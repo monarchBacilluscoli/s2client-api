@@ -19,7 +19,7 @@ namespace sc2 {
 					Point2D target_new_pos = calculate_pos_next_frame(tu, c.second[0].target_point);
 					// for each weapon, to find witch weapon can attack the target enemy
 					for (Weapon w : m_unit_types[tu->unit_type].weapons) {
-						if (Distance2D(target_new_pos, u->pos) < w.range + u->radius + tu->radius && is_weapon_match_unit(w,tu)) {
+						if (Distance2D(target_new_pos, u->pos) < w.range + u->radius + tu->radius && is_weapon_match_unit(w, tu)) {
 							units_can_be_attacked.push_back(tu);
 						}
 					}
@@ -36,7 +36,7 @@ namespace sc2 {
 	//? this must be modified, because it don't have to search the center of a unit
 	Units one_frame_bot::search_units_within_radius(const Point2D & p, float r, Unit::Alliance a) {
 		Units us = Observation()->GetUnits(a, [&p, r](const Unit& u) {
-			if (Distance2D(u.pos, p) <= r+ u.radius)
+			if (Distance2D(u.pos, p) <= r + u.radius)
 				return true;
 			else
 				return false;
@@ -80,7 +80,7 @@ namespace sc2 {
 	float one_frame_bot::damage_weapon_to_unit(const Weapon & w, const Unit * u) {
 		float damage = 0;
 		UnitTypeData u_type = Observation()->GetUnitTypeData()[u->unit_type];
-		if (is_weapon_match_unit(w,u)) {
+		if (is_weapon_match_unit(w, u)) {
 			float bonus_damage = 0;
 			for (auto i : w.damage_bonus) {
 				std::vector<Attribute>::iterator result = std::find(u_type.attributes.begin(), u_type.attributes.end(), i.attribute);
@@ -100,6 +100,20 @@ namespace sc2 {
 		Weapon w = get_matched_weapons_without_considering_distance(attacking_u, target_u)[0];
 		return damage_weapon_to_unit(w, target_u);
 	}
+	float one_frame_bot::damage_unit_to_unit(const Unit * attacking_u, const Unit * target_u) {
+		float dis = real_distance_between_two_units(attacking_u, target_u);
+		std::vector<Weapon> weapons = m_unit_types[attacking_u->unit_type].weapons;
+		float damage = 0;
+		for (const Weapon& w : weapons) {
+			// use the distance and weapon feature to check
+			if (w.range >= dis || is_weapon_match_unit(w, target_u)) {
+				if (damage < damage_weapon_to_unit(w, target_u)) {
+					damage = damage_weapon_to_unit(w, target_u);
+				}
+			}
+		}
+		return damage;
+	}
 	float one_frame_bot::basic_movement_one_frame(const UnitTypeData & ut) {
 		return ut.movement_speed / m_frames_per_second;
 	}
@@ -114,6 +128,9 @@ namespace sc2 {
 			new_pos = (p - u->pos) / two_points_distance * longest_movement_one_frame;
 		}
 		return new_pos;
+	}
+	float one_frame_bot::real_distance_between_two_units(const Unit * u1, const Unit * u2) {
+		return Distance2D(u1->pos, u2->pos) - u1->radius - u2->radius;
 	}
 	bool one_frame_bot::is_weapon_match_unit(const Weapon & w, const Unit * u) {
 		if ((int)(w.type) - 1 == u->is_flying || w.type == Weapon::TargetType::Any) {
@@ -147,13 +164,42 @@ namespace sc2 {
 		}
 	}
 
+	Weapon one_frame_bot::get_longest_range_weapon_of_weapons(const std::vector<Weapon> ws) {
+		if (!ws.empty()) {
+			if (ws.size == 1) {
+				return ws[0];
+			}
+			else {
+				Weapon longest_range_weapon = ws[0];
+				for (const Weapon& w : ws) {
+					if (w.range > longest_range_weapon.range) {
+						longest_range_weapon = w;
+					}
+				}
+				return longest_range_weapon;
+			}
+		}
+		else {
+			throw("no weapon here@one_frame_bot::get_longest_range_weapon_of_weapons");
+		}
+	}
+
+	bool one_frame_bot::is_in_fire_range(const Unit * attacking_u, const Unit * target_u) {
+		std::vector<Weapon> matched_weapons = get_matched_weapons_without_considering_distance(attacking_u, target_u);
+		float range = get_longest_range_weapon_of_weapons(matched_weapons).range;
+		if (range > Distance2D(attacking_u->pos, target_u->pos)) {
+			return true;
+		}
+		return false;
+	}
+
 	float one_frame_bot::threat_from_unit_to_unit(const Unit * source_u, const Unit* target_u) {
 		float threat = 0;
 		float distance = Distance2D(source_u->pos, target_u->pos);
 		float zero_potential_field_dis = calculate_zero_potential_field_distance(source_u, target_u);
 		if (zero_potential_field_dis != 0) {
 			threat = distance / zero_potential_field_dis;
-			if (threat>1) {
+			if (threat > 1) {
 				threat = 0;
 			}
 		}
@@ -171,7 +217,7 @@ namespace sc2 {
 				threat = 0;
 			}
 		}
-		return threat*damage_unit_to_unit_without_considering_distance(source_u,target_u);
+		return threat * damage_unit_to_unit_without_considering_distance(source_u, target_u);
 	}
 
 	float one_frame_bot::threat_from_units_to_unit(const Units & source_us, const Unit* target_u) {
@@ -206,7 +252,7 @@ namespace sc2 {
 			/*
 			* for run
 			*/
-			else	{
+			else {
 				dis = source_range + source_u->radius + target_u->radius;
 			}
 		}
@@ -235,9 +281,9 @@ namespace sc2 {
 	void one_frame_bot::display_units_pos(DebugInterface* debug, const Units & us) {
 		for (auto u : us) {
 			//if (u->is_selected) {
-				std::string pos_info;
-				pos_info = std::to_string(u->pos.x) + ", " + std::to_string(u->pos.y) + "," + std::to_string(u->pos.z);
-				debug->DebugTextOut(pos_info, u->pos, Colors::Green);
+			std::string pos_info;
+			pos_info = std::to_string(u->pos.x) + ", " + std::to_string(u->pos.y) + "," + std::to_string(u->pos.z);
+			debug->DebugTextOut(pos_info, u->pos, Colors::Green);
 			//}
 		}
 	}
@@ -374,14 +420,30 @@ namespace sc2 {
 		float total_damage = 0.0f;
 		// for each unit in a solution
 		for (const auto &c : s) {
+			const Unit* u_c = Observation()->GetUnit(c.first);
+			const ActionRaw action = c.second[0];
 			if (!c.second.empty()) {
-				// if the action is attack
-				if (c.second.at(0).ability_id == ABILITY_ID::ATTACK) {
-					//todo attack
-				}
-				// if the action is move
-				else if (c.second.at(0).ability_id == ABILITY_ID::MOVE) {
-					//todo move?
+				switch (static_cast<ABILITY_ID>(action.ability_id)) {
+				case ABILITY_ID::ATTACK:
+					switch (action.target_type) {
+					case ActionRaw::TargetType::TargetUnitTag: {
+						// first: can it attack?
+						total_damage += damage_unit_to_unit(u_c, Observation()->GetUnit(c.second[0].TargetUnitTag));
+						break;
+					}
+					case ActionRaw::TargetType::TargetPosition: {
+						const Unit* target = search_nearest_unit_from_point(action.target_point, Unit::Alliance::Enemy);
+						
+							break;
+					}
+					case ActionRaw::TargetType::TargetNone:
+					default:
+						//todo I haven't came up with a way to handle it, maybe the priciple is to attack the nearest enemy unit
+						break;
+					}
+					break;
+				default:
+					break;
 				}
 			}
 		}
