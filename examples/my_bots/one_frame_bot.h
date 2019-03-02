@@ -63,23 +63,31 @@ namespace sc2 {
         //
         const Unit* select_nearest_unit_from_point_(const Point2D& p, const Units& us);
 
+        // consider is_flying
         bool is_weapon_match_unit(const Weapon& w, const Unit* u);
+
         // get all the weapons of attack which can be used to attack the target
         std::vector<Weapon> get_matched_weapons_without_considering_distance(const Unit* attack, const Unit* target);
         //
         Weapon get_longest_range_weapon_of_unit_type(const UnitTypeData& ut);
+        Weapon get_longest_range_weapon_of_weapons(const std::vector<Weapon> ws);
+        //
+        bool is_in_fire_range(const Unit* attacking_u, const Unit* target_u);
 
         //
         float damage_weapon_to_unit(const Weapon& w, const Unit* u);
         //
         float damage_unit_to_unit_without_considering_distance(const Unit* attacking_u, const Unit* target_u);
-
+        //
+        float damage_unit_to_unit(const Unit* attacking_u, const Unit* target_u);
         //
         float basic_movement_one_frame(const UnitTypeData& ut);
         //todo need test
         Point2D calculate_pos_next_frame(const Unit* u, const Point2D& p);
         // see if the weapon w can be used to attack unit u
 
+        // real distance between two units (without two radiuses)
+        float real_distance_between_two_units(const Unit* u1, const Unit* u2);
 
 
         float threat_from_unit_to_unit(const Unit* source_u, const Unit* target_u);
