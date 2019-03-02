@@ -28,7 +28,7 @@ namespace sc2 {
         solution mutate(const solution& s);
 
         // evaluate
-        void evaluate_all_solutions(const population& p, std::vector<float>& d, std::vector<float>& h);
+        void evaluate_all_solutions(const population& p, std::vector<float>& d, std::vector<float>& total_theft);
         //
         void sort_solutions(population& p, std::vector<float>& d, std::vector<float>& h);
         //
