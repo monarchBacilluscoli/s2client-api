@@ -7,20 +7,27 @@ namespace sc2 {
 	using population = std::vector<solution>;
 
 	Units one_frame_bot::search_units_within_radius_in_solution(const Point2D & p, float r, const solution & s) {
-		return Units();
+		Units units_within_radius;
+		for (const auto& c:s) {
+			switch (static_cast<ABILITY_ID>(c.second[0].ability_id)) {
+			case ABILITY_ID::MOVE:
+			default:
+				break;
+			}
+		}
 	}
 
 	Units one_frame_bot::search_units_can_be_attacked_by_unit_in_solution(const Unit * u, const solution & s) {
 		Units units_can_be_attacked;
 		for (const auto& c : s) {
-			const Unit* tu = Observation()->GetUnit(c.first);
+			const Unit* target_u = Observation()->GetUnit(c.first);
 			if (!c.second.empty()) {
 				if (c.second[0].ability_id == ABILITY_ID::MOVE) {
-					Point2D target_new_pos = calculate_pos_next_frame(tu, c.second[0].target_point);
+					Point2D target_new_pos = calculate_pos_next_frame(target_u, c.second[0].target_point);
 					// for each weapon, to find witch weapon can attack the target enemy
-					for (Weapon w : m_unit_types[tu->unit_type].weapons) {
-						if (Distance2D(target_new_pos, u->pos) < w.range + u->radius + tu->radius && is_weapon_match_unit(w, tu)) {
-							units_can_be_attacked.push_back(tu);
+					for (Weapon w : m_unit_types[target_u->unit_type].weapons) {
+						if (Distance2D(target_new_pos, u->pos) < w.range + u->radius + target_u->radius && is_weapon_match_unit(w, target_u)) {
+							units_can_be_attacked.push_back(target_u);
 						}
 					}
 				}
@@ -203,7 +210,6 @@ namespace sc2 {
 				threat = 0;
 			}
 		}
-		//todo need to be modified
 		return threat * damage_unit_to_unit_without_considering_distance(source_u, target_u);
 	}
 
@@ -369,12 +375,12 @@ namespace sc2 {
 	solution one_frame_bot::mutate(const solution & s) {
 		return solution();
 	}
-	void one_frame_bot::evaluate_all_solutions(const population & p, std::vector<float>& total_damage, std::vector<float>& total_hurt) {
+	void one_frame_bot::evaluate_all_solutions(const population & p, std::vector<float>& total_damage, std::vector<float>& total_theft) {
 		m_hurt_objective.resize(p.size());
 		m_damage_objective.resize(p.size());
 		for (size_t i = 0; i < p.size(); i++) {
 			total_damage[i] = evaluate_single_solution_damage_next_frame(m_population[i]);
-			total_hurt[i] = evaluate_single_solution_hurt_next_frame(m_population[i]);
+			total_theft[i] = evaluate_single_solution_theft_next_frame(m_population[i]);
 		}
 	}
 	void one_frame_bot::sort_solutions(population & p, std::vector<float>& total_damage, std::vector<float>& total_hurt) {
@@ -427,14 +433,13 @@ namespace sc2 {
 				case ABILITY_ID::ATTACK:
 					switch (action.target_type) {
 					case ActionRaw::TargetType::TargetUnitTag: {
-						// first: can it attack?
 						total_damage += damage_unit_to_unit(u_c, Observation()->GetUnit(c.second[0].TargetUnitTag));
 						break;
 					}
 					case ActionRaw::TargetType::TargetPosition: {
 						const Unit* target = search_nearest_unit_from_point(action.target_point, Unit::Alliance::Enemy);
-						
-							break;
+						total_damage += damage_unit_to_unit(u_c, target);
+						break;
 					}
 					case ActionRaw::TargetType::TargetNone:
 					default:
@@ -454,17 +459,9 @@ namespace sc2 {
 		float total_hurt = 0.0f;
 		Units enemy_units = Observation()->GetUnits(Unit::Alliance::Enemy);
 		for (const Unit* u : enemy_units) {
-			//? 我似乎必须假设对方何时均可攻击，否则等到敌方可以出手的时候再逃跑就为时已晚
-			//? 暂时使用首个weapon作为参照
 			Weapon u_weapon = Observation()->GetUnitTypeData()[u->unit_type].weapons[0];
 			float search_range = u_weapon.range + u->radius;
-			//? 暂时不对攻击范围进行任何扩展...但似乎要考虑单位半径
-			//if (search_range < 1) {
-			//	search_range = 1;
-			//}
-
-			// 此处search不太妥当
-			Units possible_targets = search_units_within_radius_in_solution(u->pos, search_range, s);
+			Units possible_targets = search_units_can_be_attacked_by_unit_in_solution(u, s);
 			const Unit* target(nullptr);
 			if (!possible_targets.empty()) {
 				target = GetRandomEntry(possible_targets);
@@ -488,5 +485,6 @@ namespace sc2 {
 				break;
 			}
 		}
+		return threat_sum;
 	}
 }
