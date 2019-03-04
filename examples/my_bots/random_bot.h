@@ -117,7 +117,7 @@ namespace sc2 {
         void display_solution_line(const basic_solution& bs);
 
         // 常量
-        const float PI = 3.1415926;
+        const float PI = atan(1.) * 4.;
 
         // 更新的游戏数据
         Units m_alive_self_units;
@@ -132,8 +132,8 @@ namespace sc2 {
         // 算法设置
         int m_frames_per_deploy = 12;
         int m_population_size = 50;
-        float m_mutation_rate = 0.03;
-        float m_crossover_rate = 1;
+        float m_mutation_rate = 0.03f;
+        float m_crossover_rate = 1.f;
         int produce_times = 50;
 
         // 算法内容

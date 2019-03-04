@@ -13,4 +13,11 @@ ActionRaw::ActionRaw() :
     target_tag(NullTag) {
 }
 
+ActionRaw::ActionRaw(AbilityID in_ability_id, TargetType in_target_type, Tag in_target_tag, Point2D in_target_point) :
+    ability_id(in_ability_id),
+    target_type(in_target_type),
+    target_tag(in_target_tag),
+    target_point(in_target_point) {
+}
+
 }

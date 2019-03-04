@@ -33,6 +33,8 @@ struct ActionRaw {
 
     //! Constructor.
     ActionRaw();
+    //! Constructor defined by LiuYongfeng
+    ActionRaw(AbilityID in_ability_id, TargetType in_target_type, Tag in_target_tag, Point2D in_target_point);
 
     //! Comparison overload.
 
