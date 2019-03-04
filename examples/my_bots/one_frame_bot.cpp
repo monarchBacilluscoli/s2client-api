@@ -79,11 +79,8 @@ namespace sc2 {
 		return us;
 	}
 	Point2D one_frame_bot::generate_random_point_within_radius(float r) {
-		float random_r = GetRandomFraction()*r;
-		float theta = GetRandomFraction() * 2 * PI;
-		float x = random_r * cos(theta);
-		float y = random_r * sin(theta);
-		return Point2D(x, y);
+		Point2DInPolar pp(GetRandomFraction() * r, GetRandomFraction() * 2 * PI);
+		return pp.toPoint2D();
 	}
 	const Unit * one_frame_bot::search_nearest_unit_from_point(const Point2D & p, Unit::Alliance a, Filter f) {
 		Units us = Observation()->GetUnits(a, f);
@@ -281,7 +278,7 @@ namespace sc2 {
 			* for hit-and-run
 			*/
 			if (source_range < target_range) {
-				dis = 0.7*target_range + 0.3*source_range + source_u->radius;
+				dis = 0.7f*target_range + 0.3f*source_range + source_u->radius;
 			}
 			/*
 			* for run
@@ -427,44 +424,45 @@ namespace sc2 {
 	void one_frame_bot::OnUnitIdle(const Unit * u) {
 	}
 	solution one_frame_bot::generate_random_solution() {
-		solution so;
-		int alive_allies_number = m_alive_self_units.size();
+		solution so(m_alive_self_units.size());
+		size_t alive_allies_number = m_alive_self_units.size();
 		for (size_t i = 0; i < alive_allies_number; i++) {
+			ActionRaw action;
 			const Unit* unit = m_alive_self_units[i];
 			// if this unit's weapon has been cooldown, randomly select to move or attack
-			if (unit->weapon_cooldown <= 0.f) {
+			if (unit->weapon_cooldown <= 0.f&& GetRandomFraction() < m_attack_prob) {
 				// choose to attack
-				if (GetRandomFraction() < m_attack_prob) {
 					Units targets = serach_units_can_be_attacked_by_unit(unit, Unit::Alliance::Enemy);
 					// attack a unit within range
 					if (targets.empty()) {
-						//todo towards to the nearest target
+						action.ability_id = ABILITY_ID::MOVE;
+						action.target_type = ActionRaw::TargetType::TargetPosition;
+						Point2D new_pos = search_nearest_unit_from_point(unit->pos, Unit::Alliance::Enemy)->pos;
+						new_pos = calculate_pos_next_frame(unit, new_pos);
+						action.target_point = new_pos;
 					}
 					else {
-						//todo choose a random target
-						Tag target_tag = GetRandomEntry(targets)->tag;
-						
-
+						action.ability_id = ABILITY_ID::MOVE;
+						action.target_type = ActionRaw::TargetType::TargetUnitTag;
+						action.target_tag = GetRandomEntry(targets)->tag;
 					}
-
-				}
-				// choose to move
-				else {
-
-				}
 			}
 			// choose to move
 			else {
-				//todo move to a random direction
+				action.ability_id = ABILITY_ID::MOVE;
+				action.target_type = ActionRaw::TargetPosition;
+				action.target_point = unit->pos + generate_random_point_within_radius(basic_movement_one_frame(m_unit_types[unit->unit_type]));
 			}
-			// if this unit can not attack, just move
+			std::get<0>(so[i]) = unit->tag;
+			std::get<1>(so[i]) = { action };
 		}
+		return so;
 	}
 	std::vector<solution> one_frame_bot::cross_over(const solution & a, const solution & b) {
 		// randomly select two points and change all the commands between them
 		std::vector<solution> offspring = { a,b };
-		int start = GetRandomInteger(0, a.size() - 2);
-		int end = GetRandomInteger(start, a.size() - 1);
+		size_t start = GetRandomInteger(0, a.size() - 2);
+		size_t end = GetRandomInteger(start, a.size() - 1);
 		// exchange the segment between the two points
 		for (int i = start; i <= end; i++) {
 			swap(offspring[0][i], offspring[1][i]);
@@ -527,7 +525,7 @@ namespace sc2 {
 	solution one_frame_bot::select_one_solution(const population & p, std::vector<float>& d, std::vector<float>& h) {
 		float highest_fitness = m_damage_objective[0] - m_hurt_objective[0];
 		solution selected_solution = m_population[0];
-		int index(0);
+		size_t index(0);
 		for (size_t i = 0; i < m_population.size(); i++) {
 			if (m_damage_objective[i] - m_hurt_objective[i] > highest_fitness) {
 				selected_solution = m_population[i];

@@ -145,7 +145,7 @@ namespace sc2 {
         const float zero_potential_energy_ratio = 0.8f;
 
         const int m_population_size = 50;
-        const float m_muatation_rate = 0.1;
+        const float m_muatation_rate = 0.1f;
         const float m_crossover_rate = 1;
         const int m_offspring_size = 50;
         const double m_theta_mutate_step = 2 * PI / 10.;
