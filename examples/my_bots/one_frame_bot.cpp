@@ -1,29 +1,42 @@
 #include "one_frame_bot.h"
 #include<map>
 #include<string>
+#include"utilities/Point2DPolar.h"
 
 namespace sc2 {
-	using solution = std::map<Tag, RawActions>;
+	using command = std::tuple<Tag, RawActions>;
+	using solution = std::vector<command>;
 	using population = std::vector<solution>;
 
 	Units one_frame_bot::search_units_within_radius_in_solution(const Point2D & p, float r, const solution & s) {
 		Units units_within_radius;
-		for (const auto& c:s) {
-			switch (static_cast<ABILITY_ID>(c.second[0].ability_id)) {
+		for (const command& c : s) {
+			const Unit* u = get_execution_unit(c);
+			switch (static_cast<ABILITY_ID>(get_action(c, 0).ability_id)) {
+				// Abilities can move a unit
 			case ABILITY_ID::MOVE:
+				if (Distance2D(p, get_action(c, 0).target_point) - u->radius <= r) {
+					units_within_radius.push_back(u);
+				}
+				// Abilities can not move a unit
+			case ABILITY_ID::ATTACK:
 			default:
+				if (Distance2D(p, u->pos) - u->radius <= r) {
+					units_within_radius.push_back(u);
+				}
 				break;
 			}
 		}
+		return units_within_radius;
 	}
 
 	Units one_frame_bot::search_units_can_be_attacked_by_unit_in_solution(const Unit * u, const solution & s) {
 		Units units_can_be_attacked;
-		for (const auto& c : s) {
-			const Unit* target_u = Observation()->GetUnit(c.first);
-			if (!c.second.empty()) {
-				if (c.second[0].ability_id == ABILITY_ID::MOVE) {
-					Point2D target_new_pos = calculate_pos_next_frame(target_u, c.second[0].target_point);
+		for (const command& c : s) {
+			const Unit* target_u = get_execution_unit(c);
+			if (!get_actions(c).empty()) {
+				if (get_action(c, 0).ability_id == ABILITY_ID::MOVE) {
+					Point2D target_new_pos = calculate_pos_next_frame(target_u, get_action(c, 0).target_point);
 					// for each weapon, to find witch weapon can attack the target enemy
 					for (Weapon w : m_unit_types[target_u->unit_type].weapons) {
 						if (Distance2D(target_new_pos, u->pos) < w.range + u->radius + target_u->radius && is_weapon_match_unit(w, target_u)) {
@@ -35,6 +48,21 @@ namespace sc2 {
 			}
 			else {
 				throw("there is an empty command@one_fame_bot::search_units_can_be_attacked_by_unit_in_solution");
+			}
+		}
+		return units_can_be_attacked;
+	}
+
+	Units one_frame_bot::serach_units_can_be_attacked_by_unit(const Unit * u, Unit::Alliance a) {
+		Units units_can_be_attacked;
+		// get the longest weapon of u and search units within its range
+		std::vector<Weapon> weapons = m_unit_types[u->unit_type].weapons;
+		Weapon longest = get_longest_range_weapon_of_weapons(weapons);
+		units_can_be_attacked = search_units_within_radius(u->pos, longest.range, a);
+		// check if every unit of them can be attacked by each weapon (range & type)
+		for (Units::iterator i = units_can_be_attacked.begin(); i < units_can_be_attacked.end(); i++) {
+			if (!is_attackable(u, *i)) {
+				units_can_be_attacked.erase(i);
 			}
 		}
 		return units_can_be_attacked;
@@ -173,7 +201,7 @@ namespace sc2 {
 
 	Weapon one_frame_bot::get_longest_range_weapon_of_weapons(const std::vector<Weapon> ws) {
 		if (!ws.empty()) {
-			if (ws.size == 1) {
+			if (ws.size() == 1) {
 				return ws[0];
 			}
 			else {
@@ -191,10 +219,10 @@ namespace sc2 {
 		}
 	}
 
-	bool one_frame_bot::is_in_fire_range(const Unit * attacking_u, const Unit * target_u) {
+	bool one_frame_bot::is_attackable(const Unit * attacking_u, const Unit * target_u) {
 		std::vector<Weapon> matched_weapons = get_matched_weapons_without_considering_distance(attacking_u, target_u);
 		float range = get_longest_range_weapon_of_weapons(matched_weapons).range;
-		if (range > Distance2D(attacking_u->pos, target_u->pos)) {
+		if (range > real_distance_between_two_units(attacking_u, target_u)) {
 			return true;
 		}
 		return false;
@@ -267,6 +295,25 @@ namespace sc2 {
 		}
 		return dis;
 	}
+	const Unit * one_frame_bot::get_execution_unit(const command& c) {
+		return Observation()->GetUnit(std::get<0>(c));
+	}
+	const ActionRaw& one_frame_bot::get_action(const command & c, int i) {
+		return std::get<1>(c)[i];
+	}
+
+	ActionRaw & one_frame_bot::get_action(command & c, int i) {
+		return std::get<1>(c)[i];
+	}
+
+	const RawActions& one_frame_bot::get_actions(const command & c) {
+		return std::get<1>(c);
+	}
+
+	RawActions& one_frame_bot::get_actions(command& c) {
+		return std::get<1>(c);
+	}
+
 	void one_frame_bot::display_fire_range(DebugInterface* debug, const Units & us) {
 		for (auto u : us) {
 			std::vector<Weapon> weapons = Observation()->GetUnitTypeData()[u->unit_type].weapons;
@@ -300,6 +347,16 @@ namespace sc2 {
 			}
 		}
 	}
+	void one_frame_bot::display_units_attack_action(DebugInterface * debug, const Units & us) {
+		for(const Unit* u:us){
+			if (u->is_selected) {
+				std::string attack_info;
+				attack_info = std::to_string(u->weapon_cooldown);
+				debug->DebugTextOut(attack_info, u->pos, Colors::Red);
+				std::cout << attack_info << std::endl;
+			}
+		}
+	}
 	void one_frame_bot::display_movement(DebugInterface * debug, const Units& us) {
 		for (const Unit* u : us) {
 			if (u->is_selected) {
@@ -314,6 +371,7 @@ namespace sc2 {
 		m_all_alive_units = Observation()->GetUnits();
 		m_unit_types = Observation()->GetUnitTypeData();
 		m_marine = m_unit_types[static_cast<int>(UNIT_TYPEID::TERRAN_MARINE)];
+
 	}
 	void one_frame_bot::OnStep() {
 		//// 更新游戏数据
@@ -327,9 +385,11 @@ namespace sc2 {
 		DebugInterface* debug = Debug();
 		display_fire_range(debug, m_all_alive_units);
 		display_units_collision_range(debug, m_all_alive_units);
-		display_units_pos(debug, m_all_alive_units);
-		display_movement(debug, m_alive_self_units);
+		//display_units_pos(debug, m_all_alive_units);
+		//display_movement(debug, m_alive_self_units);
 		//display_solution_line(m_selected_solution);
+		display_units_attack_action(debug, m_alive_self_units);
+		// until this step, those orders to debug are sent
 		debug->SendDebug();
 
 		////// 算法部分
@@ -367,13 +427,73 @@ namespace sc2 {
 	void one_frame_bot::OnUnitIdle(const Unit * u) {
 	}
 	solution one_frame_bot::generate_random_solution() {
-		return solution();
+		solution so;
+		int alive_allies_number = m_alive_self_units.size();
+		for (size_t i = 0; i < alive_allies_number; i++) {
+			const Unit* unit = m_alive_self_units[i];
+			// if this unit's weapon has been cooldown, randomly select to move or attack
+			if (unit->weapon_cooldown <= 0.f) {
+				// choose to attack
+				if (GetRandomFraction() < m_attack_prob) {
+					Units targets = serach_units_can_be_attacked_by_unit(unit, Unit::Alliance::Enemy);
+					// attack a unit within range
+					if (targets.empty()) {
+						//todo towards to the nearest target
+					}
+					else {
+						//todo choose a random target
+						Tag target_tag = GetRandomEntry(targets)->tag;
+						
+
+					}
+
+				}
+				// choose to move
+				else {
+
+				}
+			}
+			// choose to move
+			else {
+				//todo move to a random direction
+			}
+			// if this unit can not attack, just move
+		}
 	}
 	std::vector<solution> one_frame_bot::cross_over(const solution & a, const solution & b) {
-		return std::vector<solution>();
+		// randomly select two points and change all the commands between them
+		std::vector<solution> offspring = { a,b };
+		int start = GetRandomInteger(0, a.size() - 2);
+		int end = GetRandomInteger(start, a.size() - 1);
+		// exchange the segment between the two points
+		for (int i = start; i <= end; i++) {
+			swap(offspring[0][i], offspring[1][i]);
+		}
+		return offspring;
 	}
-	solution one_frame_bot::mutate(const solution & s) {
-		return solution();
+	void one_frame_bot::mutate(solution & s) {
+		// select a random command and mutate it
+		command& cmd = GetRandomEntry(s);
+		ActionRaw& action = get_action(cmd, 0);
+		switch (static_cast<ABILITY_ID>(action.ability_id)) {
+		case ABILITY_ID::MOVE: {
+			//todo change the target point, use polar coordinates
+			Point2DInPolar p_polar(action.target_point);
+			p_polar.theta += m_theta_mutate_step;
+			action.target_point = p_polar.toPoint2D();
+			break;
+		}
+		case ABILITY_ID::ATTACK: {
+			//todo change the target unit
+			const Unit* e_u = get_execution_unit(cmd);
+			Units us = serach_units_can_be_attacked_by_unit(get_execution_unit(cmd), Unit::Alliance::Enemy);
+			action.target_tag = GetRandomEntry(us)->tag;
+			break;
+		}
+		default:
+			break;
+		}
+
 	}
 	void one_frame_bot::evaluate_all_solutions(const population & p, std::vector<float>& total_damage, std::vector<float>& total_theft) {
 		m_hurt_objective.resize(p.size());
@@ -426,14 +546,14 @@ namespace sc2 {
 		float total_damage = 0.0f;
 		// for each unit in a solution
 		for (const auto &c : s) {
-			const Unit* u_c = Observation()->GetUnit(c.first);
-			const ActionRaw action = c.second[0];
-			if (!c.second.empty()) {
+			const Unit* u_c = get_execution_unit(c);
+			if (!get_actions(c).empty()) {
+				const ActionRaw action = get_action(c, 0);
 				switch (static_cast<ABILITY_ID>(action.ability_id)) {
 				case ABILITY_ID::ATTACK:
 					switch (action.target_type) {
 					case ActionRaw::TargetType::TargetUnitTag: {
-						total_damage += damage_unit_to_unit(u_c, Observation()->GetUnit(c.second[0].TargetUnitTag));
+						total_damage += damage_unit_to_unit(u_c, Observation()->GetUnit(get_action(c, 0).TargetUnitTag));
 						break;
 					}
 					case ActionRaw::TargetType::TargetPosition: {
@@ -473,12 +593,12 @@ namespace sc2 {
 	float one_frame_bot::evaluate_single_solution_theft_next_frame(const solution & s) {
 		float threat_sum = 0;
 		for (const auto& c : s) {
-			switch (static_cast<ABILITY_ID>(c.second[0].ability_id)) {
+			switch (static_cast<ABILITY_ID>(get_action(c, 0).ability_id)) {
 			case ABILITY_ID::MOVE:
-				threat_sum += threat_from_units_to_unit_new_pos(m_alive_enemy_units, Observation()->GetUnit(c.first), c.second[0].target_point);
+				threat_sum += threat_from_units_to_unit_new_pos(m_alive_enemy_units, get_execution_unit(c), get_action(c, 0).target_point);
 				break;
 			case ABILITY_ID::ATTACK:
-				threat_sum += threat_from_units_to_unit(m_alive_enemy_units, Observation()->GetUnit(c.first));
+				threat_sum += threat_from_units_to_unit(m_alive_enemy_units, get_execution_unit(c));
 				break;
 			default:
 				throw("there is no brunch to handle this ability@one_frame_bot::evaluate_single_solution_theft_next_frame");
