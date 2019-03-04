@@ -7,11 +7,14 @@
 
 namespace sc2 {
     class one_frame_bot : public Agent {
-        using solution = std::map<Tag, RawActions>;
+        using command = std::tuple<Tag, RawActions>;
+        using solution = std::vector<command>;
         using population = std::vector<solution>;
 
     public:
-        one_frame_bot() = default;
+        one_frame_bot() {
+            m_population.reserve(m_population_size + m_offspring_size);
+        }
         ~one_frame_bot() = default;
 
         virtual void OnGameStart() final;
@@ -23,9 +26,10 @@ namespace sc2 {
         //todo generate a random solutions
         solution generate_random_solution();
         //todo two parents generate two children
+        //? need test
         std::vector<solution> cross_over(const solution& a, const solution& b);
         //todo mutate
-        solution mutate(const solution& s);
+        void mutate(solution& s);
 
         // evaluate
         void evaluate_all_solutions(const population& p, std::vector<float>& d, std::vector<float>& total_theft);
@@ -50,6 +54,7 @@ namespace sc2 {
         //todo search my units can be attacked
         Units search_units_can_be_attacked_by_weapon_in_solution(const Point2D& p, Weapon w, const solution& s); //! one frame edtion
         Units search_units_can_be_attacked_by_unit_in_solution(const Unit* u, const solution& s); //! one frame edition
+        Units serach_units_can_be_attacked_by_unit(const Unit* u, Unit::Alliance a);
 
         // search neighboring units (using actual positions on map)
         Units search_units_within_radius(const Point2D& p, float r, Unit::Alliance a);
@@ -72,7 +77,7 @@ namespace sc2 {
         Weapon get_longest_range_weapon_of_unit_type(const UnitTypeData& ut);
         Weapon get_longest_range_weapon_of_weapons(const std::vector<Weapon> ws);
         //
-        bool is_in_fire_range(const Unit* attacking_u, const Unit* target_u);
+        bool is_attackable(const Unit* attacking_u, const Unit* target_u);
 
         //
         float damage_weapon_to_unit(const Weapon& w, const Unit* u);
@@ -98,8 +103,11 @@ namespace sc2 {
         //
         float calculate_zero_potential_field_distance(const Unit* source_u, const Unit* target_u);
 
-        
-
+        const Unit* get_execution_unit(const command& c);
+        const ActionRaw& get_action(const command& c, int i);
+        ActionRaw& get_action(command& c, int i);
+        const RawActions& get_actions(const command& c);
+        RawActions& get_actions(command& c);
 
 
         // for debug
@@ -117,13 +125,9 @@ namespace sc2 {
 
         UnitTypes m_unit_types;
     private:
-        const float PI = 3.1415926;
+        const double PI = atan(1.)*4.;
         // Some data from the proto is presented in old 'normal' speed, now I should reset them to the faster speed. 
         const float m_frames_per_second = 16;
-
-        //
-        float max_threat_range = 100.f; //? not sure
-        float zero_threat_point_ratio = 0.8;
 
         // game data should be updated
         Units m_alive_self_units;
@@ -136,13 +140,16 @@ namespace sc2 {
         UnitTypeData m_marine; // for convenient
 
         // algorithm configuration
-        int m_frames_per_deploy = 12;
-        int m_population_size = 50;
-        float m_muatation_rate = 0.05;
-        float m_crossover_rate = 1;
-        int produce_times = 50;
-        int command_length = 1;
-        float zero_potential_energy_ratio = 0.7f;
+        const int m_frames_per_deploy = 12;
+        const int command_length = 1;
+        const float zero_potential_energy_ratio = 0.8f;
+
+        const int m_population_size = 50;
+        const float m_muatation_rate = 0.1;
+        const float m_crossover_rate = 1;
+        const int m_offspring_size = 50;
+        const double m_theta_mutate_step = 2 * PI / 10.;
+        const double m_attack_prob = 0.8;
 
         // algorithm content
         population m_population;

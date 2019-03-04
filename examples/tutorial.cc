@@ -15,10 +15,10 @@ class human_control :public Agent {
 int main(int argc, char* argv[]) {
     Coordinator coordinator; // coordinator（协调器）负责控制游戏进行中、进行前等等的设置
     std::cout << "LoadSettings: " << coordinator.LoadSettings(argc, argv) << std::endl; // 读取设置参数
-    coordinator.SetRealtime(true); // 设置游戏是否以真实速度进行
+    coordinator.SetRealtime(false); // 设置游戏是否以真实速度进行
     coordinator.SetStepSize(1); // 设置游戏循环步长
 
-    Bot bot; // 就是刚写的那个只会hello的机器人
+    Bot bot; // bot can only say hello
     random_bot bot2, bot3;
     human_control bot0;
     one_frame_bot of_bot;
@@ -36,10 +36,10 @@ int main(int argc, char* argv[]) {
 
     //coordinator.StartGame(sc2::kMapBelShirVestigeLE); // 标准对局地图
     //coordinator.StartGame("E:\\Desktop\\test\\testBattle.SC2Map");
-    coordinator.StartGame("E:\\Desktop\\test\\testBattle_distant_vs_melee.SC2Map");
+    //coordinator.StartGame("E:\\Desktop\\test\\testBattle_distant_vs_melee.SC2Map");
     //coordinator.StartGame("E:\\Desktop\\test\\testBattle_no_enemy.SC2Map");
     //coordinator.StartGame("E:\\Desktop\\test\\testBattleAllUnits.SC2Map");
-    //coordinator.StartGame("E:\\Desktop\\test\\testBattle1v1.SC2Map"); // 1v1静止测试
+    coordinator.StartGame("E:\\Desktop\\test\\testBattle1v1.SC2Map"); // 1v1静止测试
 
 
     /*bool is_start = false;
