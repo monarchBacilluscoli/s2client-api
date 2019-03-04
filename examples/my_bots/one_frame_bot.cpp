@@ -539,6 +539,24 @@ namespace sc2 {
 		return selected_solution;
 	}
 	void one_frame_bot::deploy_solution(const solution & s) {
+		for (const command& c : s) {
+			const Unit* execute_unit = Observation()->GetUnit(std::get<0>(c));
+			const ActionRaw action = std::get<1>(c)[0];
+			//todo check the target type
+			switch (action.target_type) {
+			case ActionRaw::TargetType::TargetNone:
+				Actions()->UnitCommand(execute_unit, action.ability_id);
+				break;
+			case ActionRaw::TargetType::TargetPosition:
+				Actions()->UnitCommand(execute_unit, action.ability_id, action.target_point);
+				break;
+			case ActionRaw::TargetType::TargetUnitTag:
+				Actions()->UnitCommand(execute_unit, action.ability_id, action.target_tag);
+				break;
+			default:
+				break;
+			}
+		}
 	}
 	float one_frame_bot::evaluate_single_solution_damage_next_frame(const solution & s) {
 		float total_damage = 0.0f;
