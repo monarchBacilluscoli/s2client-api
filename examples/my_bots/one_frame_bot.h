@@ -13,10 +13,9 @@ namespace sc2 {
 
     public:
         one_frame_bot() {
-            m_population.resize(m_population_size + m_offspring_size);
-            m_damage_objective.resize(m_population_size + m_offspring_size);
-            m_hurt_objective.resize(m_population_size + m_offspring_size);
-            m_threat_objectvie.resize(m_population_size + m_offspring_size);
+            m_population.reserve(m_population_size + m_offspring_size);
+            m_damage_objective.reserve(m_population_size + m_offspring_size);
+            m_threat_objectvie.reserve(m_population_size + m_offspring_size);
         }
         ~one_frame_bot() = default;
 
@@ -25,23 +24,32 @@ namespace sc2 {
         //todo control units by rules
         virtual void OnUnitIdle(const Unit* u) final;
 
+        
+       
+
+
     private:
+        solution run();
+
         // generate a random solution
         solution generate_random_solution();
+       
         // generate random solutions
-        std::vector<solution> generate_random_solutions(size_t size);
+        void generate_random_solutions(population& pop, size_t size);
         // two parents generate two children
+        std::vector<solution> produce(const solution& a, const solution& b);
+
+        // two parents generate two children (unmutated)
         //? need test
         std::vector<solution> cross_over(const solution& a, const solution& b);
         // mutate
         void mutate(solution& s);
         //todo control crossover and mutation to produce the next generation
-        std::vector<solution> produce();
 
         // evaluate
         void evaluate_all_solutions(const population& p, std::vector<float>& d, std::vector<float>& total_theft);
         //
-        void sort_solutions(population& p, std::vector<float>& d, std::vector<float>& h);
+        void sort_solutions(population& p, std::vector<float>& d, std::vector<float>& t);
         //
         solution select_one_solution(const population& p, std::vector<float>& d, std::vector<float>& h);
         //todo todo
@@ -156,12 +164,13 @@ namespace sc2 {
         const float m_muatation_rate = 0.1f;
         const float m_crossover_rate = 1;
         const double m_theta_mutate_step = 2 * PI / 10.;
+        const int m_produce_times = 50;
+
         const double m_attack_prob = 0.8;
 
         // algorithm content
         population m_population;
         population m_offspring;
-        std::vector<float> m_hurt_objective;
         std::vector<float> m_damage_objective;
         std::vector<float> m_threat_objectvie;
         solution m_selected_solution; //todo: useless

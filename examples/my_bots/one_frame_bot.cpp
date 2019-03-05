@@ -456,13 +456,22 @@ namespace sc2 {
 		}
 		return so;
 	}
-	std::vector<solution> one_frame_bot::generate_random_solutions(size_t size) {
-		std::vector<solution> solutions(size);
-		for (solution& s:solutions) {
-			s = generate_random_solution();
+	void one_frame_bot::generate_random_solutions(population& pop, size_t size) {
+		for (size_t i = 0; i < size; i++) {
+			pop[i] = generate_random_solution();
 		}
-		return solutions;
 	}
+	std::vector<solution> one_frame_bot::produce(const solution& a, const solution& b) {
+		std::vector<solution> children = cross_over(a, b);
+		for (solution& c : children) {
+			if (GetRandomFraction() < m_muatation_rate) {
+				mutate(c);
+			}
+		}
+		return children;
+	}
+
+
 	std::vector<solution> one_frame_bot::cross_over(const solution & a, const solution & b) {
 		// randomly select two points and change all the commands between them
 		std::vector<solution> offspring = { a,b };
@@ -496,35 +505,52 @@ namespace sc2 {
 		default:
 			break;
 		}
+	}
 
-	}
-	std::vector<solution> one_frame_bot::produce(const std::vector<solution>& parents) {
-		if (m_offspring_size % 2 != 0 || m_offspring_size > m_population_size) {
-			throw("m_offspring_size is against regulation@one_frame_bot::produce()");
-		}
-		else {
-			//todo for every two parents, crossover and mutate
-			for (size_t i = 0; i < m_population_size; i+=2) {
-				
+	solution one_frame_bot::run() {
+		m_population.resize(m_population_size);
+		m_damage_objective.resize(m_population_size);
+		m_threat_objectvie.resize(m_population_size);
+		// 生成随机解
+		generate_random_solutions(m_population, m_population_size);
+		// 评估所有解
+		evaluate_all_solutions(m_population, m_damage_objective, m_threat_objectvie);
+		// 对解进行排序
+		sort_solutions(m_population, m_damage_objective, m_threat_objectvie);
+		// 循环演化
+		for (size_t i = 0; i < m_produce_times; i++) {
+			// todo 生产、评估与插入
+			for (size_t i = 0; i < m_offspring_size; i += 2) {
+				// 产生子代
+				std::vector<solution> children = produce(m_population[i], m_population[i + 1]);
+				//todo 评估、插入子代
+				for (const solution c : children) {
+					// 评估子代
+					float objective = evaluate_single_solution_damage_next_frame(c) - evaluate_single_solution_theft_next_frame(c);
+					//todo 根据评估值插入子代
+					//todo 从后面开始插入可能效率更高
+					for(std::vector<solution>::reverse_iterator i = m_population.rbegin();i)
+				}
 			}
+			//todo 切掉多余解
+
 		}
-		//todo 
-		
-		
-		return std::vector<solution>();
+		// 返回最终solution
+		return m_population[0];
 	}
+
 	void one_frame_bot::evaluate_all_solutions(const population & p, std::vector<float>& total_damage, std::vector<float>& total_theft) {
-		m_hurt_objective.resize(p.size());
+		m_damage_objective.resize(p.size());
 		m_damage_objective.resize(p.size());
 		for (size_t i = 0; i < p.size(); i++) {
 			total_damage[i] = evaluate_single_solution_damage_next_frame(m_population[i]);
 			total_theft[i] = evaluate_single_solution_theft_next_frame(m_population[i]);
 		}
 	}
-	void one_frame_bot::sort_solutions(population & p, std::vector<float>& total_damage, std::vector<float>& total_hurt) {
+	void one_frame_bot::sort_solutions(population & p, std::vector<float>& total_damage, std::vector<float>& total_theft) {
 		// 对两个目标值逐个相减
 		std::vector<float> final_objective(total_damage.size());
-		std::transform(std::begin(total_damage), std::end(total_damage), std::begin(total_hurt), std::begin(final_objective), std::minus<float>());
+		std::transform(std::begin(total_damage), std::end(total_damage), std::begin(total_theft), std::begin(final_objective), std::minus<float>());
 		//todo 此处需要优化
 		std::vector<std::pair<int, float>> index_to_obj;
 		for (size_t i = 0; i < final_objective.size(); i++) {
@@ -534,28 +560,28 @@ namespace sc2 {
 		// 通过上面计算的序进行交换
 		population p_(p);
 		std::vector<float> td_(total_damage);
-		std::vector<float> th_(total_hurt);
+		std::vector<float> th_(total_theft);
 		for (size_t i = 0; i < p.size(); i++) {
 			int index = index_to_obj[i].first;
 			p[i] = p_[index];
 			total_damage[i] = td_[index];
-			total_hurt[i] = th_[index];
+			total_theft[i] = th_[index];
 		}
 	}
 	solution one_frame_bot::select_one_solution(const population & p, std::vector<float>& d, std::vector<float>& h) {
-		float highest_fitness = m_damage_objective[0] - m_hurt_objective[0];
+		float highest_fitness = m_damage_objective[0] - m_threat_objectvie[0];
 		solution selected_solution = m_population[0];
 		size_t index(0);
 		for (size_t i = 0; i < m_population.size(); i++) {
-			if (m_damage_objective[i] - m_hurt_objective[i] > highest_fitness) {
+			if (m_damage_objective[i] - m_threat_objectvie[i] > highest_fitness) {
 				selected_solution = m_population[i];
 				index = i;
 			}
 		}
 		Debug()->DebugTextOut("obj1: " + std::to_string(m_damage_objective[index]) + "\t");
-		Debug()->DebugTextOut("obj2: " + std::to_string(m_hurt_objective[index]));
+		Debug()->DebugTextOut("obj2: " + std::to_string(m_threat_objectvie[index]));
 		Debug()->SendDebug();
-		std::cout << "obj1:" << m_damage_objective[index] << "\t" << "obj2:" << m_hurt_objective[index] << std::endl;
+		std::cout << "obj1:" << m_damage_objective[index] << "\t" << "obj2:" << m_threat_objectvie[index] << std::endl;
 		return selected_solution;
 	}
 	void one_frame_bot::deploy_solution(const solution & s) {
