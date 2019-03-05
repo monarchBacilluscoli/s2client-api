@@ -23,13 +23,17 @@ namespace sc2 {
         virtual void OnUnitIdle(const Unit* u) final;
 
     private:
-        //todo generate a random solutions
+        // generate a random solution
         solution generate_random_solution();
-        //todo two parents generate two children
+        // generate random solutions
+        std::vector<solution> generate_random_solutions(size_t size);
+        // two parents generate two children
         //? need test
         std::vector<solution> cross_over(const solution& a, const solution& b);
-        //todo mutate
+        // mutate
         void mutate(solution& s);
+        //todo control crossover and mutation to produce the next generation
+        std::vector<solution> produce(std::vector<solution> parents);
 
         // evaluate
         void evaluate_all_solutions(const population& p, std::vector<float>& d, std::vector<float>& total_theft);
