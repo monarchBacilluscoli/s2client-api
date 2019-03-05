@@ -16,6 +16,7 @@ namespace sc2 {
             m_population.reserve(m_population_size + m_offspring_size);
             m_damage_objective.reserve(m_population_size + m_offspring_size);
             m_threat_objectvie.reserve(m_population_size + m_offspring_size);
+            m_offspring.reserve(m_offspring_size);
         }
         ~one_frame_bot() = default;
 
@@ -36,9 +37,11 @@ namespace sc2 {
        
         // generate random solutions
         void generate_random_solutions(population& pop, size_t size);
+        // population generate population
+        void generate_offspring(const population& parents);
+
         // two parents generate two children
         std::vector<solution> produce(const solution& a, const solution& b);
-
         // two parents generate two children (unmutated)
         //? need test
         std::vector<solution> cross_over(const solution& a, const solution& b);

@@ -8,7 +8,7 @@ namespace sc2 {
 	using solution = std::vector<command>;
 	using population = std::vector<solution>;
 
-	Units one_frame_bot::search_units_within_radius_in_solution(const Point2D & p, float r, const solution & s) {
+	Units one_frame_bot::search_units_within_radius_in_solution(const Point2D& p, float r, const solution& s) {
 		Units units_within_radius;
 		for (const command& c : s) {
 			const Unit* u = get_execution_unit(c);
@@ -30,7 +30,7 @@ namespace sc2 {
 		return units_within_radius;
 	}
 
-	Units one_frame_bot::search_units_can_be_attacked_by_unit_in_solution(const Unit * u, const solution & s) {
+	Units one_frame_bot::search_units_can_be_attacked_by_unit_in_solution(const Unit* u, const solution& s) {
 		Units units_can_be_attacked;
 		for (const command& c : s) {
 			const Unit* target_u = get_execution_unit(c);
@@ -53,7 +53,7 @@ namespace sc2 {
 		return units_can_be_attacked;
 	}
 
-	Units one_frame_bot::serach_units_can_be_attacked_by_unit(const Unit * u, Unit::Alliance a) {
+	Units one_frame_bot::serach_units_can_be_attacked_by_unit(const Unit* u, Unit::Alliance a) {
 		Units units_can_be_attacked;
 		// get the longest weapon of u and search units within its range
 		std::vector<Weapon> weapons = m_unit_types[u->unit_type].weapons;
@@ -69,8 +69,8 @@ namespace sc2 {
 	}
 
 	//? this must be modified, because it don't have to search the center of a unit
-	Units one_frame_bot::search_units_within_radius(const Point2D & p, float r, Unit::Alliance a) {
-		Units us = Observation()->GetUnits(a, [&p, r](const Unit& u) {
+	Units one_frame_bot::search_units_within_radius(const Point2D& p, float r, Unit::Alliance a) {
+		Units us = Observation()->GetUnits(a, [&p, r](const Unit & u) {
 			if (Distance2D(u.pos, p) <= r + u.radius)
 				return true;
 			else
@@ -82,11 +82,11 @@ namespace sc2 {
 		Point2DInPolar pp(GetRandomFraction() * r, GetRandomFraction() * 2 * PI);
 		return pp.toPoint2D();
 	}
-	const Unit * one_frame_bot::search_nearest_unit_from_point(const Point2D & p, Unit::Alliance a, Filter f) {
+	const Unit* one_frame_bot::search_nearest_unit_from_point(const Point2D & p, Unit::Alliance a, Filter f) {
 		Units us = Observation()->GetUnits(a, f);
 		return select_nearest_unit_from_point_(p, us);
 	}
-	const Unit * one_frame_bot::select_lowest_hp_enemy(const Units & us) {
+	const Unit* one_frame_bot::select_lowest_hp_enemy(const Units & us) {
 		float lowest_hp = FLT_MAX;
 		const Unit* selected_unit = nullptr;
 		for (const Unit* u : us) {
@@ -96,7 +96,7 @@ namespace sc2 {
 		}
 		return selected_unit;
 	}
-	const Unit * one_frame_bot::select_nearest_unit_from_point_(const Point2D & p, const Units & us) {
+	const Unit* one_frame_bot::select_nearest_unit_from_point_(const Point2D & p, const Units & us) {
 		float min_distance = FLT_MAX;
 		const Unit* selected_unit = nullptr;
 		float dis;
@@ -120,7 +120,7 @@ namespace sc2 {
 					bonus_damage += i.bonus;
 				}
 			}
-			damage += (w.damage_ - u_type.armor + bonus_damage)*w.attacks;
+			damage += (w.damage_ - u_type.armor + bonus_damage) * w.attacks;
 			return damage;
 		}
 		else {
@@ -149,7 +149,7 @@ namespace sc2 {
 	float one_frame_bot::basic_movement_one_frame(const UnitTypeData & ut) {
 		return ut.movement_speed / m_frames_per_second;
 	}
-	Point2D one_frame_bot::calculate_pos_next_frame(const Unit* u, const Point2D & p) {
+	Point2D one_frame_bot::calculate_pos_next_frame(const Unit * u, const Point2D & p) {
 		Point2D new_pos;
 		float longest_movement_one_frame = basic_movement_one_frame(m_unit_types[u->unit_type]);
 		float two_points_distance = Distance2D(p, u->pos);
@@ -225,7 +225,7 @@ namespace sc2 {
 		return false;
 	}
 
-	float one_frame_bot::threat_from_unit_to_unit(const Unit * source_u, const Unit* target_u) {
+	float one_frame_bot::threat_from_unit_to_unit(const Unit * source_u, const Unit * target_u) {
 		float threat = 0;
 		float distance = Distance2D(source_u->pos, target_u->pos);
 		float zero_potential_field_dis = calculate_zero_potential_field_distance(source_u, target_u);
@@ -238,7 +238,7 @@ namespace sc2 {
 		return threat * damage_unit_to_unit_without_considering_distance(source_u, target_u);
 	}
 
-	float one_frame_bot::threat_from_unit_to_unit_new_pos(const Unit * source_u, const Unit * target_u, const Point2D &pos) {
+	float one_frame_bot::threat_from_unit_to_unit_new_pos(const Unit * source_u, const Unit * target_u, const Point2D & pos) {
 		float threat = 0;
 		float distance = Distance2D(source_u->pos, pos);
 		float zero_potential_field_dis = calculate_zero_potential_field_distance(source_u, target_u);
@@ -251,7 +251,7 @@ namespace sc2 {
 		return threat * damage_unit_to_unit_without_considering_distance(source_u, target_u);
 	}
 
-	float one_frame_bot::threat_from_units_to_unit(const Units & source_us, const Unit* target_u) {
+	float one_frame_bot::threat_from_units_to_unit(const Units & source_us, const Unit * target_u) {
 		float threat = 0.f;
 		//todo try scalar sum
 		for (const Unit* u : source_us) {
@@ -278,7 +278,7 @@ namespace sc2 {
 			* for hit-and-run
 			*/
 			if (source_range < target_range) {
-				dis = 0.7f*target_range + 0.3f*source_range + source_u->radius;
+				dis = 0.7f * target_range + 0.3f * source_range + source_u->radius;
 			}
 			/*
 			* for run
@@ -292,14 +292,14 @@ namespace sc2 {
 		}
 		return dis;
 	}
-	const Unit * one_frame_bot::get_execution_unit(const command& c) {
+	const Unit* one_frame_bot::get_execution_unit(const command & c) {
 		return Observation()->GetUnit(std::get<0>(c));
 	}
 	const ActionRaw& one_frame_bot::get_action(const command & c, int i) {
 		return std::get<1>(c)[i];
 	}
 
-	ActionRaw & one_frame_bot::get_action(command & c, int i) {
+	ActionRaw& one_frame_bot::get_action(command & c, int i) {
 		return std::get<1>(c)[i];
 	}
 
@@ -307,11 +307,11 @@ namespace sc2 {
 		return std::get<1>(c);
 	}
 
-	RawActions& one_frame_bot::get_actions(command& c) {
+	RawActions& one_frame_bot::get_actions(command & c) {
 		return std::get<1>(c);
 	}
 
-	void one_frame_bot::display_fire_range(DebugInterface* debug, const Units & us) {
+	void one_frame_bot::display_fire_range(DebugInterface * debug, const Units & us) {
 		for (auto u : us) {
 			std::vector<Weapon> weapons = Observation()->GetUnitTypeData()[u->unit_type].weapons;
 			Color sphere_color = Colors::Blue;
@@ -323,12 +323,12 @@ namespace sc2 {
 			}
 		}
 	}
-	void one_frame_bot::display_units_collision_range(DebugInterface* debug, const Units & us) {
+	void one_frame_bot::display_units_collision_range(DebugInterface * debug, const Units & us) {
 		for (auto u : us) {
 			debug->DebugSphereOut(u->pos, u->radius);
 		}
 	}
-	void one_frame_bot::display_units_pos(DebugInterface* debug, const Units & us) {
+	void one_frame_bot::display_units_pos(DebugInterface * debug, const Units & us) {
 		for (auto u : us) {
 			//if (u->is_selected) {
 			std::string pos_info;
@@ -337,7 +337,7 @@ namespace sc2 {
 			//}
 		}
 	}
-	void one_frame_bot::display_units_move_action(DebugInterface* debug, const Units & us) {
+	void one_frame_bot::display_units_move_action(DebugInterface * debug, const Units & us) {
 		for (auto u : us) {
 			if (!(u->orders.empty()) && u->orders[0].ability_id == ABILITY_ID::MOVE) {
 				//todo there must be something to do
@@ -345,7 +345,7 @@ namespace sc2 {
 		}
 	}
 	void one_frame_bot::display_units_attack_action(DebugInterface * debug, const Units & us) {
-		for(const Unit* u:us){
+		for (const Unit* u : us) {
 			if (u->is_selected) {
 				std::string attack_info;
 				attack_info = std::to_string(u->weapon_cooldown);
@@ -354,7 +354,7 @@ namespace sc2 {
 			}
 		}
 	}
-	void one_frame_bot::display_movement(DebugInterface * debug, const Units& us) {
+	void one_frame_bot::display_movement(DebugInterface * debug, const Units & us) {
 		for (const Unit* u : us) {
 			if (u->is_selected) {
 				std::cout << u->pos.x << '\t' << u->pos.y << std::endl;
@@ -368,7 +368,7 @@ namespace sc2 {
 		m_all_alive_units = Observation()->GetUnits();
 		m_unit_types = Observation()->GetUnitTypeData();
 		m_marine = m_unit_types[static_cast<int>(UNIT_TYPEID::TERRAN_MARINE)]; //? useless
-
+		
 	}
 	void one_frame_bot::OnStep() {
 		// 更新游戏数据
@@ -389,35 +389,8 @@ namespace sc2 {
 		// until this step, those orders to debug are sent
 		debug->SendDebug();
 
-		// 算法部分
-		// 生成随机解
-		//	generate_random_solution();
-		//	//generate_attack_nearest_without_move_solution();
-		//	// 评估所有解
-		//	evaluate_all_solutions(m_population, m_damage_objective, m_hurt_objective);
-		//	// 对解进行排序
-		//	sort_solutions(m_population, m_damage_objective, m_hurt_objective);
-		//	for (size_t i = 0; i < produce_times; i++) {
-		//		population children;
-		//		for (size_t i = 0; i < m_crossover_rate*m_population_size / 2; i++) {
-		//			population instant_children = cross_over(GetRandomEntry(m_population), GetRandomEntry(m_population));
-		//			children.insert(std::end(children), std::begin(instant_children), std::end(instant_children));
-		//		}
-		//		m_population.insert(std::end(m_population), std::begin(children), std::end(children));
-		//		// 评估所有解
-		//		evaluate_all_solutions(m_population, m_damage_objective, m_hurt_objective);
-		//		// 对解进行排序
-		//		sort_solutions(m_population, m_damage_objective, m_hurt_objective);
-		//		// 留下部分解
-		//		m_population.erase(std::begin(m_population) + m_population_size, std::end(m_population));
-		//		m_hurt_objective.erase(std::begin(m_hurt_objective) + m_population_size, std::end(m_hurt_objective));
-		//		m_damage_objective.erase(std::begin(m_damage_objective) + m_population_size, std::end(m_damage_objective));
-		//	}
-		//	// 选择解
-		//	m_selected_solution = select_one_solution(m_population, m_damage_objective, m_hurt_objective);
-		//	//basic_solution selected_solution = select_random_solution();
-		//	// 部署
-		//	deploy_solution(m_selected_solution);
+		solution s = run();
+		deploy_solution(s);
 	}
 	void one_frame_bot::OnUnitIdle(const Unit * u) {
 	}
@@ -428,22 +401,22 @@ namespace sc2 {
 			ActionRaw action;
 			const Unit* unit = m_alive_self_units[i];
 			// if this unit's weapon has been cooldown, randomly select to move or attack
-			if (unit->weapon_cooldown <= 0.f&& GetRandomFraction() < m_attack_prob) {
+			if (unit->weapon_cooldown <= 0.f && GetRandomFraction() < m_attack_prob) {
 				// choose to attack
-					Units targets = serach_units_can_be_attacked_by_unit(unit, Unit::Alliance::Enemy);
-					// attack a unit within range
-					if (targets.empty()) {
-						action.ability_id = ABILITY_ID::MOVE;
-						action.target_type = ActionRaw::TargetType::TargetPosition;
-						Point2D new_pos = search_nearest_unit_from_point(unit->pos, Unit::Alliance::Enemy)->pos;
-						new_pos = calculate_pos_next_frame(unit, new_pos);
-						action.target_point = new_pos;
-					}
-					else {
-						action.ability_id = ABILITY_ID::MOVE;
-						action.target_type = ActionRaw::TargetType::TargetUnitTag;
-						action.target_tag = GetRandomEntry(targets)->tag;
-					}
+				Units targets = serach_units_can_be_attacked_by_unit(unit, Unit::Alliance::Enemy);
+				// attack a unit within range
+				if (targets.empty()) {
+					action.ability_id = ABILITY_ID::MOVE;
+					action.target_type = ActionRaw::TargetType::TargetPosition;
+					Point2D new_pos = search_nearest_unit_from_point(unit->pos, Unit::Alliance::Enemy)->pos;
+					new_pos = calculate_pos_next_frame(unit, new_pos);
+					action.target_point = new_pos;
+				}
+				else {
+					action.ability_id = ABILITY_ID::MOVE;
+					action.target_type = ActionRaw::TargetType::TargetUnitTag;
+					action.target_tag = GetRandomEntry(targets)->tag;
+				}
 			}
 			// choose to move
 			else {
@@ -456,12 +429,22 @@ namespace sc2 {
 		}
 		return so;
 	}
-	void one_frame_bot::generate_random_solutions(population& pop, size_t size) {
+	void one_frame_bot::generate_random_solutions(population & pop, size_t size) {
 		for (size_t i = 0; i < size; i++) {
 			pop[i] = generate_random_solution();
 		}
 	}
-	std::vector<solution> one_frame_bot::produce(const solution& a, const solution& b) {
+	void one_frame_bot::generate_offspring(const population & parents) {
+		if (m_offspring_size > m_population_size) {
+			throw("I can't do it that using smaller parent population to generate larger child population, at least in this version@one_frame_bot::generate_offspring");
+		}
+		m_offspring.reserve(m_offspring_size);
+		for (size_t i = 0; i < parents.size() && i < m_offspring_size; i += 2) {
+			std::vector<solution> instant_children = produce(parents[i], parents[i + 1]);
+			m_offspring.insert(m_offspring.begin()+i, instant_children.begin(), instant_children.end());
+		}
+	}
+	std::vector<solution> one_frame_bot::produce(const solution & a, const solution & b) {
 		std::vector<solution> children = cross_over(a, b);
 		for (solution& c : children) {
 			if (GetRandomFraction() < m_muatation_rate) {
@@ -519,27 +502,20 @@ namespace sc2 {
 		sort_solutions(m_population, m_damage_objective, m_threat_objectvie);
 		// 循环演化
 		for (size_t i = 0; i < m_produce_times; i++) {
-			// todo 生产、评估与插入
-			for (size_t i = 0; i < m_offspring_size; i += 2) {
-				// 产生子代
-				std::vector<solution> children = produce(m_population[i], m_population[i + 1]);
-				//todo 评估、插入子代
-				for (const solution c : children) {
-					// 评估子代
-					float objective = evaluate_single_solution_damage_next_frame(c) - evaluate_single_solution_theft_next_frame(c);
-					//todo 根据评估值插入子代
-					//todo 从后面开始插入可能效率更高
-					for(std::vector<solution>::reverse_iterator i = m_population.rbegin();i)
-				}
-			}
-			//todo 切掉多余解
+			generate_offspring(m_population);
+			m_population.insert(m_population.begin(), m_offspring.begin(), m_offspring.end());
+			evaluate_all_solutions(m_population,m_damage_objective,m_threat_objectvie);
+			sort_solutions(m_population, m_damage_objective, m_threat_objectvie);
 
+			m_population.erase(m_population.begin() + m_population_size, m_population.end());
+			m_threat_objectvie.erase(m_threat_objectvie.begin() + m_population_size, m_threat_objectvie.end());
+			m_damage_objective.erase(m_damage_objective.begin() + m_population_size, m_damage_objective.end());
 		}
 		// 返回最终solution
 		return m_population[0];
 	}
 
-	void one_frame_bot::evaluate_all_solutions(const population & p, std::vector<float>& total_damage, std::vector<float>& total_theft) {
+	void one_frame_bot::evaluate_all_solutions(const population & p, std::vector<float> & total_damage, std::vector<float> & total_theft) {
 		m_damage_objective.resize(p.size());
 		m_damage_objective.resize(p.size());
 		for (size_t i = 0; i < p.size(); i++) {
@@ -547,7 +523,7 @@ namespace sc2 {
 			total_theft[i] = evaluate_single_solution_theft_next_frame(m_population[i]);
 		}
 	}
-	void one_frame_bot::sort_solutions(population & p, std::vector<float>& total_damage, std::vector<float>& total_theft) {
+	void one_frame_bot::sort_solutions(population & p, std::vector<float> & total_damage, std::vector<float> & total_theft) {
 		// 对两个目标值逐个相减
 		std::vector<float> final_objective(total_damage.size());
 		std::transform(std::begin(total_damage), std::end(total_damage), std::begin(total_theft), std::begin(final_objective), std::minus<float>());
@@ -568,7 +544,7 @@ namespace sc2 {
 			total_theft[i] = th_[index];
 		}
 	}
-	solution one_frame_bot::select_one_solution(const population & p, std::vector<float>& d, std::vector<float>& h) {
+	solution one_frame_bot::select_one_solution(const population & p, std::vector<float> & d, std::vector<float> & h) {
 		float highest_fitness = m_damage_objective[0] - m_threat_objectvie[0];
 		solution selected_solution = m_population[0];
 		size_t index(0);
@@ -607,7 +583,7 @@ namespace sc2 {
 	float one_frame_bot::evaluate_single_solution_damage_next_frame(const solution & s) {
 		float total_damage = 0.0f;
 		// for each unit in a solution
-		for (const auto &c : s) {
+		for (const auto& c : s) {
 			const Unit* u_c = get_execution_unit(c);
 			if (!get_actions(c).empty()) {
 				const ActionRaw action = get_action(c, 0);
