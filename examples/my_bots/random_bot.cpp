@@ -82,6 +82,7 @@ namespace sc2 {
 			sort_solutions(m_population, m_damage_objective, m_hurt_objective);
 			for (size_t i = 0; i < produce_times; i++) {
 				population children;
+				// 生成子代解
 				for (size_t i = 0; i < m_crossover_rate*m_population_size/2; i++) {
 					population instant_children = cross_over(GetRandomEntry(m_population), GetRandomEntry(m_population));
 					children.insert(std::end(children), std::begin(instant_children), std::end(instant_children));
