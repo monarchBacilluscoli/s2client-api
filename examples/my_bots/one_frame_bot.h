@@ -13,7 +13,10 @@ namespace sc2 {
 
     public:
         one_frame_bot() {
-            m_population.reserve(m_population_size + m_offspring_size);
+            m_population.resize(m_population_size + m_offspring_size);
+            m_damage_objective.resize(m_population_size + m_offspring_size);
+            m_hurt_objective.resize(m_population_size + m_offspring_size);
+            m_threat_objectvie.resize(m_population_size + m_offspring_size);
         }
         ~one_frame_bot() = default;
 
@@ -33,7 +36,7 @@ namespace sc2 {
         // mutate
         void mutate(solution& s);
         //todo control crossover and mutation to produce the next generation
-        std::vector<solution> produce(std::vector<solution> parents);
+        std::vector<solution> produce();
 
         // evaluate
         void evaluate_all_solutions(const population& p, std::vector<float>& d, std::vector<float>& total_theft);
@@ -149,14 +152,15 @@ namespace sc2 {
         const float zero_potential_energy_ratio = 0.8f;
 
         const int m_population_size = 50;
+        const int m_offspring_size = 50;
         const float m_muatation_rate = 0.1f;
         const float m_crossover_rate = 1;
-        const int m_offspring_size = 50;
         const double m_theta_mutate_step = 2 * PI / 10.;
         const double m_attack_prob = 0.8;
 
         // algorithm content
         population m_population;
+        population m_offspring;
         std::vector<float> m_hurt_objective;
         std::vector<float> m_damage_objective;
         std::vector<float> m_threat_objectvie;
