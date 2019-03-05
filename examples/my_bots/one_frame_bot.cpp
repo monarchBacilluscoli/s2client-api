@@ -367,15 +367,15 @@ namespace sc2 {
 		m_alive_enemy_units = Observation()->GetUnits(Unit::Alliance::Enemy);
 		m_all_alive_units = Observation()->GetUnits();
 		m_unit_types = Observation()->GetUnitTypeData();
-		m_marine = m_unit_types[static_cast<int>(UNIT_TYPEID::TERRAN_MARINE)];
+		m_marine = m_unit_types[static_cast<int>(UNIT_TYPEID::TERRAN_MARINE)]; //? useless
 
 	}
 	void one_frame_bot::OnStep() {
-		//// 更新游戏数据
-		/*m_alive_self_units = Observation()->GetUnits(Unit::Alliance::Self);
+		// 更新游戏数据
+		m_alive_self_units = Observation()->GetUnits(Unit::Alliance::Self);
 		m_alive_enemy_units = Observation()->GetUnits(Unit::Alliance::Enemy);
 		m_all_alive_units = Observation()->GetUnits();
-		m_game_info = Observation()->GetGameInfo();*/
+		m_game_info = Observation()->GetGameInfo();
 
 		//! Debug部分
 		// 输出线框
@@ -389,9 +389,8 @@ namespace sc2 {
 		// until this step, those orders to debug are sent
 		debug->SendDebug();
 
-		////// 算法部分
-		//if (Observation()->GetGameLoop() % m_frames_per_deploy == 0) {
-		//	// 生成随机解
+		// 算法部分
+		// 生成随机解
 		//	generate_random_solution();
 		//	//generate_attack_nearest_without_move_solution();
 		//	// 评估所有解
@@ -419,7 +418,6 @@ namespace sc2 {
 		//	//basic_solution selected_solution = select_random_solution();
 		//	// 部署
 		//	deploy_solution(m_selected_solution);
-		//}
 	}
 	void one_frame_bot::OnUnitIdle(const Unit * u) {
 	}
@@ -458,6 +456,13 @@ namespace sc2 {
 		}
 		return so;
 	}
+	std::vector<solution> one_frame_bot::generate_random_solutions(size_t size) {
+		std::vector<solution> solutions(size);
+		for (solution& s:solutions) {
+			s = generate_random_solution();
+		}
+		return solutions;
+	}
 	std::vector<solution> one_frame_bot::cross_over(const solution & a, const solution & b) {
 		// randomly select two points and change all the commands between them
 		std::vector<solution> offspring = { a,b };
@@ -492,6 +497,10 @@ namespace sc2 {
 			break;
 		}
 
+	}
+	std::vector<solution> one_frame_bot::produce(std::vector<solution> parents) {
+		//todo write something
+		return std::vector<solution>();
 	}
 	void one_frame_bot::evaluate_all_solutions(const population & p, std::vector<float>& total_damage, std::vector<float>& total_theft) {
 		m_hurt_objective.resize(p.size());
