@@ -27,10 +27,10 @@ int main(int argc, char* argv[]) {
 
     coordinator.SetParticipants({ // 初始化阵营么
         //CreateComputer(Race::Terran),
-        //CreateParticipant(Race::Terran, &bot0), // 人类玩家
+        CreateParticipant(Race::Terran, &bot0), // 人类玩家
         //CreateParticipant(Race::Terran, &of_bot), // 添加人族，使用之前写的AI
         //CreateParticipant(Race::Terran, &bot3), // 添加人族，使用之前写的AI
-        CreateParticipant(Race::Terran, &bot0),
+        //CreateParticipant(Race::Terran, &bot0),
         CreateParticipant(Race::Terran, &pf_bot), // 添加人族，使用potential field AI
 
         //CreateComputer(Race::Terran), // 添加电脑，默认easy难度

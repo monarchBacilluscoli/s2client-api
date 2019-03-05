@@ -30,6 +30,30 @@ namespace sc2 {
 		return force_value * (target->pos - source->pos) / distance;
 	}
 
+	Vector2D potential_field_bot::force_wall_to_unit(const Unit* target) {
+		//todo calculate the force given by walls of the map
+		float zero_field_dis = m_unit_types[target->unit_type].weapons[0].range;
+		float force_value_lr = 0;
+		float force_value_tb = 0;
+		
+		// force from walls on left and right
+		if (target->pos.x - m_game_info.playable_min.x < zero_field_dis) { // left to right
+			force_value_lr = (target->pos.x - m_game_info.playable_min.x) / zero_field_dis;
+		}
+		else if (m_game_info.playable_max.x - target->pos.x < zero_field_dis) {
+			force_value_lr = (target->pos.x - m_game_info.playable_max.x) / zero_field_dis;
+		}
+		// force from walls on top and bottom
+		if (target->pos.y - m_game_info.playable_min.y < zero_field_dis) { // bottom to top
+			force_value_tb = (target->pos.y - m_game_info.playable_min.y) / zero_field_dis;
+		}
+		else if (m_game_info.playable_max.y - target->pos.y < zero_field_dis){
+			force_value_tb = (target->pos.y - m_game_info.playable_max.y) / zero_field_dis;
+		}
+		
+		return  m_wall_force_factor*Vector2D(force_value_lr, force_value_tb);
+	}
+
 	Vector2D potential_field_bot::force_to_unit(const Units& sources, const Unit* u) {
 		Vector2D force = {0.f,0.f};
 		for (const Unit* source : sources) {
@@ -40,6 +64,7 @@ namespace sc2 {
 				force += force_enemy_to_unit(source, u);
 			}
 		}
+		force += force_wall_to_unit(u);
 		return force;
 	}
 
@@ -60,7 +85,7 @@ namespace sc2 {
 	}
 
 	float potential_field_bot::calculate_ally_zero_field_dis(const Unit* source, const Unit* target) {
-		return m_unit_types[target->unit_type].weapons[0].range* zero_ally_field_ratio;
+		return m_unit_types[target->unit_type].weapons[0].range* m_zero_ally_field_ratio;
 	}
 
 	Units potential_field_bot::serach_enemies_can_be_attacked_by_unit(const Unit* u) {
@@ -80,6 +105,8 @@ namespace sc2 {
 		m_alive_enemy_units = Observation()->GetUnits(Unit::Alliance::Enemy);
 		m_all_alive_units = Observation()->GetUnits();
 		m_unit_types = Observation()->GetUnitTypeData();
+
+		m_game_info = Observation()->GetGameInfo();
 	}
 
 	void potential_field_bot::OnStep() {
@@ -117,6 +144,7 @@ namespace sc2 {
 			}
 		}
 		display_fire_range(m_all_alive_units, Debug());
+		display_playable_area(m_game_info,Debug());
 		Debug()->SendDebug();
 	}
 
@@ -170,6 +198,13 @@ namespace sc2 {
 				debug->DebugSphereOut(u->pos, w.range, Colors::Red);
 			}
 		}
+	}
+
+	void potential_field_bot::display_playable_area(const GameInfo& gi, DebugInterface* debug) {
+		debug->DebugBoxOut(
+			Point3D(gi.playable_min.x, gi.playable_min.y, gi.height),
+			Point3D(gi.playable_max.x, gi.playable_max.y, gi.height)
+			);
 	}
 
 
