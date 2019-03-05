@@ -482,7 +482,7 @@ namespace sc2 {
 		case ABILITY_ID::MOVE: {
 			//todo change the target point, use polar coordinates
 			Point2DInPolar p_polar(action.target_point);
-			p_polar.theta += m_theta_mutate_step;
+			p_polar.theta += m_theta_mutate_step; //todo there must be another change which is the step change.
 			action.target_point = p_polar.toPoint2D();
 			break;
 		}
@@ -498,8 +498,19 @@ namespace sc2 {
 		}
 
 	}
-	std::vector<solution> one_frame_bot::produce(std::vector<solution> parents) {
-		//todo write something
+	std::vector<solution> one_frame_bot::produce(const std::vector<solution>& parents) {
+		if (m_offspring_size % 2 != 0 || m_offspring_size > m_population_size) {
+			throw("m_offspring_size is against regulation@one_frame_bot::produce()");
+		}
+		else {
+			//todo for every two parents, crossover and mutate
+			for (size_t i = 0; i < m_population_size; i+=2) {
+				
+			}
+		}
+		//todo 
+		
+		
 		return std::vector<solution>();
 	}
 	void one_frame_bot::evaluate_all_solutions(const population & p, std::vector<float>& total_damage, std::vector<float>& total_theft) {
