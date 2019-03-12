@@ -38,7 +38,7 @@ namespace sc2 {
         // generate random solutions
         void generate_random_solutions(population& pop, size_t size);
         // population generate population
-        void generate_offspring(const population& parents);
+        void generate_offspring(const population& parents, population& offspring, int spring_size);
 
         // two parents generate two children
         std::vector<solution> produce(const solution& a, const solution& b);

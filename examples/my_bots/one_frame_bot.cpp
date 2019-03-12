@@ -368,7 +368,7 @@ namespace sc2 {
 		m_all_alive_units = Observation()->GetUnits();
 		m_unit_types = Observation()->GetUnitTypeData();
 		m_marine = m_unit_types[static_cast<int>(UNIT_TYPEID::TERRAN_MARINE)]; //? useless
-		
+
 	}
 	void one_frame_bot::OnStep() {
 		// 更新游戏数据
@@ -434,14 +434,15 @@ namespace sc2 {
 			pop[i] = generate_random_solution();
 		}
 	}
-	void one_frame_bot::generate_offspring(const population & parents) {
-		if (m_offspring_size > m_population_size) {
+	void one_frame_bot::generate_offspring(const population & parents, population & offspring, int spring_size) {
+		offspring.clear();
+		if (spring_size > m_population_size) {
 			throw("I can't do it that using smaller parent population to generate larger child population, at least in this version@one_frame_bot::generate_offspring");
 		}
-		m_offspring.reserve(m_offspring_size);
-		for (size_t i = 0; i < parents.size() && i < m_offspring_size; i += 2) {
+		offspring.reserve(spring_size);
+		for (size_t i = 0; i < parents.size() && i < spring_size; i += 2) {
 			std::vector<solution> instant_children = produce(parents[i], parents[i + 1]);
-			m_offspring.insert(m_offspring.begin()+i, instant_children.begin(), instant_children.end());
+			offspring.insert(offspring.begin() + i, instant_children.begin(), instant_children.end());
 		}
 	}
 	std::vector<solution> one_frame_bot::produce(const solution & a, const solution & b) {
@@ -502,9 +503,9 @@ namespace sc2 {
 		sort_solutions(m_population, m_damage_objective, m_threat_objectvie);
 		// 循环演化
 		for (size_t i = 0; i < m_produce_times; i++) {
-			generate_offspring(m_population);
+			generate_offspring(m_population, m_offspring, m_offspring_size);
 			m_population.insert(m_population.begin(), m_offspring.begin(), m_offspring.end());
-			evaluate_all_solutions(m_population,m_damage_objective,m_threat_objectvie);
+			evaluate_all_solutions(m_population, m_damage_objective, m_threat_objectvie);
 			sort_solutions(m_population, m_damage_objective, m_threat_objectvie);
 
 			m_population.erase(m_population.begin() + m_population_size, m_population.end());
@@ -516,8 +517,8 @@ namespace sc2 {
 	}
 
 	void one_frame_bot::evaluate_all_solutions(const population & p, std::vector<float> & total_damage, std::vector<float> & total_theft) {
-		m_damage_objective.resize(p.size());
-		m_damage_objective.resize(p.size());
+		total_damage.resize(p.size());
+		total_theft.resize(p.size());
 		for (size_t i = 0; i < p.size(); i++) {
 			total_damage[i] = evaluate_single_solution_damage_next_frame(m_population[i]);
 			total_theft[i] = evaluate_single_solution_theft_next_frame(m_population[i]);
