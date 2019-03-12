@@ -1,12 +1,17 @@
 #include "one_frame_bot.h"
 #include<map>
 #include<string>
+#include<thread>
+#include<mutex>
+#include<chrono>
 #include"utilities/Point2DPolar.h"
 
 namespace sc2 {
 	using command = std::tuple<Tag, RawActions>;
 	using solution = std::vector<command>;
 	using population = std::vector<solution>;
+
+	std::mutex evaluation_mutex;
 
 	Units one_frame_bot::search_units_within_radius_in_solution(const Point2D& p, float r, const solution& s) {
 		Units units_within_radius;
@@ -473,14 +478,15 @@ namespace sc2 {
 		ActionRaw& action = get_action(cmd, 0);
 		switch (static_cast<ABILITY_ID>(action.ability_id)) {
 		case ABILITY_ID::MOVE: {
-			//todo change the target point, use polar coordinates
+			// change the target point, use polar coordinates
+			//todo there is no change in ability
 			Point2DInPolar p_polar(action.target_point);
 			p_polar.theta += m_theta_mutate_step; //todo there must be another change which is the step change.
 			action.target_point = p_polar.toPoint2D();
 			break;
 		}
 		case ABILITY_ID::ATTACK: {
-			//todo change the target unit
+			// change the target unit
 			const Unit* e_u = get_execution_unit(cmd);
 			Units us = serach_units_can_be_attacked_by_unit(get_execution_unit(cmd), Unit::Alliance::Enemy);
 			action.target_tag = GetRandomEntry(us)->tag;
@@ -519,10 +525,21 @@ namespace sc2 {
 	void one_frame_bot::evaluate_all_solutions(const population & p, std::vector<float> & total_damage, std::vector<float> & total_theft) {
 		total_damage.resize(p.size());
 		total_theft.resize(p.size());
+		std::vector<std::thread> threads;
 		for (size_t i = 0; i < p.size(); i++) {
-			total_damage[i] = evaluate_single_solution_damage_next_frame(m_population[i]);
-			total_theft[i] = evaluate_single_solution_theft_next_frame(m_population[i]);
+			//? caution: the i must be copied rather than refered
+			threads.push_back(std::thread{ [&,i]() {
+				total_damage[i] = evaluate_single_solution_damage_next_frame(p[i]);
+				total_theft[i] = evaluate_single_solution_theft_next_frame(p[i]);
+			} });
+			//total_damage[i] = evaluate_single_solution_damage_next_frame(m_population[i]);
+			//total_theft[i] = evaluate_single_solution_theft_next_frame(m_population[i]);
+
 		}
+		for (size_t i = 0; i < threads.size(); i++) {
+			threads[i].join();
+		}
+		return;
 	}
 	void one_frame_bot::sort_solutions(population & p, std::vector<float> & total_damage, std::vector<float> & total_theft) {
 		// 对两个目标值逐个相减
@@ -581,6 +598,7 @@ namespace sc2 {
 			}
 		}
 	}
+	//todo ensure this function thread safe 
 	float one_frame_bot::evaluate_single_solution_damage_next_frame(const solution & s) {
 		float total_damage = 0.0f;
 		// for each unit in a solution
