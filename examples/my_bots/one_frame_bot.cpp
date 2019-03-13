@@ -6,6 +6,7 @@
 #include<chrono>
 #include"utilities/Point2DPolar.h"
 
+
 namespace sc2 {
 	using command = std::tuple<Tag, RawActions>;
 	using solution = std::vector<command>;
@@ -500,40 +501,66 @@ namespace sc2 {
 	solution one_frame_bot::run() {
 		m_population.resize(m_population_size);
 		m_damage_objective.resize(m_population_size);
-		m_threat_objectvie.resize(m_population_size);
+		m_threat_objective.resize(m_population_size);
 		// 生成随机解
 		generate_random_solutions(m_population, m_population_size);
 		// 评估所有解
-		evaluate_all_solutions(m_population, m_damage_objective, m_threat_objectvie);
+		evaluate_solutions(m_population, m_damage_objective, m_threat_objective);
 		// 对解进行排序
-		sort_solutions(m_population, m_damage_objective, m_threat_objectvie);
+		sort_solutions(m_population, m_damage_objective, m_threat_objective);
 		// 循环演化
+#ifdef _DEBUG
+		auto start = std::chrono::steady_clock::now();
+#endif // _DEBUG
 		for (size_t i = 0; i < m_produce_times; i++) {
-			generate_offspring(m_population, m_offspring, m_offspring_size);
-			m_population.insert(m_population.begin(), m_offspring.begin(), m_offspring.end());
-			evaluate_all_solutions(m_population, m_damage_objective, m_threat_objectvie);
-			sort_solutions(m_population, m_damage_objective, m_threat_objectvie);
+#ifdef _DEBUG
+			auto inner_start = std::chrono::steady_clock::now();
+#endif // _DEBUG
+			population offspring;
+			std::vector<float> ofs_d_o;
+			std::vector<float> ofs_t_o;
+			generate_offspring(m_population, offspring, m_offspring_size);
+			//todo I don't need to calculate parents' objectives again
+			evaluate_solutions(offspring, ofs_d_o, ofs_t_o);
+			m_population.insert(m_population.begin(), offspring.begin(), offspring.end());
+			m_damage_objective.insert(m_damage_objective.begin(), ofs_d_o.begin(), ofs_d_o.end());
+			m_threat_objective.insert(m_threat_objective.begin(), ofs_t_o.begin(), ofs_t_o.end());
 
+			sort_solutions(m_population, m_damage_objective, m_threat_objective);
 			m_population.erase(m_population.begin() + m_population_size, m_population.end());
-			m_threat_objectvie.erase(m_threat_objectvie.begin() + m_population_size, m_threat_objectvie.end());
+			m_threat_objective.erase(m_threat_objective.begin() + m_population_size, m_threat_objective.end());
 			m_damage_objective.erase(m_damage_objective.begin() + m_population_size, m_damage_objective.end());
+#ifdef _DEBUG
+			auto inner_end = std::chrono::steady_clock::now();
+			auto inner_interval = std::chrono::duration_cast<std::chrono::milliseconds>(inner_end - inner_start);
+			std::cout << "Time for a loop: " << inner_interval.count() << std::endl;
+#endif // _DEBUG
 		}
+#ifdef _DEBUG
+		auto end = std::chrono::steady_clock::now();
+		auto interval = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+		std::cout << "Time for whole loops: " <<interval.count() << std::endl;
+#endif // _DEBUG
 		// 返回最终solution
 		return m_population[0];
 	}
 
-	void one_frame_bot::evaluate_all_solutions(const population & p, std::vector<float> & total_damage, std::vector<float> & total_theft) {
+	void one_frame_bot::evaluate_solutions(const population & p, std::vector<float> & total_damage, std::vector<float> & total_theft) {
 		total_damage.resize(p.size());
 		total_theft.resize(p.size());
 		std::vector<std::thread> threads;
+		threads.reserve(2 * p.size());
 		for (size_t i = 0; i < p.size(); i++) {
 			//? caution: the i must be copied rather than refered
 			threads.push_back(std::thread{ [&,i]() {
 				total_damage[i] = evaluate_single_solution_damage_next_frame(p[i]);
+			} });
+			threads.push_back(std::thread{ [&, i]() {
 				total_theft[i] = evaluate_single_solution_theft_next_frame(p[i]);
 			} });
 			//total_damage[i] = evaluate_single_solution_damage_next_frame(m_population[i]);
 			//total_theft[i] = evaluate_single_solution_theft_next_frame(m_population[i]);
+
 
 		}
 		for (size_t i = 0; i < threads.size(); i++) {
@@ -563,19 +590,19 @@ namespace sc2 {
 		}
 	}
 	solution one_frame_bot::select_one_solution(const population & p, std::vector<float> & d, std::vector<float> & h) {
-		float highest_fitness = m_damage_objective[0] - m_threat_objectvie[0];
+		float highest_fitness = m_damage_objective[0] - m_threat_objective[0];
 		solution selected_solution = m_population[0];
 		size_t index(0);
 		for (size_t i = 0; i < m_population.size(); i++) {
-			if (m_damage_objective[i] - m_threat_objectvie[i] > highest_fitness) {
+			if (m_damage_objective[i] - m_threat_objective[i] > highest_fitness) {
 				selected_solution = m_population[i];
 				index = i;
 			}
 		}
 		Debug()->DebugTextOut("obj1: " + std::to_string(m_damage_objective[index]) + "\t");
-		Debug()->DebugTextOut("obj2: " + std::to_string(m_threat_objectvie[index]));
+		Debug()->DebugTextOut("obj2: " + std::to_string(m_threat_objective[index]));
 		Debug()->SendDebug();
-		std::cout << "obj1:" << m_damage_objective[index] << "\t" << "obj2:" << m_threat_objectvie[index] << std::endl;
+		std::cout << "obj1:" << m_damage_objective[index] << "\t" << "obj2:" << m_threat_objective[index] << std::endl;
 		return selected_solution;
 	}
 	void one_frame_bot::deploy_solution(const solution & s) {
