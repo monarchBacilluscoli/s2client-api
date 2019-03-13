@@ -15,8 +15,7 @@ namespace sc2 {
         one_frame_bot() {
             m_population.reserve(m_population_size + m_offspring_size);
             m_damage_objective.reserve(m_population_size + m_offspring_size);
-            m_threat_objectvie.reserve(m_population_size + m_offspring_size);
-            m_offspring.reserve(m_offspring_size);
+            m_threat_objective.reserve(m_population_size + m_offspring_size);
         }
         ~one_frame_bot() = default;
 
@@ -50,7 +49,7 @@ namespace sc2 {
         //todo control crossover and mutation to produce the next generation
 
         // evaluate
-        void evaluate_all_solutions(const population& p, std::vector<float>& d, std::vector<float>& total_theft);
+        void evaluate_solutions(const population& p, std::vector<float>& d, std::vector<float>& total_theft);
         //
         void sort_solutions(population& p, std::vector<float>& d, std::vector<float>& t);
         //
@@ -162,20 +161,19 @@ namespace sc2 {
         const int command_length = 1;
         const float zero_potential_energy_ratio = 0.8f;
 
-        const int m_population_size = 50;
-        const int m_offspring_size = 50;
+        const int m_population_size = 20;
+        const int m_offspring_size = 20;
         const float m_muatation_rate = 0.1f;
         const float m_crossover_rate = 1;
         const double m_theta_mutate_step = 2 * PI / 10.;
-        const int m_produce_times = 50;
+        const int m_produce_times = 20;
 
         const double m_attack_prob = 0.8;
 
         // algorithm content
         population m_population;
-        population m_offspring;
         std::vector<float> m_damage_objective;
-        std::vector<float> m_threat_objectvie;
+        std::vector<float> m_threat_objective;
         solution m_selected_solution; //todo: useless
     };
 
