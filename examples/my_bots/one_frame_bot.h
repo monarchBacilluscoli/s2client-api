@@ -168,7 +168,7 @@ namespace sc2 {
         const double m_theta_mutate_step = 2 * PI / 10.;
         const int m_produce_times = 20;
 
-        const double m_attack_prob = 0.8;
+        const double m_attack_prob = 1;
 
         // algorithm content
         population m_population;
