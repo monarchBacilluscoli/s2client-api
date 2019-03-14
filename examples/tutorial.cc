@@ -42,11 +42,12 @@ int main(int argc, char* argv[]) {
     coordinator.LaunchStarcraft(); // 打开游戏（这样的打开游戏似乎收到默认参数的控制而什么界面都没有，是啊，因为没有用Update啊）
 
     //coordinator.StartGame(sc2::kMapBelShirVestigeLE); // 标准对局地图
-    //coordinator.StartGame("E:\\Desktop\\test\\testBattle.SC2Map");
-    coordinator.StartGame("E:\\Desktop\\test\\testBattle_distant_vs_melee.SC2Map");
-    //coordinator.StartGame("E:\\Desktop\\test\\testBattle_no_enemy.SC2Map");
-    //coordinator.StartGame("E:\\Desktop\\test\\testBattleAllUnits.SC2Map");
-    //coordinator.StartGame("E:\\Desktop\\test\\testBattle1v1.SC2Map"); // 1v1静止测试
+    //coordinator.StartGame("..\\maps\\Test\\testBattle.SC2Map");
+    //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
+    coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
+    //coordinator.StartGame("..\\maps\\Test\\testBattle_no_enemy.SC2Map");
+    //coordinator.StartGame("..\\maps\\Test\\testBattleAllUnits.SC2Map");
+    //coordinator.StartGame("..\\maps\\Test\\testBattle1v1.SC2Map"); // 1v1静止测试
 
 
     /*bool is_start = false;
