@@ -23,7 +23,7 @@ namespace sc2 {
         virtual void OnStep() final;
         //todo control units by rules
         virtual void OnUnitIdle(const Unit* u) final;
-
+        virtual void OnGameEnd() final;
         
        
 

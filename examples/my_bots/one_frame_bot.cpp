@@ -6,6 +6,8 @@
 #include<chrono>
 #include"utilities/Point2DPolar.h"
 
+//#define DEBUG
+//#define MULTI_THREAD
 
 namespace sc2 {
 	using command = std::tuple<Tag, RawActions>;
@@ -234,10 +236,11 @@ namespace sc2 {
 	float one_frame_bot::threat_from_unit_to_unit(const Unit * source_u, const Unit * target_u) {
 		float threat = 0;
 		float distance = Distance2D(source_u->pos, target_u->pos);
+		//todo In fact, this value doesn't need to calculate every time here, maybe I need to store it
 		float zero_potential_field_dis = calculate_zero_potential_field_distance(source_u, target_u);
 		if (zero_potential_field_dis != 0) {
-			threat = distance / zero_potential_field_dis;
-			if (threat > 1) {
+			threat = 1 - distance / zero_potential_field_dis;
+			if (threat < 0) {
 				threat = 0;
 			}
 		}
@@ -249,8 +252,8 @@ namespace sc2 {
 		float distance = Distance2D(source_u->pos, pos);
 		float zero_potential_field_dis = calculate_zero_potential_field_distance(source_u, target_u);
 		if (zero_potential_field_dis != 0) {
-			threat = distance / zero_potential_field_dis;
-			if (threat > 1) {
+			threat = 1-distance / zero_potential_field_dis;
+			if (threat < 0) {
 				threat = 0;
 			}
 		}
@@ -375,6 +378,7 @@ namespace sc2 {
 		m_unit_types = Observation()->GetUnitTypeData();
 		m_marine = m_unit_types[static_cast<int>(UNIT_TYPEID::TERRAN_MARINE)]; //? useless
 
+		Actions()->SendChat("GGHF");
 	}
 	void one_frame_bot::OnStep() {
 		// 更新游戏数据
@@ -393,12 +397,22 @@ namespace sc2 {
 		//display_solution_line(m_selected_solution);
 		display_units_attack_action(debug, m_alive_self_units);
 		// until this step, those orders to debug are sent
-		debug->SendDebug();
 
-		solution s = run();
-		deploy_solution(s);
+		if (m_alive_self_units.size() > 0) {
+			solution s = run();
+			deploy_solution(s);
+		}
+		else {
+			// wait one minutes and bring the game to an end
+			std::this_thread::sleep_for(std::chrono::seconds(5));
+			debug->DebugEndGame();
+		}
+		debug->SendDebug();
 	}
 	void one_frame_bot::OnUnitIdle(const Unit * u) {
+	}
+	void one_frame_bot::OnGameEnd() {
+		Actions()->SendChat("GG!");
 	}
 	solution one_frame_bot::generate_random_solution() {
 		solution so(m_alive_self_units.size());
@@ -415,11 +429,11 @@ namespace sc2 {
 					action.ability_id = ABILITY_ID::MOVE;
 					action.target_type = ActionRaw::TargetType::TargetPosition;
 					Point2D new_pos = search_nearest_unit_from_point(unit->pos, Unit::Alliance::Enemy)->pos;
-					new_pos = calculate_pos_next_frame(unit, new_pos);
+					// new_pos = calculate_pos_next_frame(unit, new_pos);
 					action.target_point = new_pos;
 				}
 				else {
-					action.ability_id = ABILITY_ID::MOVE;
+					action.ability_id = ABILITY_ID::ATTACK;
 					action.target_type = ActionRaw::TargetType::TargetUnitTag;
 					action.target_tag = GetRandomEntry(targets)->tag;
 				}
@@ -463,13 +477,19 @@ namespace sc2 {
 
 
 	std::vector<solution> one_frame_bot::cross_over(const solution & a, const solution & b) {
+		if (a.size() <= 0) {
+			throw("The solution waits to be crossed is empty@one_frame_bot::cross_over");
+		}
 		// randomly select two points and change all the commands between them
 		std::vector<solution> offspring = { a,b };
-		size_t start = GetRandomInteger(0, a.size() - 2);
-		size_t end = GetRandomInteger(start, a.size() - 1);
+		size_t start = GetRandomInteger(0, a.size() - 1);
+		size_t end = GetRandomInteger(0, a.size() - 1);
+		if (start > end) {
+			std::swap(start, end);
+		}
 		// exchange the segment between the two points
 		for (int i = start; i <= end; i++) {
-			swap(offspring[0][i], offspring[1][i]);
+			std::swap(offspring[0][i], offspring[1][i]);
 		}
 		return offspring;
 	}
@@ -509,13 +529,13 @@ namespace sc2 {
 		// 对解进行排序
 		sort_solutions(m_population, m_damage_objective, m_threat_objective);
 		// 循环演化
-#ifdef _DEBUG
+#ifdef DEBUG
 		auto start = std::chrono::steady_clock::now();
-#endif // _DEBUG
+#endif // DEBUG
 		for (size_t i = 0; i < m_produce_times; i++) {
-#ifdef _DEBUG
+#ifdef DEBUG
 			auto inner_start = std::chrono::steady_clock::now();
-#endif // _DEBUG
+#endif // DEBUG
 			population offspring;
 			std::vector<float> ofs_d_o;
 			std::vector<float> ofs_t_o;
@@ -530,17 +550,17 @@ namespace sc2 {
 			m_population.erase(m_population.begin() + m_population_size, m_population.end());
 			m_threat_objective.erase(m_threat_objective.begin() + m_population_size, m_threat_objective.end());
 			m_damage_objective.erase(m_damage_objective.begin() + m_population_size, m_damage_objective.end());
-#ifdef _DEBUG
+#ifdef DEBUG
 			auto inner_end = std::chrono::steady_clock::now();
 			auto inner_interval = std::chrono::duration_cast<std::chrono::milliseconds>(inner_end - inner_start);
 			std::cout << "Time for a loop: " << inner_interval.count() << std::endl;
-#endif // _DEBUG
+#endif // DEBUG
 		}
-#ifdef _DEBUG
+#ifdef DEBUG
 		auto end = std::chrono::steady_clock::now();
 		auto interval = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-		std::cout << "Time for whole loops: " <<interval.count() << std::endl;
-#endif // _DEBUG
+		std::cout << "Time for whole loops: " << interval.count() << std::endl;
+#endif // DEBUG
 		// 返回最终solution
 		return m_population[0];
 	}
@@ -548,25 +568,28 @@ namespace sc2 {
 	void one_frame_bot::evaluate_solutions(const population & p, std::vector<float> & total_damage, std::vector<float> & total_theft) {
 		total_damage.resize(p.size());
 		total_theft.resize(p.size());
-		std::vector<std::thread> threads;
-		threads.reserve(2 * p.size());
+
+#ifdef MULTI_THREAD
+		std::vector<std::thread> threads(2 * p.size());
 		for (size_t i = 0; i < p.size(); i++) {
 			//? caution: the i must be copied rather than refered
-			threads.push_back(std::thread{ [&,i]() {
+			threads[2 * i] = std::thread{ [&,i]() {
 				total_damage[i] = evaluate_single_solution_damage_next_frame(p[i]);
-			} });
-			threads.push_back(std::thread{ [&, i]() {
+			} };
+			threads[2 * i + 1] = std::thread{ [&, i]() {
 				total_theft[i] = evaluate_single_solution_theft_next_frame(p[i]);
-			} });
-			//total_damage[i] = evaluate_single_solution_damage_next_frame(m_population[i]);
-			//total_theft[i] = evaluate_single_solution_theft_next_frame(m_population[i]);
-
-
+			} };
 		}
-		for (size_t i = 0; i < threads.size(); i++) {
-			threads[i].join();
+		for (auto& t : threads) {
+			t.join();
 		}
 		return;
+#else
+		for (size_t i = 0; i < p.size(); i++) {
+			total_damage[i] = evaluate_single_solution_damage_next_frame(p[i]);
+			total_theft[i] = evaluate_single_solution_theft_next_frame(p[i]);
+		}
+#endif // MULTI_THREAD
 	}
 	void one_frame_bot::sort_solutions(population & p, std::vector<float> & total_damage, std::vector<float> & total_theft) {
 		// 对两个目标值逐个相减
@@ -618,7 +641,7 @@ namespace sc2 {
 				Actions()->UnitCommand(execute_unit, action.ability_id, action.target_point);
 				break;
 			case ActionRaw::TargetType::TargetUnitTag:
-				Actions()->UnitCommand(execute_unit, action.ability_id, action.target_tag);
+				Actions()->UnitCommand(execute_unit, action.ability_id, Observation()->GetUnit(action.target_tag));
 				break;
 			default:
 				break;
@@ -637,7 +660,7 @@ namespace sc2 {
 				case ABILITY_ID::ATTACK:
 					switch (action.target_type) {
 					case ActionRaw::TargetType::TargetUnitTag: {
-						total_damage += damage_unit_to_unit(u_c, Observation()->GetUnit(get_action(c, 0).TargetUnitTag));
+						total_damage += damage_unit_to_unit(u_c, Observation()->GetUnit(get_action(c, 0).target_tag));
 						break;
 					}
 					case ActionRaw::TargetType::TargetPosition: {
@@ -692,3 +715,4 @@ namespace sc2 {
 		return threat_sum;
 	}
 }
+
