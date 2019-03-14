@@ -1,0 +1,93 @@
+int n_marine=5;
+int n_marauder=3;
+unitgroup g_player1 = UnitGroupEmpty(); // Attention! It needs initialization!
+unitgroup g_player2 = UnitGroupEmpty();
+int main_objective;
+
+// user-defined functions
+bool initUnitGroup(){
+    g_player1 = UnitGroup(null, 1, RegionEntireMap(), UnitFilter(0, 0, (1 << c_targetFilterMissile), (1 << (c_targetFilterDead - 32)) | (1 << (c_targetFilterHidden - 32))), 0);
+    g_player2 = UnitGroup(null, 2, RegionEntireMap(), UnitFilter(0, 0, (1 << c_targetFilterMissile), (1 << (c_targetFilterDead - 32)) | (1 << (c_targetFilterHidden - 32))), 0);
+    return true;
+}
+
+// initialization
+bool onInit(bool testConds, bool runActions) {
+    UIDisplayMessage(PlayerGroupActive(), c_messageAreaSubtitle, StringToText("HELLO WORLD"));
+    UIAlertClear(1);
+    VisRevealArea(1,RegionEntireMap(),0,false);
+    CameraPan(1,RegionGetCenter(RegionEntireMap()),0,0,0,false);
+    RegionPlayableMapSet(RegionFromName("PlayableRegion"));
+    // Scenario setup
+    initUnitGroup();
+    //todo:Task objective setup
+    ObjectiveCreateForPlayers(StringToText("Eliminate all the enemy units"),StringToText(""),c_objectiveStateActive,true,PlayerGroupAll());
+    main_objective=ObjectiveLastCreated();
+    return true;
+}
+
+// output which unit will start attack
+bool onUnitStartedAttack(bool testConds, bool runActions){
+    TriggerDebugOutput(c_messageAreaChat,StringToText(UnitGetType(EventUnit())),true);
+    //TriggerDebugOutput(c_messageAreaChat,IntToText(UnitGroupCount(g_player1,c_unitCountAlive)),true);
+    return true;
+}
+
+// Restart game when someone input "restart" in chat box
+bool onRestart(bool testConds, bool runActions){
+    RestartGame(PlayerGroupAll());
+    return true;
+}
+
+// Reset map when anyone input "reset" in chat box
+bool onReset(bool testConds, bool runActions){
+    int i;
+    unit tmp_unit;
+    for (i = 1; i <= UnitGroupCount(g_player1, c_unitCountAll); i += 1) {
+        tmp_unit = UnitGroupUnit(g_player1, i);
+        UnitRemove(tmp_unit);
+    }
+    for (i = 1; i <= UnitGroupCount(g_player1, c_unitCountAll); i += 1) {
+        tmp_unit = UnitGroupUnit(g_player2, i);
+        UnitRemove(tmp_unit);
+    }
+    initUnitGroup();
+    return true;
+}
+
+// if there is no unit in a unitgroup, the player who this group belongs to will lose this game
+bool onDefeat(bool testConds, bool runActions){
+    if(UnitGroupCount(g_player1,c_unitCountAlive)==0){
+        UIDisplayMessage(PlayerGroupAll(),c_messageAreaDirective,StringToText("Player 2 wins! \nReset map - type \"reset\" or \nRestart map - type \"restart\" in chat box"));
+        ObjectiveSetState(main_objective,c_objectiveStateCompleted);
+    }else if(UnitGroupCount(g_player2,c_unitCountAlive)==0){
+        UIDisplayMessage(PlayerGroupAll(),c_messageAreaDirective,StringToText("Player 1 wins! \nReset map - type \"reset\" or \nRestart map - type \"restart\" in chat box"));
+        ObjectiveSetState(main_objective,c_objectiveStateCompleted);
+    }
+    return true;
+}
+
+// kill all players' units, for debuging or joy
+bool onKillAll(bool testConds, bool runActions){
+    int i;
+    unit tmp_unit;
+    for (i = 1; i <= UnitGroupCount(g_player1, c_unitCountAll); i += 1) {
+        tmp_unit = UnitGroupUnit(g_player1, i);
+        UnitKill(tmp_unit);
+    }
+    for (i = 1; i <= UnitGroupCount(g_player2, c_unitCountAll); i += 1) {
+        tmp_unit = UnitGroupUnit(g_player2, i);
+        UnitKill(tmp_unit);
+    }
+    return true;
+}
+
+void main() {
+    // this is your entry point
+    TriggerAddEventMapInit(TriggerCreate("onInit"));
+    TriggerAddEventUnitStartedAttack(TriggerCreate("onUnitStartedAttack"),null);
+    TriggerAddEventChatMessage(TriggerCreate("onRestart"),c_playerAny,"restart",true);
+    TriggerAddEventChatMessage(TriggerCreate("onReset"),c_playerAny,"reset",true);
+    TriggerAddEventChatMessage(TriggerCreate("onKillAll"),c_playerAny,"kill",true);
+    TriggerAddEventUnitDied(TriggerCreate("onDefeat"),null);
+}

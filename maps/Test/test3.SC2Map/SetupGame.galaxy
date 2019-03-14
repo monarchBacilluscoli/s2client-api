@@ -1,0 +1,25 @@
+//==================================================================================================
+//
+// <Your Map> SetupGame
+//
+// Name:   <Your Map>
+// Author: <Your Name>
+//
+//==================================================================================================
+include "TriggerLibs/NativeLib"
+include "Globals.galaxy"
+
+bool SetupGame ( bool testConds, bool runActions ) {
+    //Dew Stuffz
+    TipAlertPanelClear(PlayerGroupAll());
+    UIDisplayMessage(PlayerGroupAll(), c_messageAreaSubtitle, StringToText("I Has Init!"));
+    UnitCreate(10,"Marine",0,1,RegionGetCenter(RegionEntireMap()),0);
+    UnitKill(UnitLastCreated());
+    return false;
+}
+
+bool ClickKill( bool testConds, bool runActions ){
+    UnitKill(EventUnit());
+    UIDisplayMessage(PlayerGroupAll(),c_messageAreaDebug,StringToText("A unit has been chosen!"));
+    return true;
+}

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Regions>
+    <region id="1">
+        <name value="Area1"/>
+        <shape type="rect">
+            <quad value="2,14.5,16,26"/>
+        </shape>
+    </region>
+</Regions>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PlacedObjects Version="27">
+    <ObjectUnit Id="797182997" Position="17.5,27,0" Rotation="1.6286" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="1799500398" Position="29,26.5,0" Rotation="4.8876" Scale="1,1,1" UnitType="Marine" Player="2"/>
+    <ObjectUnit Id="585775754" Position="14.5,29.5,0" Rotation="5.6413" Scale="1,1,1" UnitType="Marauder" Player="1"/>
+    <ObjectUnit Id="2129053073" Position="17.5,23.5,0" Rotation="5.1572" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="552969549" Position="24,12,0" Rotation="2.754" Scale="1,1,1" UnitType="Marine" Player="2"/>
+    <ObjectUnit Id="580411472" Position="17.5,21.5,0" Rotation="2.8051" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="870370472" Position="29,31.5,0" Rotation="4.6066" Scale="1,1,1" UnitType="Marine" Player="2"/>
+    <ObjectUnit Id="1551617552" Position="31.5,30,0" Rotation="2.851" Scale="1,1,1" UnitType="Marauder" Player="2"/>
+    <ObjectUnit Id="1683681544" Position="31.5,25,0" Rotation="0.0732" Scale="1,1,1" UnitType="Marauder" Player="2"/>
+    <ObjectUnit Id="1093437" Position="17.5,22.5,0" Rotation="4.1538" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="553726907" Position="29,24,0" Rotation="3.7473" Scale="1,1,1" UnitType="Marine" Player="2"/>
+    <ObjectUnit Id="310320207" Position="17.5,19.5,0" Rotation="4.9287" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="359664173" Position="29,29.5,0" Rotation="3.4555" Scale="1,1,1" UnitType="Marine" Player="2"/>
+    <ObjectUnit Id="1379770679" Position="17.5,25,0" Rotation="0.2145" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="1577709213" Position="29,21.5,0" Rotation="1.607" Scale="1,1,1" UnitType="Marine" Player="2"/>
+    <ObjectUnit Id="412227012" Position="17,29,0" Rotation="4.292" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="334698533" Position="29,22.5,0" Rotation="6.1965" Scale="1,1,1" UnitType="Marine" Player="2"/>
+    <ObjectUnit Id="943480135" Position="17.5,20.5,0" Rotation="2.587" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="2137228027" Position="17,30.5,0" Rotation="3.229" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="1933017938" Position="15,24.5,0" Rotation="3.6916" Scale="1,1,1" UnitType="Marauder" Player="1"/>
+</PlacedObjects>

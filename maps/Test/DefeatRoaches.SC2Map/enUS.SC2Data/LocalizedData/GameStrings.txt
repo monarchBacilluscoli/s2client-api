@@ -1,0 +1,17 @@
+﻿DocInfo/DescLong=Teaches the value of focus firing.
+DocInfo/DescShort=1
+DocInfo/Name=CombatFocus
+MapInfo/Player00/Name=Neutral
+MapInfo/Player01/Name=Player
+MapInfo/Player02/Name=Zerg
+MapInfo/Player03/Name=Hostile
+Param/Expression/3815C532=Curriculum Score: ~A~
+Param/Expression/5532DF69=Curriculum Score: ~A~
+Param/Expression/5CA1127B=Curriculum Score: ~A~
+Param/Expression/CCFE9117=Curriculum Score: ~A~
+Param/Value/4C6755AE=<s val="VictoryPanelVictory"><c val="FF0000">Defeat!</c></s><n/><s val="CenterJustified">Reset Map - type 'reset' in chat<n/>Restart Map - type 'restart' in chat</s>
+Param/Value/5EEF20C4=Defeat Roaches
+Param/Value/761DCCB2=Roaches Defeated
+Param/Value/7D90EF56=Remaining Time
+Param/Value/A4881204=<s val="VictoryPanelVictory"><c val="FFFFFF">Time Elapsed!</c></s><n/><s val="CenterJustified">Reset Map - type 'reset' in chat<n/>Restart Map - type 'restart' in chat</s>
+UI/GameResultDialog/ScoreScreen=<h/>Quit Game

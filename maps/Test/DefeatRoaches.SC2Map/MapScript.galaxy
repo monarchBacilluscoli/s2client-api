@@ -1,0 +1,527 @@
+//==================================================================================================
+// 
+// Generated Map Script
+// 
+// Name:   CombatFocus
+// 
+//==================================================================================================
+include "TriggerLibs/NativeLib"
+
+//--------------------------------------------------------------------------------------------------
+// Library Initialization
+//--------------------------------------------------------------------------------------------------
+void InitLibs () {
+    libNtve_InitLib();
+}
+
+//--------------------------------------------------------------------------------------------------
+// Global Variables
+//--------------------------------------------------------------------------------------------------
+timer gv_episodeCountdownTimer;
+unitgroup gv_marines;
+unitgroup gv_roaches;
+int gv_mainObjective;
+int gv_curriculumScoreObjective;
+bool gv_demoMode;
+
+void InitGlobals () {
+    gv_episodeCountdownTimer = TimerCreate();
+    gv_marines = UnitGroupEmpty();
+    gv_roaches = UnitGroupEmpty();
+    gv_mainObjective = c_invalidObjectiveId;
+    gv_curriculumScoreObjective = c_invalidObjectiveId;
+}
+
+//--------------------------------------------------------------------------------------------------
+// Trigger Variables
+//--------------------------------------------------------------------------------------------------
+trigger gt_Init;
+trigger gt_ScoreUpdatesandVictory;
+trigger gt_Defeat;
+trigger gt_ResetMap;
+trigger gt_RestartMap;
+trigger gt_DemoMode;
+trigger gt_EpisodeTimer;
+trigger gt_MoveOrderIssued;
+
+//--------------------------------------------------------------------------------------------------
+// Trigger: Init
+//--------------------------------------------------------------------------------------------------
+bool gt_Init_Func (bool testConds, bool runActions) {
+    int autoA0DE7821_ae;
+    int autoA0DE7821_ai;
+
+    // Variable Declarations
+    point lv_randomPointMarines;
+    point lv_randomPointRoaches;
+    int lv_i;
+
+    // Variable Initialization
+
+    // Actions
+    if (!runActions) {
+        return true;
+    }
+
+    RegionPlayableMapSet(RegionFromId(1));
+    CameraApplyInfo(1, CameraInfoDefault(), 0.0, -1, 10.0, false);
+    CameraPan(1, PointWithOffsetPolar(RegionGetCenter(RegionFromId(1)), 3.0, 270.0), 0.0, -1, 10.0, false);
+    if ((PlayerType(1) != c_playerTypeComputer)) {
+        CameraLockInput(1, true);
+    }
+
+    VisRevealArea(1, RegionFromId(1), 0.0, false);
+    SoundtrackPause(PlayerGroupAll(), c_soundtrackCategoryMusic, true, false);
+    if ((RandomInt(1, 2) == 1)) {
+        lv_randomPointMarines = RegionRandomPoint(RegionFromId(4));
+        lv_randomPointRoaches = RegionRandomPoint(RegionFromId(5));
+    }
+    else {
+        lv_randomPointMarines = RegionRandomPoint(RegionFromId(5));
+        lv_randomPointRoaches = RegionRandomPoint(RegionFromId(4));
+    }
+    autoA0DE7821_ae = 9;
+    autoA0DE7821_ai = 1;
+    lv_i = 1;
+    for ( ; ( (autoA0DE7821_ai >= 0 && lv_i <= autoA0DE7821_ae) || (autoA0DE7821_ai <= 0 && lv_i >= autoA0DE7821_ae) ) ; lv_i += autoA0DE7821_ai ) {
+        libNtve_gf_CreateUnitsWithDefaultFacing(1, "Marine", 0, 1, PointWithOffset(lv_randomPointMarines, 0.0, ((lv_i / 2) * (1 + (ModI(lv_i, 2) * -2)))));
+        UnitGroupAdd(gv_marines, UnitLastCreated());
+    }
+    libNtve_gf_CreateUnitsWithDefaultFacing(1, "Roach", 0, 2, PointWithOffset(lv_randomPointRoaches, 0.0, 0.5));
+    UnitGroupAdd(gv_roaches, UnitLastCreated());
+    libNtve_gf_CreateUnitsWithDefaultFacing(1, "Roach", 0, 2, PointWithOffset(lv_randomPointRoaches, 0.0, 1.5));
+    UnitGroupAdd(gv_roaches, UnitLastCreated());
+    libNtve_gf_CreateUnitsWithDefaultFacing(1, "Roach", 0, 2, PointWithOffset(lv_randomPointRoaches, 0.0, -0.5));
+    UnitGroupAdd(gv_roaches, UnitLastCreated());
+    libNtve_gf_CreateUnitsWithDefaultFacing(1, "Roach", 0, 2, PointWithOffset(lv_randomPointRoaches, 0.0, -1.5));
+    UnitGroupAdd(gv_roaches, UnitLastCreated());
+    UnitGroupSelect(gv_marines, 1, true);
+    PlayerModifyPropertyInt(1, c_playerPropCurriculumScore, c_playerPropOperSetTo, 0);
+    ObjectiveCreate(StringExternal("Param/Value/5EEF20C4"), StringToText(""), c_objectiveStateActive, true);
+    gv_mainObjective = ObjectiveLastCreated();
+    TextExpressionSetToken("Param/Expression/5532DF69", "A", IntToText(PlayerGetPropertyInt(1, c_playerPropCurriculumScore)));
+    ObjectiveCreate(TextExpressionAssemble("Param/Expression/5532DF69"), StringExternal("Param/Value/761DCCB2"), c_objectiveStateActive, true);
+    gv_curriculumScoreObjective = ObjectiveLastCreated();
+    if ((PlayerType(1) == c_playerTypeComputer)) {
+        gv_demoMode = true;
+        AIStart(1, true, 10000);
+        Wait(0.5, c_timeGame);
+        TriggerExecute(gt_DemoMode, true, false);
+    }
+
+    TimerStart(gv_episodeCountdownTimer, 120.0, false, c_timeGame);
+    TimerWindowCreate(TimerLastStarted(), StringExternal("Param/Value/7D90EF56"), true, false);
+    TriggerEnable(gt_EpisodeTimer, true);
+    TriggerEnable(gt_ResetMap, true);
+    TriggerEnable(gt_RestartMap, true);
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------
+void gt_Init_Init () {
+    gt_Init = TriggerCreate("gt_Init_Func");
+    TriggerAddEventMapInit(gt_Init);
+}
+
+//--------------------------------------------------------------------------------------------------
+// Trigger: Score Updates and Victory
+//--------------------------------------------------------------------------------------------------
+bool gt_ScoreUpdatesandVictory_Func (bool testConds, bool runActions) {
+    int auto392813E3_ae;
+    int auto392813E3_ai;
+    int auto269D25AE_ae;
+    int auto269D25AE_ai;
+
+    // Variable Declarations
+    fixed lv_marineHealth;
+    point lv_randomPointMarines;
+    point lv_randomPointRoaches;
+    int lv_i;
+
+    // Variable Initialization
+
+    // Conditions
+    if (testConds) {
+        if (!((TriggerIsEnabled(TriggerGetCurrent()) == true))) {
+            return false;
+        }
+
+        if (!((UnitGetOwner(EventUnit()) == 2))) {
+            return false;
+        }
+    }
+
+    // Actions
+    if (!runActions) {
+        return true;
+    }
+
+    PlayerModifyPropertyInt(1, c_playerPropCurriculumScore, c_playerPropOperAdd, 10);
+    TextExpressionSetToken("Param/Expression/5CA1127B", "A", IntToText(PlayerGetPropertyInt(1, c_playerPropCurriculumScore)));
+    ObjectiveSetName(gv_curriculumScoreObjective, TextExpressionAssemble("Param/Expression/5CA1127B"));
+    if ((UnitGroupCount(gv_roaches, c_unitCountAlive) == 0)) {
+        UnitPauseAll(true);
+        UnitGroupLoopBegin(gv_marines);
+        for ( ; !UnitGroupLoopDone() ; UnitGroupLoopStep() ) {
+            lv_marineHealth = UnitGetPropertyFixed(UnitGroupLoopCurrent(), c_unitPropLife, c_unitPropCurrent);
+            UnitGroupRemove(gv_marines, UnitGroupLoopCurrent());
+            UnitRemove(UnitGroupLoopCurrent());
+            libNtve_gf_CreateUnitsWithDefaultFacing(1, "Marine", 0, 1, RegionGetCenter(RegionFromId(1)));
+            UnitSetPropertyFixed(UnitLastCreated(), c_unitPropLife, lv_marineHealth);
+        }
+        UnitGroupLoopEnd();
+        UnitGroupLoopBegin(UnitGroup(null, c_playerAny, RegionEntireMap(), UnitFilter(0, 0, 0, (1 << (c_targetFilterDead - 32)) | (1 << (c_targetFilterHidden - 32))), 0));
+        for ( ; !UnitGroupLoopDone() ; UnitGroupLoopStep() ) {
+            if ((UnitGetType(UnitGroupLoopCurrent()) == "Marine")) {
+                UnitGroupAdd(gv_marines, UnitGroupLoopCurrent());
+            }
+            else {
+                UnitRemove(UnitGroupLoopCurrent());
+            }
+        }
+        UnitGroupLoopEnd();
+        if ((RandomInt(1, 2) == 1)) {
+            lv_randomPointMarines = RegionRandomPoint(RegionFromId(4));
+            lv_randomPointRoaches = RegionRandomPoint(RegionFromId(5));
+        }
+        else {
+            lv_randomPointMarines = RegionRandomPoint(RegionFromId(5));
+            lv_randomPointRoaches = RegionRandomPoint(RegionFromId(4));
+        }
+        auto392813E3_ae = 5;
+        auto392813E3_ai = 1;
+        lv_i = 1;
+        for ( ; ( (auto392813E3_ai >= 0 && lv_i <= auto392813E3_ae) || (auto392813E3_ai <= 0 && lv_i >= auto392813E3_ae) ) ; lv_i += auto392813E3_ai ) {
+            libNtve_gf_CreateUnitsWithDefaultFacing(1, "Marine", 0, 1, RegionGetCenter(RegionFromId(1)));
+            UnitGroupAdd(gv_marines, UnitLastCreated());
+        }
+        auto269D25AE_ae = UnitGroupCount(gv_marines, c_unitCountAlive);
+        auto269D25AE_ai = 1;
+        lv_i = 1;
+        for ( ; ( (auto269D25AE_ai >= 0 && lv_i <= auto269D25AE_ae) || (auto269D25AE_ai <= 0 && lv_i >= auto269D25AE_ae) ) ; lv_i += auto269D25AE_ai ) {
+            UnitSetPosition(UnitGroupUnit(gv_marines, lv_i), PointWithOffset(lv_randomPointMarines, 0.0, ((lv_i / 2) * (1 + (ModI(lv_i, 2) * -2)))), false);
+        }
+        libNtve_gf_CreateUnitsWithDefaultFacing(1, "Roach", 0, 2, PointWithOffset(lv_randomPointRoaches, 0.0, 0.5));
+        UnitGroupAdd(gv_roaches, UnitLastCreated());
+        libNtve_gf_CreateUnitsWithDefaultFacing(1, "Roach", 0, 2, PointWithOffset(lv_randomPointRoaches, 0.0, 1.5));
+        UnitGroupAdd(gv_roaches, UnitLastCreated());
+        libNtve_gf_CreateUnitsWithDefaultFacing(1, "Roach", 0, 2, PointWithOffset(lv_randomPointRoaches, 0.0, -0.5));
+        UnitGroupAdd(gv_roaches, UnitLastCreated());
+        libNtve_gf_CreateUnitsWithDefaultFacing(1, "Roach", 0, 2, PointWithOffset(lv_randomPointRoaches, 0.0, -1.5));
+        UnitGroupAdd(gv_roaches, UnitLastCreated());
+        UnitGroupSelect(gv_marines, 1, true);
+        UnitPauseAll(false);
+    }
+    else {
+        UnitRemove(EventUnit());
+    }
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------
+void gt_ScoreUpdatesandVictory_Init () {
+    gt_ScoreUpdatesandVictory = TriggerCreate("gt_ScoreUpdatesandVictory_Func");
+    TriggerAddEventUnitDied(gt_ScoreUpdatesandVictory, null);
+}
+
+//--------------------------------------------------------------------------------------------------
+// Trigger: Defeat
+//--------------------------------------------------------------------------------------------------
+bool gt_Defeat_Func (bool testConds, bool runActions) {
+    // Conditions
+    if (testConds) {
+        if (!((TriggerIsEnabled(TriggerGetCurrent()) == true))) {
+            return false;
+        }
+
+        if (!((UnitGetOwner(EventUnit()) == 1))) {
+            return false;
+        }
+    }
+
+    // Actions
+    if (!runActions) {
+        return true;
+    }
+
+    PlayerModifyPropertyInt(1, c_playerPropCurriculumScore, c_playerPropOperSubtract, 1);
+    TextExpressionSetToken("Param/Expression/CCFE9117", "A", IntToText(PlayerGetPropertyInt(1, c_playerPropCurriculumScore)));
+    ObjectiveSetName(gv_curriculumScoreObjective, TextExpressionAssemble("Param/Expression/CCFE9117"));
+    if ((UnitGroupCount(gv_marines, c_unitCountAlive) == 0)) {
+        TriggerEnable(TriggerGetCurrent(), false);
+        TriggerEnable(gt_ScoreUpdatesandVictory, false);
+        TriggerEnable(gt_EpisodeTimer, false);
+        TriggerStop(gt_DemoMode);
+        ObjectiveSetState(gv_mainObjective, c_objectiveStateFailed);
+        ObjectiveSetState(gv_curriculumScoreObjective, c_objectiveStateFailed);
+        UIDisplayMessage(PlayerGroupAll(), c_messageAreaDirective, StringExternal("Param/Value/4C6755AE"));
+        GameSetMissionTimePaused(true);
+        libNtve_gf_StopTimer(gv_episodeCountdownTimer);
+        Wait(2.0, c_timeReal);
+        UnitPauseAll(true);
+    }
+    else {
+        UnitRemove(EventUnit());
+    }
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------
+void gt_Defeat_Init () {
+    gt_Defeat = TriggerCreate("gt_Defeat_Func");
+    TriggerAddEventUnitDied(gt_Defeat, null);
+}
+
+//--------------------------------------------------------------------------------------------------
+// Trigger: Reset Map
+//--------------------------------------------------------------------------------------------------
+bool gt_ResetMap_Func (bool testConds, bool runActions) {
+    int auto3A589C2C_ae;
+    int auto3A589C2C_ai;
+
+    // Variable Declarations
+    point lv_randomPointMarines;
+    point lv_randomPointRoaches;
+    int lv_i;
+
+    // Variable Initialization
+
+    // Conditions
+    if (testConds) {
+        if (!((TriggerIsEnabled(TriggerGetCurrent()) == true))) {
+            return false;
+        }
+    }
+
+    // Actions
+    if (!runActions) {
+        return true;
+    }
+
+    TriggerEnable(TriggerGetCurrent(), false);
+    UnitGroupLoopBegin(UnitGroup(null, c_playerAny, RegionEntireMap(), UnitFilter(0, 0, 0, (1 << (c_targetFilterDead - 32)) | (1 << (c_targetFilterHidden - 32))), 0));
+    for ( ; !UnitGroupLoopDone() ; UnitGroupLoopStep() ) {
+        UnitRemove(UnitGroupLoopCurrent());
+    }
+    UnitGroupLoopEnd();
+    TriggerEnable(gt_ScoreUpdatesandVictory, false);
+    TriggerEnable(gt_Defeat, false);
+    TriggerStop(gt_ScoreUpdatesandVictory);
+    TriggerStop(gt_Defeat);
+    TriggerStop(gt_DemoMode);
+    UIClearMessages(PlayerGroupAll(), c_messageAreaDirective);
+    gv_marines = UnitGroupEmpty();
+    gv_roaches = UnitGroupEmpty();
+    if ((RandomInt(1, 2) == 1)) {
+        lv_randomPointMarines = RegionRandomPoint(RegionFromId(4));
+        lv_randomPointRoaches = RegionRandomPoint(RegionFromId(5));
+    }
+    else {
+        lv_randomPointMarines = RegionRandomPoint(RegionFromId(5));
+        lv_randomPointRoaches = RegionRandomPoint(RegionFromId(4));
+    }
+    auto3A589C2C_ae = 9;
+    auto3A589C2C_ai = 1;
+    lv_i = 1;
+    for ( ; ( (auto3A589C2C_ai >= 0 && lv_i <= auto3A589C2C_ae) || (auto3A589C2C_ai <= 0 && lv_i >= auto3A589C2C_ae) ) ; lv_i += auto3A589C2C_ai ) {
+        libNtve_gf_CreateUnitsWithDefaultFacing(1, "Marine", 0, 1, PointWithOffset(lv_randomPointMarines, 0.0, ((lv_i / 2) * (1 + (ModI(lv_i, 2) * -2)))));
+        UnitGroupAdd(gv_marines, UnitLastCreated());
+    }
+    libNtve_gf_CreateUnitsWithDefaultFacing(1, "Roach", 0, 2, PointWithOffset(lv_randomPointRoaches, 0.0, 0.5));
+    UnitGroupAdd(gv_roaches, UnitLastCreated());
+    libNtve_gf_CreateUnitsWithDefaultFacing(1, "Roach", 0, 2, PointWithOffset(lv_randomPointRoaches, 0.0, 1.5));
+    UnitGroupAdd(gv_roaches, UnitLastCreated());
+    libNtve_gf_CreateUnitsWithDefaultFacing(1, "Roach", 0, 2, PointWithOffset(lv_randomPointRoaches, 0.0, -0.5));
+    UnitGroupAdd(gv_roaches, UnitLastCreated());
+    libNtve_gf_CreateUnitsWithDefaultFacing(1, "Roach", 0, 2, PointWithOffset(lv_randomPointRoaches, 0.0, -1.5));
+    UnitGroupAdd(gv_roaches, UnitLastCreated());
+    UnitGroupSelect(gv_marines, 1, true);
+    PlayerModifyPropertyInt(1, c_playerPropCurriculumScore, c_playerPropOperSetTo, 0);
+    TextExpressionSetToken("Param/Expression/3815C532", "A", IntToText(PlayerGetPropertyInt(1, c_playerPropCurriculumScore)));
+    ObjectiveSetName(gv_curriculumScoreObjective, TextExpressionAssemble("Param/Expression/3815C532"));
+    ObjectiveSetState(gv_mainObjective, c_objectiveStateActive);
+    ObjectiveSetState(gv_curriculumScoreObjective, c_objectiveStateActive);
+    TriggerEnable(gt_ScoreUpdatesandVictory, true);
+    TriggerEnable(gt_Defeat, true);
+    GameSetMissionTimePaused(false);
+    if ((PlayerType(1) == c_playerTypeComputer)) {
+        Wait(0.5, c_timeGame);
+        TriggerExecute(gt_DemoMode, true, false);
+    }
+
+    TimerStart(gv_episodeCountdownTimer, 120.0, false, c_timeGame);
+    TriggerEnable(gt_EpisodeTimer, true);
+    TriggerEnable(TriggerGetCurrent(), true);
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------
+void gt_ResetMap_Init () {
+    gt_ResetMap = TriggerCreate("gt_ResetMap_Func");
+    TriggerEnable(gt_ResetMap, false);
+    TriggerAddEventChatMessage(gt_ResetMap, c_playerAny, "reset", true);
+}
+
+//--------------------------------------------------------------------------------------------------
+// Trigger: Restart Map
+//--------------------------------------------------------------------------------------------------
+bool gt_RestartMap_Func (bool testConds, bool runActions) {
+    // Conditions
+    if (testConds) {
+        if (!((TriggerIsEnabled(TriggerGetCurrent()) == true))) {
+            return false;
+        }
+    }
+
+    // Actions
+    if (!runActions) {
+        return true;
+    }
+
+    RestartGame(PlayerGroupAll());
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------
+void gt_RestartMap_Init () {
+    gt_RestartMap = TriggerCreate("gt_RestartMap_Func");
+    TriggerEnable(gt_RestartMap, false);
+    TriggerAddEventChatMessage(gt_RestartMap, c_playerAny, "restart", true);
+}
+
+//--------------------------------------------------------------------------------------------------
+// Trigger: Demo Mode
+//--------------------------------------------------------------------------------------------------
+bool gt_DemoMode_Func (bool testConds, bool runActions) {
+    // Variable Declarations
+    unit lv_currentTarget;
+
+    // Variable Initialization
+
+    // Actions
+    if (!runActions) {
+        return true;
+    }
+
+    while (true) {
+        if (((libNtve_gf_UnitGroupIsDead(gv_marines) == true) || (libNtve_gf_UnitGroupIsDead(gv_roaches) == true))) {
+            return true;
+        }
+
+        lv_currentTarget = UnitGroupClosestToPoint(gv_roaches, UnitGroupCenterOfGroup(gv_marines));
+        UnitGroupLoopBegin(gv_roaches);
+        for ( ; !UnitGroupLoopDone() ; UnitGroupLoopStep() ) {
+            if ((UnitGetPropertyFixed(UnitGroupLoopCurrent(), c_unitPropLife, c_unitPropCurrent) < UnitGetPropertyFixed(lv_currentTarget, c_unitPropLife, c_unitPropCurrent))) {
+                lv_currentTarget = UnitGroupLoopCurrent();
+            }
+
+        }
+        UnitGroupLoopEnd();
+        UnitGroupLoopBegin(gv_marines);
+        for ( ; !UnitGroupLoopDone() ; UnitGroupLoopStep() ) {
+            if ((UnitOrder(UnitGroupLoopCurrent(), 0) != OrderTargetingUnit(AbilityCommand("attack", 0), lv_currentTarget)) && (UnitGetCustomValue(UnitGroupLoopCurrent(), 0) < 1)) {
+                libNtve_gf_AICast(UnitGroupLoopCurrent(), OrderTargetingUnit(AbilityCommand("attack", 0), lv_currentTarget));
+            }
+
+        }
+        UnitGroupLoopEnd();
+        Wait(0.0625, c_timeGame);
+    }
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------
+void gt_DemoMode_Init () {
+    gt_DemoMode = TriggerCreate("gt_DemoMode_Func");
+}
+
+//--------------------------------------------------------------------------------------------------
+// Trigger: Episode Timer
+//--------------------------------------------------------------------------------------------------
+bool gt_EpisodeTimer_Func (bool testConds, bool runActions) {
+    // Conditions
+    if (testConds) {
+        if (!((TriggerIsEnabled(TriggerGetCurrent()) == true))) {
+            return false;
+        }
+    }
+
+    // Actions
+    if (!runActions) {
+        return true;
+    }
+
+    TriggerEnable(TriggerGetCurrent(), false);
+    TriggerEnable(gt_ScoreUpdatesandVictory, false);
+    TriggerStop(gt_DemoMode);
+    ObjectiveSetState(gv_mainObjective, c_objectiveStateCompleted);
+    ObjectiveSetState(gv_curriculumScoreObjective, c_objectiveStateCompleted);
+    UIDisplayMessage(PlayerGroupAll(), c_messageAreaDirective, StringExternal("Param/Value/A4881204"));
+    GameSetMissionTimePaused(true);
+    UnitPauseAll(true);
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------
+void gt_EpisodeTimer_Init () {
+    gt_EpisodeTimer = TriggerCreate("gt_EpisodeTimer_Func");
+    TriggerAddEventTimer(gt_EpisodeTimer, gv_episodeCountdownTimer);
+}
+
+//--------------------------------------------------------------------------------------------------
+// Trigger: Move Order Issued
+//--------------------------------------------------------------------------------------------------
+bool gt_MoveOrderIssued_Func (bool testConds, bool runActions) {
+    // Conditions
+    if (testConds) {
+        if (!((gv_demoMode == true))) {
+            return false;
+        }
+
+        if (!((UnitGetOwner(EventUnit()) == 1))) {
+            return false;
+        }
+    }
+
+    // Actions
+    if (!runActions) {
+        return true;
+    }
+
+    UnitSetCustomValue(EventUnit(), 0, 2.0);
+    Wait(1.0, c_timeGame);
+    if ((UnitIsAlive(EventUnit()) == true)) {
+        UnitSetCustomValue(EventUnit(), 0, 0.0);
+    }
+
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------
+void gt_MoveOrderIssued_Init () {
+    gt_MoveOrderIssued = TriggerCreate("gt_MoveOrderIssued_Func");
+    TriggerAddEventUnitOrder(gt_MoveOrderIssued, null, AbilityCommand("move", 0));
+}
+
+//--------------------------------------------------------------------------------------------------
+// Trigger Initialization
+//--------------------------------------------------------------------------------------------------
+void InitTriggers () {
+    gt_Init_Init();
+    gt_ScoreUpdatesandVictory_Init();
+    gt_Defeat_Init();
+    gt_ResetMap_Init();
+    gt_RestartMap_Init();
+    gt_DemoMode_Init();
+    gt_EpisodeTimer_Init();
+    gt_MoveOrderIssued_Init();
+}
+
+//--------------------------------------------------------------------------------------------------
+// Map Initialization
+//--------------------------------------------------------------------------------------------------
+void InitMap () {
+    InitLibs();
+    InitGlobals();
+    InitTriggers();
+}

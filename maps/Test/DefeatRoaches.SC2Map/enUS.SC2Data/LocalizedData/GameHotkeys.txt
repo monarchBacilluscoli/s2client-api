@@ -1,0 +1,1 @@
+﻿UI/GameResultDialog/ScoreScreen_Hotkey=Q

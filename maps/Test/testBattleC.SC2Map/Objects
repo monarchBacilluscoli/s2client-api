@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PlacedObjects Version="27">
+    <ObjectUnit Id="773141165" Position="16,26.5,0" Rotation="2.7573" Scale="1,1,1" UnitType="Marauder2" Player="1">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="1443124753" Position="28.5,23.5,0" Rotation="0.0302" Scale="1,1,1" UnitType="Marine2" Player="2">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="2140813108" Position="19,24.5,0" Rotation="3.95" Scale="1,1,1" UnitType="Marine2" Player="1">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="851130492" Position="28.5,28.5,0" Rotation="6.1262" Scale="1,1,1" UnitType="Marine2" Player="2">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="1597318351" Position="28.5,21.5,0" Rotation="5.2106" Scale="1,1,1" UnitType="Marine2" Player="2">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="1126576073" Position="19,27,0" Rotation="2.151" Scale="1,1,1" UnitType="Marine2" Player="1">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="1348857624" Position="28.5,19,0" Rotation="0.038" Scale="1,1,1" UnitType="Marine2" Player="2">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="209003395" Position="32,26.5,0" Rotation="5.5673" Scale="1,1,1" UnitType="Marauder2" Player="2">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="536523273" Position="28.5,17.5,0" Rotation="5.825" Scale="1,1,1" UnitType="Marine2" Player="2">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="1796012467" Position="18.5,21.5,0" Rotation="5.0725" Scale="1,1,1" UnitType="Marine2" Player="1">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="377886245" Position="29,30,0" Rotation="2.6384" Scale="1,1,1" UnitType="Marine2" Player="2">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="1732769632" Position="31.5,22,0" Rotation="3.707" Scale="1,1,1" UnitType="Marauder2" Player="2">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="1993085229" Position="19,20.5,0" Rotation="3.4421" Scale="1,1,1" UnitType="Marine2" Player="1">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="1806071754" Position="18.5,23,0" Rotation="6.2482" Scale="1,1,1" UnitType="Marine2" Player="1">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="1845406574" Position="19,19.5,0" Rotation="4.0012" Scale="1,1,1" UnitType="Marine2" Player="1">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="2067249380" Position="16,22.5,0" Rotation="5.4206" Scale="1,1,1" UnitType="Marauder2" Player="1">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="1119316938" Position="28.5,26,0" Rotation="5.1691" Scale="1,1,1" UnitType="Marine2" Player="2">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="1705399981" Position="19,29.5,0" Rotation="5.4484" Scale="1,1,1" UnitType="Marine2" Player="1">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="31771044" Position="11,38.5,0" Rotation="3.227" Scale="1,1,1" UnitType="VikingFighter" Player="1"/>
+    <ObjectUnit Id="176902006" Position="19,18.5,0" Rotation="5.731" Scale="1,1,1" UnitType="Marine2" Player="1">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+</PlacedObjects>

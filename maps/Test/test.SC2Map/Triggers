@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TriggerData>
+    <Root>
+        <Item Type="Trigger" Id="FE5F5AD0"/>
+        <Item Type="CustomScript" Id="CB3F29B8"/>
+    </Root>
+    <Element Type="Trigger" Id="FE5F5AD0">
+        <Identifier>MapInit</Identifier>
+        <Event Type="FunctionCall" Id="5BA36392"/>
+        <Action Type="FunctionCall" Id="13B88ACC"/>
+    </Element>
+    <Element Type="FunctionCall" Id="5BA36392">
+        <FunctionDef Type="FunctionDef" Library="Ntve" Id="00000120"/>
+    </Element>
+    <Element Type="FunctionCall" Id="13B88ACC">
+        <FunctionDef Type="FunctionDef" Library="Ntve" Id="DC635AEF"/>
+        <Parameter Type="Param" Id="1627FC80"/>
+        <Parameter Type="Param" Id="9E7B49BA"/>
+        <Parameter Type="Param" Id="BAD6E013"/>
+        <Parameter Type="Param" Id="BED1DD7F"/>
+        <Parameter Type="Param" Id="431F2941"/>
+        <Parameter Type="Param" Id="0F86D70D"/>
+    </Element>
+    <Element Type="Param" Id="1627FC80">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="171CA5E8"/>
+        <Value>1</Value>
+        <ValueType Type="int"/>
+    </Element>
+    <Element Type="Param" Id="9E7B49BA">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="1E118562"/>
+        <FunctionCall Type="FunctionCall" Id="E9E9A203"/>
+    </Element>
+    <Element Type="FunctionCall" Id="E9E9A203">
+        <FunctionDef Type="FunctionDef" Library="Ntve" Id="00000039"/>
+        <Parameter Type="Param" Id="C42C43D8"/>
+    </Element>
+    <Element Type="Param" Id="C42C43D8">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="00000070"/>
+        <FunctionCall Type="FunctionCall" Id="680120FE"/>
+    </Element>
+    <Element Type="FunctionCall" Id="680120FE">
+        <FunctionDef Type="FunctionDef" Library="Ntve" Id="00000356"/>
+    </Element>
+    <Element Type="Param" Id="BAD6E013">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="92625A62"/>
+        <Value>0.0</Value>
+        <ValueType Type="fixed"/>
+    </Element>
+    <Element Type="Param" Id="BED1DD7F">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="E863F6C2"/>
+        <Preset Type="PresetValue" Library="Ntve" Id="4D47A35C"/>
+    </Element>
+    <Element Type="Param" Id="431F2941">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="A91C853D"/>
+        <Value>10.0</Value>
+        <ValueType Type="fixed"/>
+    </Element>
+    <Element Type="Param" Id="0F86D70D">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="AB07BE98"/>
+        <Preset Type="PresetValue" Library="Ntve" Id="00000072"/>
+    </Element>
+    <Element Type="CustomScript" Id="CB3F29B8">
+        <Identifier>Main</Identifier>
+        <ScriptCode>
+            include&quot;scripts/MainScript.galaxy&quot;
+        </ScriptCode>
+        <InitFunc>main</InitFunc>
+    </Element>
+</TriggerData>
