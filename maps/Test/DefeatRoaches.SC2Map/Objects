@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PlacedObjects Version="27">
+    <ObjectPoint Id="1" Position="2.5,61.5,0" Scale="1,1,1" Type="StartLoc" Name="Start Location 001" Color="0,0,0,0"/>
+    <ObjectPoint Id="1598245040" Position="7.5,61.5,0" Scale="1,1,1" Type="StartLoc" Name="Start Location 002" Color="0,0,0,0"/>
+</PlacedObjects>

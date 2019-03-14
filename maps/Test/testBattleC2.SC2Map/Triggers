@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TriggerData>
+    <Root>
+        <Item Type="Variable" Id="EC2D15AD"/>
+        <Item Type="CustomScript" Id="6B8E311E"/>
+        <Item Type="Trigger" Id="F606C9B3"/>
+        <Item Type="CustomScript" Id="4AF4545B"/>
+        <Item Type="Trigger" Id="4805836D"/>
+        <Item Type="Trigger" Id="AA4B4A85"/>
+    </Root>
+    <Element Type="Variable" Id="EC2D15AD">
+        <VariableType>
+            <Type Value="unitgroup"/>
+        </VariableType>
+        <Value Type="Param" Id="3F28E91C"/>
+    </Element>
+    <Element Type="Param" Id="3F28E91C">
+        <FunctionCall Type="FunctionCall" Id="D2D42439"/>
+    </Element>
+    <Element Type="FunctionCall" Id="D2D42439">
+        <FunctionDef Type="FunctionDef" Library="Ntve" Id="00000104"/>
+    </Element>
+    <Element Type="CustomScript" Id="6B8E311E">
+        <ScriptCode>
+            include &quot;scripts/main.galaxy&quot;
+        </ScriptCode>
+        <InitFunc>main</InitFunc>
+    </Element>
+    <Element Type="Trigger" Id="F606C9B3">
+        <Identifier>init</Identifier>
+        <Event Type="FunctionCall" Id="CD38F02B"/>
+        <Action Type="FunctionCall" Id="EBA60C8D"/>
+    </Element>
+    <Element Type="FunctionCall" Id="CD38F02B">
+        <FunctionDef Type="FunctionDef" Library="Ntve" Id="00000120"/>
+    </Element>
+    <Element Type="FunctionCall" Id="EBA60C8D">
+        <FunctionDef Type="FunctionDef" Library="Ntve" Id="C4DC760C"/>
+        <Parameter Type="Param" Id="FE5A2C58"/>
+        <FunctionCall Type="FunctionCall" Id="B772DD1D"/>
+    </Element>
+    <Element Type="Param" Id="FE5A2C58">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="F96B466D"/>
+        <FunctionCall Type="FunctionCall" Id="17CC5914"/>
+    </Element>
+    <Element Type="FunctionCall" Id="17CC5914">
+        <FunctionDef Type="FunctionDef" Library="Ntve" Id="00000359"/>
+        <Parameter Type="Param" Id="1E03301D"/>
+        <Parameter Type="Param" Id="91A21046"/>
+        <Parameter Type="Param" Id="756BDE98"/>
+        <Parameter Type="Param" Id="2F303FB3"/>
+        <Parameter Type="Param" Id="A23E9A44"/>
+    </Element>
+    <Element Type="Param" Id="1E03301D">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="00000691"/>
+        <Preset Type="PresetValue" Library="Ntve" Id="00000231"/>
+    </Element>
+    <Element Type="Param" Id="91A21046">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="00000692"/>
+        <Value>2</Value>
+        <ValueType Type="int"/>
+    </Element>
+    <Element Type="Param" Id="756BDE98">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="00000693"/>
+        <FunctionCall Type="FunctionCall" Id="C27AC000"/>
+    </Element>
+    <Element Type="FunctionCall" Id="C27AC000">
+        <FunctionDef Type="FunctionDef" Library="Ntve" Id="00000356"/>
+    </Element>
+    <Element Type="Param" Id="2F303FB3">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="00000695"/>
+        <Value>-;Missile,Dead,Hidden</Value>
+        <ValueType Type="unitfilter"/>
+    </Element>
+    <Element Type="Param" Id="A23E9A44">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="00000694"/>
+        <Preset Type="PresetValue" Library="Ntve" Id="1468BD55"/>
+    </Element>
+    <Element Type="FunctionCall" Id="B772DD1D">
+        <FunctionDef Type="FunctionDef" Library="Ntve" Id="30000000"/>
+        <SubFunctionType Type="SubFuncType" Library="Ntve" Id="9441B8B5"/>
+        <Parameter Type="Param" Id="C734A6C1"/>
+        <Parameter Type="Param" Id="227F023B"/>
+    </Element>
+    <Element Type="Param" Id="C734A6C1">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="90000000"/>
+        <FunctionCall Type="FunctionCall" Id="FD0DC250"/>
+    </Element>
+    <Element Type="FunctionCall" Id="FD0DC250">
+        <FunctionDef Type="FunctionDef" Library="Ntve" Id="19CE733E"/>
+    </Element>
+    <Element Type="Param" Id="227F023B">
+        <ParameterDef Type="ParamDef" Library="Ntve" Id="01000000"/>
+        <Preset Type="PresetValue" Library="Ntve" Id="00000115"/>
+    </Element>
+</TriggerData>

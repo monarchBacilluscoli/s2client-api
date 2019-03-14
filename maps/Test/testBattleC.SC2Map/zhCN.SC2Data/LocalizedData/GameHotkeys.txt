@@ -1,0 +1,12 @@
+﻿Button/Hotkey/Attack2=A
+Button/Hotkey/Attack3=A
+Button/Hotkey/Move2=M
+Button/Hotkey/Move3=M
+Button/Hotkey/MoveHoldPosition2=H
+Button/Hotkey/MoveHoldPosition3=H
+Button/Hotkey/MovePatrol2=P
+Button/Hotkey/MovePatrol3=P
+Button/Hotkey/Stim2=T
+Button/Hotkey/StimMarauder2=T
+Button/Hotkey/Stop2=S
+Button/Hotkey/Stop3=S

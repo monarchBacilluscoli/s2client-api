@@ -1,0 +1,840 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<Catalog>
+    <CUpgrade default="1" id="TerranInfantryArmors2">
+        <Name value="Upgrade/Name/TerranInfantryArmors2"/>
+        <InfoTooltipPriority value="51"/>
+        <WebPriority value="0"/>
+        <Race value="Terr"/>
+        <ScoreCount value="ArmorTechnologyCount"/>
+        <ScoreValue value="ArmorTechnologyValue"/>
+        <ScoreResult value="BuildOrder"/>
+        <EffectArray Reference="Unit,SCV,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,SCV,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,Marine2,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Marine2,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,Reaper,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Reaper,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,Marauder,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Marauder,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,Ghost,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Ghost,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,MULE,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,MULE,LifeArmorLevel" Value="1"/>
+        <EditorCategories value="Race:Terran,UpgradeType:ArmorBonus"/>
+        <AffectedUnitArray value="Ghost"/>
+        <AffectedUnitArray value="Marauder"/>
+        <AffectedUnitArray value="Marine2"/>
+        <AffectedUnitArray value="Reaper"/>
+        <AffectedUnitArray value="SCV"/>
+        <LeaderAlias value="TechInfantryArmors"/>
+    </CUpgrade>
+    <CUpgrade default="1" id="TerranInfantryArmors22">
+        <Name value="Upgrade/Name/TerranInfantryArmors22"/>
+        <InfoTooltipPriority value="51"/>
+        <WebPriority value="0"/>
+        <Race value="Terr"/>
+        <ScoreCount value="ArmorTechnologyCount"/>
+        <ScoreValue value="ArmorTechnologyValue"/>
+        <ScoreResult value="BuildOrder"/>
+        <EffectArray Reference="Unit,SCV,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,SCV,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,Marine2,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Marine2,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,Reaper,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Reaper,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,Marauder2,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Marauder2,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,Ghost,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Ghost,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,MULE,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,MULE,LifeArmorLevel" Value="1"/>
+        <EditorCategories value="Race:Terran,UpgradeType:ArmorBonus"/>
+        <AffectedUnitArray value="Ghost"/>
+        <AffectedUnitArray value="Marauder2"/>
+        <AffectedUnitArray value="Marine2"/>
+        <AffectedUnitArray value="Reaper"/>
+        <AffectedUnitArray value="SCV"/>
+        <LeaderAlias value="TechInfantryArmors"/>
+    </CUpgrade>
+    <CUpgrade default="1" id="TerranInfantryArmors3">
+        <Name value="Upgrade/Name/TerranInfantryArmors3"/>
+        <InfoTooltipPriority value="51"/>
+        <WebPriority value="0"/>
+        <Race value="Terr"/>
+        <ScoreCount value="ArmorTechnologyCount"/>
+        <ScoreValue value="ArmorTechnologyValue"/>
+        <ScoreResult value="BuildOrder"/>
+        <EffectArray Reference="Unit,SCV,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,SCV,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,Marine,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Marine,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,Reaper,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Reaper,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,Marauder2,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Marauder2,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,Ghost,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Ghost,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,MULE,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,MULE,LifeArmorLevel" Value="1"/>
+        <EditorCategories value="Race:Terran,UpgradeType:ArmorBonus"/>
+        <AffectedUnitArray value="Ghost"/>
+        <AffectedUnitArray value="Marauder2"/>
+        <AffectedUnitArray value="Marine"/>
+        <AffectedUnitArray value="Reaper"/>
+        <AffectedUnitArray value="SCV"/>
+        <LeaderAlias value="TechInfantryArmors"/>
+    </CUpgrade>
+    <CUpgrade default="1" id="TerranInfantryArmorsVanadiumPlating2">
+        <Flags index="UpgradeCheat" value="0"/>
+        <InfoTooltipPriority value="51"/>
+        <Race value="Terr"/>
+        <ScoreCount value="ArmorTechnologyCount"/>
+        <ScoreValue value="ArmorTechnologyValue"/>
+        <ScoreResult value="BuildOrder"/>
+        <EffectArray Reference="Unit,SCV,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,SCV,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,SCV,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,SCV,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,Marine,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Marine,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Marine,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Marine,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,Reaper,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Reaper,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Reaper,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Reaper,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,Marauder2,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Marauder2,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Marauder2,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Marauder2,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,Ghost,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Ghost,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Ghost,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Ghost,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,MULE,LifeArmor" Value="1"/>
+        <EffectArray Reference="Unit,MULE,LifeArmorLevel" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,MULE,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,MULE,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,Firebat,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Firebat,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Firebat,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Firebat,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,Medic,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Medic,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Medic,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Medic,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,Spectre,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Spectre,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Spectre,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Spectre,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,WarPig,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,WarPig,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,WarPig,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,WarPig,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,HammerSecurity,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,HammerSecurity,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,HammerSecurity,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,HammerSecurity,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,DevilDog,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,DevilDog,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,DevilDog,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,DevilDog,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,DominionKillTeam,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,DominionKillTeam,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,DominionKillTeam,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,DominionKillTeam,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,RaynorCommando,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,RaynorCommando,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,RaynorCommando,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,RaynorCommando,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,Raynor,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Raynor,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Raynor,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Raynor,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,TychusCommando,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,TychusCommando,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,TychusCommando,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,TychusCommando,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,TychusChaingun,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,TychusChaingun,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,TychusChaingun,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,TychusChaingun,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,Swann,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Swann,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Swann,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Swann,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,Stetmann,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Stetmann,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Stetmann,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Stetmann,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,Nova,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Nova,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Nova,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Nova,LifeStart" Value="1.05"/>
+        <EffectArray Reference="Unit,Tosh,LifeArmorLevel" Value="1"/>
+        <EffectArray Reference="Unit,Tosh,LifeArmor" Value="1"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Tosh,LifeMax" Value="1.05"/>
+        <EffectArray Operation="Multiply" Reference="Unit,Tosh,LifeStart" Value="1.05"/>
+        <EditorCategories value="Race:Terran,UpgradeType:ArmorBonus"/>
+        <AffectedUnitArray value="RaynorCommando"/>
+        <AffectedUnitArray value="Raynor"/>
+        <AffectedUnitArray value="TychusCommando"/>
+        <AffectedUnitArray value="TychusChaingun"/>
+        <AffectedUnitArray value="Swann"/>
+        <AffectedUnitArray value="Stetmann"/>
+        <AffectedUnitArray value="Nova"/>
+        <AffectedUnitArray value="Tosh"/>
+        <AffectedUnitArray value="Ghost"/>
+        <AffectedUnitArray value="Marauder2"/>
+        <AffectedUnitArray value="Marine"/>
+        <AffectedUnitArray value="Reaper"/>
+        <AffectedUnitArray value="SCV"/>
+        <AffectedUnitArray value="MULE"/>
+        <AffectedUnitArray value="Firebat"/>
+        <AffectedUnitArray value="WarPig"/>
+        <AffectedUnitArray value="Spectre"/>
+        <AffectedUnitArray value="HammerSecurity"/>
+        <AffectedUnitArray value="DevilDog"/>
+        <AffectedUnitArray value="DominionKillTeam"/>
+        <AffectedUnitArray value="Medic"/>
+    </CUpgrade>
+    <CUpgrade default="1" id="TerranInfantryWeapons2">
+        <Name value="Upgrade/Name/TerranInfantryWeapons2"/>
+        <InfoTooltipPriority value="61"/>
+        <WebPriority value="0"/>
+        <Race value="Terr"/>
+        <ScoreCount value="WeaponTechnologyCount"/>
+        <ScoreValue value="WeaponTechnologyValue"/>
+        <ScoreResult value="BuildOrder"/>
+        <EffectArray Reference="Weapon,GuassRifle,Level" Value="1"/>
+        <EffectArray Reference="Effect,GuassRifle,Amount" Value="1"/>
+        <EffectArray Reference="Weapon,P38ScytheGuassPistol,Level" Value="1"/>
+        <EffectArray Reference="Weapon,D8Charge,Level" Value="1"/>
+        <EffectArray Reference="Effect,P38ScytheGuassPistol,Amount" Value="1"/>
+        <EffectArray Reference="Effect,D8ChargeDamage,Amount" Value="3"/>
+        <EffectArray Reference="Weapon,PunisherGrenades,Level" Value="1"/>
+        <EffectArray Reference="Effect,PunisherGrenadesU,Amount" Value="1.000000"/>
+        <EffectArray Reference="Effect,PunisherGrenadesU,AttributeBonus[Armored]" Value="1.000000"/>
+        <EffectArray Reference="Weapon,C10CanisterRifle,Level" Value="1"/>
+        <EffectArray Reference="Effect,C10CanisterRifle,Amount" Value="1.000000"/>
+        <EffectArray Reference="Effect,C10CanisterRifle,AttributeBonus[Light]" Value="1.000000"/>
+        <EditorCategories value="Race:Terran,UpgradeType:AttackBonus"/>
+        <AffectedUnitArray value="Ghost"/>
+        <AffectedUnitArray value="Marauder"/>
+        <AffectedUnitArray value="Marine2"/>
+        <AffectedUnitArray value="Reaper"/>
+        <LeaderAlias value="TechInfantryWeapons"/>
+    </CUpgrade>
+    <CUpgrade default="1" id="TerranInfantryWeapons22">
+        <Name value="Upgrade/Name/TerranInfantryWeapons22"/>
+        <InfoTooltipPriority value="61"/>
+        <WebPriority value="0"/>
+        <Race value="Terr"/>
+        <ScoreCount value="WeaponTechnologyCount"/>
+        <ScoreValue value="WeaponTechnologyValue"/>
+        <ScoreResult value="BuildOrder"/>
+        <EffectArray Reference="Weapon,GuassRifle,Level" Value="1"/>
+        <EffectArray Reference="Effect,GuassRifle,Amount" Value="1"/>
+        <EffectArray Reference="Weapon,P38ScytheGuassPistol,Level" Value="1"/>
+        <EffectArray Reference="Weapon,D8Charge,Level" Value="1"/>
+        <EffectArray Reference="Effect,P38ScytheGuassPistol,Amount" Value="1"/>
+        <EffectArray Reference="Effect,D8ChargeDamage,Amount" Value="3"/>
+        <EffectArray Reference="Weapon,PunisherGrenades,Level" Value="1"/>
+        <EffectArray Reference="Effect,PunisherGrenadesU,Amount" Value="1.000000"/>
+        <EffectArray Reference="Effect,PunisherGrenadesU,AttributeBonus[Armored]" Value="1.000000"/>
+        <EffectArray Reference="Weapon,C10CanisterRifle,Level" Value="1"/>
+        <EffectArray Reference="Effect,C10CanisterRifle,Amount" Value="1.000000"/>
+        <EffectArray Reference="Effect,C10CanisterRifle,AttributeBonus[Light]" Value="1.000000"/>
+        <EditorCategories value="Race:Terran,UpgradeType:AttackBonus"/>
+        <AffectedUnitArray value="Ghost"/>
+        <AffectedUnitArray value="Marauder2"/>
+        <AffectedUnitArray value="Marine2"/>
+        <AffectedUnitArray value="Reaper"/>
+        <LeaderAlias value="TechInfantryWeapons"/>
+    </CUpgrade>
+    <CUpgrade default="1" id="TerranInfantryWeapons3">
+        <Name value="Upgrade/Name/TerranInfantryWeapons3"/>
+        <InfoTooltipPriority value="61"/>
+        <WebPriority value="0"/>
+        <Race value="Terr"/>
+        <ScoreCount value="WeaponTechnologyCount"/>
+        <ScoreValue value="WeaponTechnologyValue"/>
+        <ScoreResult value="BuildOrder"/>
+        <EffectArray Reference="Weapon,GuassRifle,Level" Value="1"/>
+        <EffectArray Reference="Effect,GuassRifle,Amount" Value="1"/>
+        <EffectArray Reference="Weapon,P38ScytheGuassPistol,Level" Value="1"/>
+        <EffectArray Reference="Weapon,D8Charge,Level" Value="1"/>
+        <EffectArray Reference="Effect,P38ScytheGuassPistol,Amount" Value="1"/>
+        <EffectArray Reference="Effect,D8ChargeDamage,Amount" Value="3"/>
+        <EffectArray Reference="Weapon,PunisherGrenades,Level" Value="1"/>
+        <EffectArray Reference="Effect,PunisherGrenadesU,Amount" Value="1.000000"/>
+        <EffectArray Reference="Effect,PunisherGrenadesU,AttributeBonus[Armored]" Value="1.000000"/>
+        <EffectArray Reference="Weapon,C10CanisterRifle,Level" Value="1"/>
+        <EffectArray Reference="Effect,C10CanisterRifle,Amount" Value="1.000000"/>
+        <EffectArray Reference="Effect,C10CanisterRifle,AttributeBonus[Light]" Value="1.000000"/>
+        <EditorCategories value="Race:Terran,UpgradeType:AttackBonus"/>
+        <AffectedUnitArray value="Ghost"/>
+        <AffectedUnitArray value="Marauder2"/>
+        <AffectedUnitArray value="Marine"/>
+        <AffectedUnitArray value="Reaper"/>
+        <LeaderAlias value="TechInfantryWeapons"/>
+    </CUpgrade>
+    <CUpgrade default="1" id="TerranInfantryWeaponsUltraCapacitors2">
+        <Flags index="UpgradeCheat" value="0"/>
+        <InfoTooltipPriority value="61"/>
+        <Race value="Terr"/>
+        <ScoreCount value="WeaponTechnologyCount"/>
+        <ScoreValue value="WeaponTechnologyValue"/>
+        <ScoreResult value="BuildOrder"/>
+        <EffectArray Reference="Weapon,GuassRifle,Level" Value="1"/>
+        <EffectArray Reference="Effect,GuassRifle,Amount" Value="1"/>
+        <EffectArray Reference="Weapon,P38ScytheGuassPistol,Level" Value="1"/>
+        <EffectArray Reference="Effect,P38ScytheGuassPistol,Amount" Value="1"/>
+        <EffectArray Reference="Weapon,D8Charge,Level" Value="1"/>
+        <EffectArray Reference="Effect,D8ChargeDamage,Amount" Value="3"/>
+        <EffectArray Reference="Weapon,PunisherGrenades,Level" Value="1"/>
+        <EffectArray Reference="Effect,PunisherGrenadesU,Amount" Value="1.000000"/>
+        <EffectArray Reference="Effect,PunisherGrenadesU,AttributeBonus[Armored]" Value="1.000000"/>
+        <EffectArray Reference="Weapon,C10CanisterRifle,Level" Value="1"/>
+        <EffectArray Reference="Effect,C10CanisterRifle,Amount" Value="1.000000"/>
+        <EffectArray Reference="Effect,C10CanisterRifle,AttributeBonus[Light]" Value="1.000000"/>
+        <EffectArray Reference="Weapon,Firebat,Level" Value="1"/>
+        <EffectArray Reference="Effect,FirebatUFull,Amount" Value="1.000000"/>
+        <EffectArray Reference="Weapon,Specter,Level" Value="1"/>
+        <EffectArray Reference="Effect,SpecterU,Amount" Value="1.000000"/>
+        <EffectArray Reference="Weapon,KelmorianMinerGaussRifle,Level" Value="1"/>
+        <EffectArray Reference="Effect,KelmorianMinerDamage,Amount" Value="1"/>
+        <EffectArray Reference="Weapon,HammerSecurity,Level" Value="1"/>
+        <EffectArray Reference="Effect,HammerSecurityDamage,Amount" Value="1"/>
+        <EffectArray Reference="Weapon,DevilDogFlameThrower,Level" Value="1"/>
+        <EffectArray Reference="Effect,DevilDogDamage,Amount" Value="1"/>
+        <EffectArray Reference="Weapon,CommandoRifle,Level" Value="1"/>
+        <EffectArray Reference="Effect,CommandoRifle,Amount" Value="3"/>
+        <EffectArray Reference="Weapon,RaynorWeapon,Level" Value="1"/>
+        <EffectArray Reference="Effect,RaynorWeaponU,Amount" Value="2"/>
+        <EffectArray Reference="Weapon,TychusCommandoChaingun,Level" Value="1"/>
+        <EffectArray Reference="Effect,TychusCommandoAttackDamage,Amount" Value="1"/>
+        <EffectArray Reference="Weapon,TychusChaingun,Level" Value="1"/>
+        <EffectArray Reference="Effect,TychusChaingun,Amount" Value="2"/>
+        <EffectArray Reference="Weapon,DutchConcussiveGrenade,Level" Value="1"/>
+        <EffectArray Reference="Weapon,SwannMelee,Level" Value="1"/>
+        <EffectArray Reference="Effect,DutchConcussiveGrenadeDamage,Amount" Value="3"/>
+        <EffectArray Reference="Weapon,Nova,Level" Value="1"/>
+        <EffectArray Reference="Effect,Nova,Amount" Value="3"/>
+        <EffectArray Reference="Weapon,Tosh,Level" Value="1"/>
+        <EffectArray Reference="Effect,ToshU,Amount" Value="4"/>
+        <EffectArray Reference="Weapon,GuassRifle,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,P38ScytheGuassPistol,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,D8Charge,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,PunisherGrenades,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,C10CanisterRifle,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,Firebat,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,Specter,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,KelmorianMinerGaussRifle,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,HammerSecurity,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,DevilDogFlameThrower,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,CommandoRifle,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,RaynorWeapon,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,TychusCommandoChaingun,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,TychusChaingun,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,DutchConcussiveGrenade,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,SwannMelee,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,Nova,RateMultiplier" Value="0.05"/>
+        <EffectArray Reference="Weapon,Tosh,RateMultiplier" Value="0.05"/>
+        <EditorCategories value="Race:Terran,UpgradeType:AttackBonus"/>
+        <AffectedUnitArray value="RaynorCommando"/>
+        <AffectedUnitArray value="Raynor"/>
+        <AffectedUnitArray value="TychusCommando"/>
+        <AffectedUnitArray value="TychusChaingun"/>
+        <AffectedUnitArray value="Swann"/>
+        <AffectedUnitArray value="Nova"/>
+        <AffectedUnitArray value="Tosh"/>
+        <AffectedUnitArray value="Ghost"/>
+        <AffectedUnitArray value="Marauder2"/>
+        <AffectedUnitArray value="Marine"/>
+        <AffectedUnitArray value="Reaper"/>
+        <AffectedUnitArray value="Firebat"/>
+        <AffectedUnitArray value="WarPig"/>
+        <AffectedUnitArray value="Spectre"/>
+        <AffectedUnitArray value="HammerSecurity"/>
+        <AffectedUnitArray value="DevilDog"/>
+    </CUpgrade>
+    <CUpgrade id="JuggernautPlating2">
+        <Flags index="UpgradeCheat" value="0"/>
+        <EffectArray Reference="Unit,Marauder2,LifeArmor" Value="2.000000"/>
+        <EffectArray Reference="Unit,HammerSecurity,LifeArmor" Value="2.000000"/>
+        <EditorCategories value="Race:Terran,UpgradeType:Talents"/>
+    </CUpgrade>
+    <CUpgrade id="MarauderLifeBoost2">
+        <Flags index="UpgradeCheat" value="0"/>
+        <EffectArray Reference="Unit,Marauder2,LifeMax" Value="25"/>
+        <EffectArray Reference="Unit,Marauder2,LifeStart" Value="25"/>
+        <EffectArray Reference="Unit,HammerSecurity,LifeMax" Value="25"/>
+        <EffectArray Reference="Unit,HammerSecurity,LifeStart" Value="25"/>
+        <EditorCategories value="Race:Terran,UpgradeType:Talents"/>
+        <AffectedUnitArray value="Marauder2"/>
+    </CUpgrade>
+    <CUpgrade id="PunisherGrenades2">
+        <Icon value="Assets\Textures\btn-ability-terran-punishergrenade-color.dds"/>
+        <Alert value="ResearchComplete"/>
+        <Race value="Terr"/>
+        <ScoreAmount value="100"/>
+        <ScoreResult value="BuildOrder"/>
+        <EditorCategories value="Race:Terran,UpgradeType:Talents"/>
+        <AffectedUnitArray value="Marauder2"/>
+    </CUpgrade>
+    <CUpgrade id="ShieldWall2" parent="Research">
+        <Flags index="TechTreeCheat" value="1"/>
+        <InfoTooltipPriority value="2"/>
+        <Icon value="Assets\Textures\btn-techupgrade-terran-combatshield-color.dds"/>
+        <Race value="Terr"/>
+        <ScoreAmount value="200"/>
+        <ScoreResult value="BuildOrder"/>
+        <EffectArray Reference="Unit,Marine2,LifeMax" Value="10"/>
+        <EffectArray Reference="Unit,Marine2,LifeStart" Value="10"/>
+        <EffectArray Operation="Set" Reference="Actor,Marine,Wireframe.Image[0]" Value="Assets\Textures\wireframe-terran-marine-shield.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marine,GroupIcon.Image[0]" Value="Assets\Textures\wireframe-terran-marine-shield.dds"/>
+        <EditorCategories value="Race:Terran,UpgradeType:Talents"/>
+        <AffectedUnitArray value="Marine2"/>
+    </CUpgrade>
+    <CUpgrade id="Stimpack2" parent="Research">
+        <Icon value="Assets\Textures\btn-ability-terran-stimpack-color.dds"/>
+        <Race value="Terr"/>
+        <ScoreAmount value="200"/>
+        <ScoreResult value="BuildOrder"/>
+        <EditorCategories value="Race:Terran,UpgradeType:SpellResearch"/>
+        <AffectedUnitArray value="Marine2"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryArmorsLevel12" parent="TerranInfantryArmors">
+        <Name value="Upgrade/Name/TerranInfantryArmorsLevel12"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <ScoreAmount value="200"/>
+        <EffectArray index="2" Reference="Unit,Marine2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="3" Reference="Unit,Marine2,LifeArmor" Value="1"/>
+        <EffectArray Operation="Set" Reference="Actor,SCV,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,MULE,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marine,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Reaper,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marauder,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Ghost,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <AffectedUnitArray index="2" value="Marine2"/>
+        <LeaderLevel value="1"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryArmorsLevel122" parent="TerranInfantryArmors">
+        <Name value="Upgrade/Name/TerranInfantryArmorsLevel122"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <ScoreAmount value="200"/>
+        <EffectArray index="2" Reference="Unit,Marine2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="3" Reference="Unit,Marine2,LifeArmor" Value="1"/>
+        <EffectArray index="6" Reference="Unit,Marauder2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="7" Reference="Unit,Marauder2,LifeArmor" Value="1"/>
+        <EffectArray Operation="Set" Reference="Actor,SCV,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,MULE,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marine,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Reaper,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marauder,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Ghost,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <AffectedUnitArray index="1" value="Marauder2"/>
+        <AffectedUnitArray index="2" value="Marine2"/>
+        <LeaderLevel value="1"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryArmorsLevel13" parent="TerranInfantryArmors">
+        <Name value="Upgrade/Name/TerranInfantryArmorsLevel13"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <ScoreAmount value="200"/>
+        <EffectArray index="6" Reference="Unit,Marauder2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="7" Reference="Unit,Marauder2,LifeArmor" Value="1"/>
+        <EffectArray Operation="Set" Reference="Actor,SCV,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,MULE,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marine,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Reaper,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marauder,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Ghost,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <AffectedUnitArray index="1" value="Marauder2"/>
+        <LeaderLevel value="1"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryArmorsLevel22" parent="TerranInfantryArmors">
+        <Name value="Upgrade/Name/TerranInfantryArmorsLevel22"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <ScoreAmount value="350"/>
+        <EffectArray index="2" Reference="Unit,Marine2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="3" Reference="Unit,Marine2,LifeArmor" Value="1"/>
+        <EffectArray Operation="Set" Reference="Actor,SCV,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,MULE,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marine,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Reaper,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marauder,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Ghost,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <AffectedUnitArray index="2" value="Marine2"/>
+        <LeaderLevel value="2"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryArmorsLevel222" parent="TerranInfantryArmors">
+        <Name value="Upgrade/Name/TerranInfantryArmorsLevel222"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <ScoreAmount value="350"/>
+        <EffectArray index="2" Reference="Unit,Marine2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="3" Reference="Unit,Marine2,LifeArmor" Value="1"/>
+        <EffectArray index="6" Reference="Unit,Marauder2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="7" Reference="Unit,Marauder2,LifeArmor" Value="1"/>
+        <EffectArray Operation="Set" Reference="Actor,SCV,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,MULE,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marine,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Reaper,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marauder,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Ghost,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <AffectedUnitArray index="1" value="Marauder2"/>
+        <AffectedUnitArray index="2" value="Marine2"/>
+        <LeaderLevel value="2"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryArmorsLevel23" parent="TerranInfantryArmors">
+        <Name value="Upgrade/Name/TerranInfantryArmorsLevel23"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <ScoreAmount value="350"/>
+        <EffectArray index="6" Reference="Unit,Marauder2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="7" Reference="Unit,Marauder2,LifeArmor" Value="1"/>
+        <EffectArray Operation="Set" Reference="Actor,SCV,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,MULE,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marine,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Reaper,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marauder,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Ghost,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <AffectedUnitArray index="1" value="Marauder2"/>
+        <LeaderLevel value="2"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryArmorsLevel32" parent="TerranInfantryArmors">
+        <Name value="Upgrade/Name/TerranInfantryArmorsLevel32"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <ScoreAmount value="500"/>
+        <EffectArray index="2" Reference="Unit,Marine2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="3" Reference="Unit,Marine2,LifeArmor" Value="1"/>
+        <EffectArray Operation="Set" Reference="Actor,SCV,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,MULE,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marine,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Reaper,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marauder,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Ghost,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <AffectedUnitArray index="2" value="Marine2"/>
+        <LeaderLevel value="3"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryArmorsLevel322" parent="TerranInfantryArmors">
+        <Name value="Upgrade/Name/TerranInfantryArmorsLevel322"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <ScoreAmount value="500"/>
+        <EffectArray index="2" Reference="Unit,Marine2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="3" Reference="Unit,Marine2,LifeArmor" Value="1"/>
+        <EffectArray index="6" Reference="Unit,Marauder2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="7" Reference="Unit,Marauder2,LifeArmor" Value="1"/>
+        <EffectArray Operation="Set" Reference="Actor,SCV,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,MULE,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marine,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Reaper,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marauder,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Ghost,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <AffectedUnitArray index="1" value="Marauder2"/>
+        <AffectedUnitArray index="2" value="Marine2"/>
+        <LeaderLevel value="3"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryArmorsLevel33" parent="TerranInfantryArmors">
+        <Name value="Upgrade/Name/TerranInfantryArmorsLevel33"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <ScoreAmount value="500"/>
+        <EffectArray index="6" Reference="Unit,Marauder2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="7" Reference="Unit,Marauder2,LifeArmor" Value="1"/>
+        <EffectArray Operation="Set" Reference="Actor,SCV,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,MULE,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marine,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Reaper,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marauder,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Ghost,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <AffectedUnitArray index="1" value="Marauder2"/>
+        <LeaderLevel value="3"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryArmorsVanadiumPlatingLevel12" parent="TerranInfantryArmorsVanadiumPlating">
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <ScoreAmount value="200"/>
+        <EffectArray index="12" Reference="Unit,Marauder2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="13" Reference="Unit,Marauder2,LifeArmor" Value="1"/>
+        <EffectArray index="14" Operation="Multiply" Reference="Unit,Marauder2,LifeMax" Value="1.05"/>
+        <EffectArray index="15" Operation="Multiply" Reference="Unit,Marauder2,LifeStart" Value="1.05"/>
+        <EffectArray Operation="Set" Reference="Actor,SCV,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,MULE,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marine,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marauder,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Reaper,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Ghost,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Firebat,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Medic,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,SpecterUnit,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,KelmorianMiner,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,HammerSecurity,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,DevilDog,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,DominionKillTeam,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,RaynorCommando,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Raynor,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,TychusCommando,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,TychusChaingun,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Dutch,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Bones,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Nova,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Tosh,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel1.dds"/>
+        <AffectedUnitArray index="9" value="Marauder2"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryArmorsVanadiumPlatingLevel22" parent="TerranInfantryArmorsVanadiumPlating">
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <ScoreAmount value="350"/>
+        <EffectArray index="12" Reference="Unit,Marauder2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="13" Reference="Unit,Marauder2,LifeArmor" Value="1"/>
+        <EffectArray index="14" Operation="Multiply" Reference="Unit,Marauder2,LifeMax" Value="1.05"/>
+        <EffectArray index="15" Operation="Multiply" Reference="Unit,Marauder2,LifeStart" Value="1.05"/>
+        <EffectArray Operation="Set" Reference="Actor,SCV,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,MULE,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marine,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marauder,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Reaper,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Ghost,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Firebat,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Medic,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,SpecterUnit,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,KelmorianMiner,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,HammerSecurity,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,DevilDog,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,DominionKillTeam,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,RaynorCommando,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Raynor,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,TychusCommando,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,TychusChaingun,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Dutch,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Bones,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Nova,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Tosh,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel2.dds"/>
+        <AffectedUnitArray index="9" value="Marauder2"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryArmorsVanadiumPlatingLevel32" parent="TerranInfantryArmorsVanadiumPlating">
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <ScoreAmount value="500"/>
+        <EffectArray index="12" Reference="Unit,Marauder2,LifeArmorLevel" Value="1"/>
+        <EffectArray index="13" Reference="Unit,Marauder2,LifeArmor" Value="1"/>
+        <EffectArray index="14" Operation="Multiply" Reference="Unit,Marauder2,LifeMax" Value="1.05"/>
+        <EffectArray index="15" Operation="Multiply" Reference="Unit,Marauder2,LifeStart" Value="1.05"/>
+        <EffectArray Operation="Set" Reference="Actor,SCV,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,MULE,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marine,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Marauder,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Reaper,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Ghost,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Firebat,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Medic,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,SpecterUnit,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,KelmorianMiner,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,HammerSecurity,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,DevilDog,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,DominionKillTeam,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,RaynorCommando,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Raynor,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,TychusCommando,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,TychusChaingun,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Dutch,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Bones,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Nova,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Actor,Tosh,LifeArmorIcon" Value="Assets\Textures\btn-upgrade-terran-infantryarmorlevel3.dds"/>
+        <AffectedUnitArray index="9" value="Marauder2"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryWeaponsLevel12" parent="TerranInfantryWeapons">
+        <Name value="Upgrade/Name/TerranInfantryWeaponsLevel12"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <ScoreAmount value="200"/>
+        <EffectArray Operation="Set" Reference="Weapon,GuassRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,D8Charge,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,P38ScytheGuassPistol,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,PunisherGrenades,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,C10CanisterRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <AffectedUnitArray index="2" value="Marine2"/>
+        <LeaderLevel value="1"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryWeaponsLevel122" parent="TerranInfantryWeapons">
+        <Name value="Upgrade/Name/TerranInfantryWeaponsLevel122"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <ScoreAmount value="200"/>
+        <EffectArray Operation="Set" Reference="Weapon,GuassRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,D8Charge,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,P38ScytheGuassPistol,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,PunisherGrenades,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,C10CanisterRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <AffectedUnitArray index="1" value="Marauder2"/>
+        <AffectedUnitArray index="2" value="Marine2"/>
+        <LeaderLevel value="1"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryWeaponsLevel13" parent="TerranInfantryWeapons">
+        <Name value="Upgrade/Name/TerranInfantryWeaponsLevel13"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <ScoreAmount value="200"/>
+        <EffectArray Operation="Set" Reference="Weapon,GuassRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,D8Charge,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,P38ScytheGuassPistol,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,PunisherGrenades,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,C10CanisterRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <AffectedUnitArray index="1" value="Marauder2"/>
+        <LeaderLevel value="1"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryWeaponsLevel22" parent="TerranInfantryWeapons">
+        <Name value="Upgrade/Name/TerranInfantryWeaponsLevel22"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <ScoreAmount value="350"/>
+        <EffectArray Operation="Set" Reference="Weapon,GuassRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,D8Charge,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,P38ScytheGuassPistol,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,PunisherGrenades,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,C10CanisterRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <AffectedUnitArray index="2" value="Marine2"/>
+        <LeaderLevel value="2"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryWeaponsLevel222" parent="TerranInfantryWeapons">
+        <Name value="Upgrade/Name/TerranInfantryWeaponsLevel222"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <ScoreAmount value="350"/>
+        <EffectArray Operation="Set" Reference="Weapon,GuassRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,D8Charge,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,P38ScytheGuassPistol,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,PunisherGrenades,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,C10CanisterRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <AffectedUnitArray index="1" value="Marauder2"/>
+        <AffectedUnitArray index="2" value="Marine2"/>
+        <LeaderLevel value="2"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryWeaponsLevel23" parent="TerranInfantryWeapons">
+        <Name value="Upgrade/Name/TerranInfantryWeaponsLevel23"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <ScoreAmount value="350"/>
+        <EffectArray Operation="Set" Reference="Weapon,GuassRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,D8Charge,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,P38ScytheGuassPistol,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,PunisherGrenades,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,C10CanisterRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <AffectedUnitArray index="1" value="Marauder2"/>
+        <LeaderLevel value="2"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryWeaponsLevel32" parent="TerranInfantryWeapons">
+        <Name value="Upgrade/Name/TerranInfantryWeaponsLevel32"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <ScoreAmount value="500"/>
+        <EffectArray Operation="Set" Reference="Weapon,GuassRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,D8Charge,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,P38ScytheGuassPistol,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,PunisherGrenades,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,C10CanisterRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <AffectedUnitArray index="2" value="Marine2"/>
+        <LeaderLevel value="3"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryWeaponsLevel322" parent="TerranInfantryWeapons">
+        <Name value="Upgrade/Name/TerranInfantryWeaponsLevel322"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <ScoreAmount value="500"/>
+        <EffectArray Operation="Set" Reference="Weapon,GuassRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,D8Charge,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,P38ScytheGuassPistol,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,PunisherGrenades,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,C10CanisterRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <AffectedUnitArray index="1" value="Marauder2"/>
+        <AffectedUnitArray index="2" value="Marine2"/>
+        <LeaderLevel value="3"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryWeaponsLevel33" parent="TerranInfantryWeapons">
+        <Name value="Upgrade/Name/TerranInfantryWeaponsLevel33"/>
+        <InfoTooltipPriority value="0"/>
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <ScoreAmount value="500"/>
+        <EffectArray Operation="Set" Reference="Weapon,GuassRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,D8Charge,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,P38ScytheGuassPistol,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,PunisherGrenades,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,C10CanisterRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <AffectedUnitArray index="1" value="Marauder2"/>
+        <LeaderLevel value="3"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryWeaponsUltraCapacitorsLevel12" parent="TerranInfantryWeaponsUltraCapacitors">
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <ScoreAmount value="200"/>
+        <EffectArray Operation="Set" Reference="Weapon,GuassRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,D8Charge,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,P38ScytheGuassPistol,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,PunisherGrenades,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,C10CanisterRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,Firebat,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,Specter,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,KelmorianMinerGaussRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,HammerSecurity,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,DevilDogFlameThrower,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,CommandoRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,RaynorWeapon,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,TychusCommandoChaingun,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,TychusChaingun,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,DutchConcussiveGrenade,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,SwannMelee,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,Nova,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,Tosh,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel1.dds"/>
+        <AffectedUnitArray index="8" value="Marauder2"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryWeaponsUltraCapacitorsLevel22" parent="TerranInfantryWeaponsUltraCapacitors">
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <ScoreAmount value="350"/>
+        <EffectArray Operation="Set" Reference="Weapon,GuassRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,D8Charge,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,P38ScytheGuassPistol,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,PunisherGrenades,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,C10CanisterRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,Firebat,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,Specter,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,KelmorianMinerGaussRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,HammerSecurity,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,DevilDogFlameThrower,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,CommandoRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,RaynorWeapon,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,TychusCommandoChaingun,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,TychusChaingun,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,DutchConcussiveGrenade,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,SwannMelee,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,Nova,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,Tosh,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel2.dds"/>
+        <AffectedUnitArray index="8" value="Marauder2"/>
+    </CUpgrade>
+    <CUpgrade id="TerranInfantryWeaponsUltraCapacitorsLevel32" parent="TerranInfantryWeaponsUltraCapacitors">
+        <Icon value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <ScoreAmount value="500"/>
+        <EffectArray Operation="Set" Reference="Weapon,GuassRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,D8Charge,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,P38ScytheGuassPistol,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,PunisherGrenades,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,C10CanisterRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,Firebat,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,Specter,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,KelmorianMinerGaussRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,HammerSecurity,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,DevilDogFlameThrower,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,CommandoRifle,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,RaynorWeapon,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,TychusCommandoChaingun,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,TychusChaingun,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,DutchConcussiveGrenade,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,SwannMelee,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,Nova,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <EffectArray Operation="Set" Reference="Weapon,Tosh,Icon" Value="Assets\Textures\btn-upgrade-terran-infantryweaponslevel3.dds"/>
+        <AffectedUnitArray index="8" value="Marauder2"/>
+    </CUpgrade>
+</Catalog>

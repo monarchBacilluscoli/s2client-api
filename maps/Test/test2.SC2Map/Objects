@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PlacedObjects Version="27">
+    <ObjectUnit Id="1949437186" Position="12,15.5,0" Rotation="0.0646" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="1331169221" Position="29.5,21,0" Rotation="5.7346" Scale="1,1,1" UnitType="Marine"/>
+    <ObjectUnit Id="1597486587" Position="27,27.5,0" Rotation="2.9885" Scale="1,1,1" UnitType="Marine"/>
+    <ObjectUnit Id="332652521" Position="7.5,12.5,0" Rotation="6.2253" Scale="1,1,1" UnitType="Marine"/>
+    <ObjectUnit Id="1363909889" Position="10,20.5,0" Rotation="2.8017" Scale="1,1,1" UnitType="Marine"/>
+    <ObjectUnit Id="671456602" Position="15,18.5,0" Rotation="3.8007" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="1363520671" Position="9.5,11.5,0" Rotation="2.7402" Scale="1,1,1" UnitType="Marine"/>
+    <ObjectUnit Id="1695486534" Position="20.5,12.5,0" Rotation="3.5793" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="631086950" Position="10.5,12.5,0" Rotation="5.1921" Scale="1,1,1" UnitType="Marine"/>
+</PlacedObjects>

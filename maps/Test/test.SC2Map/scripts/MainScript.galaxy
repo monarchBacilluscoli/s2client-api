@@ -1,0 +1,16 @@
+bool onInit(bool testConds, bool runActions) {
+    UIDisplayMessage(PlayerGroupActive(), c_messageAreaSubtitle, StringToText("HELLO WORLD"));
+    return true;
+}
+
+bool measureDistance(bool testConds, bool runActions){
+    
+    return true;
+}
+
+
+void main() {
+    // this is your entry point
+    TriggerAddEventMapInit(TriggerCreate("onInit"));
+    // TriggerAddEventTimePeriodic()
+}

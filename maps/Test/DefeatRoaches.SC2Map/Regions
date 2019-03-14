@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Regions>
+    <region id="1">
+        <name value="Playable Space"/>
+        <shape type="rect">
+            <quad value="22.0002,20,44,36"/>
+        </shape>
+    </region>
+    <region id="4">
+        <name value="Spawn Region Left"/>
+        <shape type="rect">
+            <quad value="23.9748,25.0637,27.9787,31.0483"/>
+        </shape>
+    </region>
+    <region id="5">
+        <name value="Spawn Region Right"/>
+        <shape type="rect">
+            <quad value="38.0207,25.0427,42.0351,31.0773"/>
+        </shape>
+    </region>
+</Regions>
