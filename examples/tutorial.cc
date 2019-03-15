@@ -19,6 +19,7 @@ int main(int argc, char* argv[]) {
     std::cout << "LoadSettings: " << coordinator.LoadSettings(argc, argv) << std::endl; // 读取设置参数
     coordinator.SetRealtime(false); // 设置游戏是否以真实速度进行
     coordinator.SetStepSize(1); // 设置游戏循环步长
+    coordinator.SetMultithreaded(true);
 
     Bot bot; // bot can only say hello
     random_bot bot2, bot3;
@@ -33,9 +34,9 @@ int main(int argc, char* argv[]) {
         CreateParticipant(Race::Terran, &of_bot), // 添加人族，使用之前写的AI
         //CreateParticipant(Race::Terran, &bot3), // 添加人族，使用之前写的AI
         //CreateParticipant(Race::Terran, &bot0),
-        //CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用potential field AI
+        CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
 
-        CreateComputer(Race::Terran), // 添加电脑，默认easy难度
+        //CreateComputer(Race::Terran), // 添加电脑，默认easy难度
         //CreateParticipant(Race::Terran, &bot2),
         }); // 添加参与玩家
 
@@ -44,6 +45,7 @@ int main(int argc, char* argv[]) {
     //coordinator.StartGame(sc2::kMapBelShirVestigeLE); // 标准对局地图
     //coordinator.StartGame("..\\maps\\Test\\testBattle.SC2Map");
     //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
+    //coordinator.StartGame("..\\maps\\Test\\testBattle_2distant_vs_1melee.SC2Map");
     coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
     //coordinator.StartGame("..\\maps\\Test\\testBattle_no_enemy.SC2Map");
     //coordinator.StartGame("..\\maps\\Test\\testBattleAllUnits.SC2Map");
@@ -54,7 +56,6 @@ int main(int argc, char* argv[]) {
     time_t start = 0;
     int frames = 0;*/
     while (coordinator.Update()) { // run a bot
-        /*coordinator.LeaveGame();*/
         //? get the frames per second in real-time mode
         /*if (!is_start) {
             is_start = true;

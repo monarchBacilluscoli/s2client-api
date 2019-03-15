@@ -398,7 +398,7 @@ namespace sc2 {
 		display_units_attack_action(debug, m_alive_self_units);
 		// until this step, those orders to debug are sent
 
-		if (m_alive_self_units.size() > 0) {
+		if (m_alive_self_units.size() > 0&& m_alive_enemy_units.size()>0) {
 			solution s = run();
 			deploy_solution(s);
 		}
@@ -428,7 +428,14 @@ namespace sc2 {
 				if (targets.empty()) {
 					action.ability_id = ABILITY_ID::MOVE;
 					action.target_type = ActionRaw::TargetType::TargetPosition;
-					Point2D new_pos = search_nearest_unit_from_point(unit->pos, Unit::Alliance::Enemy)->pos;
+					const Unit* eu = search_nearest_unit_from_point(unit->pos, Unit::Alliance::Enemy);
+					Point2D new_pos;
+					if (eu) {
+						new_pos = search_nearest_unit_from_point(unit->pos, Unit::Alliance::Enemy)->pos;
+					}
+					else {
+						new_pos = unit->pos;
+					}
 					// new_pos = calculate_pos_next_frame(unit, new_pos);
 					action.target_point = new_pos;
 				}
