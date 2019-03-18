@@ -42,11 +42,10 @@ namespace sc2 {
         // two parents generate two children
         std::vector<solution> produce(const solution& a, const solution& b);
         // two parents generate two children (unmutated)
-        //? need test
+        //? 
         std::vector<solution> cross_over(const solution& a, const solution& b);
         // mutate
         void mutate(solution& s);
-        //todo control crossover and mutation to produce the next generation
 
         // evaluate
         void evaluate_solutions(const population& p, std::vector<float>& d, std::vector<float>& total_theft);
@@ -54,21 +53,23 @@ namespace sc2 {
         void sort_solutions(population& p, std::vector<float>& d, std::vector<float>& t);
         //
         solution select_one_solution(const population& p, std::vector<float>& d, std::vector<float>& h);
-        //todo todo
+        //
         void deploy_solution(const solution& s);
 
-        //todo evaluate damage to opponent of single solution
+        // evaluate damage to opponent of single solution
         float evaluate_single_solution_damage_next_frame(const solution& s);
-        //todo evalute the hurt of us of a single solution
+        //todo evaluate the hurt of us of a single solution
         float evaluate_single_solution_hurt_next_frame(const solution& s);
         //
         float evaluate_single_solution_theft_next_frame(const solution& s);
+        //todo evaluate potential advantage caused by movement next frame
+        float evaluate_movement_advantage_next_frame(const solution& s);
 
 
         // some utility functions don't belong to the evolutionay algorithm
-        //todo search neighboring units (using the positions in a solution)
+        // search neighboring units (using the positions in a solution)
         Units search_units_within_radius_in_solution(const Point2D& p, float r, const solution& s);
-        //todo search my units can be attacked
+        // search my units can be attacked
         Units search_units_can_be_attacked_by_weapon_in_solution(const Point2D& p, Weapon w, const solution& s); //! one frame edtion
         Units search_units_can_be_attacked_by_unit_in_solution(const Unit* u, const solution& s); //! one frame edition
         Units serach_units_can_be_attacked_by_unit(const Unit* u, Unit::Alliance a);
@@ -160,6 +161,8 @@ namespace sc2 {
         const int m_frames_per_deploy = 12;
         const int command_length = 1;
         const float zero_potential_energy_ratio = 0.8f;
+        const double m_attack_prob = 1;
+        const double m_killing_bonus_factor = 3;
 
         const int m_population_size = 20;
         const int m_offspring_size = 20;
@@ -168,7 +171,7 @@ namespace sc2 {
         const double m_theta_mutate_step = 2 * PI / 10.;
         const int m_produce_times = 20;
 
-        const double m_attack_prob = 1;
+        
 
         // algorithm content
         population m_population;

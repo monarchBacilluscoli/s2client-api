@@ -655,7 +655,6 @@ namespace sc2 {
 			}
 		}
 	}
-	//todo ensure this function thread safe 
 	float one_frame_bot::evaluate_single_solution_damage_next_frame(const solution & s) {
 		float total_damage = 0.0f;
 		// for each unit in a solution
@@ -667,12 +666,24 @@ namespace sc2 {
 				case ABILITY_ID::ATTACK:
 					switch (action.target_type) {
 					case ActionRaw::TargetType::TargetUnitTag: {
-						total_damage += damage_unit_to_unit(u_c, Observation()->GetUnit(get_action(c, 0).target_tag));
+						float d = damage_unit_to_unit(u_c, Observation()->GetUnit(action.target_tag));
+						if (d > Observation()->GetUnit(action.target_tag)->health) {
+							total_damage += d * m_killing_bonus_factor;
+						}
+						else {
+							total_damage += d;
+						}
 						break;
 					}
 					case ActionRaw::TargetType::TargetPosition: {
 						const Unit* target = search_nearest_unit_from_point(action.target_point, Unit::Alliance::Enemy);
-						total_damage += damage_unit_to_unit(u_c, target);
+						float d = damage_unit_to_unit(u_c, target);
+						if (d > target->health) {
+							total_damage += d * m_killing_bonus_factor;
+						}
+						else {
+							total_damage += d;
+						}
 						break;
 					}
 					case ActionRaw::TargetType::TargetNone:
@@ -720,6 +731,10 @@ namespace sc2 {
 			}
 		}
 		return threat_sum;
+	}
+	float one_frame_bot::evaluate_movement_advantage_next_frame(const solution& s) {
+		// todo finish it.
+		return 0.0f;
 	}
 }
 

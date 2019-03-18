@@ -34,9 +34,9 @@ int main(int argc, char* argv[]) {
         CreateParticipant(Race::Terran, &of_bot), // 添加人族，使用之前写的AI
         //CreateParticipant(Race::Terran, &bot3), // 添加人族，使用之前写的AI
         //CreateParticipant(Race::Terran, &bot0),
-        CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
+        //CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
 
-        //CreateComputer(Race::Terran), // 添加电脑，默认easy难度
+        CreateComputer(Race::Terran), // 添加电脑，默认easy难度
         //CreateParticipant(Race::Terran, &bot2),
         }); // 添加参与玩家
 
@@ -44,9 +44,9 @@ int main(int argc, char* argv[]) {
 
     //coordinator.StartGame(sc2::kMapBelShirVestigeLE); // 标准对局地图
     //coordinator.StartGame("..\\maps\\Test\\testBattle.SC2Map");
-    //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
     //coordinator.StartGame("..\\maps\\Test\\testBattle_2distant_vs_1melee.SC2Map");
-    coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
+    //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
+    coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_distant.SC2Map");
     //coordinator.StartGame("..\\maps\\Test\\testBattle_no_enemy.SC2Map");
     //coordinator.StartGame("..\\maps\\Test\\testBattleAllUnits.SC2Map");
     //coordinator.StartGame("..\\maps\\Test\\testBattle1v1.SC2Map"); // 1v1静止测试
