@@ -7,26 +7,40 @@
 namespace sc2 {
     class potential_field_bot:public Agent {
     public:
-        potential_field_bot() = default;
-        ~potential_field_bot() = default;
+        potential_field_bot(int step_size = 1):m_step_size(step_size) {};
+        virtual ~potential_field_bot() = default;
 
+
+
+        Vector2D force_to_unit(const Units& sources, const Unit* u);
+        float calculate_enemy_zero_field_dis(const Unit* source, const Unit* target) const;
+        float calculate_ally_zero_field_dis(const Unit* source, const Unit* target);
+        Units serach_enemies_can_be_attacked_by_unit(const Unit* u);
+
+        virtual void OnGameStart();
+        virtual void OnStep();
+
+        const Unit* select_nearest_unit_from_point(const Point2D& p, const Units& us);
+        //todo search units can be attacked
+        Units search_units_can_be_attacked_by_unit(const Unit* u, Unit::Alliance a = Unit::Alliance::Enemy);
+        //
+
+    protected:
         Vector2D force_enemy_to_unit(const Unit* source, const Unit* target);
         Vector2D force_ally_to_unit(const Unit* source, const Unit* target);
         Vector2D force_wall_to_unit(const Unit* target);
 
-        Vector2D force_to_unit(const Units& sources, const Unit* u);
+        virtual float calculate_enemy_attraction_value(const Unit* enemy, const Unit* unit) const;
+        virtual float calculate_enemy_repulsion_value(const Unit* enemy, const Unit* unit) const;
+        virtual float calculate_friendly_attraction_value(const Unit* ally, const Unit* unit) const;
+        virtual float calculate_friendly_repulsion_value(const Unit* ally, const Unit* unit) const;
+
         float calculate_enemy_zero_field_dis(const Unit* source, const Unit* target);
         float calculate_ally_zero_field_dis(const Unit* source, const Unit* target);
+
+        float move_dis_per_time_slice(const Unit* u) const;
+
         Units serach_enemies_can_be_attacked_by_unit(const Unit* u);
-
-
-        virtual void OnGameStart() final;
-        virtual void OnStep() final;
-
-        const Unit* select_nearest_unit_from_point(const Point2D& p, const Units& us);
-
-
-    private:
 
         void display_facing_direction(const Units& us, DebugInterface* debug);
         void display_force_direction(const Unit* u, const Vector2D& force,DebugInterface* debug);
@@ -43,6 +57,19 @@ namespace sc2 {
         Units m_all_alive_units;
         UnitTypes m_unit_types;
         GameInfo m_game_info;
+
+        /*
+         * some additional data members used in derived class
+        */
+        Units m_initial_units;
+        Units m_initial_self_units;
+        Units m_initial_enemy_units;
+
+        /*
+        * game process configuration
+        */
+        int m_step_size;
+
     };
 }
 

@@ -403,8 +403,8 @@ namespace sc2 {
 			deploy_solution(s);
 		}
 		else {
-			// wait one minutes and bring the game to an end
-			std::this_thread::sleep_for(std::chrono::seconds(5));
+			// wait a period time and bring the game to an end
+			std::this_thread::sleep_for(std::chrono::seconds(0));
 			debug->DebugEndGame();
 		}
 		debug->SendDebug();
