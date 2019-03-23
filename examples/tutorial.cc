@@ -5,6 +5,7 @@
 #include "my_bots/one_frame_bot.h"
 #include <iostream>
 #include "my_bots/potential_field/potential_field.h"
+#include "my_bots/potential_field/advanced_potential_field_bot.h"
 #include "my_bots/rule_based_bots/attack_nearest/attack_nearest.h"
 
 using namespace sc2;
@@ -21,27 +22,32 @@ class human_control :public Agent {
 
 
 int main(int argc, char* argv[]) {
+    int step_size = 10;
     // test for runing game repeatedly
     for (size_t i = 0; i < 2; i++) {
         Coordinator coordinator; // coordinator（协调器）负责控制游戏进行中、进行前等等的设置
         std::cout << "LoadSettings: " << coordinator.LoadSettings(argc, argv) << std::endl; // 读取设置参数
         coordinator.SetRealtime(false); // 设置游戏是否以真实速度进行
-        coordinator.SetStepSize(1); // 设置游戏循环步长
+        coordinator.SetStepSize(step_size); // 设置游戏循环步长
         coordinator.SetMultithreaded(true);
 
         Bot bot; // bot can only say hello
         random_bot bot2, bot3;
         human_control bot0;
         one_frame_bot of_bot;
-        potential_field_bot pf_bot;
+        potential_field_bot pf_bot(step_size);
+        advanced_potential_field_bot adv_pf_bot(step_size);
+
         attack_nearest an_bot;
 
         coordinator.SetParticipants({ // 初始化阵营么
             //CreateComputer(Race::Terran),
-            CreateParticipant(Race::Terran, &bot0), // 人类玩家
-            //CreateParticipant(Race::Terran, &of_bot), // 添加人族，使用之前写的AI
-            //CreateParticipant(Race::Terran, &bot3), // 添加人族，使用之前写的AI
-            //CreateParticipant(Race::Terran, &bot0),
+            //CreateParticipant(Race::Terran, &bot0), // 人类玩家
+            //CreateParticipant(Race::Terran, &of_bot), // one frame bot
+            //CreateParticipant(Race::Terran, &bot3), // random bot
+            //CreateParticipant(Race::Terran, &pf_bot), //potential field bot
+            CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
+
             //CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
 
             CreateComputer(Race::Terran), // 添加电脑，默认easy难度

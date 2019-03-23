@@ -10,12 +10,7 @@ namespace sc2 {
         potential_field_bot(int step_size = 1):m_step_size(step_size) {};
         virtual ~potential_field_bot() = default;
 
-
-
         Vector2D force_to_unit(const Units& sources, const Unit* u);
-        float calculate_enemy_zero_field_dis(const Unit* source, const Unit* target) const;
-        float calculate_ally_zero_field_dis(const Unit* source, const Unit* target);
-        Units serach_enemies_can_be_attacked_by_unit(const Unit* u);
 
         virtual void OnGameStart();
         virtual void OnStep();
@@ -30,10 +25,10 @@ namespace sc2 {
         Vector2D force_ally_to_unit(const Unit* source, const Unit* target);
         Vector2D force_wall_to_unit(const Unit* target);
 
-        virtual float calculate_enemy_attraction_value(const Unit* enemy, const Unit* unit) const;
-        virtual float calculate_enemy_repulsion_value(const Unit* enemy, const Unit* unit) const;
-        virtual float calculate_friendly_attraction_value(const Unit* ally, const Unit* unit) const;
-        virtual float calculate_friendly_repulsion_value(const Unit* ally, const Unit* unit) const;
+        virtual float calculate_enemy_attraction_value(const Unit* enemy, const Unit* unit) const { return 0.f; };
+        virtual float calculate_enemy_repulsion_value(const Unit* enemy, const Unit* unit) const { return 0.f; };
+        virtual float calculate_ally_attraction_value(const Unit* ally, const Unit* unit) const { return 0.f; };
+        virtual float calculate_ally_repulsion_value(const Unit* ally, const Unit* unit) const { return 0.f; };
 
         float calculate_enemy_zero_field_dis(const Unit* source, const Unit* target);
         float calculate_ally_zero_field_dis(const Unit* source, const Unit* target);
@@ -69,7 +64,6 @@ namespace sc2 {
         * game process configuration
         */
         int m_step_size;
-
     };
 }
 
