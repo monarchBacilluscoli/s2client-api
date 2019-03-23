@@ -1,7 +1,6 @@
 #include "potential_field.h"
 
 namespace sc2 {
-
 	Vector2D sc2::potential_field_bot::force_enemy_to_unit(const Unit* source, const Unit* target) {
 		float force_value = 0.f;
 		float distance = Distance2D(source->pos, target->pos);
@@ -69,7 +68,7 @@ namespace sc2 {
 		return force;
 	}
 
-	float potential_field_bot::calculate_enemy_zero_field_dis(const Unit * source, const Unit * target) const {
+	float potential_field_bot::calculate_enemy_zero_field_dis(const Unit * source, const Unit * target) {
 		float dis;
 		float target_range = m_unit_types[target->unit_type].weapons[0].range;
 		float source_range = m_unit_types[source->unit_type].weapons[0].range;
@@ -171,7 +170,7 @@ namespace sc2 {
 	}
 
 	float potential_field_bot::move_dis_per_time_slice(const Unit * u) const {
-		return m_unit_types[u->tag].movement_speed* m_step_size / 16;
+		return m_unit_types[u->unit_type].movement_speed* m_step_size / 16;
 	}
 
 	void potential_field_bot::display_facing_direction(const Units & us, DebugInterface * debug) {
