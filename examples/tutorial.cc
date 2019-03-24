@@ -22,7 +22,7 @@ class human_control :public Agent {
 
 
 int main(int argc, char* argv[]) {
-    int step_size = 10;
+    int step_size = 1;
     // test for runing game repeatedly
     for (size_t i = 0; i < 2; i++) {
         Coordinator coordinator; // coordinator（协调器）负责控制游戏进行中、进行前等等的设置
@@ -59,8 +59,8 @@ int main(int argc, char* argv[]) {
         //coordinator.StartGame(sc2::kMapBelShirVestigeLE); // 标准对局地图
         //coordinator.StartGame("..\\maps\\Test\\testBattle.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_2distant_vs_1melee.SC2Map");
-        coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
-        //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_distant.SC2Map");
+        //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
+        coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_distant.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_no_enemy.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattleAllUnits.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle1v1.SC2Map"); // 1v1静止测试

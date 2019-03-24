@@ -15,15 +15,20 @@ namespace sc2 {
         virtual void OnGameStart();
         virtual void OnStep();
 
-        const Unit* select_nearest_unit_from_point(const Point2D& p, const Units& us);
-        //todo search units can be attacked
-        Units search_units_can_be_attacked_by_unit(const Unit* u, Unit::Alliance a = Unit::Alliance::Enemy);
-        //
 
     protected:
-        Vector2D force_enemy_to_unit(const Unit* source, const Unit* target);
-        Vector2D force_ally_to_unit(const Unit* source, const Unit* target);
-        Vector2D force_wall_to_unit(const Unit* target);
+        virtual const Unit* select_target_enemy(const Unit* unit);
+
+
+
+        //! this is copied from another bot directly.
+        //todo it needs some modifications
+        const Unit* select_nearest_unit_from_point(const Point2D& p, const Units& us);
+        //todo search units can be attacked
+
+        virtual Vector2D force_enemy_to_unit(const Unit* source, const Unit* target);
+        virtual Vector2D force_ally_to_unit(const Unit* source, const Unit* target);
+        virtual Vector2D force_wall_to_unit(const Unit* target);
 
         virtual float calculate_enemy_attraction_value(const Unit* enemy, const Unit* unit) const { return 0.f; };
         virtual float calculate_enemy_repulsion_value(const Unit* enemy, const Unit* unit) const { return 0.f; };
