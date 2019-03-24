@@ -1,7 +1,7 @@
 #include "potential_field.h"
 
 namespace sc2 {
-	Vector2D sc2::potential_field_bot::force_enemy_to_unit(const Unit* source, const Unit* target) {
+	Vector2D potential_field_bot::force_enemy_to_unit(const Unit* source, const Unit* target) {
 		float force_value = 0.f;
 		float distance = Distance2D(source->pos, target->pos);
 		float zero_field_dis = calculate_enemy_zero_field_dis(source, target);
@@ -16,7 +16,6 @@ namespace sc2 {
 		}
 		return force_value * (target->pos - source->pos) / distance;
 	}
-
 	Vector2D potential_field_bot::force_ally_to_unit(const Unit * source, const Unit * target) {
 		float force_value = 0.f;
 		float distance = Distance2D(source->pos, target->pos);
@@ -131,18 +130,18 @@ namespace sc2 {
 			 * 2. there is at least one unit in his fire_range
 			*/
 			if ((su->weapon_cooldown <= 0.f) && !serach_enemies_can_be_attacked_by_unit(su).empty()) { //todo can be optimized
-				const Unit* target_u = select_nearest_unit_from_point(su->pos, m_alive_enemy_units);
+				const Unit* target_u = select_target_enemy(su);
 				Actions()->UnitCommand(su, ABILITY_ID::ATTACK, target_u);
 			}
 			else {
-				Vector2D force = force_to_unit(m_alive_enemy_units, su);
+				Vector2D force = force_to_unit(m_all_alive_units, su);
 				display_force_direction(su, force, Debug());
 				if (force != Vector2D()) {
-					Point2D new_pos = su->pos + force / (force.x * force.x + force.y * force.y) * move_dis_per_time_slice(su);
+					Point2D new_pos = su->pos + force / std::sqrtf(force.x * force.x + force.y * force.y) * move_dis_per_time_slice(su);
 					Actions()->UnitCommand(su, ABILITY_ID::MOVE, new_pos);
 				}
 				else {
-					const Unit* target_u = select_nearest_unit_from_point(su->pos, m_alive_enemy_units);
+					const Unit* target_u = select_target_enemy(su);
 					Actions()->UnitCommand(su, ABILITY_ID::MOVE, target_u);
 				}
 			}
@@ -153,6 +152,10 @@ namespace sc2 {
 		display_fire_range(m_all_alive_units, Debug());
 		display_playable_area(m_game_info, Debug());
 		Debug()->SendDebug();
+	}
+
+	const Unit* potential_field_bot::select_target_enemy(const Unit* unit) {
+		return select_nearest_unit_from_point(unit->pos, m_alive_enemy_units);
 	}
 
 	const Unit* potential_field_bot::select_nearest_unit_from_point(const Point2D & p, const Units & us) {
