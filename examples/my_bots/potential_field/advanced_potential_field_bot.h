@@ -11,6 +11,8 @@ namespace sc2 {
         virtual void OnStep() final;
 
     protected:
+        virtual Vector2D force_to_unit(const Units& sources, const Unit* u);
+
         virtual Vector2D force_enemy_to_unit(const Unit* source, const Unit* target);
         virtual Vector2D force_ally_to_unit(const Unit* source, const Unit* target);
 
@@ -37,7 +39,7 @@ namespace sc2 {
         float m_ea_distance_factor = 1.f;
         //? maybe a fixed value factor?
         // field parameters of enemy repulsive
-        //float m_er_max_factor = 1.f;
+        float m_er_max_factor = 1.f;
         float m_er_range_factor = 1.f;
         // target select parameter
         float m_wasted_damage_threshold = 10;

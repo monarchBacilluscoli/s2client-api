@@ -40,9 +40,39 @@ namespace sc2 {
 		display_playable_area(m_game_info, Debug());
 		Debug()->SendDebug();
 	}
-	Vector2D sc2::advanced_potential_field_bot::force_enemy_to_unit(const Unit* enemy, const Unit* unit) {
-		Vector2D force = (unit->pos - enemy->pos) / Distance2D(enemy->pos, unit->pos); // a unit vector
+	Vector2D advanced_potential_field_bot::force_to_unit(const Units& sources, const Unit* u) {
+		Vector2D force = { 0.f,0.f };
+		float max_attraction_value = 0.f;
+		const Unit* max_attactive_unit;
+		for (const Unit* source : sources) {
+			if (source->alliance == Unit::Alliance::Self) {
+				force += force_ally_to_unit(source, u);
+			}
+			else {
+				//force += force_enemy_to_unit(source, u);
+				//todo modify it
+				//todo repulsion first
+				force += calculate_enemy_repulsion_value(source, u)*Vector2D(u->pos-source->pos)/Distance2D(u->pos,source->pos);
+				//todo attraction second
+				float current_attraction = calculate_enemy_attraction_value(source, u);
+				if (current_attraction > max_attraction_value) {
+					max_attraction_value = current_attraction;
+					max_attactive_unit = source;
+				}
+			}
+		}
+		//todo add the attraction to force;
+		force += max_attraction_value * Vector2D(max_attactive_unit->pos - u->pos) / Distance2D(u->pos, max_attactive_unit->pos);
+		force += force_wall_to_unit(u);
+		return force;
+	}
+	Vector2D advanced_potential_field_bot::force_enemy_to_unit(const Unit* enemy, const Unit* unit) {
+		Vector2D force = (enemy->pos - unit->pos) / Distance2D(enemy->pos, unit->pos); // a unit vector
 		return force * (calculate_enemy_repulsion_value(enemy, unit) - calculate_enemy_attraction_value(enemy, unit));
+
+		//todo modify the way it calculate the force
+		//todo select the attraction which has the biggest value
+		//todo calculate repulsion by add up all the repulsions
 	}
 
 	Vector2D advanced_potential_field_bot::force_ally_to_unit(const Unit* ally, const Unit* unit) {
@@ -68,12 +98,15 @@ namespace sc2 {
 		float e_fragile = enemy->shield_max + enemy->health_max - enemy->shield - enemy->health;
 		float u_raw_range = weapon.range+enemy->radius+unit->radius;
 		
-		float slope = u_cooldown_damage + e_fragile + u_damage; //? why should I use u_damage as one of these items?
-		float far_away = Distance2D(unit->pos, enemy->pos) - u_raw_range * m_ea_range_factor;
-		if (far_away < 0 || far_away> m_unit_types[unit->unit_type].movement_speed) {
-			return 0.f;
-		}
-		return far_away * slope;
+		//float slope = u_cooldown_damage + e_fragile + u_damage; //? why should I use u_damage as one of these items?
+		float max_value = u_cooldown_damage + e_fragile + u_damage;
+		//float far_away = Distance2D(unit->pos, enemy->pos) - u_raw_range * m_ea_range_factor;
+		//if (far_away < 0 || far_away> m_unit_types[unit->unit_type].movement_speed) {
+		//	return 0.f;
+		//}
+		////return far_away * slope;
+		//return max_value;
+		return max_value;
 	}
 
 	float advanced_potential_field_bot::calculate_enemy_repulsion_value(const Unit* enemy, const Unit* unit) const {
@@ -93,13 +126,15 @@ namespace sc2 {
 
 		float raw_range = weapon.range + m_unit_types[enemy->unit_type].movement_speed * m_step_size / sc2utility::frames_per_second + enemy->radius + unit->radius;
 
-		float slope = e_damage + e_cooldown_damage + u_fragile;
+		//float slope = e_damage + e_cooldown_damage + u_fragile;
+		float max_value = e_damage + e_cooldown_damage + u_fragile;
 		//if two units overlap
 		float dis = Distance2D(enemy->pos, unit->pos);
 		//todo this should be modified
 		float closeness = (raw_range * m_er_range_factor) - dis;
 		if (closeness > 0) {
-			return slope * closeness;
+			//return slope * closeness;
+			return m_er_max_factor* max_value;
 		}
 		else {
 			// out of 
