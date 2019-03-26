@@ -1,5 +1,5 @@
 #include <sc2api/sc2_api.h> // 这里包含了所有的api的头文件，但也仅此而已
-#include "bot_examples.h" // 这个示例bot还不抵这里的bot
+#include "bot_examples.h" 
 #include "my_bots/bot_tutor.h"
 #include "my_bots/random_bot.h"
 #include "my_bots/one_frame_bot.h"

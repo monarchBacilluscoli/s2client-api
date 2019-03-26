@@ -10,7 +10,7 @@ namespace sc2 {
         potential_field_bot(int step_size = 1):m_step_size(step_size) {};
         virtual ~potential_field_bot() = default;
 
-        Vector2D force_to_unit(const Units& sources, const Unit* u);
+        virtual Vector2D force_to_unit(const Units& sources, const Unit* u);
 
         virtual void OnGameStart();
         virtual void OnStep();
