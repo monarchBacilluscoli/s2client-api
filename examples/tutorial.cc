@@ -43,10 +43,10 @@ int main(int argc, char* argv[]) {
         coordinator.SetParticipants({ // 初始化阵营么
             //CreateComputer(Race::Terran),
             //CreateParticipant(Race::Terran, &bot0), // 人类玩家
-            //CreateParticipant(Race::Terran, &of_bot), // one frame bot
+            CreateParticipant(Race::Terran, &of_bot), // one frame bot
             //CreateParticipant(Race::Terran, &bot3), // random bot
             //CreateParticipant(Race::Terran, &pf_bot), //potential field bot
-            CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
+            //CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
 
             //CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
 

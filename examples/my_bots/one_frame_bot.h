@@ -4,6 +4,7 @@
 #include<iostream>
 #include<sc2api/sc2_api.h>
 #include<map>
+#include"solution.h"
 
 namespace sc2 {
     class one_frame_bot : public Agent {
