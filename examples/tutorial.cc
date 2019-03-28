@@ -48,9 +48,9 @@ int main(int argc, char* argv[]) {
             //CreateParticipant(Race::Terran, &pf_bot), //potential field bot
             //CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
 
-            //CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
+            CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
 
-            CreateComputer(Race::Terran), // 添加电脑，默认easy难度
+            //CreateComputer(Race::Terran), // 添加电脑，默认easy难度
             //CreateParticipant(Race::Terran, &bot2),
             }); // 添加参与玩家
 
