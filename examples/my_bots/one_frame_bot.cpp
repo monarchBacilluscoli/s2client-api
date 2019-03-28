@@ -5,25 +5,23 @@
 #include<mutex>
 #include<chrono>
 #include"utilities/Point2DPolar.h"
-
-//#define DEBUG
-//#define MULTI_THREAD
+#include<algorithm>
 
 namespace sc2 {
-	using command = std::tuple<Tag, RawActions>;
-	using solution = std::vector<command>;
+
 	using population = std::vector<solution>;
+
 
 	std::mutex evaluation_mutex;
 
 	Units one_frame_bot::search_units_within_radius_in_solution(const Point2D& p, float r, const solution& s) {
 		Units units_within_radius;
-		for (const command& c : s) {
+		for (const command& c : s.commands) {
 			const Unit* u = get_execution_unit(c);
-			switch (static_cast<ABILITY_ID>(get_action(c, 0).ability_id)) {
+			switch (static_cast<ABILITY_ID>(c.actions.front().ability_id)) {
 				// Abilities can move a unit
 			case ABILITY_ID::MOVE:
-				if (Distance2D(p, get_action(c, 0).target_point) - u->radius <= r) {
+				if (Distance2D(p, c.actions.front().target_point) - u->radius <= r) {
 					units_within_radius.push_back(u);
 				}
 				// Abilities can not move a unit
@@ -40,11 +38,11 @@ namespace sc2 {
 
 	Units one_frame_bot::search_units_can_be_attacked_by_unit_in_solution(const Unit* u, const solution& s) {
 		Units units_can_be_attacked;
-		for (const command& c : s) {
+		for (const command& c : s.commands) {
 			const Unit* target_u = get_execution_unit(c);
-			if (!get_actions(c).empty()) {
-				if (get_action(c, 0).ability_id == ABILITY_ID::MOVE) {
-					Point2D target_new_pos = calculate_pos_next_frame(target_u, get_action(c, 0).target_point);
+			if (!c.actions.empty()) {
+				if (c.actions.front().ability_id == ABILITY_ID::MOVE) {
+					Point2D target_new_pos = calculate_pos_next_frame(target_u, c.actions.front().target_point);
 					// for each weapon, to find witch weapon can attack the target enemy
 					for (Weapon w : m_unit_types[target_u->unit_type].weapons) {
 						if (Distance2D(target_new_pos, u->pos) < w.range + u->radius + target_u->radius && is_weapon_match_unit(w, target_u)) {
@@ -137,7 +135,7 @@ namespace sc2 {
 	}
 	float one_frame_bot::damage_unit_to_unit_without_considering_distance(const Unit * attacking_u, const Unit * target_u) {
 		//! just consider the case that every unit only has only one weapon can be used to attack a specific enemy unit
-		Weapon w = get_matched_weapons_without_considering_distance(attacking_u, target_u)[0];
+		Weapon w = get_matched_weapons_without_considering_distance(attacking_u, target_u).front();
 		return damage_weapon_to_unit(w, target_u);
 	}
 	float one_frame_bot::damage_unit_to_unit(const Unit * attacking_u, const Unit * target_u) {
@@ -194,7 +192,7 @@ namespace sc2 {
 			throw("There is no weapon in this unit type@one_frame_bot::get_longest_range_weapon_of_unit_type()");
 		}
 		else {
-			Weapon longest_weapon = ut.weapons[0];
+			Weapon longest_weapon = ut.weapons.front();
 			for (const Weapon& w : ut.weapons) {
 				if (longest_weapon.range < w.range) {
 					longest_weapon = w;
@@ -207,10 +205,10 @@ namespace sc2 {
 	Weapon one_frame_bot::get_longest_range_weapon_of_weapons(const std::vector<Weapon> ws) {
 		if (!ws.empty()) {
 			if (ws.size() == 1) {
-				return ws[0];
+				return ws.front();
 			}
 			else {
-				Weapon longest_range_weapon = ws[0];
+				Weapon longest_range_weapon = ws.front();
 				for (const Weapon& w : ws) {
 					if (w.range > longest_range_weapon.range) {
 						longest_range_weapon = w;
@@ -281,8 +279,8 @@ namespace sc2 {
 		std::vector<Weapon> target_weapons = get_matched_weapons_without_considering_distance(target_u, source_u);
 
 		if (!source_weapons.empty() && !target_weapons.empty()) {
-			float target_range = target_weapons[0].range;
-			float source_range = source_weapons[0].range;
+			float target_range = target_weapons.front().range;
+			float source_range = source_weapons.front().range;
 			/*
 			* for hit-and-run
 			*/
@@ -302,22 +300,7 @@ namespace sc2 {
 		return dis;
 	}
 	const Unit* one_frame_bot::get_execution_unit(const command & c) {
-		return Observation()->GetUnit(std::get<0>(c));
-	}
-	const ActionRaw& one_frame_bot::get_action(const command & c, int i) {
-		return std::get<1>(c)[i];
-	}
-
-	ActionRaw& one_frame_bot::get_action(command & c, int i) {
-		return std::get<1>(c)[i];
-	}
-
-	const RawActions& one_frame_bot::get_actions(const command & c) {
-		return std::get<1>(c);
-	}
-
-	RawActions& one_frame_bot::get_actions(command & c) {
-		return std::get<1>(c);
+		return Observation()->GetUnit(c.unit_tag);
 	}
 
 	void one_frame_bot::display_fire_range(DebugInterface * debug, const Units & us) {
@@ -348,7 +331,7 @@ namespace sc2 {
 	}
 	void one_frame_bot::display_units_move_action(DebugInterface * debug, const Units & us) {
 		for (auto u : us) {
-			if (!(u->orders.empty()) && u->orders[0].ability_id == ABILITY_ID::MOVE) {
+			if (!(u->orders.empty()) && u->orders.front().ability_id == ABILITY_ID::MOVE) {
 				//todo there must be something to do
 			}
 		}
@@ -415,7 +398,7 @@ namespace sc2 {
 		Actions()->SendChat("GG!");
 	}
 	solution one_frame_bot::generate_random_solution() {
-		solution so(m_alive_self_units.size());
+		solution so(m_alive_self_units.size(), m_objective_number);
 		size_t alive_allies_number = m_alive_self_units.size();
 		for (size_t i = 0; i < alive_allies_number; i++) {
 			ActionRaw action;
@@ -451,8 +434,8 @@ namespace sc2 {
 				action.target_type = ActionRaw::TargetPosition;
 				action.target_point = unit->pos + generate_random_point_within_radius(basic_movement_one_frame(m_unit_types[unit->unit_type]));
 			}
-			std::get<0>(so[i]) = unit->tag;
-			std::get<1>(so[i]) = { action };
+			so.commands[i].unit_tag = unit->tag;
+			so.commands[i].actions = { action };
 		}
 		return so;
 	}
@@ -484,26 +467,26 @@ namespace sc2 {
 
 
 	std::vector<solution> one_frame_bot::cross_over(const solution & a, const solution & b) {
-		if (a.size() <= 0) {
+		if (a.commands.size() <= 0) {
 			throw("The solution waits to be crossed is empty@one_frame_bot::cross_over");
 		}
 		// randomly select two points and change all the commands between them
 		std::vector<solution> offspring = { a,b };
-		size_t start = GetRandomInteger(0, a.size() - 1);
-		size_t end = GetRandomInteger(0, a.size() - 1);
+		size_t start = GetRandomInteger(0, a.commands.size() - 1);
+		size_t end = GetRandomInteger(0, a.commands.size() - 1);
 		if (start > end) {
 			std::swap(start, end);
 		}
 		// exchange the segment between the two points
 		for (int i = start; i <= end; i++) {
-			std::swap(offspring[0][i], offspring[1][i]);
+			std::swap(offspring[0].commands[i], offspring[1].commands[i]);
 		}
 		return offspring;
 	}
 	void one_frame_bot::mutate(solution & s) {
 		// select a random command and mutate it
-		command& cmd = GetRandomEntry(s);
-		ActionRaw& action = get_action(cmd, 0);
+		command& cmd = GetRandomEntry(s.commands);
+		ActionRaw& action = cmd.actions.front();
 		switch (static_cast<ABILITY_ID>(action.ability_id)) {
 		case ABILITY_ID::MOVE: {
 			// change the target point, use polar coordinates
@@ -532,9 +515,9 @@ namespace sc2 {
 		// 生成随机解
 		generate_random_solutions(m_population, m_population_size);
 		// 评估所有解
-		evaluate_solutions(m_population, m_damage_objective, m_threat_objective);
+		evaluate_solutions(m_population);
 		// 对解进行排序
-		sort_solutions(m_population, m_damage_objective, m_threat_objective);
+		sort_solutions(m_population, simple_sum_smaller);
 		// 循环演化
 #ifdef DEBUG
 		auto start = std::chrono::steady_clock::now();
@@ -548,15 +531,12 @@ namespace sc2 {
 			std::vector<float> ofs_t_o;
 			generate_offspring(m_population, offspring, m_offspring_size);
 			//todo I don't need to calculate parents' objectives again
-			evaluate_solutions(offspring, ofs_d_o, ofs_t_o);
+			//todo Note here could be some mistakes
+			evaluate_solutions(offspring);
 			m_population.insert(m_population.begin(), offspring.begin(), offspring.end());
-			m_damage_objective.insert(m_damage_objective.begin(), ofs_d_o.begin(), ofs_d_o.end());
-			m_threat_objective.insert(m_threat_objective.begin(), ofs_t_o.begin(), ofs_t_o.end());
 
-			sort_solutions(m_population, m_damage_objective, m_threat_objective);
+			sort_solutions(m_population, simple_sum_smaller);
 			m_population.erase(m_population.begin() + m_population_size, m_population.end());
-			m_threat_objective.erase(m_threat_objective.begin() + m_population_size, m_threat_objective.end());
-			m_damage_objective.erase(m_damage_objective.begin() + m_population_size, m_damage_objective.end());
 #ifdef DEBUG
 			auto inner_end = std::chrono::steady_clock::now();
 			auto inner_interval = std::chrono::duration_cast<std::chrono::milliseconds>(inner_end - inner_start);
@@ -569,22 +549,19 @@ namespace sc2 {
 		std::cout << "Time for whole loops: " << interval.count() << std::endl;
 #endif // DEBUG
 		// 返回最终solution
-		return m_population[0];
+		return m_population.front();
 	}
 
-	void one_frame_bot::evaluate_solutions(const population & p, std::vector<float> & total_damage, std::vector<float> & total_theft) {
-		total_damage.resize(p.size());
-		total_theft.resize(p.size());
+	void one_frame_bot::evaluate_solutions(population & p) {
 
 #ifdef MULTI_THREAD
-		std::vector<std::thread> threads(2 * p.size());
+		//todo here I need to do some changes
+		std::vector<std::thread> threads(p.size());
 		for (size_t i = 0; i < p.size(); i++) {
-			//? caution: the i must be copied rather than refered
-			threads[2 * i] = std::thread{ [&,i]() {
-				total_damage[i] = evaluate_single_solution_damage_next_frame(p[i]);
-			} };
-			threads[2 * i + 1] = std::thread{ [&, i]() {
-				total_theft[i] = evaluate_single_solution_theft_next_frame(p[i]);
+			//? caution: the i must be copied rather than refered, or it will use the last value of it
+			threads[i] = std::thread{ [&,i]() {
+				p[i].objectives[0] = evaluate_single_solution_damage_next_frame(p[i]);
+				p[i].objectives[1] = evaluate_single_solution_theft_next_frame(p[i]);
 			} };
 		}
 		for (auto& t : threads) {
@@ -593,52 +570,20 @@ namespace sc2 {
 		return;
 #else
 		for (size_t i = 0; i < p.size(); i++) {
-			total_damage[i] = evaluate_single_solution_damage_next_frame(p[i]);
-			total_theft[i] = evaluate_single_solution_theft_next_frame(p[i]);
+			p[i].objectives[0] = evaluate_single_solution_damage_next_frame(p[i]);
+			p[i].objectives[1] = evaluate_single_solution_threat_next_frame(p[i]);
 		}
 #endif // MULTI_THREAD
 	}
-	void one_frame_bot::sort_solutions(population & p, std::vector<float> & total_damage, std::vector<float> & total_theft) {
-		// 对两个目标值逐个相减
-		std::vector<float> final_objective(total_damage.size());
-		std::transform(std::begin(total_damage), std::end(total_damage), std::begin(total_theft), std::begin(final_objective), std::minus<float>());
-		//todo 此处需要优化
-		std::vector<std::pair<int, float>> index_to_obj;
-		for (size_t i = 0; i < final_objective.size(); i++) {
-			index_to_obj.push_back(std::pair<int, float>(i, final_objective[i]));
-		}
-		std::sort(std::begin(index_to_obj), std::end(index_to_obj), [](const std::pair<int, float> a, const std::pair<int, float> b)->bool {return a.second > b.second; });
-		// 通过上面计算的序进行交换
-		population p_(p);
-		std::vector<float> td_(total_damage);
-		std::vector<float> th_(total_theft);
-		for (size_t i = 0; i < p.size(); i++) {
-			int index = index_to_obj[i].first;
-			p[i] = p_[index];
-			total_damage[i] = td_[index];
-			total_theft[i] = th_[index];
-		}
+
+	void one_frame_bot::sort_solutions(population& p, std::function<bool(const solution& a, const solution& b)> compare) {
+		std::sort(p.begin(), p.end(), compare);
 	}
-	solution one_frame_bot::select_one_solution(const population & p, std::vector<float> & d, std::vector<float> & h) {
-		float highest_fitness = m_damage_objective[0] - m_threat_objective[0];
-		solution selected_solution = m_population[0];
-		size_t index(0);
-		for (size_t i = 0; i < m_population.size(); i++) {
-			if (m_damage_objective[i] - m_threat_objective[i] > highest_fitness) {
-				selected_solution = m_population[i];
-				index = i;
-			}
-		}
-		Debug()->DebugTextOut("obj1: " + std::to_string(m_damage_objective[index]) + "\t");
-		Debug()->DebugTextOut("obj2: " + std::to_string(m_threat_objective[index]));
-		Debug()->SendDebug();
-		std::cout << "obj1:" << m_damage_objective[index] << "\t" << "obj2:" << m_threat_objective[index] << std::endl;
-		return selected_solution;
-	}
+
 	void one_frame_bot::deploy_solution(const solution & s) {
-		for (const command& c : s) {
-			const Unit* execute_unit = Observation()->GetUnit(std::get<0>(c));
-			const ActionRaw action = std::get<1>(c)[0];
+		for (const command& c : s.commands) {
+			const Unit* execute_unit = get_execution_unit(c);
+			const ActionRaw action = c.actions.front();
 			//todo check the target type
 			switch (action.target_type) {
 			case ActionRaw::TargetType::TargetNone:
@@ -658,10 +603,10 @@ namespace sc2 {
 	float one_frame_bot::evaluate_single_solution_damage_next_frame(const solution & s) {
 		float total_damage = 0.0f;
 		// for each unit in a solution
-		for (const auto& c : s) {
+		for (const auto& c : s.commands) {
 			const Unit* u_c = get_execution_unit(c);
-			if (!get_actions(c).empty()) {
-				const ActionRaw action = get_action(c, 0);
+			if (!c.actions.empty()) {
+				const ActionRaw action = c.actions.front();
 				switch (static_cast<ABILITY_ID>(action.ability_id)) {
 				case ABILITY_ID::ATTACK:
 					switch (action.target_type) {
@@ -704,7 +649,7 @@ namespace sc2 {
 		float total_hurt = 0.0f;
 		Units enemy_units = Observation()->GetUnits(Unit::Alliance::Enemy);
 		for (const Unit* u : enemy_units) {
-			Weapon u_weapon = Observation()->GetUnitTypeData()[u->unit_type].weapons[0];
+			Weapon u_weapon = Observation()->GetUnitTypeData()[u->unit_type].weapons.front();
 			float search_range = u_weapon.range + u->radius;
 			Units possible_targets = search_units_can_be_attacked_by_unit_in_solution(u, s);
 			const Unit* target(nullptr);
@@ -715,12 +660,12 @@ namespace sc2 {
 		}
 		return total_hurt;
 	}
-	float one_frame_bot::evaluate_single_solution_theft_next_frame(const solution & s) {
+	float one_frame_bot::evaluate_single_solution_threat_next_frame(const solution & s) {
 		float threat_sum = 0;
-		for (const auto& c : s) {
-			switch (static_cast<ABILITY_ID>(get_action(c, 0).ability_id)) {
+		for (const auto& c : s.commands) {
+			switch (static_cast<ABILITY_ID>(c.actions.front().ability_id)) {
 			case ABILITY_ID::MOVE:
-				threat_sum += threat_from_units_to_unit_new_pos(m_alive_enemy_units, get_execution_unit(c), get_action(c, 0).target_point);
+				threat_sum += threat_from_units_to_unit_new_pos(m_alive_enemy_units, get_execution_unit(c), c.actions.front().target_point);
 				break;
 			case ABILITY_ID::ATTACK:
 				threat_sum += threat_from_units_to_unit(m_alive_enemy_units, get_execution_unit(c));
