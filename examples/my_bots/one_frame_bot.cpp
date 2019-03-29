@@ -10,7 +10,7 @@
 namespace sc2 {
 
 	using population = std::vector<solution>;
-
+	using evaluator = std::function<float(const solution& s)>;
 
 	std::mutex evaluation_mutex;
 
@@ -250,7 +250,7 @@ namespace sc2 {
 		float distance = Distance2D(source_u->pos, pos);
 		float zero_potential_field_dis = calculate_zero_potential_field_distance(source_u, target_u);
 		if (zero_potential_field_dis != 0) {
-			threat = 1-distance / zero_potential_field_dis;
+			threat = 1 - distance / zero_potential_field_dis;
 			if (threat < 0) {
 				threat = 0;
 			}
@@ -381,7 +381,7 @@ namespace sc2 {
 		display_units_attack_action(debug, m_alive_self_units);
 		// until this step, those orders to debug are sent
 
-		if (m_alive_self_units.size() > 0&& m_alive_enemy_units.size()>0) {
+		if (m_alive_self_units.size() > 0 && m_alive_enemy_units.size() > 0) {
 			solution s = run();
 			deploy_solution(s);
 		}
@@ -560,8 +560,9 @@ namespace sc2 {
 		for (size_t i = 0; i < p.size(); i++) {
 			//? caution: the i must be copied rather than refered, or it will use the last value of it
 			threads[i] = std::thread{ [&,i]() {
-				p[i].objectives[0] = evaluate_single_solution_damage_next_frame(p[i]);
-				p[i].objectives[1] = evaluate_single_solution_theft_next_frame(p[i]);
+				for (size_t j = 0; j < m_evaluators.size(); j++) {
+				p[i].objectives[j] = m_evaluators[j](p[i]);
+			}
 			} };
 		}
 		for (auto& t : threads) {
@@ -570,13 +571,14 @@ namespace sc2 {
 		return;
 #else
 		for (size_t i = 0; i < p.size(); i++) {
-			p[i].objectives[0] = evaluate_single_solution_damage_next_frame(p[i]);
-			p[i].objectives[1] = evaluate_single_solution_threat_next_frame(p[i]);
+			for (size_t j = 0; j < m_evaluators.size(); j++) {
+				p[i].objectives[j] = m_evaluators[j](p[i]);
+			}
 		}
 #endif // MULTI_THREAD
 	}
 
-	void one_frame_bot::sort_solutions(population& p, std::function<bool(const solution& a, const solution& b)> compare) {
+	void one_frame_bot::sort_solutions(population & p, std::function<bool(const solution & a, const solution & b)> compare) {
 		std::sort(p.begin(), p.end(), compare);
 	}
 
@@ -677,7 +679,7 @@ namespace sc2 {
 		}
 		return threat_sum;
 	}
-	float one_frame_bot::evaluate_movement_advantage_next_frame(const solution& s) {
+	float one_frame_bot::evaluate_movement_advantage_next_frame(const solution & s) {
 		// todo finish it.
 		return 0.0f;
 	}

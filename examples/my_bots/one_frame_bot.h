@@ -171,8 +171,8 @@ namespace sc2 {
         const double m_killing_bonus_factor = 3;
 
         const int m_objective_number = 2; //! this must be properly set before it running
-        const int m_population_size = 20;
-        const int m_offspring_size = 20;
+        const int m_population_size = 10;
+        const int m_offspring_size = 10;
         const float m_muatation_rate = 0.1f;
         const float m_crossover_rate = 1;
         const double m_theta_mutate_step = 2 * PI / 10.;
