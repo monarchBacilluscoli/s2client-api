@@ -40,7 +40,7 @@ namespace sc2 {
         //? maybe a fixed value factor?
         // field parameters of enemy repulsive
         float m_er_max_factor = 1.f;
-        float m_er_range_factor = 1.f;
+        float m_er_range_factor = .8f; //
         // target select parameter
         float m_wasted_damage_threshold = 10;
 

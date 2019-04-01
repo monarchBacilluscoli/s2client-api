@@ -6,6 +6,7 @@
 #include<chrono>
 #include"utilities/Point2DPolar.h"
 #include<algorithm>
+#include<functional>
 
 namespace sc2 {
 
@@ -273,6 +274,43 @@ namespace sc2 {
 		}
 		return threat;
 	}
+
+	float one_frame_bot::advantage_from_units_to_unit(const Units & source_us, const Unit * target_u, const Point2D & pos) {
+		//todo select the maximum valve
+		//todo calculate effect of each unit
+		std::vector<float> advantages(source_us.size());
+		std::transform(source_us.begin(), source_us.end(), advantages.begin(), std::bind(&one_frame_bot::advantage_from_unit_to_unit,this, std::placeholders::_1 , target_u ,pos));
+		//todo select the maximum one
+		std::max_element(advantages.begin(), advantages.end());
+
+		return 0.0f;
+	}
+
+	float one_frame_bot::advantage_from_unit_to_unit(const Unit * source_u, const Unit * target_u, const Point2D & pos) {
+		float dis = Distance2D(source_u->pos, pos);
+		std::vector<Weapon> target_weapons = get_matched_weapons_without_considering_distance(target_u, source_u);
+
+		if (!target_weapons.empty()) {
+			float range = target_weapons.front().range;
+			if (range + source_u->radius + target_u->radius < dis) {
+				// outside
+				float ratio = (dis - range - target_u->radius - source_u->radius) / (advantage_range_factor*range + source_u->radius + target_u->radius);
+				if (ratio < 1) {
+					return damage_weapon_to_unit(target_weapons.front(), source_u)*ratio;
+				}
+				return 0.f;
+			}
+			else {
+				// inside
+				return damage_weapon_to_unit(target_weapons.front(), source_u)*dis / (range + source_u->radius + target_u->radius);
+			}
+		}
+		else {
+			return 0.f;
+		}
+	}
+
+	//todo it could be modified by adding movement speed of opponent unit
 	float one_frame_bot::calculate_zero_potential_field_distance(const Unit * source_u, const Unit * target_u) {
 		float dis;
 		std::vector<Weapon> source_weapons = get_matched_weapons_without_considering_distance(source_u, target_u);
@@ -286,6 +324,7 @@ namespace sc2 {
 			*/
 			if (source_range < target_range) {
 				dis = 0.7f * target_range + 0.3f * source_range + source_u->radius;
+				//? todo modified? 
 			}
 			/*
 			* for run
@@ -295,6 +334,7 @@ namespace sc2 {
 			}
 		}
 		else {
+			//todo there is a problem, if target_weapons is not empty and source_weapons is empty, how would it be?
 			return 0;
 		}
 		return dis;
@@ -679,8 +719,10 @@ namespace sc2 {
 		}
 		return threat_sum;
 	}
-	float one_frame_bot::evaluate_movement_advantage_next_frame(const solution & s) {
+	float one_frame_bot::evaluate_single_solution_advantage_next_frame(const solution & s) {
 		// todo finish it.
+		// todo The effective field must have a outer range. Or there will be some problems
+		
 		return 0.0f;
 	}
 }
