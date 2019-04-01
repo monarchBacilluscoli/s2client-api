@@ -43,7 +43,10 @@ namespace sc2 {
 	Vector2D advanced_potential_field_bot::force_to_unit(const Units& sources, const Unit* u) {
 		Vector2D force = { 0.f,0.f };
 		float max_attraction_value = 0.f;
-		const Unit* max_attactive_unit;
+		const Unit* max_attactive_unit = nullptr;
+		if (sources.empty()) {
+			return Vector2D(0.f,0.f);
+		}
 		for (const Unit* source : sources) {
 			if (source->alliance == Unit::Alliance::Self) {
 				force += force_ally_to_unit(source, u);
@@ -62,7 +65,9 @@ namespace sc2 {
 			}
 		}
 		//todo add the attraction to force;
-		force += max_attraction_value * Vector2D(max_attactive_unit->pos - u->pos) / Distance2D(u->pos, max_attactive_unit->pos);
+		if (max_attactive_unit!=nullptr) {
+			force += max_attraction_value * Vector2D(max_attactive_unit->pos - u->pos) / Distance2D(u->pos, max_attactive_unit->pos);
+		}
 		force += force_wall_to_unit(u);
 		return force;
 	}
@@ -124,6 +129,7 @@ namespace sc2 {
 		float e_cooldown_damage = e_damage * (e_attack_interval - enemy->weapon_cooldown) / e_attack_interval;
 		float u_fragile = unit->shield_max + unit->health_max - unit->shield - unit->health;
 
+		// consider the fire range and movement speed
 		float raw_range = weapon.range + m_unit_types[enemy->unit_type].movement_speed * m_step_size / sc2utility::frames_per_second + enemy->radius + unit->radius;
 
 		//float slope = e_damage + e_cooldown_damage + u_fragile;

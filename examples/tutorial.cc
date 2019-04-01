@@ -13,13 +13,21 @@ using namespace sc2;
 class human_control :public Agent {
     void OnGameStart() {
         initial_units = Observation()->GetUnits();
+        Control()->Save();
     }
     void OnStep() {
-        ;
+        if (Observation()->GetGameLoop() % 100 == 0) {
+            Control()->Load();
+        }
     }
     Units initial_units;
 };
 
+class no_action:public Agent {
+public:
+    no_action() = default;
+    ~no_action() = default;
+};
 
 int main(int argc, char* argv[]) {
     int step_size = 1;
@@ -27,11 +35,14 @@ int main(int argc, char* argv[]) {
     for (size_t i = 0; i < 2; i++) {
         Coordinator coordinator; // coordinator（协调器）负责控制游戏进行中、进行前等等的设置
         std::cout << "LoadSettings: " << coordinator.LoadSettings(argc, argv) << std::endl; // 读取设置参数
-        coordinator.SetRealtime(false); // 设置游戏是否以真实速度进行
+        coordinator.SetRealtime(false);
+        //coordinator.SetRealtime(true);
         coordinator.SetStepSize(step_size); // 设置游戏循环步长
         coordinator.SetMultithreaded(true);
 
-        Bot bot; // bot can only say hello
+
+        no_action na_bot;
+        Bot bot; // traditional rule-based bot
         random_bot bot2, bot3;
         human_control bot0;
         one_frame_bot of_bot;
@@ -42,11 +53,12 @@ int main(int argc, char* argv[]) {
 
         coordinator.SetParticipants({ // 初始化阵营么
             //CreateComputer(Race::Terran),
+            //CreateParticipant(Race::Terran, &na_bot), // a bot without any actions
             //CreateParticipant(Race::Terran, &bot0), // 人类玩家
-            CreateParticipant(Race::Terran, &of_bot), // one frame bot
+            //CreateParticipant(Race::Terran, &of_bot), // one frame bot
             //CreateParticipant(Race::Terran, &bot3), // random bot
             //CreateParticipant(Race::Terran, &pf_bot), //potential field bot
-            //CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
+            CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
 
             //CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
 
@@ -59,10 +71,12 @@ int main(int argc, char* argv[]) {
         //coordinator.StartGame(sc2::kMapBelShirVestigeLE); // 标准对局地图
         //coordinator.StartGame("..\\maps\\Test\\testBattle.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_2distant_vs_1melee.SC2Map");
-        coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
+        //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_distant.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_no_enemy.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattleAllUnits.SC2Map");
+        //coordinator.StartGame("..\\maps\\Test\\testBattle_d_m_vs_d_m.SC2Map");
+        coordinator.StartGame("..\\maps\\Test\\testBattle_m_vs_d.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle1v1.SC2Map"); // 1v1静止测试
 
 

@@ -62,9 +62,11 @@ namespace sc2 {
 
         void sort_solutions(population& p, std::function<bool(const solution& a, const solution& b)> compare);
 
-            //solution select_one_solution(const population& p);
-            //todo deploy
-            void deploy_solution(const solution & s);
+        // For multi-objective algorithm. Choose a solution for deployment
+        void select_solution(const population& p);
+
+        // deploy
+        void deploy_solution(const solution & s);
 
         // evaluate damage to opponent of single solution
         float evaluate_single_solution_damage_next_frame(const solution & s);
@@ -73,7 +75,7 @@ namespace sc2 {
         //
         float evaluate_single_solution_threat_next_frame(const solution & s);
         // evaluate potential advantage caused by movement next frame
-        float evaluate_movement_advantage_next_frame(const solution & s);
+        float evaluate_single_solution_advantage_next_frame(const solution & s);
 
 
         // some utility functions don't belong to the evolutionay algorithm
@@ -128,7 +130,10 @@ namespace sc2 {
 
         float threat_from_units_to_unit(const Units & source_us, const Unit * target_u);
         float threat_from_units_to_unit_new_pos(const Units & source_us, const Unit * target_u, const Point2D & pos);
-        //
+        //todo advantage
+        float advantage_from_units_to_unit(const Units & source_us, const Unit* target_u, const Point2D & pos);
+        float advantage_from_unit_to_unit(const Unit* source_u, const Unit* target_u, const Point2D & pos);
+
         float calculate_zero_potential_field_distance(const Unit * source_u, const Unit * target_u);
 
         const Unit * get_execution_unit(const command & c);
@@ -167,6 +172,7 @@ namespace sc2 {
         const int m_frames_per_deploy = 12;
         const int command_length = 1;
         const float zero_potential_energy_ratio = 0.8f;
+        const float advantage_range_factor = 3.f;
         const double m_attack_prob = 1;
         const double m_killing_bonus_factor = 3;
 
