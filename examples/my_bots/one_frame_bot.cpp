@@ -65,7 +65,7 @@ namespace sc2 {
 		// get the longest weapon of u and search units within its range
 		std::vector<Weapon> weapons = m_unit_types[u->unit_type].weapons;
 		Weapon longest = get_longest_range_weapon_of_weapons(weapons);
-		units_can_be_attacked = search_units_within_radius(u->pos, longest.range, a);
+		units_can_be_attacked = search_units_within_radius(u->pos, longest.range+u->radius, a);
 		// check if every unit of them can be attacked by each weapon (range & type)
 		for (Units::iterator i = units_can_be_attacked.begin(); i < units_can_be_attacked.end(); i++) {
 			if (!is_attackable(u, *i)) {
@@ -74,10 +74,9 @@ namespace sc2 {
 		}
 		return units_can_be_attacked;
 	}
-
-	//? this must be modified, because it don't have to search the center of a unit
 	Units one_frame_bot::search_units_within_radius(const Point2D& p, float r, Unit::Alliance a) {
 		Units us = Observation()->GetUnits(a, [&p, r](const Unit & u) {
+			// As long as the unit can be touched
 			if (Distance2D(u.pos, p) <= r + u.radius)
 				return true;
 			else
@@ -265,25 +264,27 @@ namespace sc2 {
 		for (const Unit* u : source_us) {
 			threat += threat_from_unit_to_unit(u, target_u);
 		}
-		return threat;
+		return -threat;
 	}
 	float one_frame_bot::threat_from_units_to_unit_new_pos(const Units & source_us, const Unit * target_u, const Point2D & pos) {
 		float threat = 0.f;
 		for (const Unit* u : source_us) {
 			threat += threat_from_unit_to_unit_new_pos(u, target_u, pos);
 		}
-		return threat;
+		return -threat;
 	}
 
 	float one_frame_bot::advantage_from_units_to_unit(const Units & source_us, const Unit * target_u, const Point2D & pos) {
-		//todo select the maximum valve
-		//todo calculate effect of each unit
+		// use the maximum valve for the return value
+		// calculate effect from each unit
+		if (source_us.empty()) {
+			return 0.f;
+		}
 		std::vector<float> advantages(source_us.size());
+		//? how can I use lambda here? I can't use lambda to call private mumber functions of this class
 		std::transform(source_us.begin(), source_us.end(), advantages.begin(), std::bind(&one_frame_bot::advantage_from_unit_to_unit,this, std::placeholders::_1 , target_u ,pos));
-		//todo select the maximum one
-		std::max_element(advantages.begin(), advantages.end());
-
-		return 0.0f;
+		// select the maximum one
+		return *std::max_element(advantages.begin(), advantages.end());
 	}
 
 	float one_frame_bot::advantage_from_unit_to_unit(const Unit * source_u, const Unit * target_u, const Point2D & pos) {
@@ -293,7 +294,7 @@ namespace sc2 {
 		if (!target_weapons.empty()) {
 			float range = target_weapons.front().range;
 			if (range + source_u->radius + target_u->radius < dis) {
-				// outside
+				// outside the fire circle
 				float ratio = (dis - range - target_u->radius - source_u->radius) / (advantage_range_factor*range + source_u->radius + target_u->radius);
 				if (ratio < 1) {
 					return damage_weapon_to_unit(target_weapons.front(), source_u)*ratio;
@@ -301,7 +302,7 @@ namespace sc2 {
 				return 0.f;
 			}
 			else {
-				// inside
+				// inside the fire circle
 				return damage_weapon_to_unit(target_weapons.front(), source_u)*dis / (range + source_u->radius + target_u->radius);
 			}
 		}
@@ -437,6 +438,7 @@ namespace sc2 {
 	void one_frame_bot::OnGameEnd() {
 		Actions()->SendChat("GG!");
 	}
+	//todo There is a problem which make the melee units unable to attack
 	solution one_frame_bot::generate_random_solution() {
 		solution so(m_alive_self_units.size(), m_objective_number);
 		size_t alive_allies_number = m_alive_self_units.size();
@@ -567,8 +569,6 @@ namespace sc2 {
 			auto inner_start = std::chrono::steady_clock::now();
 #endif // DEBUG
 			population offspring;
-			std::vector<float> ofs_d_o;
-			std::vector<float> ofs_t_o;
 			generate_offspring(m_population, offspring, m_offspring_size);
 			//todo I don't need to calculate parents' objectives again
 			//todo Note here could be some mistakes
@@ -642,6 +642,7 @@ namespace sc2 {
 			}
 		}
 	}
+	// todo Here I should consider other abilities
 	float one_frame_bot::evaluate_single_solution_damage_next_frame(const solution & s) {
 		float total_damage = 0.0f;
 		// for each unit in a solution
@@ -675,7 +676,7 @@ namespace sc2 {
 					}
 					case ActionRaw::TargetType::TargetNone:
 					default:
-						//todo I haven't came up with a way to handle it, maybe the priciple is to attack the nearest enemy unit
+						//todo I haven't came up with a way to handle it, maybe the principle is to attack the nearest enemy unit
 						break;
 					}
 					break;
@@ -703,7 +704,7 @@ namespace sc2 {
 		return total_hurt;
 	}
 	float one_frame_bot::evaluate_single_solution_threat_next_frame(const solution & s) {
-		float threat_sum = 0;
+		float threat_sum = 0.f;
 		for (const auto& c : s.commands) {
 			switch (static_cast<ABILITY_ID>(c.actions.front().ability_id)) {
 			case ABILITY_ID::MOVE:
@@ -719,11 +720,24 @@ namespace sc2 {
 		}
 		return threat_sum;
 	}
-	float one_frame_bot::evaluate_single_solution_advantage_next_frame(const solution & s) {
+	float one_frame_bot::evaluate_single_solution_advantage_next_frame(const solution& s) {
 		// todo finish it.
-		// todo The effective field must have a outer range. Or there will be some problems
-		
-		return 0.0f;
+		float advantage_sum = 0.f;
+		for (const auto& c : s.commands) {
+			switch (static_cast<ABILITY_ID>(c.actions.front().ability_id)) {
+			case ABILITY_ID::MOVE:
+				advantage_sum += advantage_from_units_to_unit(m_alive_enemy_units, get_execution_unit(c), c.actions.front().target_point);
+				break;
+			case ABILITY_ID::ATTACK:
+				advantage_sum += advantage_from_units_to_unit(m_alive_enemy_units, get_execution_unit(c), get_execution_unit(c)->pos);
+				break;
+			default:
+				throw("there is no brunch to handle this ability@one_frame_bot::evaluate_single_solution_advantage_next_frame");
+				break;
+			}
+		}
+
+		return advantage_sum;
 	}
 }
 

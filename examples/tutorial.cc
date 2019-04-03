@@ -55,10 +55,10 @@ int main(int argc, char* argv[]) {
             //CreateComputer(Race::Terran),
             //CreateParticipant(Race::Terran, &na_bot), // a bot without any actions
             //CreateParticipant(Race::Terran, &bot0), // 人类玩家
-            //CreateParticipant(Race::Terran, &of_bot), // one frame bot
+            CreateParticipant(Race::Terran, &of_bot), // one frame bot
             //CreateParticipant(Race::Terran, &bot3), // random bot
             //CreateParticipant(Race::Terran, &pf_bot), //potential field bot
-            CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
+            //CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
 
             //CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
 
@@ -71,12 +71,12 @@ int main(int argc, char* argv[]) {
         //coordinator.StartGame(sc2::kMapBelShirVestigeLE); // 标准对局地图
         //coordinator.StartGame("..\\maps\\Test\\testBattle.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_2distant_vs_1melee.SC2Map");
-        //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
+        coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_distant.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_no_enemy.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattleAllUnits.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_d_m_vs_d_m.SC2Map");
-        coordinator.StartGame("..\\maps\\Test\\testBattle_m_vs_d.SC2Map");
+        //coordinator.StartGame("..\\maps\\Test\\testBattle_m_vs_d.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle1v1.SC2Map"); // 1v1静止测试
 
 

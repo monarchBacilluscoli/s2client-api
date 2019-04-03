@@ -25,10 +25,12 @@ namespace sc2 {
             m_threat_objective.reserve(m_population_size + m_offspring_size);
 
             //! MUST register evaluators here FIRST!
-            m_evaluators.resize(2);
+            m_objective_number = 3;
+            m_evaluators.resize(m_objective_number);
             //? why I should use &one_frame_bot rather than this-> ???
             m_evaluators[0] = std::bind(&one_frame_bot::evaluate_single_solution_damage_next_frame, this, _1);
             m_evaluators[1] = std::bind(&one_frame_bot::evaluate_single_solution_threat_next_frame, this, _1);
+            m_evaluators[2] = std::bind(&one_frame_bot::evaluate_single_solution_advantage_next_frame, this, _1);
         }
         ~one_frame_bot() = default;
 
@@ -172,11 +174,11 @@ namespace sc2 {
         const int m_frames_per_deploy = 12;
         const int command_length = 1;
         const float zero_potential_energy_ratio = 0.8f;
-        const float advantage_range_factor = 3.f;
+        const float advantage_range_factor = 3.f; // how long the attractive field from enemies can reach
         const double m_attack_prob = 1;
         const double m_killing_bonus_factor = 3;
 
-        const int m_objective_number = 2; //! this must be properly set before it running
+        int m_objective_number; 
         const int m_population_size = 10;
         const int m_offspring_size = 10;
         const float m_muatation_rate = 0.1f;
