@@ -22,10 +22,6 @@ namespace sc2 {
 
 	// Simply add up all the objectives without considering weights
 	bool simple_sum_smaller(const solution& a, const solution& b) {
-		/*float as = std::accumulate(a.objectives.begin(), a.objectives.end(), 0.f);
-		float bs = std::accumulate(b.objectives.begin(), b.objectives.end(), 0.f);
-		bool smaller = as < bs;
-		return smaller;*/
 		//! be careful to use std::accumulate and pay attention to the last parameter of this function, the return value's type depends on it.
 		return std::accumulate(a.objectives.begin(), a.objectives.end(), 0.f) > std::accumulate(b.objectives.begin(), b.objectives.end(), 0.f);
 	}

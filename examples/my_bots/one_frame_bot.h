@@ -171,7 +171,6 @@ namespace sc2 {
         UnitTypeData m_marine; // for convenient
 
         // algorithm configuration
-        const int m_frames_per_deploy = 12;
         const int command_length = 1;
         const float zero_potential_energy_ratio = 0.8f;
         const float advantage_range_factor = 3.f; // how long the attractive field from enemies can reach
