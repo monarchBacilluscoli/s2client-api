@@ -313,31 +313,35 @@ namespace sc2 {
 
 	//todo it could be modified by adding movement speed of opponent unit
 	float one_frame_bot::calculate_zero_potential_field_distance(const Unit * source_u, const Unit * target_u) {
-		float dis;
 		std::vector<Weapon> source_weapons = get_matched_weapons_without_considering_distance(source_u, target_u);
 		std::vector<Weapon> target_weapons = get_matched_weapons_without_considering_distance(target_u, source_u);
+		//if (!source_weapons.empty() && !target_weapons.empty()) {
+		//	float target_range = target_weapons.front().range;
+		//	float source_range = source_weapons.front().range;
+		//	/*
+		//	* for hit-and-run
+		//	*/
+		//	if (source_range < target_range) {
+		//		dis = 0.7f * target_range + 0.3f * source_range + source_u->radius;
+		//		//? todo modified? 
+		//	}
+		//	/*
+		//	* for run
+		//	*/
+		//	else {
+		//		dis = source_range + source_u->radius + target_u->radius;
+		//	}
+		//}
+		//else {
+		//	//todo there is a problem, if target_weapons is not empty and source_weapons is empty, how would it be?
+		//	return 0;
+		//}
+		if (source_weapons.empty()) {
+			return 0.f;
+		}
+		float source_range = target_weapons.front().range;
+		float dis = source_range + m_unit_types[source_u->unit_type].movement_speed/ m_frames_per_second + source_u->radius + target_u->radius;
 
-		if (!source_weapons.empty() && !target_weapons.empty()) {
-			float target_range = target_weapons.front().range;
-			float source_range = source_weapons.front().range;
-			/*
-			* for hit-and-run
-			*/
-			if (source_range < target_range) {
-				dis = 0.7f * target_range + 0.3f * source_range + source_u->radius;
-				//? todo modified? 
-			}
-			/*
-			* for run
-			*/
-			else {
-				dis = source_range + source_u->radius + target_u->radius;
-			}
-		}
-		else {
-			//todo there is a problem, if target_weapons is not empty and source_weapons is empty, how would it be?
-			return 0;
-		}
 		return dis;
 	}
 	const Unit* one_frame_bot::get_execution_unit(const command & c) {
