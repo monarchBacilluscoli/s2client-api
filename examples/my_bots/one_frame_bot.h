@@ -126,13 +126,12 @@ namespace sc2 {
         // real distance between two units (without two radiuses)
         float real_distance_between_two_units(const Unit * u1, const Unit * u2);
 
-
         float threat_from_unit_to_unit(const Unit * source_u, const Unit * target_u);
         float threat_from_unit_to_unit_new_pos(const Unit * source_u, const Unit * target_u, const Point2D & pos);
 
         float threat_from_units_to_unit(const Units & source_us, const Unit * target_u);
         float threat_from_units_to_unit_new_pos(const Units & source_us, const Unit * target_u, const Point2D & pos);
-        //todo advantage
+        // position's advantage calculation
         float advantage_from_units_to_unit(const Units & source_us, const Unit* target_u, const Point2D & pos);
         float advantage_from_unit_to_unit(const Unit* source_u, const Unit* target_u, const Point2D & pos);
 
@@ -191,7 +190,6 @@ namespace sc2 {
         population m_population;
         std::vector<float> m_damage_objective;
         std::vector<float> m_threat_objective;
-        solution m_selected_solution; //todo: useless
         std::vector<evaluator> m_evaluators;
     };
 

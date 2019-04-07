@@ -25,6 +25,7 @@ namespace sc2 {
 
         std::vector<float> objectives;
         std::vector<command> commands;
+        int rank = 0;
     };
 
     bool multi_smaller(const solution& a, const solution& b);
