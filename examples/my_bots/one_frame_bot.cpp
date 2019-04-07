@@ -377,7 +377,7 @@ namespace sc2 {
 	void one_frame_bot::display_units_move_action(DebugInterface * debug, const Units & us) {
 		for (auto u : us) {
 			if (!(u->orders.empty()) && u->orders.front().ability_id == ABILITY_ID::MOVE) {
-				//todo there must be something to do
+				//todo no code here
 			}
 		}
 	}
@@ -404,7 +404,6 @@ namespace sc2 {
 		m_alive_enemy_units = Observation()->GetUnits(Unit::Alliance::Enemy);
 		m_all_alive_units = Observation()->GetUnits();
 		m_unit_types = Observation()->GetUnitTypeData();
-		m_marine = m_unit_types[static_cast<int>(UNIT_TYPEID::TERRAN_MARINE)]; //? useless
 
 		Actions()->SendChat("GGHF");
 	}
@@ -575,7 +574,6 @@ namespace sc2 {
 			population offspring;
 			generate_offspring(m_population, offspring, m_offspring_size);
 			//todo I don't need to calculate parents' objectives again
-			//todo Note here could be some mistakes
 			evaluate_solutions(offspring);
 			m_population.insert(m_population.begin(), offspring.begin(), offspring.end());
 
@@ -599,7 +597,6 @@ namespace sc2 {
 	void one_frame_bot::evaluate_solutions(population & p) {
 
 #ifdef MULTI_THREAD
-		//todo here I need to do some changes
 		std::vector<std::thread> threads(p.size());
 		for (size_t i = 0; i < p.size(); i++) {
 			//? caution: the i must be copied rather than refered, or it will use the last value of it
@@ -725,7 +722,6 @@ namespace sc2 {
 		return threat_sum;
 	}
 	float one_frame_bot::evaluate_single_solution_advantage_next_frame(const solution& s) {
-		// todo finish it.
 		float advantage_sum = 0.f;
 		for (const auto& c : s.commands) {
 			switch (static_cast<ABILITY_ID>(c.actions.front().ability_id)) {
