@@ -7,6 +7,7 @@
 #include"utilities/Point2DPolar.h"
 #include<algorithm>
 #include<functional>
+#include"utilities/debug_utility.h"
 
 namespace sc2 {
 
@@ -348,56 +349,56 @@ namespace sc2 {
 		return Observation()->GetUnit(c.unit_tag);
 	}
 
-	void one_frame_bot::display_fire_range(DebugInterface * debug, const Units & us) {
-		for (auto u : us) {
-			std::vector<Weapon> weapons = Observation()->GetUnitTypeData()[u->unit_type].weapons;
-			Color sphere_color = Colors::Blue;
-			if (u->alliance == Unit::Alliance::Self || u->alliance == Unit::Alliance::Ally) {
-				sphere_color = Colors::Red;
-			}
-			for (auto& w : weapons) {
-				debug->DebugSphereOut(u->pos, w.range, sphere_color);
-			}
-		}
-	}
-	void one_frame_bot::display_units_collision_range(DebugInterface * debug, const Units & us) {
-		for (auto u : us) {
-			debug->DebugSphereOut(u->pos, u->radius);
-		}
-	}
-	void one_frame_bot::display_units_pos(DebugInterface * debug, const Units & us) {
-		for (auto u : us) {
-			//if (u->is_selected) {
-			std::string pos_info;
-			pos_info = std::to_string(u->pos.x) + ", " + std::to_string(u->pos.y) + "," + std::to_string(u->pos.z);
-			debug->DebugTextOut(pos_info, u->pos, Colors::Green);
-			//}
-		}
-	}
-	void one_frame_bot::display_units_move_action(DebugInterface * debug, const Units & us) {
-		for (auto u : us) {
-			if (!(u->orders.empty()) && u->orders.front().ability_id == ABILITY_ID::MOVE) {
-				//todo no code here
-			}
-		}
-	}
-	void one_frame_bot::display_units_attack_action(DebugInterface * debug, const Units & us) {
-		for (const Unit* u : us) {
-			if (u->is_selected) {
-				std::string attack_info;
-				attack_info = std::to_string(u->weapon_cooldown);
-				debug->DebugTextOut(attack_info, u->pos, Colors::Red);
-				std::cout << attack_info << std::endl;
-			}
-		}
-	}
-	void one_frame_bot::display_movement(DebugInterface * debug, const Units & us) {
-		for (const Unit* u : us) {
-			if (u->is_selected) {
-				std::cout << u->pos.x << '\t' << u->pos.y << std::endl;
-			}
-		}
-	}
+	//void one_frame_bot::display_fire_range(DebugInterface * debug, const Units & us) {
+	//	for (auto u : us) {
+	//		std::vector<Weapon> weapons = Observation()->GetUnitTypeData()[u->unit_type].weapons;
+	//		Color sphere_color = Colors::Blue;
+	//		if (u->alliance == Unit::Alliance::Self || u->alliance == Unit::Alliance::Ally) {
+	//			sphere_color = Colors::Red;
+	//		}
+	//		for (auto& w : weapons) {
+	//			debug->DebugSphereOut(u->pos, w.range, sphere_color);
+	//		}
+	//	}
+	//}
+	//void one_frame_bot::display_units_collision_range(DebugInterface * debug, const Units & us) {
+	//	for (auto u : us) {
+	//		debug->DebugSphereOut(u->pos, u->radius);
+	//	}
+	//}
+	//void one_frame_bot::display_units_pos(DebugInterface * debug, const Units & us) {
+	//	for (auto u : us) {
+	//		//if (u->is_selected) {
+	//		std::string pos_info;
+	//		pos_info = std::to_string(u->pos.x) + ", " + std::to_string(u->pos.y) + "," + std::to_string(u->pos.z);
+	//		debug->DebugTextOut(pos_info, u->pos, Colors::Green);
+	//		//}
+	//	}
+	//}
+	//void one_frame_bot::display_units_move_action(DebugInterface * debug, const Units & us) {
+	//	for (auto u : us) {
+	//		if (!(u->orders.empty()) && u->orders.front().ability_id == ABILITY_ID::MOVE) {
+	//			//todo no code here
+	//		}
+	//	}
+	//}
+	//void one_frame_bot::display_units_attack_action(DebugInterface * debug, const Units & us) {
+	//	for (const Unit* u : us) {
+	//		if (u->is_selected) {
+	//			std::string attack_info;
+	//			attack_info = std::to_string(u->weapon_cooldown);
+	//			debug->DebugTextOut(attack_info, u->pos, Colors::Red);
+	//			std::cout << attack_info << std::endl;
+	//		}
+	//	}
+	//}
+	//void one_frame_bot::display_movement(DebugInterface * debug, const Units & us) {
+	//	for (const Unit* u : us) {
+	//		if (u->is_selected) {
+	//			std::cout << u->pos.x << '\t' << u->pos.y << std::endl;
+	//		}
+	//	}
+	//}
 	void one_frame_bot::OnGameStart() {
 		// initialize some data
 		m_alive_self_units = Observation()->GetUnits(Unit::Alliance::Self);
@@ -414,10 +415,12 @@ namespace sc2 {
 		m_all_alive_units = Observation()->GetUnits();
 		m_game_info = Observation()->GetGameInfo();
 
-		//! Debug部分
-		// 输出线框
+		//! Debug显示部分
 		DebugInterface* debug = Debug();
-		display_fire_range(debug, m_all_alive_units);
+		//? for test
+		debug->DebugBoxOut(Point3D(20, 16,0), Point3D(30, 28,10 ));
+
+		display_fire_range(debug, m_all_alive_units, m_unit_types);
 		display_units_collision_range(debug, m_all_alive_units);
 		//display_units_pos(debug, m_all_alive_units);
 		//display_movement(debug, m_alive_self_units);
@@ -562,7 +565,7 @@ namespace sc2 {
 		// 评估所有解
 		evaluate_solutions(m_population);
 		// 对解进行排序
-		sort_solutions(m_population, simple_sum_smaller);
+		sort_solutions(m_population, m_compare_function);
 		// 循环演化
 #ifdef DEBUG
 		auto start = std::chrono::steady_clock::now();
@@ -577,7 +580,7 @@ namespace sc2 {
 			evaluate_solutions(offspring);
 			m_population.insert(m_population.begin(), offspring.begin(), offspring.end());
 
-			sort_solutions(m_population, simple_sum_smaller);
+			sort_solutions(m_population, m_compare_function);
 			m_population.erase(m_population.begin() + m_population_size, m_population.end());
 #ifdef DEBUG
 			auto inner_end = std::chrono::steady_clock::now();

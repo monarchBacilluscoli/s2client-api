@@ -71,8 +71,8 @@ int main(int argc, char* argv[]) {
         //coordinator.StartGame(sc2::kMapBelShirVestigeLE); // 标准对局地图
         //coordinator.StartGame("..\\maps\\Test\\testBattle.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_2distant_vs_1melee.SC2Map");
-        coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
-        //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_distant.SC2Map");
+        //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
+        coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_distant.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_no_enemy.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattleAllUnits.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_d_m_vs_d_m.SC2Map");

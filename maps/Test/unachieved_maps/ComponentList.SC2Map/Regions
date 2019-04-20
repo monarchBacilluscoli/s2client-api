@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Regions>
+    <region id="1">
+        <name value="SpawnRegion1"/>
+        <shape type="rect">
+            <quad value="12,16,20,32"/>
+        </shape>
+    </region>
+    <region id="2">
+        <name value="SpawnRegion2"/>
+        <shape type="rect">
+            <quad value="28,16,36,32"/>
+        </shape>
+    </region>
+    <region id="3">
+        <name value="PlayableRegion"/>
+        <shape type="rect">
+            <quad value="8,8,40,40"/>
+        </shape>
+    </region>
+</Regions>
