@@ -9,6 +9,9 @@ namespace sc2 {
     struct command {
         Tag unit_tag;
         RawActions actions;
+
+        bool operator==(const command& rhs)const;
+        bool operator!=(const command& rhs)const;
     };
 
     // many command make up a sulution
@@ -26,12 +29,17 @@ namespace sc2 {
         std::vector<float> objectives;
         std::vector<command> commands;
         int rank = 0;
+
+        bool operator==(const solution& rhs) const;
+        bool operator!=(const solution& rhs) const;
     };
 
-    bool multi_smaller(const solution& a, const solution& b);
+    bool multi_greater(const solution& a, const solution& b);
 
     // Simply add up all the objectives without considering weights
-    bool simple_sum_smaller(const solution& a, const solution& b);
+    bool simple_sum_greater(const solution& a, const solution& b);
+    //! just for test.
+    //bool no_compare(const solution& a, const solution& b);
 }
 
 #endif // !SOLUTION_H

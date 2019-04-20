@@ -139,17 +139,16 @@ namespace sc2 {
 
         const Unit * get_execution_unit(const command & c);
 
-
-        // for debug
-        void display_fire_range(DebugInterface * debug, const Units & all_units);
-        void display_units_collision_range(DebugInterface * debug, const Units & us);
-        void display_units_pos(DebugInterface * debug, const Units & us);
-        void display_map_grid(const GameInfo & info);
-        void display_unis_actions();
-        void display_units_move_action(DebugInterface * debug, const Units & us);
-        void display_units_attack_action(DebugInterface * debug, const Units & us);
-        void display_solution_line(DebugInterface * debug, const solution s);
-        void display_movement(DebugInterface * debug, const Units & us);
+        //// for debug
+        //void display_fire_range(DebugInterface * debug, const Units & all_units);
+        //void display_units_collision_range(DebugInterface * debug, const Units & us);
+        //void display_units_pos(DebugInterface * debug, const Units & us);
+        //void display_map_grid(const GameInfo & info);
+        //void display_unis_actions();
+        //void display_units_move_action(DebugInterface * debug, const Units & us);
+        //void display_units_attack_action(DebugInterface * debug, const Units & us);
+        //void display_solution_line(DebugInterface * debug, const solution s);
+        //void display_movement(DebugInterface * debug, const Units & us);
 
 
 
@@ -175,6 +174,7 @@ namespace sc2 {
         const float advantage_range_factor = 3.f; // how long the attractive field from enemies can reach
         const double m_attack_prob = 1;
         const double m_killing_bonus_factor = 3;
+        std::function<bool(const solution&, const solution&)> m_compare_function = multi_greater;
 
         int m_objective_number; 
         const int m_population_size = 10;
@@ -183,8 +183,6 @@ namespace sc2 {
         const float m_crossover_rate = 1;
         const double m_theta_mutate_step = 2 * PI / 10.;
         const int m_produce_times = 20;
-
-
 
         // algorithm content
         population m_population;

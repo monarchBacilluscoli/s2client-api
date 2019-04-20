@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PlacedObjects Version="27">
+    <ObjectCamera Id="1420650544" Position="24,24,0" Rotation="3.14" Scale="1,1,1" Name="InitialCamera" Color="0,0,0,0" CameraTarget="24,24">
+        <CameraValue Index="FieldOfView" Value="27.7995"/>
+        <CameraValue Index="NearClip" Value="0.0998"/>
+        <CameraValue Index="FarClip" Value="600"/>
+        <CameraValue Index="ShadowClip" Value="75"/>
+        <CameraValue Index="Distance" Value="55.518"/>
+        <CameraValue Index="Pitch" Value="90"/>
+        <CameraValue Index="Yaw" Value="179.9025"/>
+        <CameraValue Index="FocalDepth" Value="8"/>
+        <CameraValue Index="FalloffStart" Value="0.0002"/>
+        <CameraValue Index="FalloffEnd" Value="8"/>
+        <CameraValue Index="FalloffStartNear" Value="0.0002"/>
+        <CameraValue Index="FalloffEndNear" Value="0.0002"/>
+        <CameraValue Index="BokehFStop" Value="0.0163"/>
+        <CameraValue Index="BokehMaxCoC" Value="1"/>
+    </ObjectCamera>
+    <ObjectCamera Id="959523384" Position="24.181,19.8251,0" Rotation="3.14" Scale="1,1,1" Name="InitialCameraNear" Color="0,0,0,0" CameraTarget="24.181,19.8251">
+        <CameraValue Index="FieldOfView" Value="27.7998"/>
+        <CameraValue Index="NearClip" Value="0.0998"/>
+        <CameraValue Index="FarClip" Value="600"/>
+        <CameraValue Index="ShadowClip" Value="75"/>
+        <CameraValue Index="Distance" Value="34.4724"/>
+        <CameraValue Index="Pitch" Value="90"/>
+        <CameraValue Index="Yaw" Value="179.9165"/>
+        <CameraValue Index="FocalDepth" Value="8"/>
+        <CameraValue Index="FalloffEnd" Value="8"/>
+    </ObjectCamera>
+    <ObjectUnit Id="1483146061" Position="12.5,25.5,0" Rotation="1.6054" Scale="1,1,1" UnitType="Roach" Player="1">
+        <Flag Index="UnitNoCreate" Value="1"/>
+    </ObjectUnit>
+    <ObjectUnit Id="1490165716" Position="32,22,0" Rotation="0.3957" Scale="1,1,1" UnitType="Roach" Player="2"/>
+    <ObjectUnit Id="1575923895" Position="32,24.5,0" Rotation="1.5917" Scale="1,1,1" UnitType="Zergling" Player="2"/>
+    <ObjectUnit Id="226986395" Position="18.5,26,0" Rotation="1.3366" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="1879371446" Position="29.5,23,0" Rotation="1.6052" Scale="1,1,1" UnitType="Roach" Player="2"/>
+    <ObjectUnit Id="1909908513" Position="15,27,0" Rotation="1.592" Scale="1,1,1" UnitType="Zergling" Player="1"/>
+    <ObjectUnit Id="1147379976" Position="11,21,0" Rotation="6.058" Scale="1,1,1" UnitType="Stalker" Player="1"/>
+    <ObjectUnit Id="1390418914" Position="18.5,29,0" Rotation="1.3364" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="498855986" Position="16.5,28,0" Rotation="0.8923" Scale="1,1,1" UnitType="Roach" Player="1"/>
+    <ObjectUnit Id="1480646366" Position="27.5,23,0" Rotation="3.3005" Scale="1,1,1" UnitType="Marine" Player="2"/>
+    <ObjectUnit Id="1212601373" Position="27.5,22,0" Rotation="2.7053" Scale="1,1,1" UnitType="Marine" Player="2"/>
+    <ObjectUnit Id="1121501694" Position="13.5,25.5,0" Rotation="1.756" Scale="1,1,1" UnitType="Zergling" Player="1"/>
+    <ObjectUnit Id="1252837691" Position="17.5,24.5,0" Rotation="6.016" Scale="1,1,1" UnitType="Zergling" Player="1"/>
+    <ObjectUnit Id="729653275" Position="28,27.5,0" Rotation="4.0966" Scale="1,1,1" UnitType="Marine" Player="2"/>
+    <ObjectUnit Id="637025656" Position="27,26,0" Rotation="2.361" Scale="1,1,1" UnitType="Stalker" Player="2"/>
+    <ObjectUnit Id="356476782" Position="30,25.5,0" Rotation="6.0578" Scale="1,1,1" UnitType="Stalker" Player="2"/>
+    <ObjectUnit Id="1549044103" Position="28,28.5,0" Rotation="2.5944" Scale="1,1,1" UnitType="Marine" Player="2"/>
+    <ObjectUnit Id="862417047" Position="19.5,24,0" Rotation="5.6657" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="711181865" Position="34,14.5,0" Rotation="6.0158" Scale="1,1,1" UnitType="Zergling" Player="2"/>
+    <ObjectUnit Id="1311321648" Position="28.5,25,0" Rotation="0.892" Scale="1,1,1" UnitType="Roach" Player="2"/>
+    <ObjectUnit Id="1236578906" Position="19.5,21.5,0" Rotation="5.6655" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="1264249153" Position="34,15.5,0" Rotation="1.909" Scale="1,1,1" UnitType="Zergling" Player="2"/>
+    <ObjectUnit Id="1520359281" Position="30.5,23,0" Rotation="1.7558" Scale="1,1,1" UnitType="Zergling" Player="2"/>
+    <ObjectUnit Id="1441676808" Position="30.5,27,0" Rotation="6.1208" Scale="1,1,1" UnitType="Marine" Player="2"/>
+    <ObjectUnit Id="291113798" Position="28,29.5,0" Rotation="1.8205" Scale="1,1,1" UnitType="Marine" Player="2"/>
+    <ObjectUnit Id="590202710" Position="12.5,19,0" Rotation="2.3613" Scale="1,1,1" UnitType="Stalker" Player="1"/>
+    <ObjectUnit Id="1723741955" Position="17.5,25.5,0" Rotation="1.9091" Scale="1,1,1" UnitType="Zergling" Player="1"/>
+    <ObjectUnit Id="1862974261" Position="19.5,27,0" Rotation="5.6655" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="1236102535" Position="18.5,23.5,0" Rotation="1.3364" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="244367003" Position="15,24.5,0" Rotation="0.396" Scale="1,1,1" UnitType="Roach" Player="1"/>
+</PlacedObjects>

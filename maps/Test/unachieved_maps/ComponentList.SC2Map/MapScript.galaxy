@@ -1,0 +1,202 @@
+//==================================================================================================
+// 
+// Generated Map Script
+// 
+// Name:   ????????????2 ????????????
+// 
+//==================================================================================================
+include "TriggerLibs/NativeLib"
+
+//--------------------------------------------------------------------------------------------------
+// Library Initialization
+//--------------------------------------------------------------------------------------------------
+void InitLibs () {
+    libNtve_InitLib();
+}
+
+//--------------------------------------------------------------------------------------------------
+// Constants
+//--------------------------------------------------------------------------------------------------
+const int gv_player_num = 2;
+
+//--------------------------------------------------------------------------------------------------
+// Global Variables
+//--------------------------------------------------------------------------------------------------
+text gv_new_line;
+unitgroup[gv_player_num + 1] gv_player_unit_groups;
+unitgroup gv_all_units;
+fixed[gv_player_num + 1] gv_initial_health_array;
+
+void InitGlobals () {
+    int init_i;
+
+    gv_new_line = StringExternal("Param/Value/047FED7E");
+    for (init_i = 0; init_i <= gv_player_num; init_i += 1) {
+        gv_player_unit_groups[init_i] = UnitGroupEmpty();
+    }
+    gv_all_units = UnitGroupEmpty();
+}
+
+//--------------------------------------------------------------------------------------------------
+// Global Function Declarations
+//--------------------------------------------------------------------------------------------------
+void gf_CameraInitialization ();
+string gf_IntSlashIntToString (int lp_first, int lp_second);
+string gf_FixedSlashFixedToString (fixed lp_first, fixed lp_second);
+string gf_FixedFixedToRatioString (fixed lp_former, fixed lp_latter);
+string gf_UnitToDialogKey (unit lp_unit);
+string gf_UnitToDialogLabelKey (unit lp_unit);
+text gf_StringStringToText (string lp_key, string lp_value);
+text gf_KeyIntToText (string lp_key, int lp_value);
+text gf_KeyFixedToText (string lp_key, fixed lp_value);
+
+//--------------------------------------------------------------------------------------------------
+// Trigger Variables
+//--------------------------------------------------------------------------------------------------
+trigger gt_Initialization;
+trigger gt_test_trigger;
+
+//--------------------------------------------------------------------------------------------------
+// Custom Script: main
+//--------------------------------------------------------------------------------------------------
+include "scripts/main"
+
+//--------------------------------------------------------------------------------------------------
+// Custom Script Initialization
+//--------------------------------------------------------------------------------------------------
+void InitCustomScript () {
+    main();
+}
+
+//--------------------------------------------------------------------------------------------------
+// Global Functions
+//--------------------------------------------------------------------------------------------------
+void gf_CameraInitialization () {
+    // Automatic Variable Declarations
+    // Implementation
+    CameraApplyInfo(1, CameraInfoFromId(959523384), 0.0, -1, 10.0, true);
+}
+
+string gf_IntSlashIntToString (int lp_first, int lp_second) {
+    // Automatic Variable Declarations
+    // Implementation
+    return (IntToString(lp_first) + "/" + IntToString(lp_second));
+}
+
+string gf_FixedSlashFixedToString (fixed lp_first, fixed lp_second) {
+    // Automatic Variable Declarations
+    // Implementation
+    return (FixedToString(lp_first, c_fixedPrecisionAny) + "/" + FixedToString(lp_second, c_fixedPrecisionAny));
+}
+
+string gf_FixedFixedToRatioString (fixed lp_former, fixed lp_latter) {
+    // Automatic Variable Declarations
+    // Implementation
+    return (FixedToString(lp_former, c_fixedPrecisionAny) + "/" + FixedToString(lp_latter, c_fixedPrecisionAny));
+}
+
+string gf_UnitToDialogKey (unit lp_unit) {
+    // Automatic Variable Declarations
+    // Implementation
+    return ("unit_dialog_" + IntToString(UnitGetTag(lp_unit)));
+}
+
+string gf_UnitToDialogLabelKey (unit lp_unit) {
+    // Automatic Variable Declarations
+    // Implementation
+    return ("unit_dialog_label_" + IntToString(UnitGetTag(lp_unit)));
+}
+
+text gf_StringStringToText (string lp_key, string lp_value) {
+    // Automatic Variable Declarations
+    // Implementation
+    return (StringToText(lp_key) + StringToText(lp_value));
+}
+
+text gf_KeyIntToText (string lp_key, int lp_value) {
+    // Automatic Variable Declarations
+    // Implementation
+    return (StringToText(lp_key) + IntToText(lp_value));
+}
+
+text gf_KeyFixedToText (string lp_key, fixed lp_value) {
+    // Automatic Variable Declarations
+    // Implementation
+    return (StringToText(lp_key) + FixedToText(lp_value, c_fixedPrecisionAny));
+}
+
+//--------------------------------------------------------------------------------------------------
+// Trigger: Initialization
+//--------------------------------------------------------------------------------------------------
+bool gt_Initialization_Func (bool testConds, bool runActions) {
+    // Automatic Variable Declarations
+    // Actions
+    if (!runActions) {
+        return true;
+    }
+
+    DialogCreate(500, 400, c_anchorCenter, 0, 0, true);
+    DialogControlCreate(DialogLastCreated(), c_triggerControlTypeProgressBar);
+    DialogControlSetSize(DialogControlLastCreated(), PlayerGroupAll(), 200, 20);
+    DialogSetVisible(DialogLastCreated(), PlayerGroupAll(), true);
+    gf_CameraInitialization();
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------
+void gt_Initialization_Init () {
+    gt_Initialization = TriggerCreate("gt_Initialization_Func");
+    TriggerAddEventMapInit(gt_Initialization);
+}
+
+//--------------------------------------------------------------------------------------------------
+// Trigger: ????????????????????? 001
+//--------------------------------------------------------------------------------------------------
+bool gt_test_trigger_Func (bool testConds, bool runActions) {
+    // Variable Declarations
+    unit lv_e697A0E6A087E9A298E79A84E58F98E9878F001;
+
+    // Automatic Variable Declarations
+    unitgroup autoEF744219_g;
+    int autoEF744219_u;
+    unit autoEF744219_var;
+
+    // Variable Initialization
+
+    // Actions
+    if (!runActions) {
+        return true;
+    }
+
+    autoEF744219_g = UnitGroup(null, c_playerAny, RegionEntireMap(), UnitFilter(0, 0, (1 << c_targetFilterMissile), (1 << (c_targetFilterDead - 32)) | (1 << (c_targetFilterHidden - 32))), 0);
+    autoEF744219_u = UnitGroupCount(autoEF744219_g, c_unitCountAll);
+    for (;; autoEF744219_u -= 1) {
+        autoEF744219_var = UnitGroupUnitFromEnd(autoEF744219_g, autoEF744219_u);
+        if (autoEF744219_var == null) { break; }
+        UnitKill(autoEF744219_var);
+    }
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------
+void gt_test_trigger_Init () {
+    gt_test_trigger = TriggerCreate("gt_test_trigger_Func");
+}
+
+//--------------------------------------------------------------------------------------------------
+// Trigger Initialization
+//--------------------------------------------------------------------------------------------------
+void InitTriggers () {
+    gt_Initialization_Init();
+    gt_test_trigger_Init();
+}
+
+//--------------------------------------------------------------------------------------------------
+// Map Initialization
+//--------------------------------------------------------------------------------------------------
+void InitMap () {
+    InitLibs();
+    InitGlobals();
+    InitCustomScript();
+    InitTriggers();
+}
