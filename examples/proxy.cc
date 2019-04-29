@@ -30,12 +30,12 @@ int main(int argc, char* argv[]) {
 
     // Connect to running sc2 process.
     sc2::Connection client;
-    client.Connect("127.0.0.1", 5679);
+    std::cout<<"connecting result: "<< client.Connect("127.0.0.1", 5679)<<std::endl; //? since it will return true if the connection has been established, here is no problem
 
     while (!sc2::PollKeyPress()) {
         // If the proxy has messages forward them to sc2.
         if (server.HasRequest()) {
-            server.SendRequest(client.connection_);
+            server.SendRequest(client.connection_); //? So, here is the connection between the two parts - the SC2 instance and the Server to handle those request and response
 
             // Block for sc2's response then queue it.
             SC2APIProtocol::Response* response = nullptr;

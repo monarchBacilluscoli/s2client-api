@@ -138,6 +138,7 @@ bool gt_Initialization_Func (bool testConds, bool runActions) {
     DialogCreate(500, 400, c_anchorCenter, 0, 0, true);
     DialogControlCreate(DialogLastCreated(), c_triggerControlTypeProgressBar);
     DialogControlSetSize(DialogControlLastCreated(), PlayerGroupAll(), 200, 20);
+    DialogControlSetSize(DialogControlLastCreated(), PlayerGroupAll(), 200, 20);
     DialogSetVisible(DialogLastCreated(), PlayerGroupAll(), true);
     gf_CameraInitialization();
     return true;

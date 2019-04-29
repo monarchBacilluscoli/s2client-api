@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DocInfo>
+    <ModType>
+        <Value>Interface</Value>
+    </ModType>
+    <Dependencies>
+        <Value>bnet:自由之翼 (Mod)/0.0/999,file:Mods/Liberty.SC2Mod</Value>
+        <Value>bnet:自由之翼 (战役)/0.0/999,file:Campaigns/Liberty.SC2Campaign</Value>
+        <Value>bnet:《魔兽争霸III》（美术Mod）/0.0/999,file:Mods/War3.SC2Mod</Value>
+    </Dependencies>
+</DocInfo>
