@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<Catalog>
+    <CRequirement id="UsePunisherGrenades2">
+        <EditorCategories value="Race:Zerg,TechType:Upgrade"/>
+        <NodeArray index="Use" Link="CountUpgradePunisherGrenadesCompleteOnly679349TechTreeCheat"/>
+    </CRequirement>
+</Catalog>

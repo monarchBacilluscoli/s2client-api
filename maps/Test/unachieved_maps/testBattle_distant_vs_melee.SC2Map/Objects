@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PlacedObjects Version="27">
+    <ObjectCamera Id="1420650544" Position="24,24,0" Rotation="3.1403" Scale="1,1,1" Name="InitialCamera" Color="0,0,0,0" CameraTarget="24,24">
+        <CameraValue Index="FieldOfView" Value="27.7995"/>
+        <CameraValue Index="NearClip" Value="0.0998"/>
+        <CameraValue Index="FarClip" Value="600"/>
+        <CameraValue Index="ShadowClip" Value="75"/>
+        <CameraValue Index="Distance" Value="55.518"/>
+        <CameraValue Index="Pitch" Value="90"/>
+        <CameraValue Index="Yaw" Value="179.9443"/>
+        <CameraValue Index="FocalDepth" Value="8"/>
+        <CameraValue Index="FalloffStart" Value="0.0002"/>
+        <CameraValue Index="FalloffEnd" Value="8"/>
+        <CameraValue Index="FalloffStartNear" Value="0.0002"/>
+        <CameraValue Index="FalloffEndNear" Value="0.0002"/>
+        <CameraValue Index="BokehFStop" Value="0.0163"/>
+        <CameraValue Index="BokehMaxCoC" Value="1"/>
+    </ObjectCamera>
+    <ObjectCamera Id="959523384" Position="24.181,19.8251,0" Rotation="3.1406" Scale="1,1,1" Name="InitialCameraNear" Color="0,0,0,0" CameraTarget="24.181,19.8251">
+        <CameraValue Index="FieldOfView" Value="27.7998"/>
+        <CameraValue Index="NearClip" Value="0.0998"/>
+        <CameraValue Index="FarClip" Value="600"/>
+        <CameraValue Index="ShadowClip" Value="75"/>
+        <CameraValue Index="Distance" Value="34.4724"/>
+        <CameraValue Index="Pitch" Value="90"/>
+        <CameraValue Index="Yaw" Value="179.9584"/>
+        <CameraValue Index="FocalDepth" Value="8"/>
+        <CameraValue Index="FalloffEnd" Value="8"/>
+    </ObjectCamera>
+    <ObjectUnit Id="1419820941" Position="27.5,27.5,0" Rotation="4.329" Scale="1,1,1" UnitType="Zealot" Player="2"/>
+    <ObjectUnit Id="1960520676" Position="18.5,31,0" Rotation="1.3364" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="336793386" Position="18.5,22.5,0" Rotation="1.3364" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="323142261" Position="19.5,15.5,0" Rotation="5.6655" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="862417047" Position="19.5,24,0" Rotation="5.6657" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="226986395" Position="18.5,26,0" Rotation="1.3366" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="1568415296" Position="19.5,20.5,0" Rotation="5.6655" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="1481033189" Position="18.5,17.5,0" Rotation="1.3364" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="1739502129" Position="27,23,0" Rotation="4.329" Scale="1,1,1" UnitType="Zealot" Player="2"/>
+    <ObjectUnit Id="1925705202" Position="19.5,29,0" Rotation="5.6655" Scale="1,1,1" UnitType="Marine" Player="1"/>
+    <ObjectUnit Id="1578741276" Position="26,24.5,0" Rotation="4.3293" Scale="1,1,1" UnitType="Zealot" Player="2"/>
+</PlacedObjects>

@@ -112,6 +112,7 @@ int LaunchProcesses(ProcessSettings& process_settings, std::vector<Client*> clie
             clientIndex++);
     }
 
+    //? this could be the most important statement.
     AttachClients(process_settings, clients);
 
     return last_port;
@@ -192,7 +193,7 @@ CoordinatorImp::CoordinatorImp() :
     game_ended_(),
     starcraft_started_(false),
     game_settings_(),
-    process_settings_(false, 1, "", "127.0.0.1", kDefaultProtoInterfaceTimeout, 8168, false) {
+    process_settings_(false, 1, "", "59.71.231.175", kDefaultProtoInterfaceTimeout, 8168, false) {
 }
 
 CoordinatorImp::~CoordinatorImp() {

@@ -1,0 +1,6 @@
+﻿CustomScript/Name/6B8E311E=main
+Trigger/Name/3DDFC0EE=CameraInitializationNear
+Trigger/Name/4AA6D8FB=vision
+Trigger/Name/4C367E7D=CameraTranslation
+Trigger/Name/7CA2A65F=CameraFollow
+Trigger/Name/CF8448F7=CameraInitializationStatic

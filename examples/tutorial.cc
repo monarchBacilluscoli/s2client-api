@@ -1,4 +1,4 @@
-#include <sc2api/sc2_api.h> // 这里包含了所有的api的头文件，但也仅此而已
+#include <sc2api/sc2_api.h> // All the head files
 #include "bot_examples.h" 
 #include "my_bots/bot_tutor.h"
 #include "my_bots/random_bot.h"
@@ -30,22 +30,27 @@ public:
 };
 
 int main(int argc, char* argv[]) {
+    //? print the argvs and see what they are...
+    for (int i = 0; i < argc; i++) {
+        std::cout << argv[i] << std::endl;
+    }
+
     int step_size = 1;
     // test for runing game repeatedly
     for (size_t i = 0; i < 2; i++) {
         Coordinator coordinator; // coordinator（协调器）负责控制游戏进行中、进行前等等的设置
-        std::cout << "LoadSettings: " << coordinator.LoadSettings(argc, argv) << std::endl; // 读取设置参数
+        std::cout << "isLoadSettings: " << coordinator.LoadSettings(argc, argv) << std::endl; // If there is no command line arguments it will check the files in your MyDocument\StarCraft II and get default settings.
+        std::cout<<"Executable path: " <<coordinator.GetExePath()<<std::endl;
         coordinator.SetRealtime(false);
         //coordinator.SetRealtime(true);
         coordinator.SetStepSize(step_size); // 设置游戏循环步长
         coordinator.SetMultithreaded(true);
 
-
         no_action na_bot;
         Bot bot; // traditional rule-based bot
         random_bot bot2, bot3;
         human_control bot0;
-        one_frame_bot of_bot;
+        one_frame_bot of_bot, of_bot2;
         potential_field_bot pf_bot(step_size);
         advanced_potential_field_bot adv_pf_bot(step_size);
 
@@ -66,13 +71,37 @@ int main(int argc, char* argv[]) {
             //CreateParticipant(Race::Terran, &bot2),
             }); // 添加参与玩家
 
-        coordinator.LaunchStarcraft(); // 打开游戏（这样的打开游戏似乎收到默认参数的控制而什么界面都没有，是啊，因为没有用Update啊）
+        //coordinator.LaunchStarcraft(); // 打开游戏（这样的打开游戏似乎收到默认参数的控制而什么界面都没有，是啊，因为没有用Update啊）
+
+        //? So, I need to know the port firstly, and then I can connect to it.
+        //! made it
+        coordinator.Connect(3000);
+
+
+        //? I need another coordinator
+        //Coordinator coordinator2;
+        //std::cout << "isLoadSettings: " << coordinator2.LoadSettings(argc, argv) << std::endl; // If there is no command line arguments it will check the files in your MyDocument\StarCraft II and get default settings.
+        //std::cout << "Executable path: " << coordinator2.GetExePath() << std::endl;
+        //coordinator2.SetRealtime(false);
+        ////coordinator.SetRealtime(true);
+        //coordinator2.SetStepSize(step_size); // 设置游戏循环步长
+        //coordinator2.SetMultithreaded(true);
+        //coordinator2.SetParticipants({ // 初始化阵营么
+        //    //CreateParticipant(Race::Terran, &of_bot), // one frame bot
+        //    CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
+        //    CreateComputer(Race::Terran)
+        //    }); // 添加参与玩家
+        //coordinator2.Connect(8168);
+
+
+
 
         //coordinator.StartGame(sc2::kMapBelShirVestigeLE); // 标准对局地图
         //coordinator.StartGame("..\\maps\\Test\\testBattle.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_2distant_vs_1melee.SC2Map");
-        //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee.SC2Map");
-        coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_distant.SC2Map");
+        coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee_debug.SC2Map");
+        //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_distant.SC2Map");
+        //coordinator2.StartGame("..\\maps\\Test\\testBattle_distant_vs_distant.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_no_enemy.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattleAllUnits.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_d_m_vs_d_m.SC2Map");
@@ -84,6 +113,7 @@ int main(int argc, char* argv[]) {
         time_t start = 0;
         int frames = 0;*/
         while (coordinator.Update()) { // run a bot
+        //while (coordinator.Update() && coordinator2.Update()) { // run bots in two coordinators.
             //? get the frames per second in real-time mode
             /*if (!is_start) {
                 is_start = true;
