@@ -61,8 +61,12 @@ int main(int argc, char* argv[]) {
     });
 
     // Start the game.
-    coordinator.LaunchStarcraft();
-    coordinator.StartGame(sc2::kMapBelShirVestigeLE);
+    //coordinator.LaunchStarcraft();
+    //coordinator.StartGame(sc2::kMapBelShirVestigeLE);
+
+    //? Liu: Connect to a remote game
+    coordinator.Connect("59.71.231.175", 3000);
+    coordinator.StartGame("..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map");
 
     while (coordinator.Update()) {
         if (sc2::PollKeyPress()) {

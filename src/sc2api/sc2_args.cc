@@ -28,6 +28,7 @@ bool ParseFromFile(ProcessSettings& process_settings, GameSettings& game_setting
     else {
         process_settings.realtime = false;
     }
+    //? Liu: When there is just a executable path, all the following functions will return false
     reader.ReadInt("port", process_settings.port_start);
     reader.ReadString("map", game_settings.map_name);
     reader.ReadInt("timeout", process_settings.timeout_ms);
@@ -42,11 +43,13 @@ bool ParseFromFile(ProcessSettings& process_settings, GameSettings& game_setting
     
 bool ParseSettings(int argc, char* argv[], ProcessSettings& process_settings, GameSettings& game_settings) {
     assert(argc);
-    ArgParser arg_parser(argv[0]);
+    ArgParser arg_parser(argv[0]); //? this is only used to parse the executable_name
 
     // First attempt to parse from the SC2 user directory.
     bool parsed = false;
     {
+        //? Liu: those statements are used to get the text file wihch contains the info of StarCraft II executable
+        //? Liu: I am sure the path of StarCraft II is read from here
         std::string execute_info_filepath = GetUserDirectory();
         if (execute_info_filepath.length() > 0) {
             execute_info_filepath += kDirectoryDivider;
@@ -54,12 +57,15 @@ bool ParseSettings(int argc, char* argv[], ProcessSettings& process_settings, Ga
             execute_info_filepath += kDirectoryDivider;
             execute_info_filepath += StarCraft2ExecuteInfo;
             parsed = ParseFromFile(process_settings, game_settings, execute_info_filepath);
-            if (parsed) {
+            if (parsed) { //? Liu: Maybe it will parse twice when the last parse fails?
                 parsed = FindLatestExe(process_settings.process_path);
             }
         }
     }
 
+    //? Liu: This is just a form which uses list to represent a struct, and the list vector can be the vector param to be passed
+    //? Liu: But why does this have those description? Are them useful for process running?
+    //? 
     arg_parser.AddOptions({
         { "-e", "--executable", "The path to StarCraft II.", true },
         { "-s", "--step_size", "How many steps to take per call.", false },
@@ -69,6 +75,8 @@ bool ParseSettings(int argc, char* argv[], ProcessSettings& process_settings, Ga
         { "-t", "--timeout", "Timeout for how long the library will block for a response.", false }
     });
 
+    //? Liu: if the argc (the account of arguements) is 1, it means there is no arguments except for the default path of this executable.
+    //? Liu: And if the argv is not parsed... it can not work at all
     if (argc == 1 && !parsed) {
         // If there is no file and no command line arguments print how to use command line arguments.
         std::cout << "Please run StarCraft II before running this API" << std::endl;

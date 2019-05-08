@@ -7,6 +7,8 @@
 #include "my_bots/potential_field/potential_field.h"
 #include "my_bots/potential_field/advanced_potential_field_bot.h"
 #include "my_bots/rule_based_bots/attack_nearest/attack_nearest.h"
+#include "my_bots/tests/step_size_test_bot.h"
+#include "my_bots/tests/debug_test_bot.h"
 
 using namespace sc2;
 
@@ -35,7 +37,7 @@ int main(int argc, char* argv[]) {
         std::cout << argv[i] << std::endl;
     }
 
-    int step_size = 1;
+    int step_size = 100;
     // test for runing game repeatedly
     for (size_t i = 0; i < 2; i++) {
         Coordinator coordinator; // coordinator（协调器）负责控制游戏进行中、进行前等等的设置
@@ -53,6 +55,8 @@ int main(int argc, char* argv[]) {
         one_frame_bot of_bot, of_bot2;
         potential_field_bot pf_bot(step_size);
         advanced_potential_field_bot adv_pf_bot(step_size);
+        step_size_test_bot sstb;
+        debug_test_bot dtb;
 
         attack_nearest an_bot;
 
@@ -60,10 +64,12 @@ int main(int argc, char* argv[]) {
             //CreateComputer(Race::Terran),
             //CreateParticipant(Race::Terran, &na_bot), // a bot without any actions
             //CreateParticipant(Race::Terran, &bot0), // 人类玩家
-            CreateParticipant(Race::Terran, &of_bot), // one frame bot
+            //CreateParticipant(Race::Terran, &of_bot), // one frame bot
             //CreateParticipant(Race::Terran, &bot3), // random bot
             //CreateParticipant(Race::Terran, &pf_bot), //potential field bot
             //CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
+            //CreateParticipant(Race::Terran, &sstb),
+            CreateParticipant(Race::Terran, &dtb), //! This is a nightmare for all units in all maps, just start screaming!
 
             //CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
 
@@ -73,12 +79,12 @@ int main(int argc, char* argv[]) {
 
         //coordinator.LaunchStarcraft(); // 打开游戏（这样的打开游戏似乎收到默认参数的控制而什么界面都没有，是啊，因为没有用Update啊）
 
-        //? So, I need to know the port firstly, and then I can connect to it.
         //! made it
-        coordinator.Connect(3000);
+        coordinator.Connect("59.71.231.175",3000);
+        //coordinator.Connect("127.0.0.1", 8167);
 
 
-        //? I need another coordinator
+        //? I need another coordinator to test
         //Coordinator coordinator2;
         //std::cout << "isLoadSettings: " << coordinator2.LoadSettings(argc, argv) << std::endl; // If there is no command line arguments it will check the files in your MyDocument\StarCraft II and get default settings.
         //std::cout << "Executable path: " << coordinator2.GetExePath() << std::endl;
@@ -99,7 +105,7 @@ int main(int argc, char* argv[]) {
         //coordinator.StartGame(sc2::kMapBelShirVestigeLE); // 标准对局地图
         //coordinator.StartGame("..\\maps\\Test\\testBattle.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_2distant_vs_1melee.SC2Map");
-        coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee_debug.SC2Map");
+        //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee_debug.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_distant.SC2Map");
         //coordinator2.StartGame("..\\maps\\Test\\testBattle_distant_vs_distant.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_no_enemy.SC2Map");
@@ -107,6 +113,10 @@ int main(int argc, char* argv[]) {
         //coordinator.StartGame("..\\maps\\Test\\testBattle_d_m_vs_d_m.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle_m_vs_d.SC2Map");
         //coordinator.StartGame("..\\maps\\Test\\testBattle1v1.SC2Map"); // 1v1静止测试
+        //coordinator.StartGame("..\\maps\\Test\\testMechanism_StepSize.SC2Map");
+
+        //! if the remote client was used, the path should be set properly
+        coordinator.StartGame("..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map");
 
 
         /*bool is_start = false;
@@ -128,10 +138,8 @@ int main(int argc, char* argv[]) {
                 }
             }*/
         }
-
         std::cout << coordinator.AllGamesEnded() << std::endl;
         coordinator.LeaveGame();
-
     }
 
 

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<Catalog>
+    <CEffectDamage id="GuassRifle">
+        <Chance value="0.875"/>
+    </CEffectDamage>
+    <CEffectDamage id="GuassRifle2" parent="DU_WEAP">
+        <EditorCategories value="Race:Terran"/>
+        <Chance value="0.5"/>
+        <Kind value="Ranged"/>
+        <Amount value="6"/>
+    </CEffectDamage>
+    <CEffectLaunchMissile id="PunisherGrenadesLM2">
+        <EditorCategories value="Race:Terran"/>
+        <Chance value="0.5"/>
+        <ImpactEffect value="PunisherGrenadesSet2"/>
+        <AmmoUnit value="PunisherGrenadesLMWeapon2"/>
+        <Movers Link="PunisherGrenadesWeapon"/>
+    </CEffectLaunchMissile>
+    <CEffectSet id="PunisherGrenadesSet2">
+        <EditorCategories value="Race:Terran"/>
+        <EffectArray value="PunisherGrenadesSlow2"/>
+        <EffectArray value="PunisherGrenadesU2"/>
+    </CEffectSet>
+    <CEffectApplyBehavior id="PunisherGrenadesSlow2">
+        <ValidatorArray index="0" value="PunisherGrenadesResearched"/>
+        <ValidatorArray value="PunisherGrenadesSlowTargetFilters"/>
+        <ValidatorArray value="NotStructure"/>
+        <ValidatorArray value="NotFrenzied"/>
+        <EditorCategories value="Race:Terran"/>
+        <Behavior value="Slow2"/>
+    </CEffectApplyBehavior>
+    <CEffectDamage id="PunisherGrenadesU">
+        <Chance value="0.875"/>
+    </CEffectDamage>
+    <CEffectDamage id="PunisherGrenadesU2" parent="DU_WEAP">
+        <EditorCategories value="Race:Terran"/>
+        <AttributeBonus index="Armored" value="10"/>
+        <Kind value="Ranged"/>
+        <Amount value="10"/>
+        <Death value="Blast"/>
+    </CEffectDamage>
+    <CEffectApplyBehavior id="Stimpack2">
+        <EditorCategories value="Race:Terran"/>
+    </CEffectApplyBehavior>
+    <CEffectApplyBehavior id="StimpackMarauder2">
+        <ValidatorArray index="0" value="StimpackTargetFilters"/>
+        <EditorCategories value="Race:Terran"/>
+        <Marker Link="Effect/Stimpack"/>
+    </CEffectApplyBehavior>
+</Catalog>

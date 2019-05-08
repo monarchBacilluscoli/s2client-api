@@ -113,6 +113,8 @@ public:
 
     //! Attaches to a running Starcraft.
     void Connect(int port);
+    //? Liu: Attaches to a running Starcraft, allows remote connection
+    void Connect(std::string net_address, int port);
 
     //! Starts a game on a certain map. There are multiple ways to specify a map:
     //! Absolute path: Any .SC2Map file.
