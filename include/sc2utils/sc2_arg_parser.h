@@ -6,6 +6,7 @@
 
 namespace sc2 {
 
+//? What is this used for?
 struct Arg {
     std::string abbreviation_;
     std::string fullname_;

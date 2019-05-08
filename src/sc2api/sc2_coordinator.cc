@@ -150,6 +150,7 @@ public:
     GameSettings game_settings_;
     ReplaySettings replay_settings_;
     InterfaceSettings interface_settings_;
+    //? Liu: here is the process_settings_
     ProcessSettings process_settings_;
 
     CoordinatorImp();
@@ -193,7 +194,10 @@ CoordinatorImp::CoordinatorImp() :
     game_ended_(),
     starcraft_started_(false),
     game_settings_(),
-    process_settings_(false, 1, "", "59.71.231.175", kDefaultProtoInterfaceTimeout, 8168, false) {
+    //? Liu: you can see that the address is set right at the initialization.
+    //? Liu: since the process_settings_'s accessiblity is public, I can call it to reset the IP address.
+    //process_settings_(false, 1, "", "59.71.231.175", kDefaultProtoInterfaceTimeout, 8168, false) {
+    process_settings_(false, 1, "", "127.0.0.1", kDefaultProtoInterfaceTimeout, 8168, false) {
 }
 
 CoordinatorImp::~CoordinatorImp() {
@@ -739,6 +743,23 @@ void Coordinator::LaunchStarcraft() {
 }
 
 void Coordinator::Connect(int port) {
+    while (imp_->process_settings_.process_info.size() < imp_->agents_.size()) {
+        imp_->process_settings_.process_info.push_back(
+            ProcessInfo(imp_->process_settings_.net_address, 0, port)
+        );
+    }
+
+    if (!AttachClients(imp_->process_settings_, std::vector<sc2::Client*>(imp_->agents_.begin(), imp_->agents_.end()))) {
+        std::cerr << "Failed to attach to starcraft." << std::endl;
+        exit(1);
+    }
+
+    // Assume starcraft has started after succesfully attaching to a server.
+    imp_->starcraft_started_ = true;
+}
+
+void Coordinator::Connect(std::string net_address, int port) {
+    imp_->process_settings_.net_address = net_address;
     while (imp_->process_settings_.process_info.size() < imp_->agents_.size()) {
         imp_->process_settings_.process_info.push_back(
             ProcessInfo(imp_->process_settings_.net_address, 0, port)

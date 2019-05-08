@@ -1,0 +1,346 @@
+// int n_marine=5;
+// int n_marauder=3;
+// unitgroup g_player1 = UnitGroupEmpty(); // Attention! It needs initialization!
+// unitgroup g_player2 = UnitGroupEmpty();
+// int main_objective;
+include "TriggerLibs/NativeLib"
+
+// Constants
+//--------------------------------------------------------------------------------
+const int gc_player_num = 2;
+const int gc_dialog_width = 300;
+const int gc_dialog_height = 500;
+const int gc_dialog_label_width = gc_dialog_width;
+const int gc_dialog_label_height = gc_dialog_height;
+
+// Global Variables
+//--------------------------------------------------------------------------------
+unitgroup g_all_units;
+unitgroup[gc_player_num + 1] g_teams; //! I want the index is corresponding to the player index, so I skip 0;
+fixed[gc_player_num + 1] g_initial_total_life;
+bool g_dialog_initialized = false;
+bool g_data_initialized = false;
+bool g_initialized = false;
+
+// Global Function Declarations
+//--------------------------------------------------------------------------------
+string get_unit_info_string(unit u);
+
+// Trigger Variables
+//--------------------------------------------------------------------------------
+trigger gt_unit_info_off_unselected_or_dead;
+trigger gt_update_unit_info;
+trigger gt_show_team_info;
+trigger gt_unit_info_on_selected;
+trigger gt_update_when_unit_created;
+
+// Global Functions
+//--------------------------------------------------------------------------------
+string fixed_fixed_to_ratio_string(fixed first, fixed second){
+    return FixedToString(first, c_fixedPrecisionAny)+" / "+FixedToString(second, c_fixedPrecisionAny);
+}
+
+string int_int_to_ratio_string(int first, int second){
+    return IntToString(first)+" / "+IntToString(second);
+}
+
+string unit_to_dialog_key (unit u) {
+    return ("unit_dialog_" + IntToString(UnitGetTag(u)));
+}
+
+string unit_to_dialog_label_key (unit lp_unit) {
+    return ("unit_dialog_label_" + IntToString(UnitGetTag(lp_unit)));
+}
+
+// create a dialog  with a label and positioned to unit, then store it into global data table
+void create_info_dialog_for_unit(unit u){
+    DialogCreate(gc_dialog_width,gc_dialog_height,c_anchorCenter,0,0,true);
+    DialogSetPositionRelativeToUnit(DialogLastCreated(),u,"Ref_Center",0,0);
+    // store it with the key is unit tag
+    DataTableSetDialog(true,unit_to_dialog_key(u),DialogLastCreated());
+    // create a dialog label and store it
+    libNtve_gf_CreateDialogItemLabel(DialogLastCreated(),gc_dialog_label_width,gc_dialog_label_height,c_anchorTopLeft,50,50,StringToText("label"),ColorWithAlpha(0,0,0,0),false,0.0);
+    libNtve_gf_SaveDataTableValueDialogItem(true,unit_to_dialog_label_key(u),DialogControlLastCreated()); //! there are not only DialogItem but also DialogControl
+}
+
+fixed get_team_total_life(unitgroup team){
+    fixed total_life = 0.0;
+    int i = UnitGroupCount(team,c_unitCountAll);
+    unit u;
+
+    for (; ; i -= 1) {
+        u = UnitGroupUnitFromEnd(team,i);
+        if(u==null){break;}
+        total_life += UnitGetPropertyFixed(u,c_unitPropLife,c_unitPropCurrent);
+    }
+
+    return total_life;
+}
+
+string get_team_info_string(unitgroup team){
+    string info;
+
+    int unit_count_alive = UnitGroupCount(team,c_unitCountAlive);
+    fixed total_life = get_team_total_life(team);
+    
+    //todo concatneate the string
+    info = "Unit Count: " + IntToString(unit_count_alive) + "<n/>"+"Total Life: "+FixedToString(total_life, c_fixedPrecisionAny);
+
+    return info;
+}
+
+//The infomation showed:
+// life
+// shield
+// energy
+// pos
+// radius
+// move_speed
+// cost 
+string get_unit_info_string(unit u){
+    // get all info fields of u
+    string info;
+    fixed life_current = UnitGetPropertyFixed(u,c_unitPropLife, c_unitPropCurrent);
+    fixed life_max = UnitGetPropertyFixed(u,c_unitPropLifeMax, c_unitPropCurrent);
+    fixed shield_current = UnitGetPropertyFixed(u,c_unitPropShields,c_unitPropCurrent);
+    fixed shield_max = UnitGetPropertyFixed(u,c_unitPropShieldsMax,c_unitPropCurrent);
+    fixed energy_current = UnitGetPropertyFixed(u,c_unitPropEnergy, c_unitPropCurrent);
+    fixed energy_max =  UnitGetPropertyFixed(u,c_unitPropEnergy,c_unitPropCurrent);
+    point pos = UnitGetPosition(u);
+    fixed radius = UnitGetPropertyFixed(u,c_unitPropRadius,true);
+    // fixed is_flying = 
+    // int i;
+    // fixed[2] weapon_cooldown;
+    // for( i = 0;i<=UnitWeaponCount(u);i+=1){
+
+    // }
+    // array's length can not increase here
+    // fixed weapon_cooldown = UnitWeaponPeriod(u,1);
+    fixed movement_speed = UnitGetPropertyFixed(u,c_unitPropMovementSpeedCurrent,c_unitPropCurrent);
+    fixed movement_speed_max = UnitGetPropertyFixed(u,c_unitPropMovementSpeed, c_unitPropCurrent);
+    fixed[3] cost; // note that it is different from C
+
+    string type = UnitGetType(u);
+    cost[0] = UnitTypeGetCost(type,c_unitCostMinerals);
+    cost[1] = UnitTypeGetCost(type,c_unitCostVespene);
+    cost[2] = UnitTypeGetCost(type,c_unitCostTerrazine);
+
+    //UnitKill(u);
+
+    // Concatenate all the fields into a string
+    info = fixed_fixed_to_ratio_string(life_current,life_max)+"<n/>"+fixed_fixed_to_ratio_string(shield_current,shield_max)+"<n/>"+fixed_fixed_to_ratio_string(energy_current,energy_max)+ "<n/>"+libNtve_gf_ConvertPointToString(pos)+"<n/>"+FixedToString(radius,c_fixedPrecisionAny)+"<n/>"+fixed_fixed_to_ratio_string(movement_speed,movement_speed_max)+"<n/>"+fixed_fixed_to_ratio_string(cost[0],cost[1]);
+    
+    return info;
+}
+
+// Actions
+//--------------------------------------------------------------------------------
+void data_initialize(){
+    int i;
+
+    g_all_units = UnitGroup(null, c_playerAny, RegionEntireMap(), UnitFilter(0, 0, (1 << c_targetFilterMissile), (1 << (c_targetFilterDead - 32)) | (1 << (c_targetFilterHidden - 32))), 0);
+
+    for (i = 1; i <= gc_player_num; i += 1) {
+        g_teams[i] = UnitGroupAlliance(i,c_unitAllianceAlly,RegionEntireMap(),UnitFilter(0, 0, (1 << c_targetFilterMissile), (1 << (c_targetFilterDead - 32)) | (1 << (c_targetFilterHidden - 32))), 0);
+        g_initial_total_life[i] = get_team_total_life(g_teams[i]);
+    }
+    g_data_initialized = true;
+}
+
+void dialog_initialize(unitgroup unit_group){
+    int i = UnitGroupCount(unit_group, c_unitCountAll); //! I need all, not only alive units
+    unit u;
+
+    for (; ; i -= 1) {
+        u = UnitGroupUnitFromEnd(unit_group,i);
+        if(u == null){break;}
+        create_info_dialog_for_unit(u);
+        //DialogSetVisible(DialogLastCreated(),PlayerGroupAll(),true);
+    }
+    g_dialog_initialized = true;
+}
+
+void player_setting_initialize(int player){
+    // Note that all the options are set by strings
+    PlayerOptionOverride(player,"selectuncontrolable", "1");
+    PlayerOptionOverride(player,"displayunitstatus","All");
+    VisRevealArea(player,RegionEntireMap(),0.0,false);
+}
+
+void dialog_add(unit u){
+    create_info_dialog_for_unit(u);
+}
+
+void data_add(unit u){
+    UnitGroupAdd(g_all_units, u); //? what will it do if there has been the same unit?
+}
+
+void unit_info_switch(unit u, bool on){
+    DialogSetVisible(DataTableGetDialog(true,unit_to_dialog_key(u)),PlayerGroupAll(),on);
+}
+
+// Triggers
+//--------------------------------------------------------------------------------
+//! at least it should return a bool
+
+bool show_team_info(bool testConds, bool runActions){
+    int i;
+    string info;
+    
+    // for each team, the data needs to be updated
+    for (i = 1; i <= gc_player_num; i += 1) {
+        info += "<n/>" + get_team_info_string(g_teams[i]);
+    }
+    UIClearMessages(PlayerGroupAll(),c_messageAreaDebug);
+    UIDisplayMessage(PlayerGroupAll(),c_messageAreaDebug,StringToText(info));
+    return true;
+}
+
+bool update_unit_info(bool testConds, bool runActions){
+    // first, check which dialog is visible now.
+    int i = UnitGroupCount(g_all_units,c_unitCountAll);
+    unit u;
+    int dialog; //! local variables must be defined at the beginning of a function block
+
+    // Actions
+    if (!runActions) {
+        return true;
+    }
+    for (;; i -= 1) {
+        u = UnitGroupUnitFromEnd(g_all_units,i);
+        if (u == null) { break; }
+        // get dialog belonging to current unit
+        dialog = DataTableGetDialog(true,unit_to_dialog_key(u));
+        // if dialog is visible now
+        if(DialogIsVisible(dialog,1)){
+            // update the info
+            libNtve_gf_SetDialogItemText(libNtve_gf_ValueFromDataTableDialogItem(true,unit_to_dialog_label_key(u)),StringToText(get_unit_info_string(u)),PlayerGroupAll());
+        }else{
+            // just traverse the next unit
+            continue;
+        }
+    }
+    return true;
+}
+
+bool initialize(bool testConds, bool runActions){
+    int player = -1;
+    playergroup pg = PlayerGroupAll();
+
+    // Initializations
+    data_initialize();
+    dialog_initialize(g_all_units);
+    while(true){
+        player = PlayerGroupNextPlayer(pg,player);
+        if(player<0){break;}
+        player_setting_initialize(player);
+    }
+
+    g_initialized = true;
+
+    // Here to enable all the triggers must be activated after initialization
+    TriggerEnable(gt_update_unit_info,true);
+    TriggerEnable(gt_show_team_info,true);
+    TriggerEnable(gt_unit_info_on_selected,true);
+    TriggerEnable(gt_update_when_unit_created,true);
+    TriggerEnable(gt_unit_info_off_unselected_or_dead,true);
+
+    return true;
+}
+
+// when a new unit is added, update data and dialog
+bool update_when_unit_created(bool testConds, bool runActions){
+
+    if(!runActions){
+        return true;
+    }
+    if(!DataTableValueExists(true,unit_to_dialog_key(EventUnit()))){
+        dialog_add(EventUnit());
+    }
+    if(!UnitGroupHasUnit(g_all_units,EventUnit())){
+        data_add(EventUnit());
+    }
+    return true;
+}
+
+bool unit_info_on_selected(bool testConds, bool runActions){
+    //! note that it needs a EventUnit()
+    int unit_dialog = c_invalidDialogId;
+
+    if(!runActions){
+        return true;
+    }
+
+    // get the dialog from datatable
+    unit_dialog = DataTableGetDialog(true,unit_to_dialog_key(EventUnit()));
+    // if it exists, and it is unvisible, show it.
+    if(unit_dialog!=c_invalidDialogId){
+        if(!DialogIsVisible(unit_dialog,EventPlayer())){
+            DialogSetVisible(unit_dialog,PlayerGroupSingle(EventPlayer()),true);
+        }
+    }
+    return true;
+}
+
+bool unit_info_off_unselected_or_dead(bool testConds, bool runActions){
+    int unit_dialog = c_invalidDialogId;
+
+    if(!runActions){
+        return true;
+    }
+
+    unit_dialog = DataTableGetDialog(true,unit_to_dialog_key(EventUnit()));
+    if(unit_dialog != c_invalidDialogId){
+        DialogSetVisible(unit_dialog,PlayerGroupSingle(EventPlayer()),false);
+    }
+    return true;
+}
+
+// Trigger Initialization
+//--------------------------------------------------------------------------------
+
+//! I don't want to create two anynomous triggers so I use init function to manage them
+void unit_info_off_unselected_or_dead_init(){
+    gt_unit_info_off_unselected_or_dead = TriggerCreate("unit_info_off_unselected_or_dead");
+    TriggerEnable(gt_unit_info_off_unselected_or_dead,false);
+    TriggerAddEventUnitDied(gt_unit_info_off_unselected_or_dead,null);
+    TriggerAddEventUnitSelected(gt_unit_info_off_unselected_or_dead,null,c_playerAny,false);
+}
+
+void update_unit_info_init(){
+    gt_update_unit_info = TriggerCreate("update_unit_info");
+    TriggerEnable(gt_update_unit_info,false);
+    TriggerAddEventTimePeriodic(gt_update_unit_info,0.0625,c_timeGame);
+}
+
+void show_team_info_init(){
+    gt_show_team_info = TriggerCreate("show_team_info");
+    TriggerEnable(gt_show_team_info,false);
+    TriggerAddEventTimePeriodic(gt_show_team_info,0.0625,c_timeGame);
+}
+
+void unit_info_on_selected_init(){
+    gt_unit_info_on_selected = TriggerCreate("unit_info_on_selected");
+    TriggerEnable(gt_unit_info_on_selected,false);
+    TriggerAddEventUnitSelected(gt_unit_info_on_selected,null,c_playerAny,true);
+}
+
+void update_when_unit_created_init(){
+    gt_update_when_unit_created = TriggerCreate("update_when_unit_created");
+    TriggerEnable(gt_update_when_unit_created,false);
+    TriggerAddEventUnitCreated(TriggerCreate("update_when_unit_created"),null, null,null);
+}
+
+void main() {
+    TriggerAddEventMapInit(TriggerCreate("initialize"));
+
+    update_unit_info_init();
+
+    show_team_info_init();
+
+    unit_info_on_selected_init();
+
+    update_when_unit_created_init();
+    
+    unit_info_off_unselected_or_dead_init();
+}
