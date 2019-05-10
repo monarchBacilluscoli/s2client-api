@@ -9,6 +9,7 @@
 #include "my_bots/rule_based_bots/attack_nearest/attack_nearest.h"
 #include "my_bots/tests/step_size_test_bot.h"
 #include "my_bots/tests/debug_test_bot.h"
+#include "my_bots/tests/remote_draw.h"
 
 using namespace sc2;
 
@@ -57,6 +58,7 @@ int main(int argc, char* argv[]) {
         advanced_potential_field_bot adv_pf_bot(step_size);
         step_size_test_bot sstb;
         debug_test_bot dtb;
+        remote_draw rdb;
 
         attack_nearest an_bot;
 
@@ -69,7 +71,7 @@ int main(int argc, char* argv[]) {
             //CreateParticipant(Race::Terran, &pf_bot), //potential field bot
             //CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
             //CreateParticipant(Race::Terran, &sstb),
-            CreateParticipant(Race::Terran, &dtb), //! This is a nightmare for all units in all maps, just start screaming!
+            CreateParticipant(Race::Terran, &rdb), //! This is a nightmare for all units in all maps, just start screaming!
 
             //CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
 
@@ -77,7 +79,7 @@ int main(int argc, char* argv[]) {
             //CreateParticipant(Race::Terran, &bot2),
             }); // 添加参与玩家
 
-        //coordinator.LaunchStarcraft(); // 打开游戏（这样的打开游戏似乎收到默认参数的控制而什么界面都没有，是啊，因为没有用Update啊）
+        //coordinator.LaunchStarcraft();
 
         //! made it
         coordinator.Connect("59.71.231.175",3000);
@@ -98,9 +100,6 @@ int main(int argc, char* argv[]) {
         //    CreateComputer(Race::Terran)
         //    }); // 添加参与玩家
         //coordinator2.Connect(8168);
-
-
-
 
         //coordinator.StartGame(sc2::kMapBelShirVestigeLE); // 标准对局地图
         //coordinator.StartGame("..\\maps\\Test\\testBattle.SC2Map");
