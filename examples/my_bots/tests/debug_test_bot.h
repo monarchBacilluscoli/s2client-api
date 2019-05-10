@@ -1,7 +1,7 @@
 // This bot is used to test Debug interface, especially those funcitons which can move/remove units and set the units' properties to make sure it can be used for the simulator
 //? And the most important: Can I use them in Multi-player game? Wow, a bad feeling comes to me...
-#ifndef DEBUG_TEST_BOT
-#define DEBUG_TEST_BOT
+#ifndef DEBUG_TEST_BOT_H
+#define DEBUG_TEST_BOT_H
 
 #include<sc2api/sc2_api.h>
 #include<iostream>
@@ -64,4 +64,4 @@ namespace sc2 {
     };
 }
 
-#endif // !DEBUG_TEST_BOT
+#endif // !DEBUG_TEST_BOT_H
