@@ -13,6 +13,9 @@
 
 using namespace sc2;
 
+const int kFeatureLayerSize = 80;
+const float kCameraWidth = 24.0f;
+
 class human_control :public Agent {
     void OnGameStart() {
         initial_units = Observation()->GetUnits();
@@ -44,10 +47,13 @@ int main(int argc, char* argv[]) {
         Coordinator coordinator; // coordinator（协调器）负责控制游戏进行中、进行前等等的设置
         std::cout << "isLoadSettings: " << coordinator.LoadSettings(argc, argv) << std::endl; // If there is no command line arguments it will check the files in your MyDocument\StarCraft II and get default settings.
         std::cout<<"Executable path: " <<coordinator.GetExePath()<<std::endl;
-        coordinator.SetRealtime(false);
+        coordinator.SetRealtime(true);
         //coordinator.SetRealtime(true);
         coordinator.SetStepSize(step_size); // 设置游戏循环步长
         coordinator.SetMultithreaded(true);
+
+        sc2::FeatureLayerSettings settings(kCameraWidth, kFeatureLayerSize, kFeatureLayerSize, kFeatureLayerSize, kFeatureLayerSize);
+        coordinator.SetFeatureLayers(settings);
 
         no_action na_bot;
         Bot bot; // traditional rule-based bot
