@@ -761,10 +761,16 @@ void Coordinator::LaunchStarcraft() {
     imp_->last_port_ = port_start;
 }
 
+void Coordinator::SetNetAddress(std::string net_address)
+{
+    imp_->process_settings_.net_address = net_address;
+}
+
 void Coordinator::Connect(int port) {
     while (imp_->process_settings_.process_info.size() < imp_->agents_.size()) {
         imp_->process_settings_.process_info.push_back(
-            ProcessInfo(imp_->process_settings_.net_address, 0, port)
+            //? Liu: for multi-player remote connection, port need a change every time, ++ is enough and simple
+            ProcessInfo(imp_->process_settings_.net_address, 0, port++)
         );
     }
 

@@ -12,6 +12,15 @@
 #include"../my_bots/solution.h"
 
 namespace sc2 {
+
+    //? Maybe I don't need this bot to have any code, I can execute the order from outside
+    class Executor: public Agent
+    {
+    public:
+        //void OnGameStart() final;
+        void OnStep() final;
+    };
+
     class Simulator
     {
     public:
@@ -25,14 +34,16 @@ namespace sc2 {
         //todo
         void SetOpponent(const std::vector<PlayerSetup>& opponent);
         //todo how long, use what to count? time? frames? or process of game?
-        void Run(int frams);
+        void SetStarPoint(command command, ObservationInterface* ob);
+        void Run(int frames);
     private:
-    //todo give the order
+    //todo give the order, did I need to store the order?
         void SetOrder(command command);
     //todo give the state
         void SetState(ObservationInterface* ob);
-    //todo 
+    //todo I think I need to store the pointer to the Bot, and 
 
+        Executor m_exector;
         CoordinatorImp* imp_;
     };
 

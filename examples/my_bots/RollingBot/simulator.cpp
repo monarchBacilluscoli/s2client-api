@@ -2,10 +2,9 @@
 
 using namespace sc2;
 
-sc2::Simulator::Simulator()
+void Simulator::SetState(ObservationInterface* ob)
 {
-}
-
-void sc2::Simulator::SetFeatureLayers(const FeatureLayerSettings& settings)
-{
+	// here the map has been loaded
+	//todo kill all
+	//todo 
 }
