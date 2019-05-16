@@ -159,6 +159,7 @@ BOOL WINAPI ConsoleHandlerRoutine(DWORD /*dwCtrlType*/) {
     return FALSE;
 }
 
+//? Liu: directly start StarCraft II instance with command line
 uint64_t StartProcess(const std::string& process_path, const std::vector<std::string>& command_line) {
     static const unsigned int buffer_size = (1 << 16) + 1;
 

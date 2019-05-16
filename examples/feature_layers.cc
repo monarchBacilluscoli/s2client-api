@@ -49,11 +49,8 @@ public:
         //? Liu: this is used for drawing main camera
         //? Liu: (Observation)->(ObservationFeatureLayer)->(FeatureLayers)
         const SC2APIProtocol::FeatureLayers& m = observation->feature_layer_data().renders();
-        //? Liu: you can see from the spatial.proto that those data has been defined into int32/unit8/1-bit these 3 types.
-        //? Liu: they are all ImageData
-        //? Liu: there is a mistake, they passed a unit_density layer to a function which is used to display the aliance of units. What a big mistake
         DrawFeatureLayerUnits8BPP(m.player_relative(), 0, 0);
-        //? Liu: 
+        //? Liu: It draws the selected unit(s)
         DrawFeatureLayer1BPP(m.selected(), kDrawSize, 0);
 
         //? Liu: (Observation)->(ObservationFeatureLayer)->(FeatureLayersMinimap)

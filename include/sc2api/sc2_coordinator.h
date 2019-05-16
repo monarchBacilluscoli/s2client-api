@@ -57,15 +57,15 @@ public:
     //! Set the correct data version of a replay to allow faster replay loading. Saves a few seconds if replay is not up to date.
     //!  Works only in combination with correct process path set by "SetProcessPath".
     //! \param version Look in "protocol/buildinfo/versions.json" for the property "data-hash". Or read it from "ReplayInfo.data_version".
-    void SetDataVersion(const std::string& version);
+    void SetDataVersion(const std::string& version); //? cut
 
     //! Sets the timeout for network operations.
     //! \param value timeout_ms in milliseconds.
-    void SetTimeoutMS(uint32_t timeout_ms = kDefaultProtoInterfaceTimeout);
+    void SetTimeoutMS(uint32_t timeout_ms = kDefaultProtoInterfaceTimeout); //? don't know
 
     //! Sets the first port number to use. Subsequent port assignments are sequential.
     //! \param port_start First port number.
-    void SetPortStart(int port_start);
+    void SetPortStart(int port_start); //? don't know
 
     //! Indicates whether feature layers should be provided in the observation.
     //! \param settings Configuration of feature layer settings.
@@ -74,42 +74,42 @@ public:
 
     //!
     //! \sa RenderSettings
-    void SetRender(const RenderSettings& settings);
+    void SetRender(const RenderSettings& settings); //? cut
 
     //! Sets the game window dimensions.
     //! \param width Width of game window.
     //! \param height Height of game window.
-    void SetWindowSize(int width, int height);
+    void SetWindowSize(int width, int height); //? cut
 
     //! Sets the game window location.
     //! \param x X position of game window.
     //! \param y y position of game window.
-    void SetWindowLocation(int x, int y);
+    void SetWindowLocation(int x, int y); //? cut
 
     //! Uses generalized abilities where possible. Example: BUILD_TECHLAB_BARRACKS, BUILD_TECHLAB_FACTORY, BUILD_TECHLAB_STARPORT 
     //! ability ids are generalized to BUILD_TECHLAB ability id in the observation.
-    void SetUseGeneralizedAbilityId(bool value);
+    void SetUseGeneralizedAbilityId(bool value); //? cut
 
     //! Appends a command line argument to be fed to StarCraft II when starting.
     // \param option The string to be appended to the executable invoke.
-    void AddCommandLine(const std::string& option);
+    void AddCommandLine(const std::string& option); //? cut
 
     //! Sets up the bots and whether they are controlled by in-built AI, human or a custom bot.
     // \param participants A vector of player setups for each participant in the game.
     // \sa PlayerSetup
-    void SetParticipants(const std::vector<PlayerSetup>& participants);
+    void SetParticipants(const std::vector<PlayerSetup>& participants); 
 
-    void SetReplayRecovery(bool value);
+    void SetReplayRecovery(bool value); //? cut
 
     //! Add an instance of ReplayObserver, each ReplayObserver will run a separate StarCraft II client.
     // \param replay_observer A pointer to the replay observer to utilize.
     // \sa ReplayObserver
-    void AddReplayObserver(ReplayObserver* replay_observer);
+    void AddReplayObserver(ReplayObserver* replay_observer); //? cut
 
     // Start-up.
 
     //! Uses settings gathered from LoadSettings, specifically the path to the executable, to run StarCraft II.
-    void LaunchStarcraft();
+    void LaunchStarcraft(); //? cut, but you should do other things in it
 
     //! Attaches to a running Starcraft.
     void Connect(int port);

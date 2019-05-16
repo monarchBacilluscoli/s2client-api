@@ -44,10 +44,10 @@ int main(int argc, char* argv[]) {
     int step_size = 100;
     // test for runing game repeatedly
     for (size_t i = 0; i < 2; i++) {
-        Coordinator coordinator; // coordinator（协调器）负责控制游戏进行中、进行前等等的设置
+        Coordinator coordinator; // （协调器）负责控制游戏进行中、进行前等等的设置
         std::cout << "isLoadSettings: " << coordinator.LoadSettings(argc, argv) << std::endl; // If there is no command line arguments it will check the files in your MyDocument\StarCraft II and get default settings.
         std::cout<<"Executable path: " <<coordinator.GetExePath()<<std::endl;
-        coordinator.SetRealtime(true);
+        coordinator.SetRealtime(false);
         //coordinator.SetRealtime(true);
         coordinator.SetStepSize(step_size); // 设置游戏循环步长
         coordinator.SetMultithreaded(true);
@@ -79,15 +79,17 @@ int main(int argc, char* argv[]) {
             //CreateParticipant(Race::Terran, &sstb),
             CreateParticipant(Race::Terran, &rdb), //! This is a nightmare for all units in all maps, just start screaming!
 
-            //CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
+            CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
 
-            CreateComputer(Race::Terran), // 添加电脑，默认easy难度
+            //CreateComputer(Race::Terran), // 添加电脑，默认easy难度
             //CreateParticipant(Race::Terran, &bot2),
             }); // 添加参与玩家
 
+        //? Here is Port
         //coordinator.LaunchStarcraft();
 
         //! made it
+        coordinator.SetupPorts(2, 3001);
         coordinator.Connect("59.71.231.175",3000);
         //coordinator.Connect("127.0.0.1", 8167);
 
@@ -108,17 +110,17 @@ int main(int argc, char* argv[]) {
         //coordinator2.Connect(8168);
 
         //coordinator.StartGame(sc2::kMapBelShirVestigeLE); // 标准对局地图
-        //coordinator.StartGame("..\\maps\\Test\\testBattle.SC2Map");
-        //coordinator.StartGame("..\\maps\\Test\\testBattle_2distant_vs_1melee.SC2Map");
-        //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_melee_debug.SC2Map");
-        //coordinator.StartGame("..\\maps\\Test\\testBattle_distant_vs_distant.SC2Map");
-        //coordinator2.StartGame("..\\maps\\Test\\testBattle_distant_vs_distant.SC2Map");
-        //coordinator.StartGame("..\\maps\\Test\\testBattle_no_enemy.SC2Map");
-        //coordinator.StartGame("..\\maps\\Test\\testBattleAllUnits.SC2Map");
-        //coordinator.StartGame("..\\maps\\Test\\testBattle_d_m_vs_d_m.SC2Map");
-        //coordinator.StartGame("..\\maps\\Test\\testBattle_m_vs_d.SC2Map");
-        //coordinator.StartGame("..\\maps\\Test\\testBattle1v1.SC2Map"); // 1v1静止测试
-        //coordinator.StartGame("..\\maps\\Test\\testMechanism_StepSize.SC2Map");
+        //coordinator.StartGame("Test\\testBattle.SC2Map");
+        //coordinator.StartGame("Test\\testBattle_2distant_vs_1melee.SC2Map");
+        //coordinator.StartGame("Test\\testBattle_distant_vs_melee_debug.SC2Map");
+        //coordinator.StartGame("Test\\testBattle_distant_vs_distant.SC2Map");
+        //coordinator2.StartGame("Test\\testBattle_distant_vs_distant.SC2Map");
+        //coordinator.StartGame("Test\\testBattle_no_enemy.SC2Map");
+        //coordinator.StartGame("Test\\testBattleAllUnits.SC2Map");
+        //coordinator.StartGame("Test\\testBattle_d_m_vs_d_m.SC2Map");
+        //coordinator.StartGame("Test\\testBattle_m_vs_d.SC2Map");
+        //coordinator.StartGame("Test\\testBattle1v1.SC2Map"); // 1v1静止测试
+        //coordinator.StartGame("Test\\testMechanism_StepSize.SC2Map");
 
         //! if the remote client was used, the path should be set properly
         coordinator.StartGame("..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map");

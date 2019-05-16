@@ -49,6 +49,7 @@ void Shutdown() {
     SDL_Quit();
 }
 
+
 void Matrix1BPP(const char* bytes, int w_mat, int h_mat, int off_x, int off_y, int px_w, int px_h) {
     assert(renderer_);
     assert(window_);
@@ -60,17 +61,22 @@ void Matrix1BPP(const char* bytes, int w_mat, int h_mat, int off_x, int off_y, i
             rect.y = off_y + (int(y) * rect.h);
 
             size_t index = x + y * w_mat;
+            //? Liu: What does this mean?
             unsigned char mask = 1 << (7 - (index % 8));
+            //? Liu: Why is here a "/8"?
             unsigned char data = bytes[index / 8];
             bool value = (data & mask) != 0;
 
             if (value)
-                SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 255);
+                SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 255); //? Liu: white means...
             else
-                SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
+                SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255); //? Liu: Black means...
 
+            //todo delete it
+            std::cout << (bytes[index / 8]?(int)1:(int)0);
             SDL_RenderFillRect(renderer_, &rect);
         }
+        std::cout << std::endl;
     }
 }
 
