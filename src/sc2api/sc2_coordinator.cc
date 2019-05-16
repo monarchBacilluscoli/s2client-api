@@ -31,6 +31,7 @@ void RunParallel(const std::function<void(Agent* a)>& step, std::vector<Agent*>&
     }
 }
 
+//? Liu: launch a StarCraft instance with settings
 int LaunchProcess(ProcessSettings& process_settings, Client* client, int window_width, int window_height, int window_start_x, int window_start_y, int port, int client_num=0) {
     assert(client);
     process_settings.process_info.push_back(sc2::ProcessInfo());
@@ -77,7 +78,8 @@ int LaunchProcess(ProcessSettings& process_settings, Client* client, int window_
     else {
         std::cout << "Launched SC2 (" << process_settings.process_path << "), PID: " << std::to_string(pi.process_id) << std::endl;
     }
-
+    //? Liu: I don't have to bother to care those code above
+    //? Liu: port...
     client->Control()->SetProcessInfo(pi);
     return pi.port;
 }
@@ -101,21 +103,24 @@ int LaunchProcesses(ProcessSettings& process_settings, std::vector<Client*> clie
     int last_port = 0;
     // Start an sc2 process for each bot.
     int clientIndex = 0;
+    //? Liu: here we should launch multiple clients
     for (auto c : clients) {
         last_port = LaunchProcess(process_settings, 
             c, 
             window_width, 
             window_height, 
             window_start_x, 
-            window_start_y, 
+            window_start_y,
+            //? Liu: When LaunchProcess() is called, a new process_info will be pushed into process_settings.process_info, and the size() will increase...
             process_settings.port_start + static_cast<int>(process_settings.process_info.size()) - 1, 
             clientIndex++);
     }
 
-    //? this could be the most important statement.
+    //? Liu: this could be the most important statement.
+    //? Liu: here it connect every client to those StarCraft II instances
     AttachClients(process_settings, clients);
 
-    return last_port;
+    return last_port; //? Liu: there has been start port set before, and here returns the last port
 }
 
 static void CallOnStep(Agent* a) {
@@ -558,13 +563,18 @@ bool CoordinatorImp::WaitForAllResponses() {
 
 bool CoordinatorImp::CreateGame() {
     // Create the game with the first client.
+    //? Liu: interesting, the first client creates... how about the server?
+    //? Liu: clients + server
+    //? Liu: looks like the first client - the server is taking responsibility to coordinate
     Agent* firstClient = agents_.front();
     return firstClient->Control()->CreateGame(game_settings_.map_name, game_settings_.player_setup, process_settings_.realtime);
 }
 
 bool CoordinatorImp::JoinGame() {
     int i = 0;
+    //? Liu: server set up the room, and all the clients (including server) join it
     for (auto c : agents_) {
+        //? Liu: RequestJoinGame handles those ports
         bool game_join_request = c->Control()->RequestJoinGame(game_settings_.player_setup[i++],
             interface_settings_,
             game_settings_.ports);
@@ -575,6 +585,10 @@ bool CoordinatorImp::JoinGame() {
         }
     }
 
+    //? Liu: why here is a "Wait"? Maybe here is just a join game request, there haven't been any response yet.
+    //? Liu: Oh, I got it, here just waits for the load of map
+    //? Liu: each client should have it own ticket
+    //? Liu: and the ticket anonymous, give one, go one
     for (auto c : agents_) {
         c->Control()->WaitJoinGame();
     }
@@ -616,11 +630,15 @@ bool CoordinatorImp::JoinGame() {
 
 bool CoordinatorImp::StartGame() {
     assert(starcraft_started_);
+    //? Liu: first create
+    //? Liu: send the name path, player setup to StarCraft II server instance to make it load the map and set the players
     bool is_game_created = CreateGame();
     if (!is_game_created) {
         std::cerr << "Failed to create game." << std::endl;
         exit(1);
     }
+    //? Liu: then join
+    //? Liu: here is the same as what s2client-proto says
     return JoinGame();
 }
 
@@ -736,7 +754,8 @@ void Coordinator::LaunchStarcraft() {
             std::vector<sc2::Client*>(imp_->agents_.begin(), imp_->agents_.end()), imp_->window_width_, imp_->window_height_, imp_->window_start_x_, imp_->window_start_y_);
     }
 
-    SetupPorts( imp_->agents_.size(), port_start);
+    //? Liu: set up other ports not the two main ports, but I don't know what are they used for.
+    SetupPorts( imp_->agents_.size(), port_start); //? Liu: port_start is the last normal port(if you have 2 instances, the number of the second instance's port will be the port_start)
 
     imp_->starcraft_started_ = true;
     imp_->last_port_ = port_start;
@@ -762,7 +781,8 @@ void Coordinator::Connect(std::string net_address, int port) {
     imp_->process_settings_.net_address = net_address;
     while (imp_->process_settings_.process_info.size() < imp_->agents_.size()) {
         imp_->process_settings_.process_info.push_back(
-            ProcessInfo(imp_->process_settings_.net_address, 0, port)
+            //? Liu: for multi-player remote connection, port need a change every time, ++ is enough and simple
+            ProcessInfo(imp_->process_settings_.net_address, 0, port++)
         );
     }
 
@@ -1007,8 +1027,9 @@ void Coordinator::SetupPorts(size_t num_agents, int port_start, bool check_singl
     // Join the game if there are two human participants.
     size_t humans = 0;
     if (check_single) {
+        //? Liu: there is nothing special in PlyaerSetup
         for (const auto& p_setup : imp_->game_settings_.player_setup) {
-            if (p_setup.type == sc2::PlayerType::Participant) {
+            if (p_setup.type == sc2::PlayerType::Participant) { //? Liu: Participant, Computer, Observer
                 ++humans;
             }
         }
@@ -1016,10 +1037,13 @@ void Coordinator::SetupPorts(size_t num_agents, int port_start, bool check_singl
     else {
         humans = num_agents;
     }
+    //? Liu: if the game is a n-player game, there will be 1 server, and n-1 clients, each has same types of ports - game_port, base_port
+    //? Liu: and there is also only one global shared_port
     if (humans > 1 ) {
         imp_->game_settings_.ports.shared_port = ++port_start;
         imp_->game_settings_.ports.server_ports.game_port = ++port_start;
         imp_->game_settings_.ports.server_ports.base_port = ++port_start;
+        // And then, for each client
         for (size_t i = 1; i < num_agents; ++i) {
             PortSet port_set;
             port_set.game_port = ++port_start;
@@ -1027,5 +1051,7 @@ void Coordinator::SetupPorts(size_t num_agents, int port_start, bool check_singl
             imp_->game_settings_.ports.client_ports.push_back(port_set);
         }
     }
+    //? Liu: so why here are so many ports?
+    //? Liu: And what then?
 }
 }

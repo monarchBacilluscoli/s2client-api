@@ -1429,6 +1429,7 @@ public:
 
     void DumpProtoUsage() override;
 
+    //? Liu: check the real path of the map based on the map_name, and set it in request
     void ResolveMap(const std::string& map_name, SC2APIProtocol::RequestCreateGame* request);
 
     const std::vector<ClientError>& GetClientErrors() const final { return client_errors_; };
@@ -1542,11 +1543,13 @@ bool ControlImp::RemoteSaveMap(const void* data, int data_size, std::string remo
 
 void ControlImp::ResolveMap (const std::string& map_name, SC2APIProtocol::RequestCreateGame* request) {
     // BattleNet map
-    if (!HasExtension(map_name, ".SC2Map")) {
+    if (!HasExtension(map_name, ".SC2Map")) { //? So, it judge whether or not the name is a Battle.net map by just checking the extension name...OK
         request->set_battlenet_map_name(map_name);
         return;
     }
 
+    //? Liu: then for every type of map, it is just check the existence of the path itself
+    //? Liu: But it doesn't matter for remote game creation, I can just set the path string outside here to let it check through
     // Absolute path
     SC2APIProtocol::LocalMap* local_map = request->mutable_local_map();
     if (DoesFileExist(map_name)) {
@@ -1569,13 +1572,17 @@ void ControlImp::ResolveMap (const std::string& map_name, SC2APIProtocol::Reques
     }
 
     // Relative path - Remotely saved maps directory
+    //? Liu: maybe it is the path which is used in remote control
+    //? Liu: it will set the string directly to make the instance run it
     local_map->set_map_path(map_name);
 }
 
 bool ControlImp::CreateGame(const std::string& map_name, const std::vector<PlayerSetup>& players, bool realtime) {
     GameRequestPtr request = proto_.MakeRequest();
     SC2APIProtocol::RequestCreateGame* request_create_game = request->mutable_create_game();
+    //? Liu: check and set the real path of the map_name
     ResolveMap(map_name, request_create_game);
+    //? Liu: according to the argument, set up request_create_game: player_setup
     for (const PlayerSetup& setup : players) {
         SC2APIProtocol::PlayerSetup* playerSetup = request_create_game->add_player_setup();
         playerSetup->set_type(SC2APIProtocol::PlayerType(setup.type));
@@ -1585,6 +1592,7 @@ bool ControlImp::CreateGame(const std::string& map_name, const std::vector<Playe
 
     request_create_game->set_realtime(realtime);
 
+    //? Liu: ProtoInterface is still not the protocol buffer generated code
     if (!proto_.SendRequest(request)) {
         return false;
     }
