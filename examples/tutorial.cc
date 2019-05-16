@@ -29,11 +29,8 @@ class human_control :public Agent {
     Units initial_units;
 };
 
-class no_action:public Agent {
-public:
-    no_action() = default;
-    ~no_action() = default;
-};
+// Haha, here is a bot with no real code
+class no_action:public Agent {};
 
 int main(int argc, char* argv[]) {
     //? print the argvs and see what they are...
@@ -41,7 +38,7 @@ int main(int argc, char* argv[]) {
         std::cout << argv[i] << std::endl;
     }
 
-    int step_size = 100;
+    int step_size = 1;
     // test for runing game repeatedly
     for (size_t i = 0; i < 2; i++) {
         Coordinator coordinator; // （协调器）负责控制游戏进行中、进行前等等的设置
@@ -63,7 +60,7 @@ int main(int argc, char* argv[]) {
         potential_field_bot pf_bot(step_size);
         advanced_potential_field_bot adv_pf_bot(step_size);
         step_size_test_bot sstb;
-        debug_test_bot dtb;
+        debug_test_bot dtb; //! This is a nightmare for all units in all maps, just start screaming!
         remote_draw rdb;
 
         attack_nearest an_bot;
@@ -77,9 +74,9 @@ int main(int argc, char* argv[]) {
             //CreateParticipant(Race::Terran, &pf_bot), //potential field bot
             //CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
             //CreateParticipant(Race::Terran, &sstb),
-            CreateParticipant(Race::Terran, &rdb), //! This is a nightmare for all units in all maps, just start screaming!
+            CreateParticipant(Race::Terran, &rdb),
 
-            CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
+            CreateParticipant(Race::Terran, &na_bot), // 添加人族，使用Attack Nearest
 
             //CreateComputer(Race::Terran), // 添加电脑，默认easy难度
             //CreateParticipant(Race::Terran, &bot2),
@@ -90,8 +87,9 @@ int main(int argc, char* argv[]) {
 
         //! made it
         coordinator.SetupPorts(2, 3001);
+        coordinator.SetNetAddress("59.71.231.175");
+        coordinator.LeaveGame();
         coordinator.Connect("59.71.231.175",3000);
-        //coordinator.Connect("127.0.0.1", 8167);
 
 
         //? I need another coordinator to test

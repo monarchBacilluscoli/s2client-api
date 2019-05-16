@@ -111,6 +111,9 @@ public:
     //! Uses settings gathered from LoadSettings, specifically the path to the executable, to run StarCraft II.
     void LaunchStarcraft(); //? cut, but you should do other things in it
 
+    //? Liu: set the IP address of a StarCraft II instance
+    void SetNetAddress(std::string net_address);
+
     //! Attaches to a running Starcraft.
     void Connect(int port);
     //? Liu: Attaches to a running Starcraft, allows remote connection

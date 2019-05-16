@@ -72,8 +72,6 @@ void Matrix1BPP(const char* bytes, int w_mat, int h_mat, int off_x, int off_y, i
             else
                 SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255); //? Liu: Black means...
 
-            //todo delete it
-            std::cout << (bytes[index / 8]?(int)1:(int)0);
             SDL_RenderFillRect(renderer_, &rect);
         }
         std::cout << std::endl;
