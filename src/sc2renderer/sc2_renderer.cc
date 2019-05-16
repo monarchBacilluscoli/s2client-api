@@ -9,7 +9,6 @@ namespace {
     SDL_Window* window_;
     SDL_Renderer* renderer_;
 
-    //? Liu: Create a SDL_Rect, maybe there isn't a rect creator in SDL
     SDL_Rect CreateRect(int x, int y, int w, int h) {
         SDL_Rect r;
         r.x = x;
@@ -61,16 +60,14 @@ void Matrix1BPP(const char* bytes, int w_mat, int h_mat, int off_x, int off_y, i
             rect.y = off_y + (int(y) * rect.h);
 
             size_t index = x + y * w_mat;
-            //? Liu: What does this mean?
             unsigned char mask = 1 << (7 - (index % 8));
-            //? Liu: Why is here a "/8"?
             unsigned char data = bytes[index / 8];
             bool value = (data & mask) != 0;
 
             if (value)
-                SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 255); //? Liu: white means...
+                SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 255);
             else
-                SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255); //? Liu: Black means...
+                SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
 
             //todo delete it
             std::cout << (bytes[index / 8]?(int)1:(int)0);
@@ -102,38 +99,32 @@ void Matrix8BPPPlayers(const char* bytes, int w_mat, int h_mat, int off_x, int o
     assert(renderer_);
     assert(window_);
 
-    //? Liu: prepare a big "pixel" to be drawn
     SDL_Rect rect = CreateRect(0, 0, px_w, px_h);
-    //? Liu: based on the input data's properties, it draws the individuals in this data
     for (size_t y = 0; y < h_mat; ++y) {
         for (size_t x = 0; x < w_mat; ++x) {
-            //? Liu: Relocate the "pixel"
             rect.x = off_x + (int(x) * rect.w);
             rect.y = off_y + (int(y) * rect.h);
 
-            //? Liu: coordinator - index conversion
             size_t index = x + y * w_mat;
             switch (bytes[index]) {
             case 0:
-                //? Liu: renderer+RGBA, in Alpha Channel, white(255) represents opacity, black(0) represent transparency
-                SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);//? Liu: black background
+                SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
                 break;
             case 1:
                 // Self.
-                SDL_SetRenderDrawColor(renderer_, 0, 255, 0, 255);//? Liu: Green
+                SDL_SetRenderDrawColor(renderer_, 0, 255, 0, 255);
                 break;
             case 2:
-                // Enemy.
-                //? Liu: Ally
-                SDL_SetRenderDrawColor(renderer_, 255, 0, 0, 255);//? Liu: This is not enemy, this is Ally
+                // Ally
+                SDL_SetRenderDrawColor(renderer_, 255, 0, 0, 255);
                 break;
             case 3:
                 // Neutral.
                 SDL_SetRenderDrawColor(renderer_, 0, 0, 255, 255);
                 break;
             case 4:
-                //? Liu: Enemy
-                SDL_SetRenderDrawColor(renderer_, 255, 255, 0, 255);//? Liu: this is enemy, yellow(R+G=Y)
+                // Enemy
+                SDL_SetRenderDrawColor(renderer_, 255, 255, 0, 255);
                 break;
             case 5:
                 SDL_SetRenderDrawColor(renderer_, 0, 255, 255, 255);
