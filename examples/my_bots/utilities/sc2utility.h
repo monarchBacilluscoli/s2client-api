@@ -123,6 +123,20 @@ namespace sc2 {
             return false;
         }
 
+        static const Unit* select_nearest_unit_from_point(const Point2D& p, const Units& us) {
+            float min_distance = FLT_MAX;
+            const Unit* selected_unit = nullptr;
+            float dis;
+            for (const auto u : us) {
+                dis = Distance2D(p, u->pos);
+                if (dis < min_distance) {
+                    selected_unit = u;
+                    min_distance = dis;
+                }
+            }
+            return selected_unit;
+        }
+
         static const int frames_per_second = 16;
     };
 }

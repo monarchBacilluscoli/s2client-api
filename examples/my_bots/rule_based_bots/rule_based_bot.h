@@ -11,6 +11,7 @@ namespace sc2 {
         rule_based_bot() = default;
         ~rule_based_bot() = default;
 
+        //todo since it has been moved to sc2_utility, it would better be deleted here
         const Unit* select_nearest_unit_from_point(const Point2D& p, const Units& us);
 
     protected:

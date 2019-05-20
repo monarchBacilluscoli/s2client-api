@@ -194,6 +194,9 @@ public:
     //!< \return The game executable path.
     std::string GetExePath() const;
 
+    //? Liu:exposes the imp pointer to me to use.
+    CoordinatorImp* Imp();
+
 private:
     CoordinatorImp* imp_;
 };

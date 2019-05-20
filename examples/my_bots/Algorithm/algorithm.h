@@ -9,11 +9,7 @@ public:
     //todo some universal method interfaces
 
 private:
-    //todo some private methods
 
-    //todo algorithm data at runtime
-
-    //todo configuration of algorithm
 
 };
 
