@@ -3,66 +3,70 @@
 
     The coordinator acts as a remote game manager. It is used to remotely attach to a StarCraft and setup proto connections
     between a user's bot and the running StarCraft instance. And it provided function of copying the current game settings and state so that let the remote instance run as a simulator for current game
+    Note that if you want to use this method correctly, you need to have a entirely exposed map or a bot with full full observation
 */
 
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 
-#include<sc2api/sc2_api.h>
-#include"../my_bots/solution.h"
+#include <string>
+#include <vector>
+#include <map>
+#include <sc2api/sc2_api.h>
+#include <sc2api/sc2_proto_interface.h>
+#include "../my_bots/solution.h"
+#include "../my_bots/tests/remote_draw.h"
+
+#include "state.h"
 
 namespace sc2 {
 
-    //? Maybe I don't need this bot to have any code, I can execute the order from outside
-    class Executor: public Agent
-    {
-    public:
-        //void OnGameStart() final;
-        void OnStep() final;
-    };
+    //! An empty bot to be called outside 
+    class Executor : public Agent {};
 
     class Simulator
     {
     public:
-        //todo use a constructor to copy current state and game settings. And of course you have to provide the remote port and IP.
-        //todo 
-        Simulator();
-        ~Simulator();
-
-        //todo 
+        Simulator() = default;
+        ~Simulator() = default;
+        
+        //! Set all the settings, once they are set, they can not be changed when connects to game instance
+        void Initialize(std::string net_address, int port, std::string map_path, int step_size, Agent& my_bot = Executor(), PlayerSetup opponent = PlayerSetup(PlayerType::Computer, Race::Terran, nullptr, Difficulty::Easy), bool Multithreaded = false);
+        //! set feature layer display in local client, once user uses it, the feature layer is activated
         void SetFeatureLayers(const FeatureLayerSettings& settings);
-        //todo
-        void SetOpponent(const std::vector<PlayerSetup>& opponent);
-        //todo how long, use what to count? time? frames? or process of game?
-        void SetStarPoint(command command, ObservationInterface* ob);
-        void Run(int frames);
+
+        //! copy the game state from a specific game observation
+        void CopyAndSetState(const ObservationInterface* ob);
+        //! copys state and sets orders for preparation to run
+        void SetStartPoint(std::vector<command> commands, const ObservationInterface* ob);
+        //! runs for specific number of steps which can be set by user
+        void Run(int steps);
+        //! load the copied state
+        void Load();
+        //? is anyone really needs a Run() which runs the game until gameover
+        //! exposes the whole ObservationInterface to user
+        const ObservationInterface* Observation() const;
     private:
-    //todo give the order, did I need to store the order?
-        void SetOrder(command command);
-    //todo give the state
-        void SetState(ObservationInterface* ob);
-    //todo I think I need to store the pointer to the Bot, and 
 
-        Executor m_exector;
-        CoordinatorImp* imp_;
+        //! direct send the orders to units
+        void SetOrders(std::vector<command> commands);
+        //! set units relations
+        //! so the caller of this simultor doesn't have to know the tags of units here
+        void SetUnitsRelations(State state, Units us_copied);
+
+        bool m_is_multi_player = false;
+        //! the bot to be called outside to send orders or get observations
+        Agent& m_executor = Executor();
+        //! the process and game manager
+        Coordinator m_coordinator;
+        //! save of the caller' state when calls it
+        State m_initia_save;
+        //! save of state
+        State m_save;
+
+        //! form resource tag to target unit
+        std::map<Tag, const Unit*> m_relative_units;
     };
-
-    //Simulator::Simulator()
-    //{
-        //? What settings should be copied from coordinator(map) and what should not(ip, ports)
-        //? What settings can be changed after construction and what should not(almost everything can be fixed in old Coordinator)
-        //todo Check if there are something useful in LoadSettings
-        //todo Multithreaded??
-        //todo set realtime false
-        //todo Maybe I can check the process path
-        //todo set the bot which can deploy my orders, as for the other one...
-        //todo users can set the opponent here to, or set it after initialization
-        //todo no launch, but need to setup ports and connect
-        //todo start game(map)
-        //todo create game(open a room for clients, clients not be connected yet)
-        //todo join game
-    //}
-
 }
 
 #endif // !SIMULATOR_H

@@ -763,6 +763,7 @@ void Coordinator::LaunchStarcraft() {
 
 void Coordinator::SetNetAddress(std::string net_address)
 {
+    assert(!imp_->starcraft_started_);
     imp_->process_settings_.net_address = net_address;
 }
 
@@ -1027,6 +1028,11 @@ std::string Coordinator::GetExePath() const {
         return imp_->process_settings_.process_path;
 
     return imp_->process_settings_.process_path;
+}
+
+CoordinatorImp* Coordinator::Imp()
+{
+    return imp_;
 }
 
 void Coordinator::SetupPorts(size_t num_agents, int port_start, bool check_single) {

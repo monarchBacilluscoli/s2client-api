@@ -12,7 +12,7 @@
 #include "sc2renderer/sc2_renderer.h"
 
 namespace sc2 {
-    class remote_draw : public Agent,public rule_based_bot
+    class remote_draw : public Agent
     {
     public:
         remote_draw() = default;
@@ -20,31 +20,27 @@ namespace sc2 {
 
         virtual void OnGameStart() final {
             //Initialize data
-            m_alive_enemy_units = Agent::Observation()->GetUnits(Unit::Alliance::Enemy);
 
             sc2::renderer::Initialize("Feature layers", 50, 50, 2 * kDrawSize, 2 * kDrawSize);
         }
 
         virtual void OnStep() final {
             //Update data
-            m_alive_enemy_units = Agent::Observation()->GetUnits(Unit::Alliance::Enemy);
 
             const SC2APIProtocol::Observation* observation = Agent::Observation()->GetRawObservation();
 
             const SC2APIProtocol::FeatureLayers& m = observation->feature_layer_data().renders();
-            DrawFeatureLayerUnits8BPP(m.unit_density(), 0, 0);
+            DrawFeatureLayerUnits8BPP(m.player_relative(), 0, 0);
             DrawFeatureLayer1BPP(m.selected(), kDrawSize, 0);
 
             const SC2APIProtocol::FeatureLayersMinimap& mi = observation->feature_layer_data().minimap_renders();
             DrawFeatureLayerHeightMap8BPP(mi.height_map(), 0, kDrawSize);
             DrawFeatureLayer1BPP(mi.camera(), kDrawSize, kDrawSize);
-
-            sc2::renderer::Render();
         }
 
         virtual void OnUnitIdle(const Unit* unit) {
-            const Unit* target = select_nearest_unit_from_point(unit->pos, m_alive_enemy_units);
-            Agent::Actions()->UnitCommand(unit, ABILITY_ID::ATTACK, target);
+            //const Unit* target = select_nearest_unit_from_point(unit->pos, m_alive_enemy_units);
+            //Agent::Actions()->UnitCommand(unit, ABILITY_ID::ATTACK, target);
         }
 
 

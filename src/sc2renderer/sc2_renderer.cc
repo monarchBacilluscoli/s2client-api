@@ -74,7 +74,6 @@ void Matrix1BPP(const char* bytes, int w_mat, int h_mat, int off_x, int off_y, i
 
             SDL_RenderFillRect(renderer_, &rect);
         }
-        std::cout << std::endl;
     }
 }
 
@@ -121,7 +120,6 @@ void Matrix8BPPPlayers(const char* bytes, int w_mat, int h_mat, int off_x, int o
                 SDL_SetRenderDrawColor(renderer_, 0, 255, 0, 255);//? Liu: Green
                 break;
             case 2:
-                // Enemy.
                 //? Liu: Ally
                 SDL_SetRenderDrawColor(renderer_, 255, 0, 0, 255);//? Liu: This is not enemy, this is Ally
                 break;

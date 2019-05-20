@@ -1,13 +1,16 @@
-#ifndef NSGAII_H
-#define NSGAII_H
+#ifndef GA_H
+#define GA_H
 
-class nsgaii {
+#include<vector>
+
+template<class T>
+class GA {
 public:
-    nsgaii();
-    ~nsgaii();
+    GA();
+    ~GA();
 
     //todo some universal methods
-    
+
 
 private:
     //todo configuration parameters
@@ -16,4 +19,4 @@ private:
 
 };
 
-#endif // !NSGAII_H
+#endif // !GA_H
