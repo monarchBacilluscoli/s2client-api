@@ -624,7 +624,6 @@ bool CoordinatorImp::JoinGame() {
     for (auto c : agents_) {
         c->Control()->IssueEvents(c->Actions()->Commands());
     }
-
     return true;
 }
 

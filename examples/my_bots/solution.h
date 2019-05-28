@@ -1,20 +1,11 @@
 #ifndef SOLUTION_H
 #define SOLUTION_H
 
-#include "sc2api/sc2_api.h"
+#include "command.h"
 #include <numeric>
 
 namespace sc2 {
-    // a series of actions for a unit
-    struct command {
-        Tag unit_tag;
-        RawActions actions;
-
-        bool operator==(const command& rhs)const;
-        bool operator!=(const command& rhs)const;
-    };
-
-    // many command make up a sulution
+    // many commands make up a sulution
     struct solution {
         solution() = default;
         solution(int command_size, int objective_size) {
@@ -27,20 +18,40 @@ namespace sc2 {
         ~solution() = default;
 
         std::vector<float> objectives;
-        std::vector<command> commands;
+        std::vector<Command> commands;
         int rank = 0;
 
         bool operator==(const solution& rhs) const;
         bool operator!=(const solution& rhs) const;
     };
 
-    bool multi_greater(const solution& a, const solution& b);
+    static bool multi_greater(const solution& a, const solution& b) {
+        bool equal = true;
+        // If any of the b's dimensions is bigger than a, return false
+        for (size_t i = 0; i < a.objectives.size(); i++) {
+            if (a.objectives[i] < b.objectives[i]) {
+                return false;
+            }
+            else if (equal && fabsf(a.objectives[i] - b.objectives[i]) > 0.000001) {
+                equal = false;
+            }
+        }
+        // If all the demensions are equal, return false
+        if (equal) {
+            return false;
+        }
+        // else return true
+        return true;
+    }
 
     // Simply add up all the objectives without considering weights
-    bool simple_sum_greater(const solution& a, const solution& b);
-    //! just for test.
-    //bool no_compare(const solution& a, const solution& b);
+    static bool simple_sum_greater(const solution& a, const solution& b) {
+        //! be careful to use std::accumulate and pay attention to the last parameter of this function, the return value's type depends on it.
+        return std::accumulate(a.objectives.begin(), a.objectives.end(), 0.f) > std::accumulate(b.objectives.begin(), b.objectives.end(), 0.f);
+    }
 }
+
+
 
 #endif // !SOLUTION_H
 

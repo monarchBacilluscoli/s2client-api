@@ -36,6 +36,8 @@ namespace sc2 {
             const SC2APIProtocol::FeatureLayersMinimap& mi = observation->feature_layer_data().minimap_renders();
             DrawFeatureLayerHeightMap8BPP(mi.height_map(), 0, kDrawSize);
             DrawFeatureLayer1BPP(mi.camera(), kDrawSize, kDrawSize);
+
+            sc2::renderer::Render();
         }
 
         virtual void OnUnitIdle(const Unit* unit) {
