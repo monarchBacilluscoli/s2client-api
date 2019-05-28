@@ -137,6 +137,10 @@ namespace sc2 {
             return selected_unit;
         }
 
+        static float move_distance(const Unit* u, int frames, const UnitTypes& uts) {
+            return uts[u->unit_type].movement_speed / frames_per_second * frames;
+        }
+
         static const int frames_per_second = 16;
     };
 }

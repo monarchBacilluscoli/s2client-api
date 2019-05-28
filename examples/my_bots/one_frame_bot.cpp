@@ -18,7 +18,7 @@ namespace sc2 {
 
 	Units one_frame_bot::search_units_within_radius_in_solution(const Point2D& p, float r, const solution& s) {
 		Units units_within_radius;
-		for (const command& c : s.commands) {
+		for (const Command& c : s.commands) {
 			const Unit* u = get_execution_unit(c);
 			switch (static_cast<ABILITY_ID>(c.actions.front().ability_id)) {
 				// Abilities can move a unit
@@ -40,7 +40,7 @@ namespace sc2 {
 
 	Units one_frame_bot::search_units_can_be_attacked_by_unit_in_solution(const Unit* u, const solution& s) {
 		Units units_can_be_attacked;
-		for (const command& c : s.commands) {
+		for (const Command& c : s.commands) {
 			const Unit* target_u = get_execution_unit(c);
 			if (!c.actions.empty()) {
 				if (c.actions.front().ability_id == ABILITY_ID::MOVE) {
@@ -345,7 +345,7 @@ namespace sc2 {
 
 		return dis;
 	}
-	const Unit* one_frame_bot::get_execution_unit(const command & c) {
+	const Unit* one_frame_bot::get_execution_unit(const Command & c) {
 		return Observation()->GetUnit(c.unit_tag);
 	}
 
@@ -498,7 +498,7 @@ namespace sc2 {
 			throw("I can't do it that using smaller parent population to generate larger child population, at least in this version@one_frame_bot::generate_offspring");
 		}
 		offspring.reserve(spring_size);
-		for (size_t i = 0; i < parents.size() && i < spring_size; i += 2) {
+		for (size_t i = 0; i < spring_size; i += 2) {
 			std::vector<solution> instant_children = produce(parents[i], parents[i + 1]);
 			offspring.insert(offspring.begin() + i, instant_children.begin(), instant_children.end());
 		}
@@ -526,14 +526,14 @@ namespace sc2 {
 			std::swap(start, end);
 		}
 		// exchange the segment between the two points
-		for (int i = start; i <= end; i++) {
+		for (size_t i = start; i <= end; i++) {
 			std::swap(offspring[0].commands[i], offspring[1].commands[i]);
 		}
 		return offspring;
 	}
 	void one_frame_bot::mutate(solution & s) {
 		// select a random command and mutate it
-		command& cmd = GetRandomEntry(s.commands);
+		Command& cmd = GetRandomEntry(s.commands);
 		ActionRaw& action = cmd.actions.front();
 		switch (static_cast<ABILITY_ID>(action.ability_id)) {
 		case ABILITY_ID::MOVE: {
@@ -627,7 +627,7 @@ namespace sc2 {
 	}
 
 	void one_frame_bot::deploy_solution(const solution & s) {
-		for (const command& c : s.commands) {
+		for (const Command& c : s.commands) {
 			const Unit* execute_unit = get_execution_unit(c);
 			const ActionRaw action = c.actions.front();
 			//todo check the target type
@@ -743,4 +743,3 @@ namespace sc2 {
 		return advantage_sum;
 	}
 }
-

@@ -31,14 +31,23 @@ namespace sc2 {
         ~Simulator() = default;
         
         //! Set all the settings, once they are set, they can not be changed when connects to game instance
-        void Initialize(std::string net_address, int port, std::string map_path, int step_size, Agent& my_bot = Executor(), PlayerSetup opponent = PlayerSetup(PlayerType::Computer, Race::Terran, nullptr, Difficulty::Easy), bool Multithreaded = false);
+        void Initialize(\
+            std::string net_address, \
+            int port_start, \
+            std::string map_path, \
+            int step_size, \
+            Agent my_bot = Executor(),\
+            const PlayerSetup& opponent = PlayerSetup(PlayerType::Computer, Race::Terran, nullptr, Difficulty::Easy),\
+            bool Multithreaded = false);
         //! set feature layer display in local client, once user uses it, the feature layer is activated
         void SetFeatureLayers(const FeatureLayerSettings& settings);
 
+        //! direct send the orders to units
+        void SetOrders(std::vector<Command> commands);
         //! copy the game state from a specific game observation
         void CopyAndSetState(const ObservationInterface* ob);
         //! copys state and sets orders for preparation to run
-        void SetStartPoint(std::vector<command> commands, const ObservationInterface* ob);
+        void SetStartPoint(std::vector<Command> commands, const ObservationInterface* ob);
         //! runs for specific number of steps which can be set by user
         void Run(int steps);
         //! load the copied state
@@ -46,14 +55,22 @@ namespace sc2 {
         //? is anyone really needs a Run() which runs the game until gameover
         //! exposes the whole ObservationInterface to user
         const ObservationInterface* Observation() const;
+
+        int GetStepSize() const{
+            return m_step_size;
+        }
+        //! Compares current state with the start point to get specific unit group health loss
+        float GetTeamHealthLoss(Unit::Alliance alliance) const;
     private:
 
-        //! direct send the orders to units
-        void SetOrders(std::vector<command> commands);
         //! set units relations
         //! so the caller of this simultor doesn't have to know the tags of units here
         void SetUnitsRelations(State state, Units us_copied);
 
+        //! simulation step size
+        //! if you want the simulation to speed up, you can set a higher value
+        int m_step_size = 1;
+        //! it is based on the participant passed
         bool m_is_multi_player = false;
         //! the bot to be called outside to send orders or get observations
         Agent& m_executor = Executor();

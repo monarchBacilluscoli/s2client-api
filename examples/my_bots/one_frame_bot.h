@@ -137,7 +137,7 @@ namespace sc2 {
 
         float calculate_zero_potential_field_distance(const Unit * source_u, const Unit * target_u);
 
-        const Unit * get_execution_unit(const command & c);
+        const Unit * get_execution_unit(const Command & c);
 
         //// for debug
         //void display_fire_range(DebugInterface * debug, const Units & all_units);
