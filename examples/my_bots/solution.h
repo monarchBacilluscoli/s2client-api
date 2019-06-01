@@ -12,6 +12,7 @@ namespace sc2 {
             commands.resize(command_size);
             objectives.resize(objective_size);
         }
+        //todo sometimes you need to input a vector<vector> into it... So maybe I should think about how to contruct the two-demensional vector at the point of initialization
         solution(int command_size) {
             commands.resize(command_size);
         }

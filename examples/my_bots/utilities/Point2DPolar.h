@@ -2,7 +2,7 @@
 #define POINT2DPOLAR_H
 
 #include<cmath>
-#include"H:\SC2API_\s2client-api\include\sc2api\sc2_common.h"
+#include<sc2api/sc2_common.h>
 
 namespace sc2 {
 	struct Point2DInPolar {

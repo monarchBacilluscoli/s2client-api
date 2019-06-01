@@ -28,15 +28,19 @@ namespace sc2 {
     {
     public:
         Simulator() = default;
-        ~Simulator() = default;
-        
+        ~Simulator() {
+            // if one of the agent is destructed, it can automatically bring the remote instance to an end
+            //? I need to make sure that again, personally
+        };
+
+        void LaunchRemoteStarCraft(std::string net_address, std::string username, std::string password, std::string listening_port, std::string dir);
+
         //! Set all the settings, once they are set, they can not be changed when connects to game instance
         void Initialize(\
             std::string net_address, \
             int port_start, \
             std::string map_path, \
             int step_size, \
-            Agent my_bot = Executor(),\
             const PlayerSetup& opponent = PlayerSetup(PlayerType::Computer, Race::Terran, nullptr, Difficulty::Easy),\
             bool Multithreaded = false);
         //! set feature layer display in local client, once user uses it, the feature layer is activated

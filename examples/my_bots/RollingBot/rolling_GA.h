@@ -49,14 +49,15 @@ namespace sc2 {
             const ObservationInterface* observation,\
             std::vector<Evaluator>& evaluators, \
             float crossover_rate = 1.f, \
-            int population_size = 100, \
+            int population_size = 10, \
             Compare compare = Solution<Command>::sum_greater, \
-            int max_generation = 100, \
+            int max_generation = 20, \
             float reproduce_rate = 1.f, \
             float mutate_rate = 0.3f) {
             GA::Initialize(evaluators, crossover_rate, mutate_rate, population_size, compare, max_generation, reproduce_rate);
-            m_game_info = observation->GetGameInfo();
-            m_unit_type = observation->GetUnitTypeData(); //? why isn't here anything wrong?
+            m_observation = observation;
+            m_game_info = m_observation->GetGameInfo();
+            m_unit_type = m_observation->GetUnitTypeData(); //? why isn't here anything wrong?
             m_my_team = m_observation->GetUnits(Unit::Alliance::Self);
             m_enemy_team = m_observation->GetUnits(Unit::Alliance::Enemy);
             m_playable_dis = Point2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
@@ -68,6 +69,9 @@ namespace sc2 {
         virtual Solution<Command> GenerateSolution() override;;
         //! According to game conditions generates solutions which is as valid as possiable
         virtual void Mutate(Solution<Command>& s) override;
+        //! I need to override the Evaluate() function to make it multi-threaded
+        virtual void Evaluate(Population& p) override;
+
         //! Settings
         int m_step_size = 8; //? Does the step_size in simulator matter?
         //! the command length for each unit

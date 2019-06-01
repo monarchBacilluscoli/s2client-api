@@ -15,7 +15,7 @@ namespace sc2 {
             sc2::FeatureLayerSettings settings(kCameraWidth, kFeatureLayerSize, kFeatureLayerSize, kFeatureLayerSize, kFeatureLayerSize);
             m_sim.SetFeatureLayers(settings);
             renderer::Initialize("Feature layers", 50, 50, 2 * kDrawSize, 2 * kDrawSize);
-            m_sim.Initialize("59.71.231.175", 3000, "..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map", 10, m_rdt);
+            m_sim.Initialize("59.71.231.175", 3000, "..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map", 10);
             m_sim.CopyAndSetState(Observation());
             m_sim.Run(10);
             std::cout << m_sim.Observation()->GetUnits().size() << std::endl;
