@@ -13,13 +13,14 @@ void Simulator::CopyAndSetState(const ObservationInterface* ob_source)
 	SetUnitsRelations(m_save, m_executor.Observation()->GetUnits());
 	if (!m_is_multi_player) {
 		m_executor.Control()->Save();
+		//todo Then maybe you should rebuild the relationship.
 	}
 }
 
 void Simulator::SetUnitsRelations(State state, Units us_copied)
 {
 	// since state object is static once it is saved, so it just needs to get the relations between units in state and units in simulator
-	for (const UnitState state_u : state.unit_states)
+	for (const UnitState& state_u : state.unit_states)
 	{
 		m_relative_units[state_u.unit_tag] = sc2utility::select_nearest_unit_from_point(state_u.pos, us_copied);
 	}
@@ -46,9 +47,11 @@ const ObservationInterface* Simulator::Observation() const
 
 float Simulator::GetTeamHealthLoss(Unit::Alliance alliance) const {
 	float health_loss = 0.f;
+	// use the data from m_save and current data to simply calculate the health loss
 	for (const UnitState& state_u : m_save.unit_states)
 	{
-		const Unit* u = m_executor.Observation()->GetUnit(state_u.unit_tag);
+		const Unit* u = m_relative_units.at(state_u.unit_tag);
+		Units us = m_executor.Observation()->GetUnits();
 		// check if the unit has been dead
 		// because the API will keep the a unit's health its number the last time he lived if he has been dead now
 		if (u->is_alive) {
@@ -69,7 +72,7 @@ void Simulator::Load()
 	}
 	else {
 		m_executor.Control()->Load();
-		//todo I need to figure out whether or not the save & load don't reset the tags of units
+		// I don't have to rebuild the relationships, the tags will keep unchanged after Save() and Load()
 	}
 }
 
@@ -97,7 +100,12 @@ void Simulator::SetOrders(std::vector<Command> commands)
 	}
 }
 
-void Simulator::Initialize(std::string net_address, int port_start, std::string map_path, int step_size, Agent my_bot, const PlayerSetup& opponent, bool Multithreaded)
+void sc2::Simulator::LaunchRemoteStarCraft(std::string net_address, std::string username, std::string password, std::string listening_port, std::string dir)
+{
+	//todo call the launch program
+}
+
+void Simulator::Initialize(std::string net_address, int port_start, std::string map_path, int step_size, const PlayerSetup& opponent, bool Multithreaded)
 {
 	//this simulator don't support observer type player
 	assert(opponent.type == PlayerType::Computer || opponent.type == PlayerType::Participant);
@@ -109,7 +117,6 @@ void Simulator::Initialize(std::string net_address, int port_start, std::string 
 	m_step_size = step_size;
 	m_is_multi_player = opponent.type == PlayerType::Participant;
 	//sets the bot which can deploy my orders, as for the other one...
-	m_executor = my_bot;
 	m_coordinator.SetParticipants({
 		CreateParticipant(Race::Terran, &m_executor),
 		opponent
@@ -121,6 +128,7 @@ void Simulator::Initialize(std::string net_address, int port_start, std::string 
 		m_coordinator.SetupPorts(2, port_start + 1);
 	}
 
+	//todo before Connect, I need to launch a instance first
 	m_coordinator.Connect(port_start);
 	m_coordinator.StartGame(map_path);
 }

@@ -58,3 +58,4 @@ project/lib
 docs/html
 docs/latex
 doxygen.log
+!/examples/my_bots/RollingBot/launch_remote_sc2.exe

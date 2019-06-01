@@ -9,7 +9,7 @@
 #include <sc2api/sc2_common.h> //! I want to use the random functions. They are easy to use and I love them!
 #include <numeric>
 
-template<class T = float>
+template<class T>
 struct Solution
 {
     std::vector<float> objectives;
@@ -39,7 +39,7 @@ struct Solution
     static bool sum_greater(const Solution<T>& a, const Solution<T>& b);
 };
 
-template<class T = float>
+template<class T>
 class GA {
 
     using Population = std::vector<Solution<T>>;

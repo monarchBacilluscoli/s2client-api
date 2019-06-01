@@ -1,4 +1,5 @@
 #include <sc2api/sc2_api.h> // All the head files
+#include <set>
 #include "bot_examples.h" 
 #include "my_bots/bot_tutor.h"
 #include "my_bots/random_bot.h"
@@ -13,7 +14,6 @@
 #include "my_bots/tests/simulator_test.h"
 #include "my_bots/Algorithm/real_GA.h"
 #include "my_bots/RollingBot/rolling_bot.h"
-#include <libssh/libssh.h>
 
 using namespace sc2;
 
@@ -53,26 +53,10 @@ int main(int argc, char* argv[]) {
     }
 
     // try libssh in this project to ensure I have set it up already
-    const char* net_address = "59.71.231.175";
-    const char* username = "liuyongfeng";
-    const char* password = "1121";
-    const char* execution = "SC2_x64 -listen 59.71.231.175:3000";
-
-    // generate a new ssh session
-    ssh_session test_session = ssh_new();
-    ssh_options_set(test_session, SSH_OPTIONS_HOST, net_address);
-    ssh_options_set(test_session, SSH_OPTIONS_USER, username);
-    ssh_connect(test_session);
-    ssh_userauth_password(test_session, username, password);
-    ssh_channel test_channel = channel_new(test_session);
-    ssh_channel_open_session(test_channel);
-    ssh_channel_request_exec(test_channel, execution);
-
-    ssh_channel_send_eof(test_channel);
-    ssh_channel_close(test_channel);
-    ssh_channel_free(test_channel);
-    ssh_disconnect(test_session);
-    ssh_free(test_session);
+    std::string net_address = "59.71.231.175";
+    std::string username = "liuyongfeng";
+    std::string password = "1121";
+    std::string execution = "SC2_x64 -listen 59.71.231.175:3000";
 
     int step_size = 1;
     // test for runing game repeatedly
@@ -96,7 +80,7 @@ int main(int argc, char* argv[]) {
         debug_test_bot dtb; //! This is a nightmare for all units in all maps, just start screaming!
         remote_draw rdb;
         SimulatorTestBot stb;
-        rolling_bot rolling_bot("59.71.231.175", 3000, "..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map", 8);
+        rolling_bot rolling_bot(net_address, 3000, "..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map", 8);
 
 
         attack_nearest an_bot;
@@ -110,7 +94,7 @@ int main(int argc, char* argv[]) {
             //CreateParticipant(Race::Terran, &pf_bot), //potential field bot
             //CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
             //CreateParticipant(Race::Terran, &sstb),
-            CreateParticipant(Race::Terran, &rdb),
+            CreateParticipant(Race::Terran, &rolling_bot),
 
             //CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
 
@@ -119,22 +103,22 @@ int main(int argc, char* argv[]) {
             }); // 添加参与玩家
 
         //? Here is Port
-        //coordinator.LaunchStarcraft();
+        coordinator.LaunchStarcraft();
 
         //! made it
-        sc2::FeatureLayerSettings settings(kCameraWidth, kFeatureLayerSize, kFeatureLayerSize, kFeatureLayerSize, kFeatureLayerSize);
-        coordinator.SetFeatureLayers(settings);
-        coordinator.SetupPorts(2, 3001);
-        coordinator.SetNetAddress("59.71.231.175");
-        coordinator.Connect(3000);
+        //sc2::FeatureLayerSettings settings(kCameraWidth, kFeatureLayerSize, kFeatureLayerSize, kFeatureLayerSize, kFeatureLayerSize);
+        //coordinator.SetFeatureLayers(settings);
+        //coordinator.SetupPorts(2, 3001);
+        //coordinator.SetNetAddress("59.71.231.175");
+        //coordinator.Connect(3000);
         //! if the remote client was used, the path should be set properly
         //! When StartGame() is called, it'll call OnGameStart() and OnStep() of each client once
-        coordinator.StartGame("..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map");
+        //coordinator.StartGame("..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map");
 
         //coordinator.StartGame(sc2::kMapBelShirVestigeLE); // 标准对局地图
         //coordinator.StartGame("Test\\testBattle.SC2Map");
         //coordinator.StartGame("Test\\testBattle_2distant_vs_1melee.SC2Map");
-        //coordinator.StartGame("Test\\testBattle_distant_vs_melee_debug.SC2Map");
+        coordinator.StartGame("Test\\testBattle_distant_vs_melee_debug.SC2Map");
         //coordinator.StartGame("Test\\testBattle_distant_vs_distant.SC2Map");
         //coordinator.StartGame("Test\\testBattle_distant_vs_distant.SC2Map");
         //coordinator.StartGame("Test\\testBattle_no_enemy.SC2Map");
@@ -143,8 +127,11 @@ int main(int argc, char* argv[]) {
         //coordinator.StartGame("Test\\testBattle_m_vs_d.SC2Map");
         //coordinator.StartGame("Test\\testBattle1v1.SC2Map"); // 1v1静止测试
         //coordinator.StartGame("Test\\testMechanism_StepSize.SC2Map");
-        
+
+        std::set<Tag> unit_tags;
+        Units us;
         while (coordinator.Update()) { // run a bot
+            
         }
         return 0;
     }
