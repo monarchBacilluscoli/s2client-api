@@ -14,6 +14,7 @@
 #include "my_bots/tests/simulator_test.h"
 #include "my_bots/Algorithm/real_GA.h"
 #include "my_bots/RollingBot/rolling_bot.h"
+#include <libssh/libssh.h>
 
 using namespace sc2;
 
@@ -42,15 +43,7 @@ class human_control :public Agent {
 class no_action:public Agent {};
 
 int main(int argc, char* argv[]) {
-    {
-    ////? for test, delete it
-    //std::vector<float> lower({ -1.f,-1.f });
-    //std::vector<float> upper({ 1.f,1.f });
-    //std::vector<std::function<float(const std::vector<float>&)>> evaluators;
-    //evaluators.push_back(evaluator);
-    //RealGA ga(lower, upper, evaluators,0.8f,0.1f,20,Solution<float>::sum_greater,100,1.f);
-    //std::vector<float> result = ga.Run().front().objectives;
-    }
+
 
     // try libssh in this project to ensure I have set it up already
     std::string net_address = "59.71.231.175";
