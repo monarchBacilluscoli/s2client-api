@@ -1,20 +1,23 @@
 #include "ssh_connection.h"
 
-void SSHConnection::SetConnection(const std::string& net_address, const std::string& username, const std::string& password)
+void SSHConnection::SetConnection(const std::string& net_address)
 {
 	ssh_options_set(m_session, SSH_OPTIONS_HOST, net_address.c_str());
-	m_username = username;
-	ssh_options_set(m_session, SSH_OPTIONS_USER, m_username.c_str());
-	m_password = password;
+	m_host_address = net_address;
 }
 
-void SSHConnection::Connect()
+std::string SSHConnection::GetHostAddress()
+{
+	return m_host_address;
+}
+
+void SSHConnection::Connect(const std::string& username, const std::string& password)
 {
 	int rc = ssh_connect(m_session);
 	if (rc != SSH_OK) {
 		std::cerr << ssh_get_error(m_session);
 	}
-	ssh_userauth_password(m_session, m_username.c_str(), m_password.c_str());
+	ssh_userauth_password(m_session, username.c_str(), password.c_str());
 }
 
 int SSHConnection::Execute(const std::string& order)

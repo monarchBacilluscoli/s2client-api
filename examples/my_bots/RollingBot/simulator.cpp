@@ -100,9 +100,52 @@ void Simulator::SetOrders(std::vector<Command> commands)
 	}
 }
 
-void sc2::Simulator::LaunchRemoteStarCraft(std::string net_address, std::string username, std::string password, std::string listening_port, std::string dir)
+void Simulator::ConnectRemoteClient(const std::string& net_address, const std::string& username, const std::string& password)
 {
-	//todo call the launch program
+	m_ssh_connection.SetConnection(net_address);
+	m_ssh_connection.Connect(username, password);
+}
+
+void Simulator::SetPortStart(int port_start)
+{
+	m_port_start = port_start;
+	m_coordinator.SetPortStart(m_port_start);
+}
+
+void sc2::Simulator::SetRemoteProcessPath(std::string path)
+{
+	m_remote_process_path = path;
+}
+
+void Simulator::LaunchRemoteStarCraft(int listening_port, const std::string& dir)
+{
+	// check if the connection has been established
+	assert(m_ssh_connection.IsConnected());
+	std::string command = dir + " -listen " + m_ssh_connection.GetHostAddress() + ":" + std::to_string(listening_port);
+	m_ssh_connection.Execute(command);
+}
+
+void Simulator::SetOpponent(Agent* agent)
+{
+	m_is_multi_player = true;
+	m_coordinator.SetParticipants({
+	CreateParticipant(Race::Terran, &m_executor),
+	CreateParticipant(Race::Terran, agent)
+		});
+}
+
+void Simulator::SetOpponent(Difficulty difficulty)
+{
+	m_is_multi_player = false;
+	m_coordinator.SetParticipants({
+	CreateParticipant(Race::Terran, &m_executor),
+	CreateComputer(Race::Terran, difficulty)
+		});
+}
+
+void Simulator::SetStepSize(int step_size)
+{
+	m_coordinator.SetStepSize(step_size);
 }
 
 void Simulator::Initialize(std::string net_address, int port_start, std::string map_path, int step_size, const PlayerSetup& opponent, bool Multithreaded)
@@ -115,7 +158,7 @@ void Simulator::Initialize(std::string net_address, int port_start, std::string 
 	m_coordinator.SetMultithreaded(Multithreaded);
 	m_coordinator.SetStepSize(step_size);
 	m_step_size = step_size;
-	m_is_multi_player = opponent.type == PlayerType::Participant;
+	m_is_multi_player = (opponent.type == PlayerType::Participant);
 	//sets the bot which can deploy my orders, as for the other one...
 	m_coordinator.SetParticipants({
 		CreateParticipant(Race::Terran, &m_executor),
@@ -127,8 +170,9 @@ void Simulator::Initialize(std::string net_address, int port_start, std::string 
 	if (opponent.type == PlayerType::Participant) {
 		m_coordinator.SetupPorts(2, port_start + 1);
 	}
+	//todo launch the instances needed
 
-	//todo before Connect, I need to launch a instance first
+	// before Connect, I need to launch a instance first
 	m_coordinator.Connect(port_start);
 	m_coordinator.StartGame(map_path);
 }
@@ -137,4 +181,23 @@ void Simulator::Initialize(std::string net_address, int port_start, std::string 
 void Simulator::SetFeatureLayers(const FeatureLayerSettings& settings)
 {
 	m_coordinator.SetFeatureLayers(settings);
+}
+
+void sc2::Simulator::LaunchRemoteGames()
+{
+	//todo according to the start port and multi-player game flag to launch several SC2 instances
+	if (m_is_multi_player) {
+		for (size_t i = 0; i < 2; i++)
+		{
+			LaunchRemoteStarCraft(m_port_start+i,m_remote_process_path);
+		}
+	}
+	else {
+		LaunchRemoteStarCraft(m_port_start, m_remote_process_path);
+	}
+}
+
+bool sc2::Simulator::StartGame(std::string map_path)
+{
+	return m_coordinator.StartGame(map_path);
 }

@@ -4,7 +4,7 @@ namespace sc2 {
 	void rolling_bot::OnGameStart()
 	{
 		// only after game starting I can initialize the ga, or the information will not be passed to it
-		m_rolling_ga.Initialize(8, m_sim, Observation(), evaluators);
+		m_rolling_ga.Initialize(8, m_sim, Observation(), evaluators,m_population_size, m_max_generation);
 	}
 	void rolling_bot::OnStep()
 	{
