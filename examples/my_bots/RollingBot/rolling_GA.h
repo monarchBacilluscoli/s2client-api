@@ -41,6 +41,8 @@ namespace sc2 {
             m_my_team = m_observation->GetUnits(Unit::Alliance::Self);
             m_enemy_team = m_observation->GetUnits(Unit::Alliance::Enemy);
             m_playable_dis = Point2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
+            //todo initialize the simulators
+            m_simulators.resize(m_population_size);
         }
         //! before every time you run it, you should do it once
         void Initialize(\
@@ -48,10 +50,10 @@ namespace sc2 {
             Simulator& simulator, \
             const ObservationInterface* observation,\
             std::vector<Evaluator>& evaluators, \
-            float crossover_rate = 1.f, \
             int population_size = 10, \
-            Compare compare = Solution<Command>::sum_greater, \
             int max_generation = 20, \
+            Compare compare = Solution<Command>::sum_greater, \
+            float crossover_rate = 1.f, \
             float reproduce_rate = 1.f, \
             float mutate_rate = 0.3f) {
             GA::Initialize(evaluators, crossover_rate, mutate_rate, population_size, compare, max_generation, reproduce_rate);
@@ -61,7 +63,17 @@ namespace sc2 {
             m_my_team = m_observation->GetUnits(Unit::Alliance::Self);
             m_enemy_team = m_observation->GetUnits(Unit::Alliance::Enemy);
             m_playable_dis = Point2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
+            //todo initialize the simulators
+            m_simulators.resize(m_population_size);
         }
+
+        void SetSimulators(std::string net_address, \
+            int port_start, \
+            std::string map_path, \
+            int step_size, \
+            const PlayerSetup& opponent = PlayerSetup(PlayerType::Computer, Race::Terran, nullptr, Difficulty::Easy), \
+            bool Multithreaded = false \
+        );
 
         ~RollingGA() = default;
     private:
@@ -82,6 +94,7 @@ namespace sc2 {
         //! Information
         //? if I have many simulators here, things will become a non-blocking multi-thread programming condition, that means I need to manage them to function correctly
         Simulator& m_simulator = Simulator(); //? Just one simulator here? Or I need to pass a simulator here
+        std::vector<Simulator> m_simulators;
         // map info to privide bundary of the map (maybe useless)
         GameInfo m_game_info;
         Point2D m_playable_dis;

@@ -61,10 +61,18 @@ namespace sc2 {
 
         //! Number of frames for which the algorithm should run once
         int m_interval_size = 80; // about 5 seconds
+
+        //
+        int m_population_size = 20;
+        //
+        int m_max_generation = 20;
+
         //! the simulator which is used as a forward model...
         Simulator m_sim;
+        std::vector<Simulator> m_simulators;
         //! The algorithm object
         RollingGA m_rolling_ga;
+
     };
 
 }

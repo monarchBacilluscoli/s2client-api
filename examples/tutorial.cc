@@ -14,7 +14,7 @@
 #include "my_bots/tests/simulator_test.h"
 #include "my_bots/Algorithm/real_GA.h"
 #include "my_bots/RollingBot/rolling_bot.h"
-#include <libssh/libssh.h>
+#include "../my_bots/utilities/ssh_connection.h"
 
 using namespace sc2;
 
@@ -44,12 +44,19 @@ class no_action:public Agent {};
 
 int main(int argc, char* argv[]) {
 
-
-    // try libssh in this project to ensure I have set it up already
+    //// try libssh in this project to ensure I have set it up already
     std::string net_address = "59.71.231.175";
     std::string username = "liuyongfeng";
     std::string password = "1121";
-    std::string execution = "SC2_x64 -listen 59.71.231.175:3000";
+    //! you should set the absolute directory, or it doesn't work
+    std::string execution = "StarCraftII/Versions/Base70154/SC2_x64 -listen 59.71.231.175:3000";
+    SSHConnection ssh_connection(net_address);
+    ssh_connection.Connect(username, password);
+    ssh_connection.Execute(execution);
+    ssh_connection.~SSHConnection();
+
+    //Simulator sim; 
+    //sim.LaunchRemoteStarCraft(net_address, username, password, 3000, "StarCraftII/Versions/Base70154/SC2_x64");
 
     int step_size = 1;
     // test for runing game repeatedly

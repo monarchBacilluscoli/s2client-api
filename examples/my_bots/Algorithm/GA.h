@@ -53,7 +53,33 @@ public:
         assert(population_size % 2 == 0);
         m_population.resize(population_size);
     };
-    ~GA() = default; //? whether or not the reference of evaluators can effect the destruction
+    ~GA() = default; //? whether or not the reference of evaluators can effect the destruction.
+
+    void SetMaxGeneration(int max_generation) {
+        m_max_generation = max_generation;
+    }
+
+    void SetCrossOverRate(int crossover_rate) {
+        m_cross_over_rate = crossover_rate;
+    }
+
+    void SetMutateRate(int mutate_rate) {
+        m_mutate_rate = mutate_rate;
+    }
+
+    void SetPopulationSize(int population_size) {
+        m_population_size = population_size;
+    }
+
+    void SetReproduceRate(int reproduce_rate) {
+        m_reproduce_rate = reproduce_rate;
+    }
+
+    void SetCompare(Compare compare) {
+        m_compare = compare;
+    }
+
+    void SetEvaluators();
 
     virtual void Initialize(std::vector<Evaluator>& evaluators, float crossover_rate, float mutate_rate, int population_size, Compare compare, int max_generation, float reproduce_rate) {
         m_evaluators = evaluators;
