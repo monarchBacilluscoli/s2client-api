@@ -15,7 +15,7 @@ void sc2::RollingGA::SetSimulators(std::string net_address, int port_start, std:
 	//todo Set all simulator's properties
 	for (size_t i = 0; i < m_population_size; i++)
 	{
-		.
+		
 	}
 }
 

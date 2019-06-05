@@ -16,7 +16,7 @@
 #include <sc2api/sc2_proto_interface.h>
 #include "../my_bots/solution.h"
 #include "../my_bots/tests/remote_draw.h"
-#include "../my_bots/utilities/ssh_connection.h"
+//#include "../my_bots/utilities/ssh_connection.h"
 
 #include "state.h"
 
@@ -25,41 +25,16 @@ namespace sc2 {
     //! An empty bot to be called outside 
     class Executor : public Agent {};
 
-    class Simulator
+    class Simulator: public Coordinator
     {
     public:
         Simulator() = default;
-        ~Simulator() {
-            
-            // if one of the agent is destructed, it can automatically bring the remote instance to an end
-            //? I need to make sure that again, personally
-        };
+        ~Simulator() = default;
 
-        void ConnectRemoteClient(const std::string& net_address, const std::string& username, const std::string& password);
-
-        void SetPortStart(int port_start);
-        void SetRemoteProcessPath(std::string path);
         //! set your opponent as a user-defined bot
         void SetOpponent(Agent* agent);
         //! set your opponent as a built-in bot - a computer
         void SetOpponent(Difficulty difficulty);
-        void SetStepSize(int step_size);
-
-
-        //! Set all the settings, once they are set, they can not be changed when connects to game instance
-        void Initialize(\
-            std::string net_address, \
-            int port_start, \
-            std::string map_path, \
-            int step_size, \
-            const PlayerSetup& opponent = PlayerSetup(PlayerType::Computer, Race::Terran, nullptr, Difficulty::Easy),\
-            bool Multithreaded = false);
-        //! set feature layer display in local client, once user uses it, the feature layer is activated
-        void SetFeatureLayers(const FeatureLayerSettings& settings);
-        //! according to those settings launch corresponding number of SC2 instances
-        void LaunchRemoteGames();
-
-        bool StartGame(std::string map_path);
 
         //! direct send the orders to units
         void SetOrders(std::vector<Command> commands);
@@ -81,8 +56,6 @@ namespace sc2 {
         //! Compares current state with the start point to get specific unit group health loss
         float GetTeamHealthLoss(Unit::Alliance alliance) const;
     private:
-        void LaunchRemoteStarCraft(int listening_port, const std::string& dir);
-
         //! set units relations
         //! so the caller of this simultor doesn't have to know the tags of units here
         void SetUnitsRelations(State state, Units us_copied);
@@ -91,26 +64,16 @@ namespace sc2 {
         //! if you want the simulation to speed up, you can set a higher value
         int m_step_size = 1;
         //! it is based on the participant passed
-        bool m_is_multi_player = false;
+        //bool m_is_multi_player = false;
         //! the bot to be called outside to send orders or get observations
         Agent& m_executor = Executor();
-        //! the process and game manager
-        Coordinator m_coordinator;
         //! save of the caller' state when calls it
         State m_initia_save;
         //! save of state
         State m_save;
-        //!
-        int m_port_start = 3000;
-        //!
-        std::string m_remote_process_path = "StarCraftII/Versions/Base70154/SC2_x64";
 
         //! form resource tag to target unit
         std::map<Tag, const Unit*> m_relative_units;
-
-        //! the ssh connection session
-        SSHConnection m_ssh_connection;
-
     };
 }
 

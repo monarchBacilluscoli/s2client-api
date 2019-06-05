@@ -12,12 +12,15 @@
 #include <string>
 #include "sc2api/sc2_game_settings.h"
 #include "sc2api/sc2_proto_interface.h"
+//#include "../examples/my_bots/utilities/ssh_connection.h"
 
 namespace sc2 {
 
 class Agent;
 class ReplayObserver;
 class CoordinatorImp;
+
+bool SetSSHConnection(const std::string& remote_client_ip, const std::string& username, const std::string& password);
 
 //! Coordinator of one or more clients. Used to start, step and stop games and replays.
 class Coordinator {
@@ -53,6 +56,9 @@ public:
     //! Sets the path to the StarCraft II binary.
     //! \param path Absolute file path.
     void SetProcessPath(const std::string& path);
+
+    //? Liu: Gets the path set before to the StarCraft II binary, for the use of remote connection
+     std::string GetProcessPath();
 
     //! Set the correct data version of a replay to allow faster replay loading. Saves a few seconds if replay is not up to date.
     //!  Works only in combination with correct process path set by "SetProcessPath".
@@ -97,7 +103,7 @@ public:
     //! Sets up the bots and whether they are controlled by in-built AI, human or a custom bot.
     // \param participants A vector of player setups for each participant in the game.
     // \sa PlayerSetup
-    void SetParticipants(const std::vector<PlayerSetup>& participants); 
+    void SetParticipants(const std::vector<PlayerSetup>& participants);
 
     void SetReplayRecovery(bool value); //? cut
 
@@ -110,6 +116,12 @@ public:
 
     //! Uses settings gathered from LoadSettings, specifically the path to the executable, to run StarCraft II.
     void LaunchStarcraft(); //? cut, but you should do other things in it
+
+    //? Liu: Uses settings to run a remote StarCraft II.
+    void LaunchRemoteStarcraft();
+
+    //? Liu: check if current game is a multiplayer game
+    bool IsMultiPlayerGame();
 
     //? Liu: set the IP address of a StarCraft II instance
     void SetNetAddress(std::string net_address);

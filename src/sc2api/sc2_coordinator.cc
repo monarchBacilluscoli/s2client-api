@@ -9,6 +9,7 @@
 #include "sc2utils/sc2_scan_directory.h"
 
 #include "s2clientprotocol/sc2api.pb.h"
+#include "sc2utils/ssh_connection.h"
 
 #include <algorithm>
 #include <iostream>
@@ -29,6 +30,13 @@ void RunParallel(const std::function<void(Agent* a)>& step, std::vector<Agent*>&
     for (auto& t : threads) {
         t.join();
     }
+}
+
+//? Liu: Connect a session to a remote client
+bool EstablishSSHConnectionToRemoteClient(SSHConnection& ssh_connection, const std::string& remote_client_ip, const std::string& username, const std::string& password) {
+    ssh_connection.SetConnection(remote_client_ip);
+    ssh_connection.Connect(username, password);
+    return ssh_connection.IsConnected();
 }
 
 //? Liu: launch a StarCraft instance with settings
@@ -84,6 +92,25 @@ int LaunchProcess(ProcessSettings& process_settings, Client* client, int window_
     return pi.port;
 }
 
+int LaunchRemoteProcess(SSHConnection& ssh_connection, ProcessSettings& process_settings, Client* client, int port) {
+    assert(client&&ssh_connection.IsConnected());
+    assert(!process_settings.process_path.empty());
+    process_settings.process_info.push_back(sc2::ProcessInfo());
+    ProcessInfo& pi = process_settings.process_info.back();
+
+    // Get the next port
+    pi.port = port;
+
+    pi.process_path = process_settings.process_path;
+
+    // Command line arguments that will be passed to sc2.
+    std::string cl = process_settings.process_path + " -listen " + process_settings.net_address + ":" + std::to_string(pi.port);
+    ssh_connection.Execute(cl);
+
+    client->Control()->SetProcessInfo(pi);
+    return pi.port;
+}
+
 bool AttachClients(ProcessSettings& process_settings, std::vector<Client*> clients) {
     bool connected = false;
 
@@ -112,7 +139,7 @@ int LaunchProcesses(ProcessSettings& process_settings, std::vector<Client*> clie
             window_start_x, 
             window_start_y,
             //? Liu: When LaunchProcess() is called, a new process_info will be pushed into process_settings.process_info, and the size() will increase...
-            process_settings.port_start + static_cast<int>(process_settings.process_info.size()) - 1, 
+            process_settings.port_start + static_cast<int>(process_settings.process_info.size()) - 1, //? why -1?
             clientIndex++);
     }
 
@@ -121,6 +148,23 @@ int LaunchProcesses(ProcessSettings& process_settings, std::vector<Client*> clie
     AttachClients(process_settings, clients);
 
     return last_port; //? Liu: there has been start port set before, and here returns the last port
+}
+
+//? Liu
+int LaunchRemoteProcesses(SSHConnection& ssh_connection, ProcessSettings& process_settings, std::vector<Client*> clients) {
+    int last_port = 0;
+    for (auto c : clients) {
+        last_port = LaunchRemoteProcess(
+            ssh_connection,
+            process_settings,
+            c,
+            process_settings.port_start + static_cast<int>(process_settings.process_info.size()) - 1
+        );
+    }
+
+    AttachClients(process_settings, clients);
+
+    return last_port;
 }
 
 static void CallOnStep(Agent* a) {
@@ -191,7 +235,12 @@ public:
     int last_port_ = 0;
 
     bool use_generalized_ability_id = true;
+
+    //? Liu: if you want to deploy a remote launch, you need to connecte it to a remote client;
+    static SSHConnection ssh_connection;
 };
+
+SSHConnection CoordinatorImp::ssh_connection;
 
 CoordinatorImp::CoordinatorImp() :
     agents_(),
@@ -199,16 +248,15 @@ CoordinatorImp::CoordinatorImp() :
     game_ended_(),
     starcraft_started_(false),
     game_settings_(),
-    //? Liu: you can see that the address is set right at the initialization.
-    //? Liu: since the process_settings_'s accessiblity is public, I can call it to reset the IP address.
-    //process_settings_(false, 1, "", "59.71.231.175", kDefaultProtoInterfaceTimeout, 8168, false) {
     process_settings_(false, 1, "", "127.0.0.1", kDefaultProtoInterfaceTimeout, 8168, false) {
+
 }
 
 CoordinatorImp::~CoordinatorImp() {
     for (auto& p : process_settings_.process_info) {
         TerminateProcess(p.process_id);
     }
+
 }
 
 bool CoordinatorImp::AnyObserverAvailable() const {
@@ -760,6 +808,30 @@ void Coordinator::LaunchStarcraft() {
     imp_->last_port_ = port_start;
 }
 
+void Coordinator::LaunchRemoteStarcraft()
+{
+    assert(!imp_->agents_.empty());
+
+    // TODO: Check the case that a pid in the process_info_ struct is no longer running.
+    // The process may have died.
+    int port_start = 0;
+    if (imp_->process_settings_.process_info.size() != imp_->agents_.size()) {
+        port_start = LaunchRemoteProcesses(imp_->ssh_connection, imp_->process_settings_,
+            std::vector<sc2::Client*>(imp_->agents_.begin(), imp_->agents_.end()));
+    }
+
+    //? Liu: set up other ports not the two main ports, but I don't know what are they used for.
+    SetupPorts(imp_->agents_.size(), port_start); //? Liu: port_start is the last normal port(if you have 2 instances, the number of the second instance's port will be the port_start)
+
+    imp_->starcraft_started_ = true;
+    imp_->last_port_ = port_start;
+}
+
+bool Coordinator::IsMultiPlayerGame()
+{
+    return imp_->agents_.size() > 1;
+}
+
 void Coordinator::SetNetAddress(std::string net_address)
 {
     assert(!imp_->starcraft_started_);
@@ -925,6 +997,10 @@ void Coordinator::SetProcessPath(const std::string& path) {
     imp_->process_settings_.process_path = path;
 }
 
+std::string Coordinator::GetProcessPath() {
+    return imp_->process_settings_.process_path;
+}
+
 void Coordinator::SetDataVersion(const std::string& version) {
     assert(!imp_->starcraft_started_);
     imp_->process_settings_.data_version = version;
@@ -1064,5 +1140,9 @@ void Coordinator::SetupPorts(size_t num_agents, int port_start, bool check_singl
     }
     //? Liu: so why here are so many ports?
     //? Liu: And what then?
+}
+bool SetSSHConnection(const std::string& remote_client_ip, const std::string& username, const std::string& password)
+{
+    return EstablishSSHConnectionToRemoteClient(CoordinatorImp::ssh_connection, remote_client_ip, username, password);
 }
 }
