@@ -35,7 +35,7 @@ namespace sc2 {
             //todo let it run for some time
             m_sim.Run(m_interval_size / m_sim.GetStepSize());
             //todo get the HPs and sum them up as the objective value to return
-            return m_sim.GetTeamHealthLoss(Unit::Alliance::Self) - m_sim.GetTeamHealthLoss(Unit::Alliance::Self);
+            return m_sim.GetTeamHealthLoss(Unit::Alliance::Enemy) - m_sim.GetTeamHealthLoss(Unit::Alliance::Self);
         };
         std::vector<Evaluator> evaluators = { evaluator };
         //! the funciton deploy the solution

@@ -69,6 +69,7 @@ public:
 
     void SetPopulationSize(int population_size) {
         m_population_size = population_size;
+        m_population.resize(m_population_size);
     }
 
     void SetReproduceRate(int reproduce_rate) {
@@ -78,8 +79,6 @@ public:
     void SetCompare(Compare compare) {
         m_compare = compare;
     }
-
-    void SetEvaluators();
 
     virtual void Initialize(std::vector<Evaluator>& evaluators, float crossover_rate, float mutate_rate, int population_size, Compare compare, int max_generation, float reproduce_rate) {
         m_evaluators = evaluators;
