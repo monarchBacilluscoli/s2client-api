@@ -1,4 +1,5 @@
 #include "rolling_GA.h"
+#include <thread>
 
 using namespace sc2;
 
@@ -10,12 +11,74 @@ using Compare = std::function<bool(const Solution<Command>&, const Solution<Comm
 
 //! before every time you run it, you should do it once
 
-void sc2::RollingGA::SetSimulators(std::string net_address, int port_start, std::string map_path, int step_size, const PlayerSetup& opponent, bool Multithreaded)
+
+
+void sc2::RollingGA::SetSimulators(const std::string& net_address, int port_start, const std::string& process_path, const std::string& map_path, int step_size, const PlayerSetup& opponent, bool multithreaded)
 {
-	//todo Set all simulator's properties
-	for (size_t i = 0; i < m_population_size; i++)
+	// Set all simulator's properties
+	for (Simulator& sim:m_simulators)
 	{
-		
+		sim.SetNetAddress(net_address);
+		sim.SetPortStart(port_start);
+		sim.SetProcessPath(process_path);
+		if (opponent.agent == nullptr) {
+			sim.SetOpponent(opponent.difficulty);
+		}
+		else {
+			sim.SetOpponent(opponent.agent);
+		}
+		sim.SetMultithreaded(multithreaded);
+		// run the game
+		sim.StartGame();
+		// since there are up to two agent players, for simplisity I'd better make the port +2 at each time
+		port_start += 2;
+	}
+}
+
+void sc2::RollingGA::SetSimulatorsStart(const ObservationInterface* ob)
+{
+	//todo try to implement them in multi threads
+	for (Simulator& sim :m_simulators)
+	{
+		sim.CopyAndSetState(ob);
+	}
+}
+
+void sc2::RollingGA::RunSimulatorsSynchronous()
+{
+	std::vector<std::thread> threads(m_simulators.size());
+	for (size_t i = 0; i < threads.size(); i++)
+	{
+		threads[i] = std::thread{ [&]() ->void {
+			m_simulators[i].Run(m_step_size);
+		} };
+	}
+	for (auto& t:threads)
+	{
+		t.join();
+	}
+}
+
+void sc2::RollingGA::SetGameInfo(const ObservationInterface* observation)
+{
+	m_observation = observation;
+	m_game_info = m_observation->GetGameInfo();
+	m_unit_type = m_observation->GetUnitTypeData(); //? why isn't here anything wrong?
+	m_my_team = m_observation->GetUnits(Unit::Alliance::Self);
+	m_enemy_team = m_observation->GetUnits(Unit::Alliance::Enemy);
+	m_playable_dis = Point2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
+}
+
+inline void sc2::RollingGA::SetPopulationSize(int population_size) {
+	m_population_size = population_size;
+	m_simulators.resize(m_population_size);
+}
+
+void sc2::RollingGA::SetSimulatorsStepSize(int step_size)
+{
+	for (Simulator& sim:m_simulators)
+	{
+		sim.SetStepSize.SetStepSize(step_size);
 	}
 }
 
@@ -61,10 +124,13 @@ void sc2::RollingGA::Mutate(Solution<Command>& s)
 
 void sc2::RollingGA::Evaluate(Population& p)
 {
-	//todo use multiple simulator to evaluate those solutions in p
-	//? But I should rewrite the initialization and constructor first
-	//? And of course, before that, I need to rewrite the constructor of simulator, I need it can automatically launch SC2 instance remotely
-
+	//todo I need to construct a more robust simulator manager
+	assert(p.size() < m_simulators.size());
+	std::vector<std::thread> eva_threads(p.size());
 	//todo use different simulators to evaluate solutions respectively
-
+	RunSimulatorsSynchronous();
+	for (size_t i = 0; i < p.size(); i++)
+	{
+		p[i].objectives[0] = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Enemy) - m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Self);
+	}
 }

@@ -67,13 +67,25 @@ namespace sc2 {
             m_simulators.resize(m_population_size);
         }
 
-        void SetSimulators(std::string net_address, \
-            int port_start, \
-            std::string map_path, \
-            int step_size, \
-            const PlayerSetup& opponent = PlayerSetup(PlayerType::Computer, Race::Terran, nullptr, Difficulty::Easy), \
-            bool Multithreaded = false \
+        void SetGameInfo(const ObservationInterface* observation);
+
+        void SetPopulationSize(int population_size);
+
+        //? it has be included in SetSimulators
+        void SetSimulatorsStepSize(int step_size);
+
+        //! Use this to set the the client to run simulators, the map loaded and other settings
+        void SetSimulators(const std::string& net_address,
+            int port_start,
+            const std::string& process_path,
+            const std::string& map_path,
+            int step_size,
+            const PlayerSetup& opponent = PlayerSetup(PlayerType::Computer, Race::Terran, nullptr, Difficulty::Easy),
+            bool multithreaded = false
         );
+
+        void SetSimulatorsStart(const ObservationInterface* observation_interface);
+        void RunSimulatorsSynchronous();
 
         ~RollingGA() = default;
     private:
@@ -81,7 +93,7 @@ namespace sc2 {
         virtual Solution<Command> GenerateSolution() override;;
         //! According to game conditions generates solutions which is as valid as possiable
         virtual void Mutate(Solution<Command>& s) override;
-        //! I need to override the Evaluate() function to make it multi-threaded
+        //! Plaese set the start point before you evaluate
         virtual void Evaluate(Population& p) override;
 
         //! Settings
