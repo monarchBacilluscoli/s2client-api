@@ -780,6 +780,11 @@ bool Coordinator::LoadSettings(int argc, char** argv) {
     return ParseSettings(argc, argv, imp_->process_settings_, imp_->game_settings_);
 }
 
+void Coordinator::SetMapPath(const std::string map_path)
+{
+    imp_->game_settings_.map_name = map_path;
+}
+
 void Coordinator::LaunchStarcraft() {
     if (!DoesFileExist(imp_->process_settings_.process_path)) {
         std::cerr << "Executable path can't be found, try running the StarCraft II executable first." << std::endl;

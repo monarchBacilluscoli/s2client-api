@@ -23,72 +23,46 @@ namespace sc2 {
 
     public:
         RollingGA() = default;
-        RollingGA(\
-            int step_size, \
-            Simulator& simulator, \
-            const ObservationInterface* observation, \
-            std::vector<Evaluator>& evaluators, \
-            float crossover_rate = 1.f, \
-            int population_size = 100, \
-            Compare compare = Solution<Command>::sum_greater, \
-            int max_generation = 100, \
-            float reproduce_rate = 1.f, \
-            float mutate_rate = 0.3f \
-        ) :GA<Command>(evaluators, crossover_rate, mutate_rate, population_size, compare, max_generation, reproduce_rate), m_step_size(step_size), m_simulator(simulator), m_observation(observation) {
-            //? I can not get those object before game starting
-            m_game_info = observation->GetGameInfo();
-            m_unit_type = observation->GetUnitTypeData(); //? why isn't here anything wrong?
-            m_my_team = m_observation->GetUnits(Unit::Alliance::Self);
-            m_enemy_team = m_observation->GetUnits(Unit::Alliance::Enemy);
-            m_playable_dis = Point2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
-            //todo initialize the simulators
-            m_simulators.resize(m_population_size);
-        }
-        //! before every time you run it, you should do it once
-        void Initialize(\
-            int step_size, \
-            Simulator& simulator, \
-            const ObservationInterface* observation,\
-            std::vector<Evaluator>& evaluators, \
-            int population_size = 10, \
-            int max_generation = 20, \
-            Compare compare = Solution<Command>::sum_greater, \
-            float crossover_rate = 1.f, \
-            float reproduce_rate = 1.f, \
-            float mutate_rate = 0.3f) {
-            GA::Initialize(evaluators, crossover_rate, mutate_rate, population_size, compare, max_generation, reproduce_rate);
-            m_observation = observation;
-            m_game_info = m_observation->GetGameInfo();
-            m_unit_type = m_observation->GetUnitTypeData(); //? why isn't here anything wrong?
-            m_my_team = m_observation->GetUnits(Unit::Alliance::Self);
-            m_enemy_team = m_observation->GetUnits(Unit::Alliance::Enemy);
-            m_playable_dis = Point2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
-            //todo initialize the simulators
-            m_simulators.resize(m_population_size);
-        }
+        //? the constructor only includes those parameters that must be set, other params can be set respectively
 
-        void SetGameInfo(const ObservationInterface* observation);
-
-        void SetPopulationSize(int population_size);
-
-        //? it has be included in SetSimulators
-        void SetSimulatorsStepSize(int step_size);
-
-        //! Use this to set the the client to run simulators, the map loaded and other settings
-        void SetSimulators(const std::string& net_address,
+        // This 
+        RollingGA(
+            const std::string& net_address,
             int port_start,
             const std::string& process_path,
-            const std::string& map_path,
-            int step_size,
-            const PlayerSetup& opponent = PlayerSetup(PlayerType::Computer, Race::Terran, nullptr, Difficulty::Easy),
-            bool multithreaded = false
-        );
+            const std::string& map_path) {
+            SetSimulators(net_address, port_start, process_path, map_path);
+            m_simulators.resize(m_population_size);
+        }
 
+        // Initialization and setup.
+        //? I have to write an initialization function here 
+        void InitializeObservation(const ObservationInterface* observation){
+            SetObservation(observation);
+        }
+
+        void SetStepSize(int step_size);
+        void SetCommandLength(int command_length);
+        void SetAttackPossibility(float attack_possibility);
+
+        void SetSimlatorsOpponent(const PlayerSetup& opponent);
+        void SetSimulatorsMultithreaded(bool multithreaded);
+
+        // Start up
         void SetSimulatorsStart(const ObservationInterface* observation_interface);
         void RunSimulatorsSynchronous();
 
         ~RollingGA() = default;
     private:
+        void SetObservation(const ObservationInterface* observation);
+        //! Use this to set the the client to run simulators, the map loaded and other settings
+        void SetSimulators(const std::string& net_address,
+            int port_start,
+            const std::string& process_path,
+            const std::string& map_path
+        );
+
+        // run
         //! According to known information generates solutions which is as valid as possiable 
         virtual Solution<Command> GenerateSolution() override;;
         //! According to game conditions generates solutions which is as valid as possiable
@@ -96,31 +70,32 @@ namespace sc2 {
         //! Plaese set the start point before you evaluate
         virtual void Evaluate(Population& p) override;
 
-        //! Settings
+        // Settings
         int m_step_size = 8; //? Does the step_size in simulator matter?
         //! the command length for each unit
-        int m_command_size = 8;
+        int m_command_length = 8;
         float m_attack_possibility = 0.3f; // it's related to the m_step_size
         int m_mutate_step = 100;
 
-        //! Information
+        // Information
         //? if I have many simulators here, things will become a non-blocking multi-thread programming condition, that means I need to manage them to function correctly
-        Simulator& m_simulator = Simulator(); //? Just one simulator here? Or I need to pass a simulator here
         std::vector<Simulator> m_simulators;
         // map info to privide bundary of the map (maybe useless)
         GameInfo m_game_info;
         Point2D m_playable_dis;
-        //todo unit type info
-        UnitTypes m_unit_type;
+        //! unit type info
+        static UnitTypes m_unit_type;
         //! current number of my units
-        //int m_team_size;
         Units m_my_team;
         Units m_enemy_team;
         const ObservationInterface* m_observation;
 
         const double PI = atan(1.) * 4.;
     };
+
+    UnitTypes m_unit_type = UnitTypes();
 }
+
 
 #endif // !ROLLING_GA
 
