@@ -57,9 +57,6 @@ public:
     //! \param path Absolute file path.
     void SetProcessPath(const std::string& path);
 
-    //? Liu: Gets the path set before to the StarCraft II binary, for the use of remote connection
-     std::string GetProcessPath();
-
     //! Set the correct data version of a replay to allow faster replay loading. Saves a few seconds if replay is not up to date.
     //!  Works only in combination with correct process path set by "SetProcessPath".
     //! \param version Look in "protocol/buildinfo/versions.json" for the property "data-hash". Or read it from "ReplayInfo.data_version".
@@ -112,6 +109,12 @@ public:
     // \sa ReplayObserver
     void AddReplayObserver(ReplayObserver* replay_observer); //? cut
 
+    //? Liu: I slpited this from StartGame() for consistency, since the map_path is an option, right?
+    void SetMapPath(const std::string map_path);
+
+    //? Liu: set the IP address of a StarCraft II instance
+    void SetNetAddress(std::string net_address);
+
     // Start-up.
 
     //! Uses settings gathered from LoadSettings, specifically the path to the executable, to run StarCraft II.
@@ -119,12 +122,6 @@ public:
 
     //? Liu: Uses settings to run a remote StarCraft II.
     void LaunchRemoteStarcraft();
-
-    //? Liu: check if current game is a multiplayer game
-    bool IsMultiPlayerGame();
-
-    //? Liu: set the IP address of a StarCraft II instance
-    void SetNetAddress(std::string net_address);
 
     //! Attaches to a running Starcraft.
     void Connect(int port);
@@ -175,8 +172,12 @@ public:
 
     // Status.
 
+    //? Liu: Gets the path set before to the StarCraft II binary, for the use of remote connection
+    std::string GetProcessPath();
     //! Returns true if all running games have ended.
     bool AllGamesEnded() const;
+    //? Liu: check if current game is a multiplayer game
+    bool IsMultiPlayerGame();
 
     // Replay specific.
     //! Sets the path for to a folder of replays to analyze.

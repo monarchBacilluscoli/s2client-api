@@ -18,9 +18,7 @@ namespace sc2 {
         rolling_bot() = delete;
         //! the only thing this constructor needs to do is to provid all parameters the simulator needs
         //! You need to ensure that all the settings are valid in remote client, especially the map_path (a lot of errors have happend to it)
-        rolling_bot(std::string net_address, int port_start, std::string map_path, int step_size) {
-            m_sim.Initialize(net_address, port_start, map_path, step_size);
-        };
+        rolling_bot(std::string net_address, int port_start, const std::string& process_path,const std::string& map_path):m_rolling_ga(net_address, port_start, process_path, map_path) {};
 
         ~rolling_bot() = default;
 
@@ -72,7 +70,6 @@ namespace sc2 {
         std::vector<Simulator> m_simulators;
         //! The algorithm object
         RollingGA m_rolling_ga;
-
     };
 
 }

@@ -49,10 +49,10 @@ class GA {
 public:
     // after you calling the default constructor, I hope you can call the Initialize()
     GA() = default;
-    GA(std::vector<Evaluator>& evaluators, float crossover_rate = 1.f, float mutate_rate = 0.2f, int population_size = 20, Compare compare = Solution<T>::sum_greater, int max_generation = 100, float reproduce_rate = 1.f) :m_evaluators(evaluators), m_cross_over_rate(crossover_rate), m_mutate_rate(mutate_rate), m_population_size(population_size), m_compare(compare), m_max_generation(max_generation), m_reproduce_rate(reproduce_rate) {
+    /*GA(std::vector<Evaluator>& evaluators, float crossover_rate = 1.f, float mutate_rate = 0.2f, int population_size = 20, Compare compare = Solution<T>::sum_greater, int max_generation = 100, float reproduce_rate = 1.f) :m_evaluators(evaluators), m_cross_over_rate(crossover_rate), m_mutate_rate(mutate_rate), m_population_size(population_size), m_compare(compare), m_max_generation(max_generation), m_reproduce_rate(reproduce_rate) {
         assert(population_size % 2 == 0);
         m_population.resize(population_size);
-    };
+    };*/
     ~GA() = default; //? whether or not the reference of evaluators can effect the destruction.
 
     void SetMaxGeneration(int max_generation) {
@@ -80,16 +80,10 @@ public:
         m_compare = compare;
     }
 
-    virtual void Initialize(std::vector<Evaluator>& evaluators, float crossover_rate, float mutate_rate, int population_size, Compare compare, int max_generation, float reproduce_rate) {
-        m_evaluators = evaluators;
-        m_cross_over_rate = crossover_rate;
-        m_mutate_rate = mutate_rate;
-        m_population_size = population_size;
-        m_compare = compare;
-        m_max_generation = max_generation;
-        m_reproduce_rate = reproduce_rate;
-        m_population.resize(m_population_size);
-    };
+    void SetEvaluator(Evaluator* evaluator) {
+        m_evaluators = evaluator;
+    }
+
     //! run the algorithm and return the final population to choose
     virtual Population Run();
 
@@ -131,8 +125,8 @@ protected:
     float m_reproduce_rate = 1.f;
     Compare m_compare = Solution<T>::sum_greater;
     Evaluator default_evaluator = [](const std::vector<T> variables)->float {return 0; };
-    std::vector<Evaluator> eva_v = { default_evaluator };
-    std::vector<Evaluator>& m_evaluators = eva_v; // for easy to use
+    std::vector<Evaluator*> eva_v = { &default_evaluator };
+    std::vector<Evaluator*> m_evaluators = eva_v; // for easy to use
 
     //! Runtime data
     Population m_population;
