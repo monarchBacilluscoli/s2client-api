@@ -14,7 +14,7 @@
 #include "my_bots/RollingBot/simulator.h"
 //#include "my_bots/tests/simulator_test.h"
 //#include "my_bots/Algorithm/real_GA.h"
-//#include "my_bots/RollingBot/rolling_bot.h"
+#include "my_bots/RollingBot/rolling_bot.h"
 //#include <sc2utils/ssh_connection.h>
 
 using namespace sc2;
@@ -29,13 +29,25 @@ float evaluator(std::vector<float> x) {
 
 class human_control :public Agent {
     void OnGameStart() {
-        initial_units = Observation()->GetUnits();
-        Control()->Save();
+        ////todo push sevaral actions in unit action queues
+        //Units us = Observation()->GetUnits(Unit::Alliance::Self);
+        //for (auto& u : us)
+        //{
+        //    //todo generate a random 
+        //    Actions()->UnitCommand(u, ABILITY_ID::STOP, false);
+        //    Actions()->UnitCommand(u, ABILITY_ID::MOVE, { 0.f,0.f }, true);
+        //}
     }
     void OnStep() {
-        if (Observation()->GetGameLoop() % 100 == 0) {
-            Control()->Load();
-        }
+        ////todo Once conditions are met, use cancel to see whether or not it will end the queue
+        //if (Observation()->GetGameLoop() >= 20) {
+        //    Units us = Observation()->GetUnits(Unit::Alliance::Self);
+        //    for (auto& u : us)
+        //    {
+        //        //todo generate a random 
+        //        //Actions()->UnitCommand(u, ABILITY_ID::STOP,false);
+        //    }
+        //}
     }
     Units initial_units;
 };
@@ -50,8 +62,9 @@ int main(int argc, char* argv[]) {
     std::string username = "liuyongfeng";
     std::string password = "1121";
     //! you should set the absolute directory, or it doesn't work
+    std::string process_path = "StarCraftII/Versions/Base70154/SC2_x64";
     std::string execution = "StarCraftII/Versions/Base70154/SC2_x64 -listen 59.71.231.175:3000";
-
+    int port_start = 3000;
 
     //SSHConnection connection(net_address);
     //connection.Connect(username, password);
@@ -60,13 +73,17 @@ int main(int argc, char* argv[]) {
     // Before doing anything, you should set it first
     bool isCoonected = SetSSHConnection(net_address, username, password);
 
-    Simulator sim; 
-    sim.SetNetAddress(net_address);
-    sim.SetOpponent(Difficulty::Easy);
-    sim.SetPortStart(3000);
-    sim.SetRealtime(false);
-    sim.SetProcessPath("StarCraftII/Versions/Base70154/SC2_x64");
-    sim.LaunchRemoteStarcraft();
+    //Simulator sim; 
+    //sim.SetNetAddress(net_address);
+    //sim.SetOpponent(Difficulty::Easy);
+    //sim.SetPortStart(3000);
+    //sim.SetRealtime(false);
+    //sim.SetProcessPath("StarCraftII/Versions/Base70154/SC2_x64");
+    //sim.LaunchRemoteStarcraft();
+    //sim.StartGame("..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map");
+    //sim.Update();
+    //Units us = sim.Observation()->GetUnits();
+
 
     int step_size = 1;
     // test for runing game repeatedly
@@ -74,7 +91,7 @@ int main(int argc, char* argv[]) {
         Coordinator coordinator; // （协调器）负责控制游戏进行中、进行前等等的设置
         std::cout << "isLoadSettings: " << coordinator.LoadSettings(argc, argv) << std::endl; // If there is no command line arguments it will check the files in your MyDocument\StarCraft II and get default settings.
         std::cout<<"Executable path: " <<coordinator.GetExePath()<<std::endl;
-        coordinator.SetRealtime(false);
+        coordinator.SetRealtime(true);
         //coordinator.SetRealtime(true);
         coordinator.SetStepSize(step_size); // 设置游戏循环步长
         coordinator.SetMultithreaded(true);
@@ -91,8 +108,7 @@ int main(int argc, char* argv[]) {
         step_size_test_bot sstb;
         debug_test_bot dtb; //! This is a nightmare for all units in all maps, just start screaming!
         remote_draw rdb;
-        //SimulatorTestBot stb;
-        //rolling_bot rolling_bot(net_address, 3000, "..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map", 8);
+        //rolling_bot rolling_bot(net_address, port_start, process_path, "..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map");
 
 
         attack_nearest an_bot;
@@ -106,11 +122,12 @@ int main(int argc, char* argv[]) {
             //CreateParticipant(Race::Terran, &pf_bot), //potential field bot
             //CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
             //CreateParticipant(Race::Terran, &sstb),
-            CreateParticipant(Race::Terran, &an_bot),
+            CreateParticipant(Race::Terran, &bot0),
 
             //CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
 
             CreateComputer(Race::Terran), // 添加电脑，默认easy难度
+            //PlayerSetup(Observer,Terran,&na_bot)
             //CreateParticipant(Race::Terran, &bot2),
             }); // 添加参与玩家
 
@@ -141,12 +158,11 @@ int main(int argc, char* argv[]) {
         //coordinator.StartGame("Test\\testBattle1v1.SC2Map"); // 1v1静止测试
         //coordinator.StartGame("Test\\testMechanism_StepSize.SC2Map");
 
-        std::set<Tag> unit_tags;
-        Units us;
         while (coordinator.Update()) { // run a bot
             
         }
-        return 0;
+        //todo at the end of a game set, I need to output the results of the game
+        
     }
 
 

@@ -22,7 +22,7 @@ namespace sc2 {
         using Compare = std::function<bool(const Solution<Command>&, const Solution<Command>&)>;
 
     public:
-        RollingGA() = default;
+        RollingGA() = delete;
         //? the constructor only includes those parameters that must be set, other params can be set respectively
 
         // This 
@@ -31,8 +31,8 @@ namespace sc2 {
             int port_start,
             const std::string& process_path,
             const std::string& map_path) {
-            SetSimulators(net_address, port_start, process_path, map_path);
             m_simulators.resize(m_population_size);
+            SetSimulators(net_address, port_start, process_path, map_path);
         }
 
         // Initialization and setup.
@@ -47,6 +47,15 @@ namespace sc2 {
 
         void SetSimlatorsOpponent(const PlayerSetup& opponent);
         void SetSimulatorsMultithreaded(bool multithreaded);
+
+        void SetPopulationSize(int population_size) override {
+            if (population_size > m_population_size) {
+                m_simulators.resize(population_size);
+                // Uses the settings before to set all simulators again
+                SetSimulators(m_simulators[0].GetNetAddress(), m_simulators[0].GetPortStart(), m_simulators[0].GetProcessPath(), m_simulators[0].GetMapPath());
+            }
+            m_population_size = population_size;
+        }
 
         // Start up
         void SetSimulatorsStart(const ObservationInterface* observation_interface);
@@ -69,6 +78,8 @@ namespace sc2 {
         virtual void Mutate(Solution<Command>& s) override;
         //! Plaese set the start point before you evaluate
         virtual void Evaluate(Population& p) override;
+        // to take place the default function
+        //virtual void EvaluateSingleSolution(Solution<Command>& s) override {};
 
         // Settings
         int m_step_size = 8; //? Does the step_size in simulator matter?
@@ -76,6 +87,9 @@ namespace sc2 {
         int m_command_length = 8;
         float m_attack_possibility = 0.3f; // it's related to the m_step_size
         int m_mutate_step = 100;
+        //! to reduce uncertainty, uses multiple simulators to evaluate one solution
+        //! this is the number of sims to be used to evaluate one solution
+        int m_evaluate_multiplier = 3;
 
         // Information
         //? if I have many simulators here, things will become a non-blocking multi-thread programming condition, that means I need to manage them to function correctly
@@ -93,7 +107,6 @@ namespace sc2 {
         const double PI = atan(1.) * 4.;
     };
 
-    UnitTypes m_unit_type = UnitTypes();
 }
 
 

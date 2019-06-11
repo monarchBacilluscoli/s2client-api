@@ -45,19 +45,38 @@ const ObservationInterface* Simulator::Observation() const
 }
 
 float Simulator::GetTeamHealthLoss(Unit::Alliance alliance) const {
+	uint32_t player_id = 0;
+	switch (alliance)
+	{
+	case sc2::Unit::Self:
+		player_id = 1;
+		break;
+	//case sc2::Unit::Ally:
+	//? I have no idea on how to handle that
+	//	break;
+	case sc2::Unit::Neutral:
+		player_id = 0;
+		break;
+	case sc2::Unit::Enemy:
+		player_id = 2;
+		break;
+	default:
+		break;
+	}
 	float health_loss = 0.f;
 	// use the data from m_save and current data to simply calculate the health loss
 	for (const UnitState& state_u : m_save.unit_states)
 	{
-		const Unit* u = m_relative_units.at(state_u.unit_tag);
-		Units us = m_executor.Observation()->GetUnits();
-		// check if the unit has been dead
-		// because the API will keep the a unit's health its number the last time he lived if he has been dead now
-		if (u->is_alive) {
-			health_loss += state_u.life - u->health;
-		}
-		else {
-			health_loss += state_u.life;
+		if (state_u.player_id == player_id) {
+			const Unit* u = m_relative_units.at(state_u.unit_tag);
+			// check if the unit has been dead
+			// because the API will keep the a unit's health its number the last time he lived if he has been dead now
+			if (u->is_alive) {
+				health_loss += state_u.life - u->health;
+			}
+			else {
+				health_loss += state_u.life;
+			}
 		}
 	}
 	return health_loss;

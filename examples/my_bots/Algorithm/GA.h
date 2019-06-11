@@ -67,7 +67,7 @@ public:
         m_mutate_rate = mutate_rate;
     }
 
-    void SetPopulationSize(int population_size) {
+    virtual void SetPopulationSize(int population_size) {
         m_population_size = population_size;
         m_population.resize(m_population_size);
     }
@@ -106,13 +106,13 @@ protected:
     //! two parents generate two children by crossover and mutation
     virtual std::vector<Solution<T>> Produce(const Solution<T>& a, const Solution<T>& b);
     //! Calls those evaluators to evaluate one solution
-    void EvaluateSingleSolution(Solution<T>& solution);
+    virtual void EvaluateSingleSolution(Solution<T>& solution);
     //! Generate one solution
     //? pure virtual
     virtual Solution<T> GenerateSolution() = 0;
 
     //! Settings
-    int m_max_generation = 50;
+    int m_max_generation = 20;
     //! Controls how many parents ...
     //? this setting is OK, but the process is not right, since I shouldn't let the parents to generate a pair of just the same children, instead, I should pass them to another pair of parents
     //todo Here is a todo of modification for 
@@ -123,6 +123,7 @@ protected:
     int m_population_size = 20;
     //! Controls the ratio between the parents population and the offspring population in each reproduction
     float m_reproduce_rate = 1.f;
+
     Compare m_compare = Solution<T>::sum_greater;
     Evaluator default_evaluator = [](const std::vector<T> variables)->float {return 0; };
     std::vector<Evaluator*> eva_v = { &default_evaluator };
@@ -239,11 +240,11 @@ inline void GA<T>::SortSolutions(Population& p, const Compare& compare)
 template<class T>
 inline void GA<T>::EvaluateSingleSolution(Solution<T>& solution)
 {
-    assert(solution.objectives.size() == m_evaluators.size()); //? or I can add, but this will effect the performance, so you'd better set the settings properly before the run
-    for (size_t i = 0; i < m_evaluators.size(); i++)
-    {
-        solution.objectives[i] = m_evaluators[i](solution.variable);
-    }
+    //assert(solution.objectives.size() == m_evaluators.size()); //? or I can add, but this will effect the performance, so you'd better set the settings properly before the run
+    //for (size_t i = 0; i < m_evaluators.size(); i++)
+    //{
+    //    solution.objectives[i] = m_evaluators[i](solution.variable);
+    //}
 }
 
 template<class T>

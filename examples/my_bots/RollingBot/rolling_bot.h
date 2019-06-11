@@ -19,27 +19,51 @@ namespace sc2 {
         //! the only thing this constructor needs to do is to provid all parameters the simulator needs
         //! You need to ensure that all the settings are valid in remote client, especially the map_path (a lot of errors have happend to it)
         rolling_bot(std::string net_address, int port_start, const std::string& process_path,const std::string& map_path):m_rolling_ga(net_address, port_start, process_path, map_path) {};
-
+        //todo I should check if the remote client has been connected
         ~rolling_bot() = default;
 
         virtual void OnGameStart() override;
         virtual void OnStep() override;
 
+        // Settings
+        void SetPopulationSize(int population_size){
+            m_rolling_ga.SetPopulationSize(population_size);
+        }
+        void SetMaxGeneration(int max_generation) {
+            m_rolling_ga.SetMaxGeneration(max_generation);
+        }
     private:
         //! the function to evaluate the solution
-        std::function<float(const std::vector<Command>&)> evaluator = [&](const std::vector<Command>& sol)->float {
-            //todo pass the solution to it
-            m_sim.Load();
-            //todo let it run for some time
-            m_sim.Run(m_interval_size / m_sim.GetStepSize());
-            //todo get the HPs and sum them up as the objective value to return
-            return m_sim.GetTeamHealthLoss(Unit::Alliance::Enemy) - m_sim.GetTeamHealthLoss(Unit::Alliance::Self);
-        };
-        std::vector<Evaluator> evaluators = { evaluator };
+        //std::function<float(const std::vector<Command>&)> evaluator = [&](const std::vector<Command>& sol)->float {
+        //    //todo pass the solution to it
+        //    m_sim.Load();
+        //    //todo let it run for some time
+        //    m_sim.Run(m_interval_size / m_sim.GetStepSize());
+        //    //todo get the HPs and sum them up as the objective value to return
+        //    return m_sim.GetTeamHealthLoss(Unit::Alliance::Enemy) - m_sim.GetTeamHealthLoss(Unit::Alliance::Self);
+        //};
         //! the funciton deploy the solution
         void DeploySolution(Solution<Command> sol) {
             for (const Command& c : sol.variable) {
-                for (const ActionRaw& a : c.actions)
+                //todo before deploying the first command this time, the command queue should be cleared
+                bool queued_command = true;
+                for (size_t i = 0; i < c.actions.size(); i++)
+                {
+                    queued_command = i = 0 ? false : true;
+                    switch (c.actions[i].target_type)
+                    {
+                    case ActionRaw::TargetType::TargetNone:
+                        Actions()->UnitCommand(Observation()->GetUnit(c.unit_tag), c.actions[i].ability_id, queued_command);
+                        break;
+                    case ActionRaw::TargetType::TargetPosition:
+                        Actions()->UnitCommand(Observation()->GetUnit(c.unit_tag), c.actions[i].ability_id, c.actions[i].target_point, queued_command);
+                        break;
+                    case ActionRaw::TargetType::TargetUnitTag:
+                        Actions()->UnitCommand(Observation()->GetUnit(c.unit_tag), c.actions[i].ability_id, Observation()->GetUnit(c.actions[i].TargetUnitTag), queued_command);
+                        break;
+                    }
+                }
+                /*for (const ActionRaw& a : c.actions)
                 {
                     switch (a.target_type)
                     {
@@ -53,7 +77,7 @@ namespace sc2 {
                         Actions()->UnitCommand(Observation()->GetUnit(c.unit_tag), a.ability_id, Observation()->GetUnit(a.TargetUnitTag), true);
                         break;
                     }
-                }
+                }*/
             }
         }
 

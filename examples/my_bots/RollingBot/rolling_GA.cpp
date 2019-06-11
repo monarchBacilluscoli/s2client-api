@@ -7,11 +7,15 @@ using Population = std::vector<Solution<Command>>;
 using Evaluator = std::function<float(const std::vector<Command>&)>;
 using Compare = std::function<bool(const Solution<Command>&, const Solution<Command>&)>;
 
-//! According to known information generates solutions which is as valid as possiable 
+class test
+{
+public:
+	bool foo() {
+		return true;
+	}
+private:
 
-//! before every time you run it, you should do it once
-
-
+};
 
 void sc2::RollingGA::SetSimulators(const std::string& net_address, int port_start, const std::string& process_path, const std::string& map_path)
 {
@@ -23,10 +27,20 @@ void sc2::RollingGA::SetSimulators(const std::string& net_address, int port_star
 		sim.SetPortStart(port_start);
 		sim.SetProcessPath(process_path);
 		sim.SetMapPath(map_path);
-		// run the game
-		sim.StartGame();
-		// since there are up to two agent players, for simplisity I'd better make the port +2 at each time
+		// since there are up to two agent players, for simplicity I'd better make the port +2 at each time
 		port_start += 2;
+	}
+	std::vector<std::thread> start_game_threads(m_simulators.size());
+	for (size_t i = 0; i < start_game_threads.size(); i++)
+	{
+		//start_game_threads[i] = std::thread(&Simulator::StartGame,&m_simulators[i], std::string());
+		start_game_threads[i] = std::thread([&, i]()->void{
+			m_simulators[i].LaunchRemoteStarcraft();
+			m_simulators[i].StartGame();
+		});
+	}
+	for (auto& t : start_game_threads) {
+		t.join();
 	}
 }
 
@@ -45,7 +59,7 @@ void sc2::RollingGA::RunSimulatorsSynchronous()
 	std::vector<std::thread> threads(m_simulators.size());
 	for (size_t i = 0; i < threads.size(); i++)
 	{
-		threads[i] = std::thread{ [&]() ->void {
+		threads[i] = std::thread{ [&,i]() ->void {
 			m_simulators[i].Run(m_step_size);
 		} };
 	}
@@ -145,11 +159,37 @@ void sc2::RollingGA::Mutate(Solution<Command>& s)
 void sc2::RollingGA::Evaluate(Population& p)
 {
 	//todo I need to construct a more robust simulator manager
-	assert(p.size() < m_simulators.size());
-	//todo use different simulators to evaluate solutions respectively
+	assert(p.size() <= m_simulators.size());
+	//use different simulators to evaluate solutions respectively
+	//todo for each sim, dopy the state and deploy the commands!
+	for (size_t i = 0; i < p.size(); i++)
+	{
+		m_simulators[i].CopyAndSetState(m_observation);
+		m_simulators[i].SetOrders(p[i].variable);
+	}
 	RunSimulatorsSynchronous();
+	//? for test
+	for (size_t i = 0; i < m_simulators.size(); i++)
+	{
+		float total_healths = 0.f;
+		Units us = m_simulators[i].Observation()->GetUnits();
+		for (const Unit* u : us)
+		{
+			total_healths += u->health;
+		}
+		std::cout << total_healths<<"\t";
+	}
+	std::cout << std::endl;
+	//? end
 	for (size_t i = 0; i < p.size(); i++)
 	{
 		p[i].objectives[0] = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Enemy) - m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Self);
+		//? delete the test code
+		if (p[i].objectives[0] - 0.f > 0.001f) {
+			std::cout << "got!" << std::endl;
+		}
 	}
 }
+
+UnitTypes RollingGA::m_unit_type = UnitTypes();
+

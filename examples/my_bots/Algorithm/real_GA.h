@@ -9,7 +9,7 @@ class RealGA:public GA<float> {
     using Compare = std::function<bool(const Solution<float>&, const Solution<float>&)>;
 public:
     RealGA() = default;
-    RealGA(const std::vector<float>& lower, const std::vector<float>& upper, std::vector<Evaluator>& evaluators, float crossover_rate, float mutate_rate, int population_size, Compare compare, int max_generation, float reproduce_rate) :GA<float>(evaluators, crossover_rate, mutate_rate, population_size, compare, max_generation, reproduce_rate),m_lower(lower),m_upper(upper) {
+    RealGA(const std::vector<float>& lower, const std::vector<float>& upper): m_lower(lower),m_upper(upper) {
         assert(lower.size() == upper.size());
         m_dimensions = lower.size();
         for (size_t i = 0; i < m_dimensions; i++)
