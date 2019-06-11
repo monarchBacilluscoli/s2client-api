@@ -172,8 +172,7 @@ public:
 
     // Status.
 
-    //? Liu: Gets the path set before to the StarCraft II binary, for the use of remote connection
-    std::string GetProcessPath();
+
     //! Returns true if all running games have ended.
     bool AllGamesEnded() const;
     //? Liu: check if current game is a multiplayer game
@@ -204,6 +203,13 @@ public:
     //!< \return Is true if the save is successful.
     bool RemoteSaveMap(const void* data, int data_size, std::string remote_path);
     //! Gets the game executable path.
+
+    int GetStepSize();
+    int GetPortStart();
+    std::string GetNetAddress();
+    //? Liu: Gets the path set before to the StarCraft II binary, for the use of remote connection
+    std::string GetProcessPath();
+    std::string GetMapPath();
     //!< \return The game executable path.
     std::string GetExePath() const;
 

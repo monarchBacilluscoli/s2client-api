@@ -25,10 +25,17 @@ namespace sc2 {
     //! An empty bot to be called outside 
     class Executor : public Agent {};
 
-    class Simulator: public Coordinator
+    class Simulator : public Coordinator
     {
     public:
-        Simulator() = default;
+        Simulator() {
+            SetParticipants({
+                CreateParticipant(Terran, &m_executor),
+                CreateComputer(Terran)
+                }
+            );
+            SetStepSize(m_step_size);
+        }
         ~Simulator() = default;
 
         //! set your opponent as a user-defined bot
@@ -50,7 +57,7 @@ namespace sc2 {
         //! exposes the whole ObservationInterface to user
         const ObservationInterface* Observation() const;
 
-        int GetStepSize() const{
+        int GetStepSize() const {
             return m_step_size;
         }
         //! Compares current state with the start point to get specific unit group health loss
@@ -62,11 +69,11 @@ namespace sc2 {
 
         //! simulation step size
         //! if you want the simulation to speed up, you can set a higher value
-        int m_step_size = 1;
+        int m_step_size = 8;
         //! it is based on the participant passed
         //bool m_is_multi_player = false;
         //! the bot to be called outside to send orders or get observations
-        Agent& m_executor = Executor();
+        Executor m_executor;
         //! save of the caller' state when calls it
         State m_initia_save;
         //! save of state

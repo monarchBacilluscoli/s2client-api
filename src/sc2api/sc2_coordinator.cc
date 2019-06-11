@@ -1002,8 +1002,27 @@ void Coordinator::SetProcessPath(const std::string& path) {
     imp_->process_settings_.process_path = path;
 }
 
+int Coordinator::GetStepSize()
+{
+    return imp_->process_settings_.step_size;
+}
+
+int Coordinator::GetPortStart(){
+    return imp_->process_settings_.port_start;
+}
+
+std::string Coordinator::GetNetAddress()
+{
+    return imp_->process_settings_.net_address;
+}
+
 std::string Coordinator::GetProcessPath() {
     return imp_->process_settings_.process_path;
+}
+
+std::string Coordinator::GetMapPath()
+{
+    return imp_->game_settings_.map_name;
 }
 
 void Coordinator::SetDataVersion(const std::string& version) {
