@@ -28,28 +28,28 @@ float evaluator(std::vector<float> x) {
 }
 
 class human_control :public Agent {
+public:
+    human_control(Coordinator& coordinator) :m_coordinator(coordinator) {}
     void OnGameStart() {
-        ////todo push sevaral actions in unit action queues
-        //Units us = Observation()->GetUnits(Unit::Alliance::Self);
-        //for (auto& u : us)
-        //{
-        //    //todo generate a random 
-        //    Actions()->UnitCommand(u, ABILITY_ID::STOP, false);
-        //    Actions()->UnitCommand(u, ABILITY_ID::MOVE, { 0.f,0.f }, true);
-        //}
+        Units us = Observation()->GetUnits();
+        std::for_each(us.begin(), us.end(), [&](const Unit*& u) {
+            Debug()->DebugSetShields(u->shield_max / 2, u);
+            });
+        Debug()->SendDebug();
     }
     void OnStep() {
-        ////todo Once conditions are met, use cancel to see whether or not it will end the queue
-        //if (Observation()->GetGameLoop() >= 20) {
-        //    Units us = Observation()->GetUnits(Unit::Alliance::Self);
-        //    for (auto& u : us)
-        //    {
-        //        //todo generate a random 
-        //        //Actions()->UnitCommand(u, ABILITY_ID::STOP,false);
-        //    }
-        //}
+        if (Observation()->GetGameLoop() > 5) {
+            Units us = Observation()->GetUnits();
+            std::for_each(us.begin(), us.end(), [&](const Unit*& u) {
+                Debug()->DebugSetShields(0, u);
+                });
+            Debug()->SendDebug();
+        }
     }
-    Units initial_units;
+    State m_save;
+    int m_live_loops = 20;
+    int m_current_live_loops = 0;
+    Coordinator& m_coordinator;
 };
 
 // Haha, here is a bot with no real code
@@ -73,16 +73,16 @@ int main(int argc, char* argv[]) {
     // Before doing anything, you should set it first
     bool isCoonected = SetSSHConnection(net_address, username, password);
 
-    //Simulator sim; 
-    //sim.SetNetAddress(net_address);
-    //sim.SetOpponent(Difficulty::Easy);
-    //sim.SetPortStart(3000);
-    //sim.SetRealtime(false);
-    //sim.SetProcessPath("StarCraftII/Versions/Base70154/SC2_x64");
-    //sim.LaunchRemoteStarcraft();
-    //sim.StartGame("..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map");
-    //sim.Update();
-    //Units us = sim.Observation()->GetUnits();
+   /* Simulator sim; 
+    sim.SetNetAddress(net_address);
+    sim.SetOpponent(Difficulty::Easy);
+    sim.SetPortStart(3000);
+    sim.SetRealtime(false);
+    sim.SetProcessPath("StarCraftII/Versions/Base70154/SC2_x64");
+    sim.LaunchRemoteStarcraft();
+    sim.StartGame("..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map");
+    sim.Update();
+    Units us = sim.Observation()->GetUnits();*/
 
 
     int step_size = 1;
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
         Coordinator coordinator; // （协调器）负责控制游戏进行中、进行前等等的设置
         std::cout << "isLoadSettings: " << coordinator.LoadSettings(argc, argv) << std::endl; // If there is no command line arguments it will check the files in your MyDocument\StarCraft II and get default settings.
         std::cout<<"Executable path: " <<coordinator.GetExePath()<<std::endl;
-        coordinator.SetRealtime(true);
+        coordinator.SetRealtime(false);
         //coordinator.SetRealtime(true);
         coordinator.SetStepSize(step_size); // 设置游戏循环步长
         coordinator.SetMultithreaded(true);
@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
         no_action na_bot;
         Bot bot; // traditional rule-based bot
         random_bot bot2, bot3;
-        human_control bot0;
+        human_control bot0(coordinator);
         one_frame_bot of_bot, of_bot2;
         potential_field_bot pf_bot(step_size);
         advanced_potential_field_bot adv_pf_bot(step_size);
@@ -109,7 +109,6 @@ int main(int argc, char* argv[]) {
         debug_test_bot dtb; //! This is a nightmare for all units in all maps, just start screaming!
         remote_draw rdb;
         //rolling_bot rolling_bot(net_address, port_start, process_path, "..\\Maps\\testBattle_distant_vs_melee_debug.SC2Map");
-
 
         attack_nearest an_bot;
 
@@ -159,7 +158,13 @@ int main(int argc, char* argv[]) {
         //coordinator.StartGame("Test\\testMechanism_StepSize.SC2Map");
 
         while (coordinator.Update()) { // run a bot
-            
+            //if (bot0.Observation()->GetGameLoop() == 100) {
+            //    bot0.m_save = SaveMultiPlayerGame(bot0.Observation());
+            //}
+            //if (bot0.Observation()->GetGameLoop() > 100) {
+            //    LoadMultiPlayerGame(bot0.m_save, bot0, coordinator);
+            //}
+            //SleepFor(64);
         }
         //todo at the end of a game set, I need to output the results of the game
         

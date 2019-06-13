@@ -49,7 +49,7 @@ namespace sc2 {
                 bool queued_command = true;
                 for (size_t i = 0; i < c.actions.size(); i++)
                 {
-                    queued_command = i = 0 ? false : true;
+                    queued_command = (i == 0) ? false : true;
                     switch (c.actions[i].target_type)
                     {
                     case ActionRaw::TargetType::TargetNone:

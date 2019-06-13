@@ -49,7 +49,7 @@ float Simulator::GetTeamHealthLoss(Unit::Alliance alliance) const {
 	switch (alliance)
 	{
 	case sc2::Unit::Self:
-		player_id = 1;
+		player_id = Observation()->GetPlayerID();
 		break;
 	//case sc2::Unit::Ally:
 	//? I have no idea on how to handle that
@@ -58,7 +58,7 @@ float Simulator::GetTeamHealthLoss(Unit::Alliance alliance) const {
 		player_id = 0;
 		break;
 	case sc2::Unit::Enemy:
-		player_id = 2;
+		player_id = Observation()->GetPlayerID() == 1 ? 2 : 1;
 		break;
 	default:
 		break;
@@ -71,11 +71,12 @@ float Simulator::GetTeamHealthLoss(Unit::Alliance alliance) const {
 			const Unit* u = m_relative_units.at(state_u.unit_tag);
 			// check if the unit has been dead
 			// because the API will keep the a unit's health its number the last time he lived if he has been dead now
+			// I need calculate the shield at the same time
 			if (u->is_alive) {
-				health_loss += state_u.life - u->health;
+				health_loss += state_u.life - u->health + state_u.shields - u->shield;
 			}
 			else {
-				health_loss += state_u.life;
+				health_loss += state_u.life + state_u.shields;
 			}
 		}
 	}

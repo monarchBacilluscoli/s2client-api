@@ -1,5 +1,7 @@
 #include "rolling_GA.h"
 #include <thread>
+#include <numeric>
+#include <algorithm>
 
 using namespace sc2;
 
@@ -29,13 +31,23 @@ void sc2::RollingGA::SetSimulators(const std::string& net_address, int port_star
 		sim.SetMapPath(map_path);
 		// since there are up to two agent players, for simplicity I'd better make the port +2 at each time
 		port_start += 2;
+		sim.LaunchRemoteStarcraft();
 	}
 	std::vector<std::thread> start_game_threads(m_simulators.size());
+	//for (size_t i = 0; i < start_game_threads.size(); i++)
+	//{
+	//	start_game_threads[i] = std::thread([&,i]()->void {
+	//		m_simulators[i].LaunchRemoteStarcraft();
+	//		});
+	//}
+	//for (auto& t : start_game_threads) {
+	//	t.join();
+	//}
 	for (size_t i = 0; i < start_game_threads.size(); i++)
 	{
 		//start_game_threads[i] = std::thread(&Simulator::StartGame,&m_simulators[i], std::string());
 		start_game_threads[i] = std::thread([&, i]()->void{
-			m_simulators[i].LaunchRemoteStarcraft();
+			/*m_simulators[i].LaunchRemoteStarcraft();*/
 			m_simulators[i].StartGame();
 		});
 	}
@@ -158,37 +170,43 @@ void sc2::RollingGA::Mutate(Solution<Command>& s)
 
 void sc2::RollingGA::Evaluate(Population& p)
 {
-	//todo I need to construct a more robust simulator manager
 	assert(p.size() <= m_simulators.size());
-	//use different simulators to evaluate solutions respectively
-	//todo for each sim, dopy the state and deploy the commands!
+	// use different simulators to evaluate solutions respectively
+	// for each sim, copy the state and deploy the commands!
 	for (size_t i = 0; i < p.size(); i++)
 	{
 		m_simulators[i].CopyAndSetState(m_observation);
+#ifdef _DEBUG
+		////? outputs units info that can indicate whether the CopyAndSet function has worked
+		//Units us = m_simulators[i].Observation()->GetUnits();
+		//sc2utility::output_units_health_in_order(us);
+		//std::cout << std::endl;
+#endif // _DEBUG
 		m_simulators[i].SetOrders(p[i].variable);
 	}
 	RunSimulatorsSynchronous();
-	//? for test
-	for (size_t i = 0; i < m_simulators.size(); i++)
-	{
-		float total_healths = 0.f;
-		Units us = m_simulators[i].Observation()->GetUnits();
-		for (const Unit* u : us)
-		{
-			total_healths += u->health;
-		}
-		std::cout << total_healths<<"\t";
-	}
-	std::cout << std::endl;
-	//? end
+	//? output the best one for each generation, or outputs the average objectives for each generation
+	float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
+	float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();
 	for (size_t i = 0; i < p.size(); i++)
 	{
-		p[i].objectives[0] = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Enemy) - m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Self);
-		//? delete the test code
-		if (p[i].objectives[0] - 0.f > 0.001f) {
-			std::cout << "got!" << std::endl;
+		self_loss = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Self);
+		enemy_loss = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Enemy);
+		self_team_loss_total += self_loss;
+		enemy_team_loss_total += enemy_loss;
+		if (self_team_loss_best > self_loss) {
+			self_team_loss_best = self_loss;
 		}
+		if (enemy_team_loss_best < enemy_loss) {
+			enemy_team_loss_best = enemy_loss;
+		}
+
+		p[i].objectives[0] = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Enemy)/* - m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Self)*/;
 	}
+	std::cout << "ally_team_loss_avg:\t" << self_team_loss_total / p.size() <<"\t"
+		<< "ally_team_loss_best:\t" << self_team_loss_best << "\t"
+		<< "enemy_team_loss_avg:\t" << enemy_team_loss_total / p.size() << "\t"
+		<< "enemy_team_loss_best:\t" << enemy_team_loss_best << std::endl;
 }
 
 UnitTypes RollingGA::m_unit_type = UnitTypes();

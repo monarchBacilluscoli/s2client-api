@@ -19,11 +19,14 @@ namespace sc2 {
         std::vector<UnitState> unit_states;
     };
 
-    //todo save & load in multi-player game
-    //? those are utility functions, so don't need to wrap them into a class
+    //! Save the current game status to a State object
+    //! \param observation The Observation object which can observe current game, the client it belongs to should have the whole view of the map, or it will be meaningless
     State SaveMultiPlayerGame(const ObservationInterface* observation);
-    //todo loads a game state from a State object, need to use Debug() to set  and Control()
-    void LoadMultiPlayerGame(State save, Client& client, Coordinator& coordinator);
+    //! Loads a game state from a State object
+    //! \param save The State object which save the game status which needs to be loaded
+    //! \param client It is used to set units, so it must be the current client
+    //! \param coordinator It is used to set units, too, so it should also be the coordinator of the current game 
+    void LoadMultiPlayerGame(State save, Client& current_client, Coordinator& current_coordinator);
 }
 
 #endif // !STATE_H

@@ -1,5 +1,10 @@
 #include "state.h"
 #include "../utilities/sc2utility.h"
+#include <sc2utils/sc2_manage_process.h>
+#if _DEBUG
+#include<iostream>
+#endif // _DEBUG
+
 
 using namespace sc2;
 
@@ -25,30 +30,45 @@ State sc2::SaveMultiPlayerGame(const ObservationInterface* observation)
 	return save;
 }
 
-void sc2::LoadMultiPlayerGame(State save, Client& client, Coordinator& coordinator)
+void sc2::LoadMultiPlayerGame(State save, Client& current_client, Coordinator& current_coordinator)
 {
 	// kills all current units
-	for (const Unit* u : client.Observation()->GetUnits())
+	for (const Unit* u : current_client.Observation()->GetUnits())
 	{
-		client.Debug()->DebugKillUnit(u);
+		current_client.Debug()->DebugKillUnit(u);
+	}
+	current_client.Debug()->SendDebug();
+	// the wrekages need about 20 game loops to be cleaned
+	for (size_t i = 0; i < 20; i++)
+	{
+		current_coordinator.Update();
 	}
 	// creates units from save
 	for (UnitState state_u: save.unit_states)
 	{
-		client.Debug()->DebugCreateUnit(state_u.unit_type, state_u.pos, state_u.player_id);
+		current_client.Debug()->DebugCreateUnit(state_u.unit_type, state_u.pos, state_u.player_id);
 	}
-	client.Debug()->SendDebug();
-	coordinator.Update();
+	current_client.Debug()->SendDebug();
+	// the DebugCreateUnit() needs at least 2 loops to be executed
+	current_coordinator.Update();
+	current_coordinator.Update();
 
 	// just copys the units in save
 	const Unit* u_copied;
-	Units us_copied = client.Observation()->GetUnits();
+	Units us_copied = current_client.Observation()->GetUnits();
 	for (UnitState state_u : save.unit_states) {
 		u_copied = sc2utility::select_nearest_unit_from_point(state_u.pos, us_copied);
-		client.Debug()->DebugSetLife(state_u.life,u_copied);
-		client.Debug()->DebugSetEnergy(state_u.energy, u_copied);
-		client.Debug()->DebugSetShields(state_u.energy, u_copied);
+		current_client.Debug()->DebugSetShields(state_u.shields + 0.1f, u_copied); // WTF, shield cannot be set to 0, if you set 0, you will find it is full in game, but if you set it as 0.1f, the data in game will be 0, fuck again.
+		current_client.Debug()->DebugSetLife(state_u.life,u_copied);
+		current_client.Debug()->DebugSetEnergy(state_u.energy, u_copied);
 	}
-	client.Debug()->SendDebug();
-	coordinator.Update();
+	current_client.Debug()->SendDebug();
+	// like CreateUnit(), DebugCreateUnit() needs at least 2 loops to be executed, too
+	current_coordinator.Update();
+	current_coordinator.Update();
+#ifdef _DEBUG
+	Units us = current_client.Observation()->GetUnits();
+	sc2utility::output_units_health_in_order(us);
+	std::cout << std::endl;
+#endif // _DEBUG
 }
