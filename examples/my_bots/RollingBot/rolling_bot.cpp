@@ -16,6 +16,8 @@ namespace sc2 {
 			Solution<Command> sol = m_rolling_ga.Run().front(); // you must control the frames to run in m_sim.Initialize(), not here
 			//todo after running, get the solution to deploy
 			DeploySolution(sol);
+			//? for test
+			std::cout << "deploy!" << std::endl;
 		}
 	}
 }

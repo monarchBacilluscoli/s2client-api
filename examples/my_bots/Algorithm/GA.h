@@ -120,7 +120,7 @@ protected:
     //! Controls how many offspring solutions should be mutated
     float m_mutate_rate = 0.2f;
     //! Controls the population size after each selection
-    int m_population_size = 20;
+    int m_population_size = 50;
     //! Controls the ratio between the parents population and the offspring population in each reproduction
     float m_reproduce_rate = 1.f;
 

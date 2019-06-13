@@ -14,6 +14,7 @@ namespace sc2 {
     {
     public:
         SSHConnection() {
+            ssh_init();
             m_session = ssh_new();
         }
         SSHConnection(const std::string& net_address) {
@@ -37,6 +38,7 @@ namespace sc2 {
         ~SSHConnection() {
             ssh_disconnect(m_session);
             ssh_free(m_session);
+            ssh_finalize();
         }
     private:
         ssh_session m_session;

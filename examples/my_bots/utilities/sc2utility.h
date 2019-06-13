@@ -2,6 +2,7 @@
 #define SC2UTILITY_H
 
 #include"sc2api/sc2_api.h"
+#include<iostream>
 
 namespace sc2 {
     class sc2utility {
@@ -139,6 +140,11 @@ namespace sc2 {
 
         static float move_distance(const Unit* u, int frames, const UnitTypes& uts) {
             return uts[u->unit_type].movement_speed / frames_per_second * frames;
+        }
+
+        static void output_units_health_in_order(Units& units) {
+            std::sort(units.begin(), units.end(), [](const Unit* a, const Unit* b)->bool {return a->health > b->health; });
+            std::for_each(units.begin(), units.end(), [](const Unit* &a) {std::cout << a->health << "\t"; });
         }
 
         static const int frames_per_second = 16;
