@@ -69,6 +69,7 @@ void sc2::LoadMultiPlayerGame(State save, Client& current_client, Coordinator& c
 #ifdef _DEBUG
 	Units us = current_client.Observation()->GetUnits();
 	sc2utility::output_units_health_in_order(us);
+	//TODO I need to DRAW them OUT!!!
 	std::cout << std::endl;
 #endif // _DEBUG
 }

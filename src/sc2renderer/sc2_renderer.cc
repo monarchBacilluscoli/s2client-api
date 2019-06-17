@@ -6,6 +6,7 @@
 #include <iostream>
 
 namespace {
+    //? Looks like here is only one window and rederer in the entire solution
     SDL_Window* window_;
     SDL_Renderer* renderer_;
 
@@ -32,9 +33,11 @@ void Initialize(const char* title, int x, int y, int w, int h, unsigned int flag
         exit(1);
     }
 
+    //? Liu: Creates a new window 
     window_ = SDL_CreateWindow(title, x, y, w, h, flags == 0 ? SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE : flags);
     assert(window_);
 
+    //? Liu: uses the first driver can be found (-1) and hardware renderer (SDL_RENDERER_ACCELERATED) to create a renderer
     renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
     assert(renderer_);
 
