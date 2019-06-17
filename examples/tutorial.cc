@@ -15,6 +15,7 @@
 //#include "my_bots/tests/simulator_test.h"
 //#include "my_bots/Algorithm/real_GA.h"
 #include "my_bots/RollingBot/rolling_bot.h"
+#include "..///liu_renderer/liu_renderer/liu_renderer.h"
 //#include <sc2utils/ssh_connection.h>
 
 using namespace sc2;
@@ -121,7 +122,7 @@ int main(int argc, char* argv[]) {
             //CreateParticipant(Race::Terran, &pf_bot), //potential field bot
             //CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
             //CreateParticipant(Race::Terran, &sstb),
-            CreateParticipant(Race::Terran, &bot0),
+            CreateParticipant(Race::Terran, &an_bot),
 
             //CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
 
@@ -157,6 +158,7 @@ int main(int argc, char* argv[]) {
         //coordinator.StartGame("Test\\testBattle1v1.SC2Map"); // 1v1静止测试
         //coordinator.StartGame("Test\\testMechanism_StepSize.SC2Map");
 
+        
         while (coordinator.Update()) { // run a bot
             //if (bot0.Observation()->GetGameLoop() == 100) {
             //    bot0.m_save = SaveMultiPlayerGame(bot0.Observation());
@@ -164,7 +166,9 @@ int main(int argc, char* argv[]) {
             //if (bot0.Observation()->GetGameLoop() > 100) {
             //    LoadMultiPlayerGame(bot0.m_save, bot0, coordinator);
             //}
-            //SleepFor(64);
+            // Sleeps for 64 mileseconds can make the unrealtime game easy to observe
+
+            SleepFor(64);
         }
         //todo at the end of a game set, I need to output the results of the game
         
