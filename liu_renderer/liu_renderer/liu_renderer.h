@@ -18,7 +18,7 @@ namespace sc2 {
         ~LiuRenderer();
 
         void DrawObservations(const std::vector<const ObservationInterface*> observations);
-        // Draws only one Observation data on m_window
+        // Draws only one Observation data to fullfill m_window
         void DrawObservation(const ObservationInterface* observation);
 
     private:

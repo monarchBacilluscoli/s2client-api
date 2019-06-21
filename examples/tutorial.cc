@@ -30,27 +30,12 @@ float evaluator(std::vector<float> x) {
 
 class human_control :public Agent {
 public:
-    human_control(Coordinator& coordinator) :m_coordinator(coordinator) {}
-    void OnGameStart() {
-        Units us = Observation()->GetUnits();
-        std::for_each(us.begin(), us.end(), [&](const Unit*& u) {
-            Debug()->DebugSetShields(u->shield_max / 2, u);
-            });
-        Debug()->SendDebug();
-    }
+    human_control() {}
     void OnStep() {
-        if (Observation()->GetGameLoop() > 5) {
-            Units us = Observation()->GetUnits();
-            std::for_each(us.begin(), us.end(), [&](const Unit*& u) {
-                Debug()->DebugSetShields(0, u);
-                });
-            Debug()->SendDebug();
-        }
+        m_game_renderer.DrawObservation(Observation());
     }
-    State m_save;
-    int m_live_loops = 20;
-    int m_current_live_loops = 0;
-    Coordinator& m_coordinator;
+private:
+    LiuRenderer m_game_renderer;
 };
 
 // Haha, here is a bot with no real code
@@ -102,7 +87,7 @@ int main(int argc, char* argv[]) {
         no_action na_bot;
         Bot bot; // traditional rule-based bot
         random_bot bot2, bot3;
-        human_control bot0(coordinator);
+        human_control bot0;
         one_frame_bot of_bot, of_bot2;
         potential_field_bot pf_bot(step_size);
         advanced_potential_field_bot adv_pf_bot(step_size);
@@ -122,7 +107,7 @@ int main(int argc, char* argv[]) {
             //CreateParticipant(Race::Terran, &pf_bot), //potential field bot
             //CreateParticipant(Race::Terran, &adv_pf_bot), //advanced potential field bot
             //CreateParticipant(Race::Terran, &sstb),
-            CreateParticipant(Race::Terran, &an_bot),
+            CreateParticipant(Race::Terran, &bot0),
 
             //CreateParticipant(Race::Terran, &an_bot), // 添加人族，使用Attack Nearest
 
