@@ -1,14 +1,19 @@
+
 # All the source files for the sc2 api
+# Liu: of course the second parameter of each function call is variable.
+# Liu: this is used to collect all the corresponding files and store them into several variables
 file(GLOB sources_sc2 "sc2api/*.cpp" "sc2api/*.cc" "../include/sc2api/*.h")
 file(GLOB sources_sc2_lib "sc2lib/*.cpp" "sc2lib/*.cc" "../include/sc2lib/*.h")
 file(GLOB sources_utils "sc2utils/*.cpp" "sc2utils/*.cc" "../include/sc2utils/*.h")
 file(GLOB sources_renderer "sc2renderer/*.cc" "sc2renderer/*.h" "../include/sc2renderer/*.h")
+# Liu: What I need to do is to add my folders and files here to let it can be built into libs
 
 # Gather the protos.
 file(GLOB proto_files
     "../protocol/s2clientprotocol/*.proto"
 )
 
+# Liu: OKOK string equal... if there isn't anything, it means you need to reconstruct it again
 if ("${proto_files}" STREQUAL "")
 	message(FATAL_ERROR "Missing root protocol submodule.\nRemove your protocol directory and run:\ngit submodule update --recursive --init")
 endif ()
@@ -16,8 +21,11 @@ endif ()
 # Create the output directory for generated protos.
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/generated/s2clientprotocol)
 
+# Liu: for each proto file 
 foreach(proto ${proto_files})
-    get_filename_component(proto_name ${proto} NAME_WE)
+    # Liu: gets the filename without directory and longest file extension
+    get_filename_component(proto_name ${proto} NAME_WE) 
+    # Liu: emmm... it is used to prepare to ... generate the corresponging *.h and *.c?
     list(APPEND proto_src ${PROJECT_BINARY_DIR}/generated/s2clientprotocol/${proto_name}.pb.h ${PROJECT_BINARY_DIR}/generated/s2clientprotocol/${proto_name}.pb.cc)
 endforeach()
 
@@ -30,8 +38,9 @@ add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
 # Create the library
 add_library(sc2api ${sources_sc2})
 add_library(sc2lib ${sources_sc2_lib})
-add_library(sc2protocol ${proto_src} ${proto_files})
-add_library(sc2utils ${sources_utils})
+# Liu: ? Looks like I can add a library from an upper dir's CMakeLists.txt....
+add_library(sc2protocol ${proto_src} ${proto_files}) # Liu: how can CMake use .proto files?
+add_library(sc2utils ${sources_utils}) 
 
 set_target_properties(sc2api PROPERTIES DEBUG_POSTFIX "d")
 set_target_properties(sc2lib PROPERTIES DEBUG_POSTFIX "d")
@@ -45,6 +54,7 @@ if (APPLE)
 endif ()
 
 # Exclude SDL and related projects to work around linker issue.
+# looks like I need to configure the renderer and its dependency SDL inidvidually
 if (NOT APPLE)
     add_library(sc2renderer ${sources_renderer})
     set_target_properties(sc2renderer PROPERTIES DEBUG_POSTFIX "d")
@@ -53,6 +63,7 @@ if (NOT APPLE)
 endif ()
 
 # It requires includes to civetweb and our own headers.
+#? Liu: If I have a CMakeList file like this, will I still need to write the whole dir to include a *.h?
 include_directories("../contrib/civetweb/include")
 include_directories("../contrib/SDL-mirror/include")
 include_directories("../contrib/ipv6-parse")
