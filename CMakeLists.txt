@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
+# Liu: looks like a bool variable
 option(BUILD_API_EXAMPLES "Build Examples" ON)
 option(BUILD_API_TESTS "Build Tests" ON)
 project(s2client-api)
@@ -11,6 +12,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
 # Windows builds subdirectories Debug/Release.
 # These variables will overwrite that and put binaries in bin.
+# Liu: maybe only one type of build will exist in this directory 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin)
@@ -132,7 +134,8 @@ add_subdirectory("src")
 
 # Exclude SDL and related projects to work around linker issue.
 if (NOT APPLE)
-    set_target_properties(sc2renderer PROPERTIES FOLDER utilities)
+    set_target_properties(sc2renderer PROPERTIES FOLDER utilities) 
+    set_target_properties(liu_renderer PROPERTIES FOLDER utilities) # should I do it?
     set_target_properties(uninstall PROPERTIES FOLDER CMakePredefinedTargets)
 endif ()
 
