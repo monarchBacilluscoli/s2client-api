@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liuyongfeng/s2client-api-liu/s2client-api/build/bin/project",
+            "args": [
+                // Remember to add the executable dir here, and pay attention to this form of args
+                "-e",
+                "${HOME}/StarCraftII/Versions/Base70154/SC2_x64"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            // I don't have to build it since I have build it yet
+            "preLaunchTask": "make the entire project",
+            "miDebuggerPath": "/usr/bin/gdb"
+        }
+    ]
+}

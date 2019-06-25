@@ -1,0 +1,31 @@
+// I know what it means, it is just a json let you write what you want to do before dubugging
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "make the entire project",
+            "command": "make",
+            "args": [ 
+                "-j" // let the make be able to build multiple tasks for one time
+            ],
+            "options": {
+                "cwd": "${cwd}/build"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "g++ build active file",
+            "command": "/usr/bin/g++",
+            "args": [
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "/usr/bin"
+            }
+        }
+    ],
+    "version": "2.0.0"
+}
