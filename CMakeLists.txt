@@ -8,6 +8,7 @@ project(s2client-api)
 # Use bin as the directory for all executables.
 # This will make protoc easy to find.
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+# Liu: OKOK I know it make all the project able to find all the libs
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
 # Windows builds subdirectories Debug/Release.
@@ -124,15 +125,15 @@ endif (MSVC)
 # Exclude SDL and related projects to work around linker issue.
 if (NOT APPLE)
 	# Run SDLs cmake.
-	add_subdirectory("contrib/SDL-mirror")
-
+    add_subdirectory("contrib/SDL-mirror")
 	set_target_properties(SDL2main PROPERTIES FOLDER contrib)
-	set_target_properties(SDL2-static PROPERTIES FOLDER contrib)
+    set_target_properties(SDL2-static PROPERTIES FOLDER contrib)
+    # add_subdirectory("contrib/SDL2_ttf-2.0.15")
+    # set_target_properties(SDL2_ttf PROPERTIES FOLDER contrib)
 endif ()
 
 add_subdirectory("src")
 
-# Exclude SDL and related projects to work around linker issue.
 if (NOT APPLE)
     set_target_properties(sc2renderer PROPERTIES FOLDER utilities) 
     set_target_properties(liu_renderer PROPERTIES FOLDER utilities) # should I do it?
@@ -140,9 +141,12 @@ if (NOT APPLE)
 endif ()
 
 if (BUILD_API_EXAMPLES)
+    # I almost understand how it functions, just add the subdir and the CMakeLists will be execute
     add_subdirectory("examples")
 endif ()
 
 if (BUILD_API_TESTS)
     add_subdirectory("tests")
 endif ()
+
+add_subdirectory("project")

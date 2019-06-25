@@ -1,16 +1,58 @@
 #include "liu_renderer/liu_renderer.h"
 #include <iostream>
+#include <cmath>
 
 using namespace sc2;
 
+//! A fixed size health bar
+struct HealthBar{
+    HealthBar(int x, int y, int max_value, int current_value){
+        //todo maybe... 1 pixel 1 hp? about 10 pixels' width... I mean height
+        frame = {x,y,max_value+2, 10};
+        cover = {x+1,y+1,current_value, 8};
+    }
+    void SetCurrentValue(int current_value){
+        cover.x = current_value;
+    }
+    // Don't forget to present the draw
+    void Draw(SDL_Renderer* renderer){
+        // store the original draw color of current renderer for restore it after draw
+        Uint8 r,g,b,a;
+        SDL_GetRenderDrawColor(renderer,&r,&g,&b,&a);
+        // Black frame
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff/2);
+        SDL_RenderDrawRect(renderer, &frame);
+        // Red bar cover
+        SDL_SetRenderDrawColor(renderer, 0xff,0,0,0xff/2);
+        SDL_RenderDrawRect(renderer, &cover);
+        SDL_RenderFillRect(renderer, &cover);
+        SDL_SetRenderDrawColor(renderer, r,g,b,a);
+        // draw the text of current health
+        //todo set the message text        
+    }
+    SDL_Rect frame;
+    SDL_Rect cover;
+};
+
+
+
 LiuRenderer::LiuRenderer()
 {
+    // Init SDL2
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         const char *error = SDL_GetError();
         std::cout << "SDL_Init() failed with error: " << error << std::endl;
         exit(1);
     }
+    // init the SDL_ttf extension library
+    // if(TTF_Init()!=0)
+    // {
+    //     const char *error = TTF_GetError();
+    //     std::cout << "TTF_Init() failed with error: " << error << std::endl;
+    //     exit(1);
+    // }
+    IMG_Init(IMG_INIT_PNG);
     // I hope that everybody will run it with a monitor...
     SDL_Rect display_bound;
     if (SDL_GetDisplayBounds(0, &display_bound) != 0)
@@ -19,12 +61,15 @@ LiuRenderer::LiuRenderer()
         std::cout << "SDL_GetDisplayBounds() failed with error: " << error << std::endl;
         exit(1);
     }
-    m_window = SDL_CreateWindow("StarCraftII Observer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, display_bound.w, display_bound.h, SDL_WINDOW_SHOWN);
+    m_window = SDL_CreateWindow("StarCraftII Observer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, display_bound.w*3/4, display_bound.h*3/4, SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
 
     m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
+    // Enable the use of alpha tannel
+    SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
 
     SDL_SetRenderDrawColor(m_renderer, 0xff, 0xff, 0xff, 0xff);
     SDL_RenderClear(m_renderer);
+    SDL_RenderPresent(m_renderer);
 }
 
 LiuRenderer::~LiuRenderer()
@@ -38,9 +83,14 @@ void LiuRenderer::DrawObservation(const ObservationInterface *observation)
 {
     int w, h;
     SDL_GetWindowSize(m_window, &w, &h);
-    DrawObservation(observation);
+
+    SDL_SetRenderDrawColor(m_renderer, 0xff, 0xff, 0xff, 0xff);
+	SDL_RenderClear(m_renderer);
+    DrawObservation(observation, 0,0,w,h);
+    SDL_RenderPresent(m_renderer);
 }
 
+// Without presenting and clearing
 void LiuRenderer::DrawObservation(const ObservationInterface *observation, int offset_x, int offset_y, int w, int h)
 {
     //calculate the ratio from original map to draw window
@@ -71,7 +121,18 @@ void LiuRenderer::DrawObservation(const ObservationInterface *observation, int o
         float y = (float)offset_y + (playable_length.y - playable_pos.y) * ratio;
         float size = u->radius * ratio < 20 ? 20 : u->radius * ratio;
         unit_rect = {(int)x, (int)y, (int)size, (int)size};
+        HealthBar health_bar(x,y-12,u->health_max, u->health);
+        health_bar.Draw(m_renderer);
         SDL_RenderDrawRect(m_renderer, &unit_rect);
         SDL_RenderFillRect(m_renderer, &unit_rect);
+        //todo Draw the facing direction of a unit
+        //todo calculate the line in the direction of the unit
+        Point2DI facing_line_start(x+size/2,y+size/2); // from the middle of the unit
+        SDL_SetRenderDrawColor(m_renderer,0,0,0,0xff/2);
+        SDL_RenderDrawLine(m_renderer,facing_line_start.x,facing_line_start.y,facing_line_start.x+m_facing_line_length* std::cos(u->facing), facing_line_start.y-m_facing_line_length* std::sin(u->facing));
     }
+}
+
+void LiuRenderer::DrawUnit(const Unit* unit){
+    
 }

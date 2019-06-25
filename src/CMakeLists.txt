@@ -1,4 +1,10 @@
 
+# Liu I have to use the sdl library in system dir, since it is too hard for me to get extension lib in contrib/SDL-mirror
+INCLUDE(FindPkgConfig)
+PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
+PKG_SEARCH_MODULE(SDL2IMAGE REQUIRED SDL2_image)
+PKG_SEARCH_MODULE(SDL2TTF REQUIRED SDL2_ttf)
+
 # All the source files for the sc2 api
 # Liu: of course the second parameter of each function call is variable.
 # Liu: this is used to collect all the corresponding files and store them into several variables
@@ -32,7 +38,7 @@ foreach(proto ${proto_files}) # it is the *.proto s
 endforeach()
 
 # Now include that directory
-include_directories(SYSTEM "${PROJECT_BINARY_DIR}/generated")
+include_directories(SYSTEM "${PROJECT_BINARY_DIR}/generated") # this is the directory of .hs which proto generates
 
 # Setup MSVC parallelized builds
 add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
@@ -62,8 +68,8 @@ endif ()
 if (NOT APPLE)
     add_library(sc2renderer ${sources_renderer})
     set_target_properties(sc2renderer PROPERTIES DEBUG_POSTFIX "d")
-    target_link_libraries(sc2renderer SDL2-static)
-    include_directories("../contrib/SDL-mirror/include")
+    target_link_libraries(sc2renderer ${SDL2_LIBRARIES})
+    include_directories(${SDL2_INCLUDE_DIRS})
 
 endif ()
 
@@ -71,7 +77,7 @@ endif ()
 #? Liu: If I have a CMakeList file like this, will I still need to write the whole dir to include a *.h?
 # Liu: looks like the IDE shouldn't have added these include files to intellisense, but it does, so it gets me puzzled. I mean, I should have done it twice: first let the intellisense know, second let the compiler know
 include_directories("../contrib/civetweb/include")
-include_directories("../contrib/SDL-mirror/include")
+include_directories(${SDL2_INCLUDE_DIRS})
 include_directories("../contrib/ipv6-parse")
 include_directories("../include")
 
@@ -112,7 +118,7 @@ if (MSVC)
     set_target_properties(sc2api PROPERTIES COMPILE_FLAGS "/W4 /WX")
     set_target_properties(sc2lib PROPERTIES COMPILE_FLAGS "/W4 /WX")
     set_target_properties(sc2renderer PROPERTIES COMPILE_FLAGS "/W4 /WX")
-    # set_target_properties(liu_renderer PROPERTIES COMPILE_FLAGS "/W4 /WX")
+    set_target_properties(liu_renderer PROPERTIES COMPILE_FLAGS "/W4 /WX")
     set_target_properties(sc2utils PROPERTIES COMPILE_FLAGS "/W3 /WX")
     set_target_properties(sc2protocol PROPERTIES COMPILE_FLAGS "/W0")
 endif (MSVC)
@@ -126,8 +132,12 @@ target_link_libraries(sc2lib sc2api)
 if(NOT APPLE)
     add_library(liu_renderer ${sources_liu_renderer})
     set_target_properties(liu_renderer PROPERTIES DEBUG_POSTFIX "d")
-    target_link_libraries(liu_renderer SDL2-static)
+    # TARGET_LINK_LIBRARIES(liu_renderer ${SDL2_LIBRARIES} ${SDL2TTF_LIBRARIES})
     target_link_libraries(liu_renderer sc2api) #! Note that it should be added since liu_renderer has used it 
-    include_directories("../contrib/SDL-mirror/include")
+    #Liu ADD
+    # INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS} ${SDL2IMAGE_INCLUDE_DIRS} ${SDL2TTF_INCLUDE_DIRS})
+    TARGET_LINK_LIBRARIES(liu_renderer ${SDL2_LIBRARIES} ${SDL2IMAGE_LIBRARIES}) #! I can not use the SDL2_ttf library, so I deleted this library here. Maybe someday I can find the solution and add it here
+    # INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS} ${SDL2TTF_INCLUDE_DIRS}) 
+    # include_directories("../contrib/SDL-mirror/include")
 endif()
-
