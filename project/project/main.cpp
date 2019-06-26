@@ -3,7 +3,11 @@
 #include <string>
 #include <iostream>
 #include <chrono>
-#include<thread>
+#include <thread>
+
+//! test include files
+#include "../rolling_bot/simulator/state.h"
+#include "../rolling_bot/algorithm/ga.h"
 
 using namespace sc2;
 
@@ -31,11 +35,16 @@ private:
 };
 
 int main(int argc, char* argv[]) {
+    //! test code
+    State st;
+    Solution<int> so;
 
+    // Some settings
     std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
     int port_start = 4000;
     bool real_time = false;
     bool multi_threaded = false;
+    // use this to control the cauculation times per second
     uint frames = 60;
 
     Coordinator coordinator;
@@ -53,6 +62,7 @@ int main(int argc, char* argv[]) {
     coordinator.LaunchStarcraft();
     coordinator.StartGame(map_path);
 
+    // A fixed time update mechanism
     auto start = std::chrono::steady_clock::now();
     auto end = std::chrono::steady_clock::now();
     while (start = std::chrono::steady_clock::now(), coordinator.Update()) {

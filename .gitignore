@@ -58,3 +58,5 @@ project/lib
 docs/html
 docs/latex
 doxygen.log
+
+.vscode/ipch

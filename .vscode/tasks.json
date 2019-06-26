@@ -3,6 +3,18 @@
     "tasks": [
         {
             "type": "shell",
+            "label": "cmake debug",
+            "command": "cmake",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=debug",
+                "../"
+            ],
+            "options": {
+                "cwd": "${cwd}/build"
+            }
+        },
+        {
+            "type": "shell",
             "label": "make the entire project",
             "command": "make",
             "args": [ 

@@ -1,5 +1,6 @@
 #include "sc2api/sc2_api.h"
 #include "sc2lib/sc2_utils.h"
+#include <numeric>
 
 namespace sc2 {
 
@@ -21,6 +22,20 @@ Point2D FindCenterOfMap(const GameInfo& game_info) {
     target_pos.x = game_info.playable_max.x / 2.0f;
     target_pos.y = game_info.playable_max.y / 2.0f;
     return target_pos;
+}
+
+const Unit* select_nearest_unit_from_point(const Point2D& p, const Units& us) {
+    float min_distance = std::numeric_limits<float>::max();
+    const Unit *selected_unit = nullptr;
+    float dis;
+    for (const auto u : us) {
+        dis = Distance2D(p, u->pos);
+        if (dis < min_distance) {
+            selected_unit = u;
+            min_distance = dis;
+        }
+    }
+    return selected_unit;
 }
 
 }

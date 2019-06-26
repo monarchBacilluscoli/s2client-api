@@ -52,7 +52,7 @@ LiuRenderer::LiuRenderer()
     //     std::cout << "TTF_Init() failed with error: " << error << std::endl;
     //     exit(1);
     // }
-    IMG_Init(IMG_INIT_PNG);
+    // IMG_Init(IMG_INIT_PNG);
     // I hope that everybody will run it with a monitor...
     SDL_Rect display_bound;
     if (SDL_GetDisplayBounds(0, &display_bound) != 0)
