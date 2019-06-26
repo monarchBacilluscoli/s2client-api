@@ -8,6 +8,7 @@
 //! test include files
 #include "../rolling_bot/simulator/state.h"
 #include "../rolling_bot/algorithm/ga.h"
+#include "../algorithm/real_ga.h"
 
 using namespace sc2;
 
@@ -36,8 +37,7 @@ private:
 
 int main(int argc, char* argv[]) {
     //! test code
-    State st;
-    Solution<int> so;
+    
 
     // Some settings
     std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
