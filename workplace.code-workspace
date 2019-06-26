@@ -1,0 +1,66 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"chrono": "cpp",
+			"atomic": "cpp",
+			"strstream": "cpp",
+			"condition_variable": "cpp",
+			"cstdint": "cpp",
+			"initializer_list": "cpp",
+			"iosfwd": "cpp",
+			"mutex": "cpp",
+			"ratio": "cpp",
+			"system_error": "cpp",
+			"thread": "cpp",
+			"cctype": "cpp",
+			"cinttypes": "cpp",
+			"cstdio": "cpp",
+			"cstdlib": "cpp",
+			"cwchar": "cpp",
+			"typeindex": "cpp",
+			"array": "cpp",
+			"*.tcc": "cpp",
+			"clocale": "cpp",
+			"cmath": "cpp",
+			"cstddef": "cpp",
+			"cstring": "cpp",
+			"ctime": "cpp",
+			"cwctype": "cpp",
+			"deque": "cpp",
+			"unordered_map": "cpp",
+			"vector": "cpp",
+			"exception": "cpp",
+			"fstream": "cpp",
+			"functional": "cpp",
+			"iostream": "cpp",
+			"istream": "cpp",
+			"limits": "cpp",
+			"memory": "cpp",
+			"new": "cpp",
+			"optional": "cpp",
+			"ostream": "cpp",
+			"sstream": "cpp",
+			"stdexcept": "cpp",
+			"streambuf": "cpp",
+			"string_view": "cpp",
+			"type_traits": "cpp",
+			"tuple": "cpp",
+			"typeinfo": "cpp",
+			"utility": "cpp",
+			"cstdarg": "cpp"
+		},
+		"files.exclude": {
+			"**.bat": true,
+			"**/.md": true,
+			"**/contrib": true,
+			"**/docs": true,
+			"**/protocol": true,
+			"tests": true
+		}
+	}
+}

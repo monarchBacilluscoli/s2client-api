@@ -84,8 +84,7 @@ protected:
     virtual void GenerateSolutions(Population& pop, int size);
     //! two parents generate a unmutated soluton
     virtual std::vector<Solution<T>> CrossOver(const Solution<T>& a, const Solution<T>& b);
-    //virtual Solution<T> Mutate(const Solution<T>& s); //? mutate must be implemented by users
-    //? pure virtual
+    //! pure virtual mutate a solution
     virtual void Mutate(Solution<T>& s) = 0;
     //! a population generate another population
     // The spring_size need to be smaller than the size of parents
@@ -106,8 +105,6 @@ protected:
     //! Settings
     int m_max_generation = 20;
     //! Controls how many parents ...
-    //? this setting is OK, but the process is not right, since I shouldn't let the parents to generate a pair of just the same children, instead, I should pass them to another pair of parents
-    //todo Here is a todo of modification for 
     float m_cross_over_rate = 1.f;
     //! Controls how many offspring solutions should be mutated
     float m_mutate_rate = 0.2f;
@@ -156,4 +153,22 @@ inline bool Solution<T>::sum_greater(const Solution<T>& a, const Solution<T>& b)
     return std::accumulate(a.objectives.begin(), a.objectives.end(), 0.f) > std::accumulate(b.objectives.begin(), b.objectives.end(), 0.f);
 }
 
+template<class T>
+inline std::vector<Solution<T>> GA<T>::Run()
+{
+    m_population.resize(m_population_size);
+    GenerateSolutions(m_population, m_population_size);
+    Evaluate(m_population);
+    SortSolutions(m_population, m_compare);
+    for (size_t i = 0; i < m_max_generation; i++)
+    {
+        Population offspring;
+        Reproduce(m_population, offspring, m_reproduce_rate * m_population_size);
+        Evaluate(offspring);
+        m_population.insert(m_population.begin(), offspring.begin(), offspring.end());
+        SortSolutions(m_population, m_compare);
+        m_population.erase(m_population.begin() + m_population_size, m_population.end()); //
+    }
+    return m_population;
+}
 #endif //GA_H
