@@ -27,7 +27,6 @@
                     "ignoreFailures": true
                 }
             ],
-            // I don't have to build it since I have build it yet
             "preLaunchTask": "make the entire project",
             "miDebuggerPath": "/usr/bin/gdb"
         }

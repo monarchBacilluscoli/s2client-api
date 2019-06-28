@@ -8,7 +8,7 @@
 //! test include files
 #include "../rolling_bot/simulator/state.h"
 #include "../rolling_bot/algorithm/ga.h"
-#include "../algorithm/real_ga.h"
+#include "../rolling_bot/algorithm/real_ga.h"
 
 using namespace sc2;
 
@@ -37,7 +37,13 @@ private:
 
 int main(int argc, char* argv[]) {
     //! test code
-    
+    //! for real ga
+    RealGA real_ga;
+    RealGA::SetExampleDimensions(3);
+    auto a = &RealGA::example_evaluator;
+    real_ga.SetEvaluator(&RealGA::example_evaluator);
+    real_ga.SetBoundry(RealGA::example_lower_boundry, RealGA::example_upper_boundry);
+    Solution<float> final = real_ga.Run().front();
 
     // Some settings
     std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";

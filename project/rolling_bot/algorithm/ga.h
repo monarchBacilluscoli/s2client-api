@@ -4,6 +4,9 @@
 
 #include<vector>
 #include<numeric>
+#include<functional>
+#include <cassert>
+#include <sc2api/sc2_common.h>
 
 template<class T>
 struct Solution
@@ -73,7 +76,12 @@ public:
     }
 
     void SetEvaluator(Evaluator* evaluator) {
-        m_evaluators = evaluator;
+        m_evaluators.resize(1);
+        m_evaluators[0] = evaluator;
+    }
+
+    void SetEvaluators(std::vector<Evaluator*> evaluators){
+        m_evaluators = evaluators;
     }
 
     //! run the algorithm and return the final population to choose
@@ -114,9 +122,7 @@ protected:
     float m_reproduce_rate = 1.f;
 
     Compare m_compare = Solution<T>::sum_greater;
-    Evaluator default_evaluator = [](const std::vector<T> variables)->float {return 0; };
-    std::vector<Evaluator*> eva_v = { &default_evaluator };
-    std::vector<Evaluator*> m_evaluators = eva_v; // for easy to use
+    std::vector<Evaluator*> m_evaluators = {nullptr}; // for easy to use
 
     //! Runtime data
     Population m_population;
@@ -133,7 +139,7 @@ bool Solution<T>::multi_greater(const Solution<T> &a, const Solution<T> &b)
         {
             return false;
         }
-        else if (equal && fabsf(a.objectives[i] - b.objectives[i]) > 0.000001)
+        else if (equal && abs(a.objectives[i] - b.objectives[i]) > 0.000001)
         {
             equal = false;
         }
@@ -154,7 +160,7 @@ inline bool Solution<T>::sum_greater(const Solution<T>& a, const Solution<T>& b)
 }
 
 template<class T>
-inline std::vector<Solution<T>> GA<T>::Run()
+std::vector<Solution<T>> GA<T>::Run()
 {
     m_population.resize(m_population_size);
     GenerateSolutions(m_population, m_population_size);
@@ -171,4 +177,91 @@ inline std::vector<Solution<T>> GA<T>::Run()
     }
     return m_population;
 }
+
+template<class T>
+inline void GA<T>::GenerateSolutions(Population& pop, int size)
+{
+    for (size_t i = 0; i < size; i++) {
+        pop[i] = GenerateSolution();
+    }
+}
+
+template<class T>
+inline std::vector<Solution<T>> GA<T>::CrossOver(const Solution<T>& a, const Solution<T>& b)
+{
+    //! you can use #define NDBUG to disabled assert()
+    assert(a.variable.size() > 0 && a.variable.size() == b.variable.size());
+    std::vector<Solution<T>> offspring = { a,b };
+    size_t start = sc2::GetRandomInteger(0, a.variable.size() - 1);
+    size_t end = sc2::GetRandomInteger(0, a.variable.size() - 1);
+    if (start > end) {
+        std::swap(start, end);
+    }
+    for (size_t i = start; i < end; i++)
+    {
+        std::swap(offspring[0].variable[i], offspring[1].variable[i]);
+    }
+    return offspring;
+}
+
+template<class T>
+inline std::vector<Solution<T>> GA<T>::Produce(const Solution<T>& a, const Solution<T>& b)
+{
+    std::vector<Solution<T>> children;
+    if (sc2::GetRandomFraction() < m_cross_over_rate) { //? it should't be here, instead, it should be outside
+        children = CrossOver(a, b);
+    }
+    else {
+        children = { a,b };
+    }
+    for (Solution<T>& c: children)
+    {
+        if (sc2::GetRandomFraction() < m_mutate_rate) {
+            Mutate(c);
+        }
+    }
+    return children;
+}
+
+template<class T>
+inline void GA<T>::Reproduce(const Population& parents, Population& offspring, int spring_size)
+{
+    assert(spring_size <= parents.size()); //! for now, I can not reproduce a larger offspring population
+    offspring.resize(spring_size);
+    for (size_t i = 0; i < spring_size; i+=2)
+    {
+        std::vector<Solution<T>> instant_children = Produce(parents[i], parents[i + 1]);
+        offspring[i] = instant_children[0];
+        if (i + 1 < spring_size) {
+            offspring[i + 1] = instant_children[1];
+        }
+    }
+}
+
+template<class T>
+inline void GA<T>::Evaluate(Population& p)
+{
+    for (Solution<T>& s: p)
+    {
+        EvaluateSingleSolution(s);
+    }
+}
+
+template<class T>
+inline void GA<T>::SortSolutions(Population& p, const Compare& compare)
+{
+    std::sort(p.begin(), p.end(), compare);
+}
+
+
+template<class T>
+inline void GA<T>::EvaluateSingleSolution(Solution<T>& solution)
+{
+    assert(solution.objectives.size() == m_evaluators.size()); //? or I can add, but this will effect the performance, so you'd better set the settings properly before the run
+    for (size_t i = 0; i < m_evaluators.size(); i++)
+    {
+       solution.objectives[i] = (*m_evaluators[i])(solution.variable);
+    }
+}
+
 #endif //GA_H
