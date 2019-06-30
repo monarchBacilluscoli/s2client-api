@@ -264,4 +264,4 @@ inline void GA<T>::EvaluateSingleSolution(Solution<T>& solution)
     }
 }
 
-#endif //GA_H
+#endif //GA_HSelectNearestUnitFromPoint

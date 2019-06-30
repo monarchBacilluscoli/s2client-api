@@ -53,7 +53,7 @@ void sc2::LoadMultiPlayerGame(State save, Client& current_client, Coordinator& c
 	const Unit* u_copied;
 	Units us_copied = current_client.Observation()->GetUnits();
 	for (UnitState state_u : save.unit_states) {
-		u_copied = select_nearest_unit_from_point(state_u.pos, us_copied);
+		u_copied = SelectNearestUnitFromPoint(state_u.pos, us_copied);
 		current_client.Debug()->DebugSetShields(state_u.shields + 0.1f, u_copied); // WTF, shield cannot be set to 0, if you set 0, you will find it is full in game, but if you set it as 0.1f, the data in game will be 0, fuck again.
 		current_client.Debug()->DebugSetLife(state_u.life,u_copied);
 		current_client.Debug()->DebugSetEnergy(state_u.energy, u_copied);

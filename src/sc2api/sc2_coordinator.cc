@@ -841,6 +841,8 @@ bool Coordinator::AllGamesEnded() const {
     return true;
 }
 
+bool Coordinator::IsMultiPlayerGame() const { return imp_->agents_.size() > 1; }
+
 void CoordinatorImp::AddAgent(Agent* agent) {
     assert(agent);
     agents_.push_back(agent);
@@ -940,6 +942,10 @@ bool Coordinator::SetReplayPath(const std::string& path) {
     return !imp_->replay_settings_.replay_file.empty();
 }
 
+void Coordinator::SetMapPath(const std::string& map_path){
+    imp_->game_settings_.map_name = map_path;
+}
+
 bool Coordinator::LoadReplayList(const std::string& file_path) {
     if (!DoesFileExist(file_path))
         return false;
@@ -1006,4 +1012,9 @@ void Coordinator::SetupPorts(size_t num_agents, int port_start, bool check_singl
         }
     }
 }
+
+int Coordinator::GetStepSize() { return imp_->process_settings_.step_size; }
+int Coordinator::GetPortStart() { return imp_->process_settings_.port_start; }
+std::string Coordinator::GetNetAddress() { return imp_->process_settings_.net_address; }
+std::string Coordinator::GetMapPath() { return imp_->game_settings_.map_name; }
 }

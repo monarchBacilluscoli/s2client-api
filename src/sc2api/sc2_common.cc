@@ -136,6 +136,8 @@ bool Point2DI::operator!=(const Point2DI& rhs) const {
     return !(*this == rhs);
 }
 
+Point2D Point2DP::toPoint2D() { return point_rec; }
+
 struct RandomGenerator {
     RandomGenerator() : rd(), mt(rd()) {}
     std::random_device rd;

@@ -106,6 +106,8 @@ public:
     // \sa ReplayObserver
     void AddReplayObserver(ReplayObserver* replay_observer);
 
+    void SetMapPath(const std::string& map_path);
+
     // Start-up.
 
     //! Uses settings gathered from LoadSettings, specifically the path to the executable, to run StarCraft II.
@@ -160,6 +162,8 @@ public:
 
     //! Returns true if all running games have ended.
     bool AllGamesEnded() const;
+    //! Returns true if running game is a multi-player game
+    bool IsMultiPlayerGame() const;
 
     // Replay specific.
     //! Sets the path for to a folder of replays to analyze.
@@ -188,6 +192,11 @@ public:
     //! Gets the game executable path.
     //!< \return The game executable path.
     std::string GetExePath() const;
+
+    int GetStepSize();
+    int GetPortStart();
+    std::string GetNetAddress();
+    std::string GetMapPath();
 
 private:
     CoordinatorImp* imp_;

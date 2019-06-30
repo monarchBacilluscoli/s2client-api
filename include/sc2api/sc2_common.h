@@ -111,6 +111,35 @@ struct Rect2DI {
     Point2DI to;
 };
 
+//! 2D point represented in polar coordinator
+struct Point2DP {
+		Point2D point_rec;
+		float r;
+		float theta;
+
+		Point2DP() :r(0.f), theta(0.f), point_rec(Point2D()) {};
+		Point2DP(float in_r, float in_theta) :point_rec(Point2D(in_r*std::cos(in_theta), in_r*std::sin(in_theta))),r(in_r), theta(in_theta) { };
+		Point2DP(const Point2D& p) :r(std::sqrt(p.x*p.x + p.y*p.y)), theta(std::atan2(p.y, p.x)), point_rec(p) {};
+
+		Point2DP& operator+=(const Point2DP& rhs);
+		Point2DP& operator-=(const Point2DP& rhs);
+		Point2DP& operator*=(float rhs);
+		Point2DP& operator/=(float rhs);
+
+		bool operator==(const Point2DP& rhs);
+		bool operator!=(const Point2DP& rhs);
+
+		Point2D toPoint2D();
+	};
+
+    //todo undefined yet
+	Point2DP operator+(const Point2DP& lhs, const Point2DP& rhs);
+	Point2DP operator-(const Point2DP& lhs, const Point2DP& rhs);
+	Point2DP operator*(const Point2DP& lhs, float rhs);
+	Point2DP operator*(float lhs, const Point2DP& rhs);
+	Point2DP operator/(const Point2DP& lhs, float rhs);
+    Point2DP operator/(float lhs, const Point2DP& rhs);
+
 //! RGB Color.
 struct Color {
     uint8_t r;
@@ -201,5 +230,7 @@ void Normalize3D(Point3D& a);
 //!< \param b Second vector.
 //!< \return Dot product.
 float Dot3D(const Point3D& a, const Point3D& b);
+
+
 
 }

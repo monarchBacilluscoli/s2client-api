@@ -9,6 +9,7 @@
 #include "../rolling_bot/simulator/state.h"
 #include "../rolling_bot/algorithm/ga.h"
 #include "../rolling_bot/algorithm/real_ga.h"
+#include "../rolling_bot/rolling_bot/rolling_bot.h"
 
 using namespace sc2;
 
@@ -44,14 +45,20 @@ int main(int argc, char* argv[]) {
     real_ga.SetEvaluator(&RealGA::example_evaluator);
     real_ga.SetBoundry(RealGA::example_lower_boundry, RealGA::example_upper_boundry);
     Solution<float> final = real_ga.Run().front();
+    
 
     // Some settings
+    std::string net_address = "127.0.0.1";
     std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
+    std::string starcraft_path = "/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64";    
     int port_start = 4000;
     bool real_time = false;
     bool multi_threaded = false;
     // use this to control the cauculation times per second
     uint frames = 60;
+
+    RollingBot rolling_bot(net_address, 4000, starcraft_path, map_path);
+
 
     Coordinator coordinator;
     coordinator.LoadSettings(argc, argv);

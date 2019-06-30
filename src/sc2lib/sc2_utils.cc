@@ -4,6 +4,9 @@
 
 namespace sc2 {
 
+// frames passed per game second
+const int frames_per_second = 16;
+
 Point2D FindRandomLocation(const Point2D& min, const Point2D& max) {
     Point2D target_pos;
     float playable_w = max.x - min.x;
@@ -24,7 +27,7 @@ Point2D FindCenterOfMap(const GameInfo& game_info) {
     return target_pos;
 }
 
-const Unit* select_nearest_unit_from_point(const Point2D& p, const Units& us) {
+const Unit* SelectNearestUnitFromPoint(const Point2D& p, const Units& us) {
     float min_distance = std::numeric_limits<float>::max();
     const Unit *selected_unit = nullptr;
     float dis;
@@ -36,6 +39,10 @@ const Unit* select_nearest_unit_from_point(const Point2D& p, const Units& us) {
         }
     }
     return selected_unit;
+}
+
+float MoveDistance(const Unit* u, int frames, const UnitTypes& uts) {
+    return uts[u->unit_type].movement_speed / frames_per_second * frames;
 }
 
 }
