@@ -44,12 +44,19 @@ class RollingBot : public Agent {
         }
     }
 
-    // Settings
+    // Settings for GA
     void SetPopulationSize(int population_size) {
         m_rolling_ga.SetPopulationSize(population_size);
     }
     void SetMaxGeneration(int max_generation) {
         m_rolling_ga.SetMaxGeneration(max_generation);
+    }
+
+    // Settings for Sims
+    void SetSimStepSize(int steps);
+
+    const std::vector<const ObservationInterface*> GetAllSimsObservations(){
+        return m_rolling_ga.GetAllSimsObservations();
     }
 
    private:
@@ -77,7 +84,7 @@ class RollingBot : public Agent {
                         Actions()->UnitCommand(
                             Observation()->GetUnit(c.unit_tag),
                             c.actions[i].ability_id,
-                            Observation()->GetUnit(c.actions[i].TargetUnitTag),
+                            Observation()->GetUnit(c.actions[i].TargetUnitTag), 
                             queued_command);
                         break;
                 }

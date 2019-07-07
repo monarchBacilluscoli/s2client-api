@@ -41,7 +41,6 @@ class Simulator : public Coordinator {
     //! exposes the whole ObservationInterface to user
     const ObservationInterface* Observation() const;
 
-    int GetStepSize() const { return m_step_size; }
     //! Compares current state with the start point to get specific unit group
     //! health loss
     float GetTeamHealthLoss(Unit::Alliance alliance) const;

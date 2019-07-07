@@ -24,12 +24,16 @@ namespace sc2
         void DrawUnit(const Unit* unit);
     public:
         LiuRenderer();
+        LiuRenderer(const std::string& window_name);
         ~LiuRenderer();
-        
-        void DrawObservations(const std::vector<const ObservationInterface*> observations);
-        void DrawObservation(const ObservationInterface* observation);        
-    };    
 
+        //! Draw mutilple Observations in one window
+        void DrawObservations(const std::vector<const ObservationInterface*> observations);
+        //! Simple method to draw one Observation in one window
+        void DrawObservation(const ObservationInterface* observation);
+
+        void SetIsDisplay(bool is_display);
+    };
 }
 
 #endif //LIU_RENDERER_H

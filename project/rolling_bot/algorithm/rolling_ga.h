@@ -9,6 +9,7 @@
 #include "../simulator/command.h"
 #include "../simulator/simulator.h"
 #include <sc2lib/sc2_utils.h>
+#include "liu_renderer/liu_renderer.h"
 
 namespace sc2{
     class RollingGA :public GA<Command>
@@ -18,7 +19,7 @@ namespace sc2{
         using Population = std::vector<Solution<Command>>;
         using Evaluator = std::function<float(const std::vector<Command>&)>;
         using Compare = std::function<bool(const Solution<Command>&, const Solution<Command>&)>;
-
+        
     public:
         RollingGA() = delete;
 
@@ -30,6 +31,7 @@ namespace sc2{
             // simulator number now is simply equal to population size
             m_simulators.resize(m_population_size);
             SetSimulators(net_address, port_start, process_path, map_path);
+            m_debug_renderer.SetIsDisplay(false);
         }
 
         // Initialization and setup.
@@ -38,7 +40,7 @@ namespace sc2{
             SetObservation(observation);
         }
 
-        void SetStepSize(int step_size);
+        void SetRunLength(int run_length);
         void SetCommandLength(int command_length);
         void SetAttackPossibility(float attack_possibility);
 
@@ -53,10 +55,14 @@ namespace sc2{
             }
             m_population_size = population_size;
         }
+        // Other settings
+        void SetDebugMode(bool is_debug);
 
         // Start up
         void SetSimulatorsStart(const ObservationInterface* observation_interface);
         void RunSimulatorsSynchronous();
+        // Get all the ObservationInterface from those simulators
+        std::vector<const ObservationInterface*> GetAllSimsObservations() const;
 
         ~RollingGA() = default;
     private:
@@ -79,14 +85,16 @@ namespace sc2{
         //virtual void EvaluateSingleSolution(Solution<Command>& s) override {};
 
         // Settings
-        int m_step_size = 8; //? Does the step_size in simulator matter?
+        int m_sims_step_size = 8;
+        int m_run_length = 64;  //? Does the step_size in simulator matter?
         //! the command length for each unit
         int m_command_length = 8;
-        float m_attack_possibility = 0.3f; // it's related to the m_step_size
+        float m_attack_possibility = 0.3f; // it's related to the m_run_length
         int m_mutate_step = 100;
         //! to reduce uncertainty, uses multiple simulators to evaluate one solution
         //! this is the number of sims to be used to evaluate one solution
         int m_evaluate_multiplier = 3;
+        bool m_is_debug = false;
 
         // Information
         //? if I have many simulators here, things will become a non-blocking multi-thread programming condition, that means I need to manage them to function correctly
@@ -100,6 +108,9 @@ namespace sc2{
         Units m_my_team;
         Units m_enemy_team;
         const ObservationInterface* m_observation;
+
+        // Misc
+        LiuRenderer m_debug_renderer;
 
         const double PI = atan(1.) * 4.;
     };

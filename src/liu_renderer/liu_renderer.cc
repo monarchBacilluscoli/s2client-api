@@ -45,14 +45,6 @@ LiuRenderer::LiuRenderer()
         std::cout << "SDL_Init() failed with error: " << error << std::endl;
         exit(1);
     }
-    // init the SDL_ttf extension library
-    // if(TTF_Init()!=0)
-    // {
-    //     const char *error = TTF_GetError();
-    //     std::cout << "TTF_Init() failed with error: " << error << std::endl;
-    //     exit(1);
-    // }
-    // IMG_Init(IMG_INIT_PNG);
     // I hope that everybody will run it with a monitor...
     SDL_Rect display_bound;
     if (SDL_GetDisplayBounds(0, &display_bound) != 0)
@@ -72,12 +64,38 @@ LiuRenderer::LiuRenderer()
     SDL_RenderPresent(m_renderer);
 }
 
+LiuRenderer::LiuRenderer(const std::string& window_name){
+    LiuRenderer();
+    SDL_SetWindowTitle(m_window, window_name.c_str());
+}
+
 LiuRenderer::~LiuRenderer()
 {
     SDL_DestroyRenderer(m_renderer);
     SDL_DestroyWindow(m_window);
     SDL_Quit();
 }
+
+void LiuRenderer::DrawObservations(const std::vector<const ObservationInterface*> observations){
+    //todo get main window size
+    int w, h;
+    SDL_GetWindowSize(m_window, &w, &h);
+    //todo split it into several sub windows
+    //todo square root the observations size
+    int cuts = ceil(pow(observations.size(), 0.5f));
+    float w_sub = w / (float)cuts;
+    float h_sub = h / (float)cuts;
+    //todo draw each window
+    for (size_t i = 0; i < observations.size(); i++)
+    {
+        //todo get the remainder to calculate coordinator x
+        int offset_x = (i % cuts) * w_sub;
+        //todo get the consult to calculate coordinator y
+        int offset_y = (i / cuts) * h_sub;
+        DrawObservation(observations[i], offset_x, offset_y, w_sub, h_sub);
+    }
+}
+
 
 void LiuRenderer::DrawObservation(const ObservationInterface *observation)
 {
@@ -133,6 +151,10 @@ void LiuRenderer::DrawObservation(const ObservationInterface *observation, int o
     }
 }
 
-void LiuRenderer::DrawUnit(const Unit* unit){
-    
+void LiuRenderer::SetIsDisplay(bool is_display){
+    if(is_display){
+        SDL_ShowWindow(m_window);
+    }else{
+        SDL_HideWindow(m_window);
+    }
 }

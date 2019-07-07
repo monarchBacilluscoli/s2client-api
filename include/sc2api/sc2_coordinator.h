@@ -12,6 +12,7 @@
 #include <string>
 #include "sc2api/sc2_game_settings.h"
 #include "sc2api/sc2_proto_interface.h"
+#include "sc2api/sc2_interfaces.h"
 
 namespace sc2 {
 
@@ -197,8 +198,10 @@ public:
     int GetPortStart();
     std::string GetNetAddress();
     std::string GetMapPath();
+    //! Get no matter Observer or Game agent
+    std::vector<const ObservationInterface*> GetObservations();
 
-private:
+   private:
     CoordinatorImp* imp_;
 };
 

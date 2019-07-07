@@ -32,7 +32,7 @@ void Simulator::SetStartPoint(std::vector<Command> commands,
 
 //todo here I need to do some modification
 void Simulator::Run(int steps) {
-    for (size_t i = 0; i < steps; i++) {
+    for (size_t i = 0; i < (size_t)ceil(steps/GetStepSize()); i++) {
         Update();
     }
 }

@@ -16,15 +16,19 @@ void sc2::RollingGA::SetSimulators(const std::string& net_address, int port_star
 		sim.SetPortStart(port_start);
 		sim.SetProcessPath(process_path);
 		sim.SetMapPath(map_path);
+		sim.SetStepSize(m_sims_step_size);
 		// since there are up to two agent players, for simplicity I'd better make the port +2 at each time
 		port_start += 2;
-        //todo maybe I can modify it into multi-threaded mode
-		sim.LaunchStarcraft();
-	}
-	std::vector<std::thread> start_game_threads(m_simulators.size());
+        // //! here for test
+        // sim.LaunchStarcraft();
+        // sim.StartGame();
+    }
+    std::vector<std::thread> start_game_threads(m_simulators.size());
 	for (size_t i = 0; i < start_game_threads.size(); i++)
 	{
 		start_game_threads[i] = std::thread([&, i]()->void{
+			m_simulators[i].LaunchStarcraft();
+			// m_simulators[i].Connect(m_simulators[i].GetPortStart());
 			m_simulators[i].StartGame();
 		});
 	}
@@ -49,7 +53,7 @@ void sc2::RollingGA::RunSimulatorsSynchronous()
 	for (size_t i = 0; i < threads.size(); i++)
 	{
 		threads[i] = std::thread{ [&,i]() ->void {
-			m_simulators[i].Run(m_step_size);
+			m_simulators[i].Run(m_run_length);
 		} };
 	}
 	for (auto& t:threads)
@@ -68,9 +72,9 @@ void sc2::RollingGA::SetObservation(const ObservationInterface* observation)
 	m_playable_dis = Point2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
 }
 
-void sc2::RollingGA::SetStepSize(int step_size)
+void sc2::RollingGA::SetRunLength(int length)
 {
-	m_step_size = step_size;
+	m_run_length = length;
 }
 
 void sc2::RollingGA::SetCommandLength(int command_length)
@@ -99,12 +103,21 @@ void sc2::RollingGA::SetSimlatorsOpponent(const PlayerSetup& opponent)
 	}
 }
 
-void sc2::RollingGA::SetSimulatorsMultithreaded(bool multithreaded)
+void RollingGA::SetSimulatorsMultithreaded(bool multithreaded)
 {
 	for (auto& sim:m_simulators)
 	{
 		sim.SetMultithreaded(multithreaded);
 	}
+}
+
+void RollingGA::SetDebugMode(bool is_debug) {
+    if (is_debug) {
+        m_debug_renderer.SetIsDisplay(true);
+    } else {
+        m_debug_renderer.SetIsDisplay(false);
+    }
+    m_is_debug = is_debug;
 }
 
 Solution<Command> RollingGA::GenerateSolution() {
@@ -115,7 +128,7 @@ Solution<Command> RollingGA::GenerateSolution() {
 	for (size_t i = 0; i < m_my_team.size(); i++)
 	{
 		sol.variable[i].unit_tag = m_my_team[i]->tag;
-		float moveable_radius = MoveDistance(m_my_team[i], m_step_size* m_command_length, m_unit_type);
+		float moveable_radius = MoveDistance(m_my_team[i], m_run_length* m_command_length, m_unit_type);
 		Point2D current_location = m_my_team[i]->pos;
 		sol.variable[i].actions.resize(m_command_length);
 		for (ActionRaw& action_raw : sol.variable[i].actions)
@@ -184,4 +197,12 @@ void sc2::RollingGA::Evaluate(Population& p)
 		<< "ally_team_loss_best:\t" << self_team_loss_best << "\t"
 		<< "enemy_team_loss_avg:\t" << enemy_team_loss_total / p.size() << "\t"
 		<< "enemy_team_loss_best:\t" << enemy_team_loss_best << std::endl;
+}
+
+std::vector<const ObservationInterface*> RollingGA::GetAllSimsObservations() const {
+    std::vector<const ObservationInterface*> observations(m_simulators.size());
+    for (size_t i = 0; i < m_simulators.size(); i++) {
+        observations[i] = m_simulators[i].Observation();
+    }
+    return observations;
 }
