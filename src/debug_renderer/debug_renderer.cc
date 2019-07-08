@@ -1,4 +1,4 @@
-#include "liu_renderer/liu_renderer.h"
+#include "debug_renderer/debug_renderer.h"
 #include <iostream>
 #include <cmath>
 
@@ -34,10 +34,14 @@ struct HealthBar{
     SDL_Rect cover;
 };
 
+// DebugRenderer DebugRenderer::global_debug_renderer = DebugRenderer("Debug Renderer");
 
-
-LiuRenderer::LiuRenderer()
+DebugRenderer::DebugRenderer()
 {
+    DebugRenderer("Debug Renderer");
+}
+
+DebugRenderer::DebugRenderer(const std::string& window_name){
     // Init SDL2
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
@@ -64,19 +68,32 @@ LiuRenderer::LiuRenderer()
     SDL_RenderPresent(m_renderer);
 }
 
-LiuRenderer::LiuRenderer(const std::string& window_name){
-    LiuRenderer();
-    SDL_SetWindowTitle(m_window, window_name.c_str());
+DebugRenderer::DebugRenderer(const std::string& window_name, int x, int y, int w, int h){
+// Init SDL2
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    {
+        const char *error = SDL_GetError();
+        std::cout << "SDL_Init() failed with error: " << error << std::endl;
+        exit(1);
+    }
+    m_window = SDL_CreateWindow("StarCraftII Observer", x, y, w, h, SDL_WINDOW_SHOWN);
+    m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_WINDOW_BORDERLESS);
+    // Enable the use of alpha tannel
+    SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
+
+    SDL_SetRenderDrawColor(m_renderer, 0xff, 0xff, 0xff, 0xff);
+    SDL_RenderClear(m_renderer);
+    SDL_RenderPresent(m_renderer);
 }
 
-LiuRenderer::~LiuRenderer()
+DebugRenderer::~DebugRenderer()
 {
     SDL_DestroyRenderer(m_renderer);
     SDL_DestroyWindow(m_window);
     SDL_Quit();
 }
 
-void LiuRenderer::DrawObservations(const std::vector<const ObservationInterface*> observations){
+void DebugRenderer::DrawObservations(const std::vector<const ObservationInterface*> observations){
     //todo get main window size
     int w, h;
     SDL_GetWindowSize(m_window, &w, &h);
@@ -97,7 +114,7 @@ void LiuRenderer::DrawObservations(const std::vector<const ObservationInterface*
 }
 
 
-void LiuRenderer::DrawObservation(const ObservationInterface *observation)
+void DebugRenderer::DrawObservation(const ObservationInterface *observation)
 {
     int w, h;
     SDL_GetWindowSize(m_window, &w, &h);
@@ -109,7 +126,7 @@ void LiuRenderer::DrawObservation(const ObservationInterface *observation)
 }
 
 // Without presenting and clearing
-void LiuRenderer::DrawObservation(const ObservationInterface *observation, int offset_x, int offset_y, int w, int h)
+void DebugRenderer::DrawObservation(const ObservationInterface *observation, int offset_x, int offset_y, int w, int h)
 {
     //calculate the ratio from original map to draw window
     Point2D playable_min = observation->GetGameInfo().playable_min;
@@ -151,10 +168,38 @@ void LiuRenderer::DrawObservation(const ObservationInterface *observation, int o
     }
 }
 
-void LiuRenderer::SetIsDisplay(bool is_display){
+void DebugRenderer::SetIsDisplay(bool is_display){
     if(is_display){
         SDL_ShowWindow(m_window);
     }else{
         SDL_HideWindow(m_window);
     }
+}
+
+DebugRenderers::DebugRenderers(int count){
+    m_debug_renderers.reserve(count);
+    // get the monitor's size, I'd rather use the second monitor to display this
+    int display_count = SDL_GetNumVideoDisplays();
+    if (display_count < 1) {
+        std::cout << "DebugRenderers inits failed with error: " << "no monitor can be detected by SDL" << std::endl;
+    }
+    int chosen_display_index = display_count > 1 ? 1: 0;
+    SDL_Rect display_bound;
+    SDL_GetDisplayBounds(chosen_display_index, &display_bound);
+    // split the display according to the input count
+    int cuts = ceil(pow(count,0.5f));
+    float w_sub = display_bound.w / (float)cuts;
+    float h_sub = display_bound.h / (float)cuts;
+    for (size_t i = 0; i < count; i++)
+    {
+        //todo get the remainder to calculate coordinator x
+        int offset_x = (i % cuts) * w_sub;
+        //todo get the consult to calculate coordinator y
+        int offset_y = (i / cuts) * h_sub;
+        m_debug_renderers.emplace_back(std::to_string(i), offset_x, offset_y, w_sub, h_sub);
+    }
+}
+
+DebugRenderer& DebugRenderers::operator[] (int count){
+    return m_debug_renderers[count];
 }

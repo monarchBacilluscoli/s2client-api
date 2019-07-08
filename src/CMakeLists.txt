@@ -13,7 +13,7 @@ file(GLOB sources_sc2_lib "sc2lib/*.cpp" "sc2lib/*.cc" "../include/sc2lib/*.h")
 file(GLOB sources_utils "sc2utils/*.cpp" "sc2utils/*.cc" "../include/sc2utils/*.h")
 file(GLOB sources_renderer "sc2renderer/*.cc" "sc2renderer/*.h" "../include/sc2renderer/*.h")
 # Liu: What I need to do is to add my folders and files here to let it can be built into libs
-file(GLOB sources_liu_renderer "liu_renderer/*.cc" "liu_renderer/*.h" "../include/liu_renderer/*.h")
+file(GLOB sources_debug_renderer "debug_renderer/*.cc" "debug_renderer/*.h" "../include/debug_renderer/*.h")
 
 # Gather the protos.
 file(GLOB proto_files
@@ -118,7 +118,7 @@ if (MSVC)
     set_target_properties(sc2api PROPERTIES COMPILE_FLAGS "/W4 /WX")
     set_target_properties(sc2lib PROPERTIES COMPILE_FLAGS "/W4 /WX")
     set_target_properties(sc2renderer PROPERTIES COMPILE_FLAGS "/W4 /WX")
-    set_target_properties(liu_renderer PROPERTIES COMPILE_FLAGS "/W4 /WX")
+    set_target_properties(debug_renderer PROPERTIES COMPILE_FLAGS "/W4 /WX")
     set_target_properties(sc2utils PROPERTIES COMPILE_FLAGS "/W3 /WX")
     set_target_properties(sc2protocol PROPERTIES COMPILE_FLAGS "/W0")
 endif (MSVC)
@@ -130,14 +130,14 @@ target_link_libraries(sc2lib sc2api)
 
 # Liu: configure my renderer here, it may need to be handled at last, since it need sc2lib...
 if(NOT APPLE)
-    add_library(liu_renderer ${sources_liu_renderer})
-    set_target_properties(liu_renderer PROPERTIES DEBUG_POSTFIX "d")
-    # TARGET_LINK_LIBRARIES(liu_renderer ${SDL2_LIBRARIES} ${SDL2TTF_LIBRARIES})
-    target_link_libraries(liu_renderer sc2api) #! Note that it should be added since liu_renderer has used it 
+    add_library(debug_renderer ${sources_debug_renderer})
+    set_target_properties(debug_renderer PROPERTIES DEBUG_POSTFIX "d")
+    # TARGET_LINK_LIBRARIES(debug_renderer ${SDL2_LIBRARIES} ${SDL2TTF_LIBRARIES})
+    target_link_libraries(debug_renderer sc2api) #! Note that it should be added since debug_renderer has used it 
     #Liu ADD
     # INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS})
     INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS} ${SDL2IMAGE_INCLUDE_DIRS} ${SDL2TTF_INCLUDE_DIRS})
-    TARGET_LINK_LIBRARIES(liu_renderer ${SDL2_LIBRARIES} ${SDL2IMAGE_LIBRARIES}) #! I can not use the SDL2_ttf library, so I deleted this library here. Maybe someday I can find the solution and add it here
+    TARGET_LINK_LIBRARIES(debug_renderer ${SDL2_LIBRARIES} ${SDL2IMAGE_LIBRARIES}) #! I can not use the SDL2_ttf library, so I deleted this library here. Maybe someday I can find the solution and add it here
     # INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS} ${SDL2TTF_INCLUDE_DIRS}) 
     # include_directories("../contrib/SDL-mirror/include")
 endif()

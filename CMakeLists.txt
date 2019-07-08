@@ -136,7 +136,7 @@ add_subdirectory("src")
 
 if (NOT APPLE)
     set_target_properties(sc2renderer PROPERTIES FOLDER utilities) 
-    set_target_properties(liu_renderer PROPERTIES FOLDER utilities) # should I do it?
+    set_target_properties(debug_renderer PROPERTIES FOLDER utilities) # should I do it?
     set_target_properties(uninstall PROPERTIES FOLDER CMakePredefinedTargets)
 endif ()
 

@@ -1,5 +1,5 @@
-#ifndef LIU_RENDERER_H
-#define LIU_RENDERER_H
+#ifndef DEBUG_RENDERER_H
+#define DEBUG_RENDERER_H
 
 #include<string>
 #include<vector>
@@ -10,7 +10,7 @@
 
 namespace sc2
 {
-    class LiuRenderer
+    class DebugRenderer
     {
     private:
         SDL_Window* m_window = nullptr;
@@ -23,9 +23,11 @@ namespace sc2
         // according to properties of units and windows, draw the unit 
         void DrawUnit(const Unit* unit);
     public:
-        LiuRenderer();
-        LiuRenderer(const std::string& window_name);
-        ~LiuRenderer();
+        DebugRenderer();
+        // todo finish it
+        DebugRenderer(const std::string& window_name, int offset_x, int offset_y, int w, int h);
+        DebugRenderer(const std::string& window_name);
+        ~DebugRenderer();
 
         //! Draw mutilple Observations in one window
         void DrawObservations(const std::vector<const ObservationInterface*> observations);
@@ -33,7 +35,21 @@ namespace sc2
         void DrawObservation(const ObservationInterface* observation);
 
         void SetIsDisplay(bool is_display);
+
+        // static DebugRenderer global_debug_renderer;
+    };
+
+    class DebugRenderers
+    {
+    private:
+     std::vector<DebugRenderer> m_debug_renderers;
+    public:
+     //! according to the monitor windows size, set the subwindows size and positions
+     DebugRenderers(int count);
+     // I dont have to write the destructor, since program will call the item's destructor automatically when they are no longer useful 
+     //! get subwindow
+     DebugRenderer& operator[](int count);
     };
 }
 
-#endif //LIU_RENDERER_H
+#endif //DEBUG_RENDERER_H

@@ -34,6 +34,7 @@ void Simulator::SetStartPoint(std::vector<Command> commands,
 void Simulator::Run(int steps) {
     for (size_t i = 0; i < (size_t)ceil(steps/GetStepSize()); i++) {
         Update();
+        
     }
 }
 

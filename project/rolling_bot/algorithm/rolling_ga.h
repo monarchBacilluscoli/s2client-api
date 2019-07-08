@@ -9,7 +9,7 @@
 #include "../simulator/command.h"
 #include "../simulator/simulator.h"
 #include <sc2lib/sc2_utils.h>
-#include "liu_renderer/liu_renderer.h"
+#include "debug_renderer/debug_renderer.h"
 
 namespace sc2{
     class RollingGA :public GA<Command>
@@ -31,7 +31,7 @@ namespace sc2{
             // simulator number now is simply equal to population size
             m_simulators.resize(m_population_size);
             SetSimulators(net_address, port_start, process_path, map_path);
-            m_debug_renderer.SetIsDisplay(false);
+            // m_debug_renderer.SetIsDisplay(false);
         }
 
         // Initialization and setup.
@@ -110,8 +110,7 @@ namespace sc2{
         const ObservationInterface* m_observation;
 
         // Misc
-        LiuRenderer m_debug_renderer;
-
+        
         const double PI = atan(1.) * 4.;
     };
 }

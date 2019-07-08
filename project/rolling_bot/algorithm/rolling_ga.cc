@@ -113,9 +113,9 @@ void RollingGA::SetSimulatorsMultithreaded(bool multithreaded)
 
 void RollingGA::SetDebugMode(bool is_debug) {
     if (is_debug) {
-        m_debug_renderer.SetIsDisplay(true);
+        // m_debug_renderer.SetIsDisplay(true);
     } else {
-        m_debug_renderer.SetIsDisplay(false);
+        // m_debug_renderer.SetIsDisplay(false);
     }
     m_is_debug = is_debug;
 }

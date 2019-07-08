@@ -47,6 +47,6 @@ example_project(save_load "save_load.cc")
 if (NOT APPLE)
     example_project_extra(feature_layers "feature_layers.cc" sc2renderer)
     example_project_extra(rendered "rendered.cc" sc2renderer)
-    # example_project_extra(tutorial "tutorial.cc" liu_renderer)
+    # example_project_extra(tutorial "tutorial.cc" debug_renderer)
 endif ()
 
