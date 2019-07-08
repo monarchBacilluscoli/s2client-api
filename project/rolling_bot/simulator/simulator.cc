@@ -30,11 +30,17 @@ void Simulator::SetStartPoint(std::vector<Command> commands,
     SetOrders(commands);
 }
 
-//todo here I need to do some modification
-void Simulator::Run(int steps) {
-    for (size_t i = 0; i < (size_t)ceil(steps/GetStepSize()); i++) {
-        Update();
-        
+void Simulator::Run(int steps, DebugRenderer* debug_renderer) {
+    if (debug_renderer) {
+        const ObservationInterface* ob = GetObservations().front();
+        for (size_t i = 0; i < (size_t)ceil(steps / GetStepSize()); i++) {
+            Update();
+            debug_renderer->DrawObservation(ob);
+        }
+    } else {
+        for (size_t i = 0; i < (size_t)ceil(steps / GetStepSize()); i++) {
+            Update();
+        }
     }
 }
 

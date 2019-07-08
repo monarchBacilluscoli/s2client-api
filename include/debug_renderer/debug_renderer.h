@@ -36,6 +36,16 @@ namespace sc2
 
         void SetIsDisplay(bool is_display);
 
+        //! for test
+        void DrawRedRect(){
+            SDL_SetRenderDrawColor(m_renderer, 0xff, 0xff, 0xff, 0xff);
+            SDL_RenderClear(m_renderer);
+            SDL_Rect rect = {0, 0, 50, 50};
+            SDL_SetRenderDrawColor(m_renderer, 0xff, 0, 0, 0xff);
+            SDL_RenderDrawRect(m_renderer, &rect);
+            SDL_RenderPresent(m_renderer);
+        }
+
         // static DebugRenderer global_debug_renderer;
     };
 
@@ -44,6 +54,7 @@ namespace sc2
     private:
      std::vector<DebugRenderer> m_debug_renderers;
     public:
+    //  DebugRenderers() = default;
      //! according to the monitor windows size, set the subwindows size and positions
      DebugRenderers(int count);
      // I dont have to write the destructor, since program will call the item's destructor automatically when they are no longer useful 

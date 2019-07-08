@@ -27,7 +27,7 @@ namespace sc2{
             const std::string& net_address,
             int port_start,
             const std::string& process_path,
-            const std::string& map_path) {
+            const std::string& map_path): m_debug_renderers(m_population_size) {
             // simulator number now is simply equal to population size
             m_simulators.resize(m_population_size);
             SetSimulators(net_address, port_start, process_path, map_path);
@@ -108,6 +108,9 @@ namespace sc2{
         Units m_my_team;
         Units m_enemy_team;
         const ObservationInterface* m_observation;
+
+        // Tools
+        DebugRenderers m_debug_renderers;
 
         // Misc
         

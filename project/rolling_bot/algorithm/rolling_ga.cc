@@ -47,19 +47,28 @@ void sc2::RollingGA::SetSimulatorsStart(const ObservationInterface* ob)
 	}
 }
 
-void sc2::RollingGA::RunSimulatorsSynchronous()
+void sc2::RollingGA::RunSimulatorsSynchronous() 
 {
-	std::vector<std::thread> threads(m_simulators.size());
-	for (size_t i = 0; i < threads.size(); i++)
-	{
-		threads[i] = std::thread{ [&,i]() ->void {
-			m_simulators[i].Run(m_run_length);
-		} };
-	}
-	for (auto& t:threads)
-	{
-		t.join();
-	}
+    std::vector<std::thread> threads(m_simulators.size());
+    if (m_is_debug) {
+        for (size_t i = 0; i < threads.size(); i++) {
+            threads[i] = std::thread{[&, i]() -> void {
+                m_simulators[i].Run(m_run_length, &m_debug_renderers[i]);
+            }};
+            //todo if debug flag is on, the debug renderes are involved
+        }
+    } else {
+        std::vector<std::thread> threads(m_simulators.size());
+        for (size_t i = 0; i < threads.size(); i++) {
+            threads[i] = std::thread{[&, i]() -> void {
+                m_simulators[i].Run(m_run_length);
+            }};
+            //todo if debug flag is on, the debug renderes are involved
+        }
+    }
+    for (auto& t : threads) {
+        t.join();
+    }
 }
 
 void sc2::RollingGA::SetObservation(const ObservationInterface* observation)

@@ -1,12 +1,13 @@
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 
-#include <sc2api/sc2_proto_interface.h>
 #include <sc2api/sc2_api.h>
+#include <sc2api/sc2_proto_interface.h>
 #include <map>
 #include <string>
 #include <vector>
 #include "command.h"
+#include "debug_renderer/debug_renderer.h"
 #include "state.h"
 
 namespace sc2 {
@@ -34,7 +35,7 @@ class Simulator : public Coordinator {
     void SetStartPoint(std::vector<Command> commands,
                        const ObservationInterface* ob);
     //! runs for specific number of steps which can be set by user
-    void Run(int steps);
+    void Run(int steps, DebugRenderer* debug_renderer = nullptr);
     //! load the copied state
     void Load();
     //? is anyone really needs a Run() which runs the game until gameover

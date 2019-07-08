@@ -76,8 +76,8 @@ DebugRenderer::DebugRenderer(const std::string& window_name, int x, int y, int w
         std::cout << "SDL_Init() failed with error: " << error << std::endl;
         exit(1);
     }
-    m_window = SDL_CreateWindow("StarCraftII Observer", x, y, w, h, SDL_WINDOW_SHOWN);
-    m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_WINDOW_BORDERLESS);
+    m_window = SDL_CreateWindow(window_name.c_str(), x, y, w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
+    m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
     // Enable the use of alpha tannel
     SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
 
@@ -180,14 +180,19 @@ DebugRenderers::DebugRenderers(int count){
     m_debug_renderers.reserve(count);
     // get the monitor's size, I'd rather use the second monitor to display this
     int display_count = SDL_GetNumVideoDisplays();
-    if (display_count < 1) {
-        std::cout << "DebugRenderers inits failed with error: " << "no monitor can be detected by SDL" << std::endl;
-    }
+    
     int chosen_display_index = display_count > 1 ? 1: 0;
     SDL_Rect display_bound;
-    SDL_GetDisplayBounds(chosen_display_index, &display_bound);
+    if (display_count < 1) {
+        std::cout << "no local monitor can be detected by SDL, you may be using remote desktop, renderer will use the default settings" << std::endl;
+        display_bound = {0, 0, 1920, 1080};
+    } else {
+        chosen_display_index = display_count > 1 ? 1: 0;
+        SDL_GetDisplayBounds(chosen_display_index, &display_bound);
+    }
+
     // split the display according to the input count
-    int cuts = ceil(pow(count,0.5f));
+    int cuts = ceil(pow(count, 0.5f));
     float w_sub = display_bound.w / (float)cuts;
     float h_sub = display_bound.h / (float)cuts;
     for (size_t i = 0; i < count; i++)
