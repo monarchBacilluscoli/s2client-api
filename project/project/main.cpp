@@ -38,55 +38,57 @@ private:
 };
 
 int main(int argc, char* argv[]) {
-    //! test code
-    //! for real ga
-    // {
-    //     RealGA real_ga;
-    //     RealGA::SetExampleDimensions(3);
-    //     auto a = &RealGA::example_evaluator;
-    //     real_ga.SetEvaluator(&RealGA::example_evaluator);
-    //     real_ga.SetBoundry(RealGA::example_lower_boundry, RealGA::example_upper_boundry);
-    //     Solution<float> final = real_ga.Run().front();
-    // }
-    //! A DebugRenderers test
-    // {
-    //     int count = 3;
-    //     std::vector<Bot> bots(count);
-    //     std::vector<Coordinator> coordinators(count);
-    //     std::vector<const ObservationInterface*> observations(count);
-    //     std::vector<std::thread> start_threads(count);
-    //     for (size_t i = 0; i < count; i++) {
-    //         start_threads[i] = std::thread([&,i] {
-    //             coordinators[i].LoadSettings(argc, argv);
-    //             // coordinators[i].SetProcessPath("/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64");
-    //             // std::cout << coordinators[i].GetExePath() << std::endl;
-    //             coordinators[i].SetPortStart(5000 + i * 2);
-    //             coordinators[i].SetParticipants({CreateParticipant(Race::Terran, &bots[i]),
-    //                                              CreateComputer(Race::Zerg)});
-    //             coordinators[i].LaunchStarcraft();
-    //             coordinators[i].StartGame("testBattle_distant_vs_melee_debug.SC2Map");
-    //             observations[i] = coordinators[i].GetObservations().front();
-    //         });
-    //     }
-    //     for(auto& t: start_threads){
-    //         t.join();
-    //     }
-    //     DebugRenderers debug_renderers(count);
-    //     auto start = std::chrono::steady_clock::now();
-    //     auto end = std::chrono::steady_clock::now();
-    //     while (true) {
-    //         start = std::chrono::steady_clock::now();
-    //         for (size_t i = 0; i < count; i++) {
-    //             coordinators[i].Update();
-    //             debug_renderers[i].DrawObservation(observations[i]);
-    //             // debug_renderers[i].DrawRedRect();
-    //         }
-    //         end = std::chrono::steady_clock::now();
-    //         auto interval = end - start;
-    //         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60) -
-    //                                     interval);
-    //     }
-    // }
+    //! test code (Can be folded)
+    {
+        //! for real ga
+        // {
+        //     RealGA real_ga;
+        //     RealGA::SetExampleDimensions(3);
+        //     auto a = &RealGA::example_evaluator;
+        //     real_ga.SetEvaluator(&RealGA::example_evaluator);
+        //     real_ga.SetBoundry(RealGA::example_lower_boundry, RealGA::example_upper_boundry);
+        //     Solution<float> final = real_ga.Run().front();
+        // }
+        //! A DebugRenderers test
+        // {
+        //     int count = 3;
+        //     std::vector<Bot> bots(count);
+        //     std::vector<Coordinator> coordinators(count);
+        //     std::vector<const ObservationInterface*> observations(count);
+        //     std::vector<std::thread> start_threads(count);
+        //     for (size_t i = 0; i < count; i++) {
+        //         start_threads[i] = std::thread([&,i] {
+        //             coordinators[i].LoadSettings(argc, argv);
+        //             // coordinators[i].SetProcessPath("/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64");
+        //             // std::cout << coordinators[i].GetExePath() << std::endl;
+        //             coordinators[i].SetPortStart(5000 + i * 2);
+        //             coordinators[i].SetParticipants({CreateParticipant(Race::Terran, &bots[i]),
+        //                                              CreateComputer(Race::Zerg)});
+        //             coordinators[i].LaunchStarcraft();
+        //             coordinators[i].StartGame("testBattle_distant_vs_melee_debug.SC2Map");
+        //             observations[i] = coordinators[i].GetObservations().front();
+        //         });
+        //     }
+        //     for(auto& t: start_threads){
+        //         t.join();
+        //     }
+        //     DebugRenderers debug_renderers(count);
+        //     auto start = std::chrono::steady_clock::now();
+        //     auto end = std::chrono::steady_clock::now();
+        //     while (true) {
+        //         start = std::chrono::steady_clock::now();
+        //         for (size_t i = 0; i < count; i++) {
+        //             coordinators[i].Update();
+        //             debug_renderers[i].DrawObservation(observations[i]);
+        //             // debug_renderers[i].DrawRedRect();
+        //         }
+        //         end = std::chrono::steady_clock::now();
+        //         auto interval = end - start;
+        //         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60) -
+        //                                     interval);
+        //     }
+        // }
+    }
 
     // Before evething starts, kill all the StarCraftII instances started before.
     std::string process_name_to_be_killed = "SC2_x64";
@@ -112,22 +114,13 @@ int main(int argc, char* argv[]) {
 
     //! Bots here
     Bot bot;
-    // RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path);
-    // rolling_bot.SetMaxGeneration(10);
+    RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path);
+    rolling_bot.SetDebugOn(true);
 
-    // //! for coordinator test
-    // Coordinator test_coordinator;
-    // test_coordinator.SetProcessPath(starcraft_path);
-    // test_coordinator.SetMapPath(map_path);
-    // test_coordinator.SetPortStart(4000);
-    // test_coordinator.SetParticipants(
-    //     {CreateParticipant(Race::Terran, &bot), CreateComputer(Race::Protoss)});
-    // test_coordinator.LaunchStarcraft();
-    // // test_coordinator.Connect(3999);
-    // test_coordinator.StartGame();
+    rolling_bot.SetMaxGeneration(10);
 
     //! participants settings here
-    coordinator.SetParticipants({CreateParticipant(Race::Terran, &bot),
+    coordinator.SetParticipants({CreateParticipant(Race::Terran, &rolling_bot),
                                  CreateComputer(Race::Zerg)});
     coordinator.SetPortStart(main_process_port);
     coordinator.SetRealtime(real_time);
@@ -137,18 +130,6 @@ int main(int argc, char* argv[]) {
 
     coordinator.LaunchStarcraft();
     coordinator.StartGame(map_path);
-
-    // Another thread used for debuging
-    // std::thread display_thread = std::thread([/*&rolling_bot,*/&is_debug, &ob]() {
-    //     DebugRenderer sim_debug_renderer("Debug Observer");
-    //     // std::vector<const ObservationInterface*> observations = rolling_bot.GetAllSimsObservations();
-    //     //todo set a timer here
-    //     while (is_debug) {
-    //         sim_debug_renderer.DrawObservation(ob);
-    //         // sim_debug_renderer.DrawObservations(observations);
-    //     }
-    // });
-    // display_thread.detach();
 
     // A fixed time update mechanism
     auto start = std::chrono::steady_clock::now();

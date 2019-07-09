@@ -4,12 +4,18 @@
 
 using namespace sc2;
 
+float DebugRenderer::ratio_between_window_and_unit = 20.f;
+
 //! A fixed size health bar
 struct HealthBar{
-    HealthBar(int x, int y, int max_value, int current_value){
-        //todo maybe... 1 pixel 1 hp? about 10 pixels' width... I mean height
-        frame = {x,y,max_value+2, 10};
-        cover = {x+1,y+1,current_value, 8};
+    HealthBar(int x, int y, int max_value, int current_value, int height = 10, float health_scale = 1.f){
+        if (height > 2) { // if height>2, it means there is still space between the upper and lower lines of frames to set the cover bar. 
+            frame = {x, y, ceil(max_value*health_scale) + 2, height};
+            cover = {x + 1, y + 1, current_value*health_scale, height - 2};
+        }else{// If height<2, it means the frame and cover must be overlaped
+            frame = {x, y, ceil(max_value*health_scale), height};
+            cover = {x, y, current_value*health_scale, height};
+        }
     }
     void SetCurrentValue(int current_value){
         cover.x = current_value;
@@ -19,10 +25,10 @@ struct HealthBar{
         // store the original draw color of current renderer for restore it after draw
         Uint8 r,g,b,a;
         SDL_GetRenderDrawColor(renderer,&r,&g,&b,&a);
-        // Black frame
+        // Black frame first
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff/2);
         SDL_RenderDrawRect(renderer, &frame);
-        // Red bar cover
+        // Red bar cover then
         SDL_SetRenderDrawColor(renderer, 0xff,0,0,0xff/2);
         SDL_RenderDrawRect(renderer, &cover);
         SDL_RenderFillRect(renderer, &cover);
@@ -136,8 +142,8 @@ void DebugRenderer::DrawObservation(const ObservationInterface *observation, int
     Units us = observation->GetUnits();
     Point2D playable_pos;
     SDL_Rect unit_rect; //? Note that the properties of rect are ints
-    for (const Unit *u : us)
-    {
+    int minimize_size = ceil(h < w ? h / ratio_between_window_and_unit : w / ratio_between_window_and_unit);
+    for (const Unit *u : us) {
         if (u->owner == 1)
         {
             SDL_SetRenderDrawColor(m_renderer, 0, 0xff, 0, 0xff);
@@ -154,9 +160,9 @@ void DebugRenderer::DrawObservation(const ObservationInterface *observation, int
         // get the corresponding pos in draw window
         float x = (float)offset_x + playable_pos.x * ratio;
         float y = (float)offset_y + (playable_length.y - playable_pos.y) * ratio;
-        float size = u->radius * ratio < 20 ? 20 : u->radius * ratio;
+        int size = u->radius * ratio < minimize_size ? minimize_size : ceil(u->radius * ratio);
         unit_rect = {(int)x, (int)y, (int)size, (int)size};
-        HealthBar health_bar(x,y-12,u->health_max, u->health);
+        HealthBar health_bar(x,y-12,u->health_max, u->health, ceil(h/30), w/240);
         health_bar.Draw(m_renderer);
         SDL_RenderDrawRect(m_renderer, &unit_rect);
         SDL_RenderFillRect(m_renderer, &unit_rect);
@@ -195,8 +201,8 @@ DebugRenderers::DebugRenderers(int count){
     int cuts = ceil(pow(count, 0.5f));
     float w_sub = display_bound.w / (float)cuts;
     float h_sub = display_bound.h / (float)cuts;
-    for (size_t i = 0; i < count; i++)
-    {
+    //todo multi-threaded modification
+    for (size_t i = 0; i < count; i++) {
         //todo get the remainder to calculate coordinator x
         int offset_x = (i % cuts) * w_sub;
         //todo get the consult to calculate coordinator y

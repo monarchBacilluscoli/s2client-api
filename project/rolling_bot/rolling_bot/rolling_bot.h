@@ -51,6 +51,9 @@ class RollingBot : public Agent {
     void SetMaxGeneration(int max_generation) {
         m_rolling_ga.SetMaxGeneration(max_generation);
     }
+    void SetDebugOn(bool is_debug){
+        m_rolling_ga.SetDebugMode(is_debug);
+    }
 
     // Settings for Sims
     void SetSimStepSize(int steps);

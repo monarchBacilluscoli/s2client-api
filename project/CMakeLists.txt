@@ -19,3 +19,5 @@ add_executable(project ${project_sources} ${rolling_bot_sources})
 set_target_properties(project PROPERTIES FOLDER project)
 # Link all the libraries this project will use
 target_link_libraries(project sc2api sc2lib sc2utils debug_renderer) # here can be multiple libs to be added
+
+add_definitions(-D DEBUG)

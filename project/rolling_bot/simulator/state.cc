@@ -48,6 +48,7 @@ void sc2::LoadMultiPlayerGame(State save, Client& current_client, Coordinator& c
 	// the DebugCreateUnit() needs at least 2 loops to be executed
 	current_coordinator.Update();
 	current_coordinator.Update();
+	// from here, I need to ensure nobody will move, but if I do it like this...x
 
 	// just copys the units in save
 	const Unit* u_copied;

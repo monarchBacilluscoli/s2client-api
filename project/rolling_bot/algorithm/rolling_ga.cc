@@ -167,45 +167,46 @@ void sc2::RollingGA::Mutate(Solution<Command>& s)
 	action.target_point += Point2D(GetRandomInteger(-1, 1) * m_playable_dis.x, GetRandomInteger(-1, 1) * m_playable_dis.y) / m_mutate_step;
 }
 
-void sc2::RollingGA::Evaluate(Population& p)
-{
-	assert(p.size() <= m_simulators.size());
-	// use different simulators to evaluate solutions respectively
-	// for each sim, copy the state and deploy the commands!
-	for (size_t i = 0; i < p.size(); i++)
-	{
-		m_simulators[i].CopyAndSetState(m_observation);
-#ifdef _DEBUG
-		////? outputs units info that can indicate whether the CopyAndSet function has worked
-		//Units us = m_simulators[i].Observation()->GetUnits();
-		//sc2utility::output_units_health_in_order(us);
-		//std::cout << std::endl;
-#endif // _DEBUG
-		m_simulators[i].SetOrders(p[i].variable);
-	}
-	RunSimulatorsSynchronous();
-	//? output the best one for each generation, or outputs the average objectives for each generation
-	float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
-	float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();
-	for (size_t i = 0; i < p.size(); i++)
-	{
-		self_loss = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Self);
-		enemy_loss = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Enemy);
-		self_team_loss_total += self_loss;
-		enemy_team_loss_total += enemy_loss;
-		if (self_team_loss_best > self_loss) {
-			self_team_loss_best = self_loss;
-		}
-		if (enemy_team_loss_best < enemy_loss) {
-			enemy_team_loss_best = enemy_loss;
-		}
+void sc2::RollingGA::Evaluate(Population& p) {
+    assert(p.size() <= m_simulators.size());
+    // use different simulators to evaluate solutions respectively
+    // for each sim, copy the state and deploy the commands!
+    //todo multi-threaded
+    std::vector<std::thread> setting_threads(m_simulators.size());
+    // for (size_t i = 0; i < p.size(); i++) {
+    //     m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
+    //     m_simulators[i].SetOrders(p[i].variable);
+    // }
+    for (size_t i = 0; i < p.size(); i++) {
+        setting_threads[i] = std::thread([&, i] {
+            m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
+            m_simulators[i].SetOrders(p[i].variable);
+        });
+    }
+    std::for_each(setting_threads.begin(), setting_threads.end(), [](std::thread& t) -> void { t.join(); });
 
-		p[i].objectives[0] = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Enemy)/* - m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Self)*/;
-	}
-	std::cout << "ally_team_loss_avg:\t" << self_team_loss_total / p.size() <<"\t"
-		<< "ally_team_loss_best:\t" << self_team_loss_best << "\t"
-		<< "enemy_team_loss_avg:\t" << enemy_team_loss_total / p.size() << "\t"
-		<< "enemy_team_loss_best:\t" << enemy_team_loss_best << std::endl;
+    RunSimulatorsSynchronous();
+    //? output the best one for each generation, or outputs the average objectives for each generation
+    float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
+    float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();
+    for (size_t i = 0; i < p.size(); i++) {
+        self_loss = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Self);
+        enemy_loss = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Enemy);
+        self_team_loss_total += self_loss;
+        enemy_team_loss_total += enemy_loss;
+        if (self_team_loss_best > self_loss) {
+            self_team_loss_best = self_loss;
+        }
+        if (enemy_team_loss_best < enemy_loss) {
+            enemy_team_loss_best = enemy_loss;
+        }
+
+        p[i].objectives[0] = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Enemy) /* - m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Self)*/;
+    }
+    std::cout << "ally_team_loss_avg:\t" << self_team_loss_total / p.size() << "\t"
+              << "ally_team_loss_best:\t" << self_team_loss_best << "\t"
+              << "enemy_team_loss_avg:\t" << enemy_team_loss_total / p.size() << "\t"
+              << "enemy_team_loss_best:\t" << enemy_team_loss_best << std::endl;
 }
 
 std::vector<const ObservationInterface*> RollingGA::GetAllSimsObservations() const {

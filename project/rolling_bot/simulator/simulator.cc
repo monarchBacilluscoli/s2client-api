@@ -2,16 +2,33 @@
 #include <sc2api/sc2_coordinator.h>
 #include <sc2lib/sc2_utils.h>
 #include <cassert>
+#include <iostream>
+#include <set>
 
 using namespace sc2;
 
-void Simulator::CopyAndSetState(const ObservationInterface* ob_source) {
+void Simulator::CopyAndSetState(const ObservationInterface* ob_source, DebugRenderer* debug_renderer) {
     // save from local instance
-    m_save = SaveMultiPlayerGame(ob_source);
-    LoadMultiPlayerGame(m_save, m_executor, *this);
-    SetUnitsRelations(m_save, m_executor.Observation()->GetUnits());
-    if (!IsMultiPlayerGame()) {
-        m_executor.Control()->Save();
+    if (debug_renderer) {
+        m_save = SaveMultiPlayerGame(ob_source);
+        LoadMultiPlayerGame(m_save, m_executor, *this);
+        SetUnitsRelations(m_save, m_executor.Observation()->GetUnits());
+        //check the crush of unit relationship
+        //todo use set to check it
+        std::set<const Unit*> check_set;
+        for (const auto& item: m_relative_units)
+        {
+            check_set.insert(item.second);
+        }
+        if(check_set.size()<m_relative_units.size()){
+            std::cout << "mistake in copy!" << std::endl;
+        }
+
+        if (!IsMultiPlayerGame()) {
+            m_executor.Control()->Save();
+        }
+        // Maybe I only need to display the result
+        debug_renderer->DrawObservation(m_executor.Observation());
     }
 }
 

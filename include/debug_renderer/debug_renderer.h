@@ -18,6 +18,7 @@ namespace sc2
         TTF_Font* font = nullptr;
     private:
         const int m_facing_line_length = 50;
+        static float ratio_between_window_and_unit;
     private:
         void DrawObservation(const ObservationInterface* observation, int offset_x, int offset_y, int w, int h);
         // according to properties of units and windows, draw the unit 
@@ -53,8 +54,9 @@ namespace sc2
     {
     private:
      std::vector<DebugRenderer> m_debug_renderers;
+
     public:
-    //  DebugRenderers() = default;
+     //  DebugRenderers() = default;
      //! according to the monitor windows size, set the subwindows size and positions
      DebugRenderers(int count);
      // I dont have to write the destructor, since program will call the item's destructor automatically when they are no longer useful 

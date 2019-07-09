@@ -10,6 +10,7 @@
 #include "debug_renderer/debug_renderer.h"
 #include "state.h"
 
+
 namespace sc2 {
 class Executor : public Agent {};
 
@@ -30,7 +31,7 @@ class Simulator : public Coordinator {
     //! direct send the orders to units
     void SetOrders(std::vector<Command> commands);
     //! copy the game state from a specific game observation
-    void CopyAndSetState(const ObservationInterface* ob);
+    void CopyAndSetState(const ObservationInterface* ob, DebugRenderer* debug_renderer = nullptr);
     //! copys state and sets orders for preparation to run
     void SetStartPoint(std::vector<Command> commands,
                        const ObservationInterface* ob);
