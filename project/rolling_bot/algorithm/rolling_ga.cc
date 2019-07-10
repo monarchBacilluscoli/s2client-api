@@ -132,7 +132,7 @@ void RollingGA::SetDebugMode(bool is_debug) {
 Solution<Command> RollingGA::GenerateSolution() {
 	//? These is a way to get avaliable abilities in s2client-api, but it is time consuming
 	//? But for now, I choose to limit the chosen of abilities in only move and attack
-	Solution<Command> sol(m_my_team.size(), m_evaluators.size());
+	Solution<Command> sol(m_my_team.size(), m_objective_size);
 	RawActions raw_actions(m_command_length);
 	for (size_t i = 0; i < m_my_team.size(); i++)
 	{
@@ -201,8 +201,11 @@ void sc2::RollingGA::Evaluate(Population& p) {
             enemy_team_loss_best = enemy_loss;
         }
 
-        p[i].objectives[0] = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Enemy) /* - m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Self)*/;
+		// 2-objective
+        p[i].objectives[0] = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Enemy);
+        p[i].objectives[1] = -m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Self);
     }
+    //! output the the results
     std::cout << "ally_team_loss_avg:\t" << self_team_loss_total / p.size() << "\t"
               << "ally_team_loss_best:\t" << self_team_loss_best << "\t"
               << "enemy_team_loss_avg:\t" << enemy_team_loss_total / p.size() << "\t"

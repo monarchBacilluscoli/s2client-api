@@ -11,19 +11,17 @@ void Simulator::CopyAndSetState(const ObservationInterface* ob_source, DebugRend
     // save from local instance
     if (debug_renderer) {
         m_save = SaveMultiPlayerGame(ob_source);
-        LoadMultiPlayerGame(m_save, m_executor, *this);
-        SetUnitsRelations(m_save, m_executor.Observation()->GetUnits());
+        m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);
+        // SetUnitsRelations(m_save, m_executor.Observation()->GetUnits());
         //check the crush of unit relationship
         //todo use set to check it
         std::set<const Unit*> check_set;
-        for (const auto& item: m_relative_units)
-        {
+        for (const auto& item : m_relative_units) {
             check_set.insert(item.second);
         }
-        if(check_set.size()<m_relative_units.size()){
-            std::cout << "mistake in copy!" << std::endl;
+        if (check_set.size() != m_relative_units.size()) {
+            std::cout << "mistake in copy: " << m_relative_units.size() - check_set.size() << std::endl;
         }
-
         if (!IsMultiPlayerGame()) {
             m_executor.Control()->Save();
         }

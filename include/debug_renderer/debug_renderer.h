@@ -1,15 +1,19 @@
 #ifndef DEBUG_RENDERER_H
 #define DEBUG_RENDERER_H
 
-#include<string>
-#include<vector>
-#include<SDL2/SDL.h>
-#include<sc2api/sc2_api.h>
-#include<SDL2/SDL_ttf.h>
-#include<SDL2/SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+#include <sc2api/sc2_api.h>
+#include <string>
+#include <vector>
+#include "../project/rolling_bot/algorithm/solution.h"
+#include "../project/rolling_bot/simulator/command.h"
 
 namespace sc2
 {
+    
+
     class DebugRenderer
     {
     private:
@@ -17,7 +21,7 @@ namespace sc2
         SDL_Renderer* m_renderer = nullptr;
         TTF_Font* font = nullptr;
     private:
-        const int m_facing_line_length = 50;
+        int m_facing_line_length = 50;
         static float ratio_between_window_and_unit;
     private:
         void DrawObservation(const ObservationInterface* observation, int offset_x, int offset_y, int w, int h);
@@ -25,11 +29,13 @@ namespace sc2
         void DrawUnit(const Unit* unit);
     public:
         DebugRenderer();
+        DebugRenderer& operator=(const sc2::DebugRenderer& rhs);
         // todo finish it
         DebugRenderer(const std::string& window_name, int offset_x, int offset_y, int w, int h);
         DebugRenderer(const std::string& window_name);
         ~DebugRenderer();
 
+        void DrawSolution(Solution<Command> solution, const ObservationInterface* observation, std::map<Tag, const Unit*>);
         //! Draw mutilple Observations in one window
         void DrawObservations(const std::vector<const ObservationInterface*> observations);
         //! Simple method to draw one Observation in one window
@@ -44,6 +50,10 @@ namespace sc2
             SDL_Rect rect = {0, 0, 50, 50};
             SDL_SetRenderDrawColor(m_renderer, 0xff, 0, 0, 0xff);
             SDL_RenderDrawRect(m_renderer, &rect);
+            SDL_RenderPresent(m_renderer);
+        }
+
+        void Present(){
             SDL_RenderPresent(m_renderer);
         }
 

@@ -26,12 +26,12 @@ State sc2::SaveMultiPlayerGame(const ObservationInterface* observation)
 	return save;
 }
 
-void sc2::LoadMultiPlayerGame(State save, Client& current_client, Coordinator& current_coordinator)
+std::map<Tag, const Unit*> sc2::LoadMultiPlayerGame(State save, Client& current_client, Coordinator& current_coordinator)
 {
-	// kills all current units
-	for (const Unit* u : current_client.Observation()->GetUnits())
-	{
-		current_client.Debug()->DebugKillUnit(u);
+    std::map<Tag, const Unit*> unit_map;
+    // kills all current units
+    for (const Unit* u : current_client.Observation()->GetUnits()) {
+        current_client.Debug()->DebugKillUnit(u);
 	}
 	current_client.Debug()->SendDebug();
 	// the wrekages need about 20 game loops to be cleaned
@@ -49,12 +49,12 @@ void sc2::LoadMultiPlayerGame(State save, Client& current_client, Coordinator& c
 	current_coordinator.Update();
 	current_coordinator.Update();
 	// from here, I need to ensure nobody will move, but if I do it like this...x
-
+	// todo set the relationship here! To ensure the minimize movement
 	// just copys the units in save
 	const Unit* u_copied;
 	Units us_copied = current_client.Observation()->GetUnits();
-	for (UnitState state_u : save.unit_states) {
-		u_copied = SelectNearestUnitFromPoint(state_u.pos, us_copied);
+	for (const UnitState& state_u : save.unit_states) {
+		unit_map[state_u.unit_tag] = u_copied = SelectNearestUnitFromPoint(state_u.pos, us_copied);
 		current_client.Debug()->DebugSetShields(state_u.shields + 0.1f, u_copied); // WTF, shield cannot be set to 0, if you set 0, you will find it is full in game, but if you set it as 0.1f, the data in game will be 0, fuck again.
 		current_client.Debug()->DebugSetLife(state_u.life,u_copied);
 		current_client.Debug()->DebugSetEnergy(state_u.energy, u_copied);
@@ -63,4 +63,5 @@ void sc2::LoadMultiPlayerGame(State save, Client& current_client, Coordinator& c
 	// like CreateUnit(), DebugCreateUnit() needs at least 2 loops to be executed, too
 	current_coordinator.Update();
 	current_coordinator.Update();
+    return unit_map;
 }

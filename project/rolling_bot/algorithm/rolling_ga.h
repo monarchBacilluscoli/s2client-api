@@ -5,11 +5,12 @@
 #define ROLLING_GA
 
 #include <sc2api/sc2_api.h>
-#include "ga.h"
+#include <sc2lib/sc2_utils.h>
 #include "../simulator/command.h"
 #include "../simulator/simulator.h"
-#include <sc2lib/sc2_utils.h>
 #include "debug_renderer/debug_renderer.h"
+#include "ga.h"
+#include "solution.h"
 
 namespace sc2{
     class RollingGA :public GA<Command>
@@ -32,6 +33,7 @@ namespace sc2{
             m_simulators.resize(m_population_size);
             SetSimulators(net_address, port_start, process_path, map_path);
             // m_debug_renderer.SetIsDisplay(false);
+            SetCompare(Solution<Command>::multi_greater);
         }
 
         // Initialization and setup.
@@ -76,7 +78,7 @@ namespace sc2{
 
         // run
         //! According to known information generates solutions which is as valid as possiable 
-        virtual Solution<Command> GenerateSolution() override;;
+        virtual Solution<Command> GenerateSolution() override;
         //! According to game conditions generates solutions which is as valid as possiable
         virtual void Mutate(Solution<Command>& s) override;
         //! Plaese set the start point before you evaluate
@@ -85,6 +87,7 @@ namespace sc2{
         //virtual void EvaluateSingleSolution(Solution<Command>& s) override {};
 
         // Settings
+        int m_objective_size = 2;
         int m_sims_step_size = 8;
         int m_run_length = 64;  //? Does the step_size in simulator matter?
         //! the command length for each unit

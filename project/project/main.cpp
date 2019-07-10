@@ -135,7 +135,8 @@ int main(int argc, char* argv[]) {
     auto start = std::chrono::steady_clock::now();
     auto end = std::chrono::steady_clock::now();
     while (start = std::chrono::steady_clock::now(),
-           renderer.DrawObservation(ob),  // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
+              renderer.DrawObservation(ob),  // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
+        //    renderer.DrawRedRect(),
            coordinator.Update()) {
         end = std::chrono::steady_clock::now();
         auto interval = end - start;

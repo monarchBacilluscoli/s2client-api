@@ -1,10 +1,58 @@
 #include "debug_renderer/debug_renderer.h"
 #include <iostream>
 #include <cmath>
+#include <thread>
 
 using namespace sc2;
 
 float DebugRenderer::ratio_between_window_and_unit = 20.f;
+
+//! SDL_Rect only contains int data, but coordinators in game map are float data
+struct FloatRect{
+    float x, y;
+    float w, h;
+};
+
+//! Used for transforming coordinators between game position and renderer position
+class CoordinatorTransformer {
+   private:
+    FloatRect m_game_rect;
+    SDL_Rect m_render_rect;
+
+   private:
+    //some intermediate data
+    float m_ratio_game_to_render = 1.f;
+
+   public:
+    // several constructor
+    CoordinatorTransformer(const Point2D& playable_min, const Point2D& playable_max, const SDL_Rect& renderer_boundary);
+    CoordinatorTransformer(const ObservationInterface* observation, const SDL_Rect& renderer_boundary);
+    CoordinatorTransformer(/* args */) = delete;
+    ~CoordinatorTransformer() = default;
+
+   public:
+    Point2D ToRenderPoint(const Point2D& game_point) const;
+    Point2D ToGamePoint(const Point2D& render_point) const;
+};
+
+CoordinatorTransformer::CoordinatorTransformer(const ObservationInterface* observation, const SDL_Rect& renderer_boundary) : CoordinatorTransformer(observation->GetGameInfo().playable_min, observation->GetGameInfo().playable_max, renderer_boundary) {}
+
+CoordinatorTransformer::CoordinatorTransformer(const Point2D& playable_min, const Point2D& playable_max, const SDL_Rect& renderer_boundary):
+m_game_rect({playable_min.x, playable_min.y,(playable_max-playable_min).x,(playable_max-playable_min).y}),
+m_render_rect(renderer_boundary),
+m_ratio_game_to_render(m_game_rect.w/m_render_rect.w>m_game_rect.h/m_render_rect.h?m_render_rect.w/m_game_rect.w:m_render_rect.h/m_game_rect.h)
+{}
+
+Point2D CoordinatorTransformer::ToRenderPoint(const Point2D& game_point) const {
+    Point2D playable_pos = game_point - Point2D(m_game_rect.x, m_game_rect.y);
+    return Point2D(
+        playable_pos.x * m_ratio_game_to_render,
+        (m_game_rect.y - playable_pos.y) * m_ratio_game_to_render);
+}
+
+Point2D CoordinatorTransformer::ToGamePoint(const Point2D& render_point) const {
+    return Point2D(render_point.x / m_ratio_game_to_render + m_game_rect.x, m_game_rect.h - render_point.y / m_ratio_game_to_render + m_game_rect.y);
+}
 
 //! A fixed size health bar
 struct HealthBar{
@@ -42,10 +90,7 @@ struct HealthBar{
 
 // DebugRenderer DebugRenderer::global_debug_renderer = DebugRenderer("Debug Renderer");
 
-DebugRenderer::DebugRenderer()
-{
-    DebugRenderer("Debug Renderer");
-}
+DebugRenderer::DebugRenderer():DebugRenderer("Debug Renderer"){}
 
 DebugRenderer::DebugRenderer(const std::string& window_name){
     // Init SDL2
@@ -98,6 +143,26 @@ DebugRenderer::~DebugRenderer()
     SDL_DestroyWindow(m_window);
     SDL_Quit();
 }
+
+DebugRenderer& DebugRenderer::operator=(const sc2::DebugRenderer& rhs){
+    //todo destory current pointer
+    SDL_DestroyRenderer(m_renderer);
+    SDL_DestroyWindow(m_window);
+    //todo get the passed object‘s pointer
+    m_renderer = rhs.m_renderer;
+    m_window = rhs.m_window;
+    m_facing_line_length = rhs.m_facing_line_length;
+
+    return *this;
+}
+
+void DebugRenderer::DrawSolution(Solution<Command> solution, const ObservationInterface* observation, std::map<Tag, const Unit*> units_map){
+    // todo I must be able to draw all aspects of an ActionRaw: executor, target pos, target unit, and maybe target itself
+    //todo coordinator map
+    //todo 
+    //todo for each solution
+}
+
 
 void DebugRenderer::DrawObservations(const std::vector<const ObservationInterface*> observations){
     //todo get main window size
@@ -162,10 +227,17 @@ void DebugRenderer::DrawObservation(const ObservationInterface *observation, int
         float y = (float)offset_y + (playable_length.y - playable_pos.y) * ratio;
         int size = u->radius * ratio < minimize_size ? minimize_size : ceil(u->radius * ratio);
         unit_rect = {(int)x, (int)y, (int)size, (int)size};
-        HealthBar health_bar(x,y-12,u->health_max, u->health, ceil(h/30), w/240);
+        HealthBar health_bar(x,y-ceil(h/30),u->health_max, u->health, ceil(h/30), w/240);
         health_bar.Draw(m_renderer);
         SDL_RenderDrawRect(m_renderer, &unit_rect);
         SDL_RenderFillRect(m_renderer, &unit_rect);
+        //todo draw the cooldown
+        if(u->weapon_cooldown>0){
+            SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0xff / 2);
+            SDL_Rect cooldown_rect = {unit_rect.x + unit_rect.w * 1 / 4, unit_rect.y + unit_rect.h * 1 / 4, unit_rect.w / 2, unit_rect.h / 2};
+            SDL_RenderDrawRect(m_renderer, &cooldown_rect);
+            SDL_RenderFillRect(m_renderer, &cooldown_rect);
+        }
         //todo Draw the facing direction of a unit
         //todo calculate the line in the direction of the unit
         Point2DI facing_line_start(x+size/2,y+size/2); // from the middle of the unit
