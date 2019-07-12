@@ -7,51 +7,45 @@ using namespace sc2;
 
 float DebugRenderer::ratio_between_window_and_unit = 20.f;
 
-//! SDL_Rect only contains int data, but coordinators in game map are float data
-struct FloatRect{
-    float x, y;
-    float w, h;
-};
+CoordinateTransformer::CoordinateTransformer(const ObservationInterface* observation, const SDL_Rect& renderer_boundary) : CoordinateTransformer(observation->GetGameInfo().playable_min, observation->GetGameInfo().playable_max, renderer_boundary) {}
 
-//! Used for transforming coordinators between game position and renderer position
-class CoordinatorTransformer {
-   private:
-    FloatRect m_game_rect;
-    SDL_Rect m_render_rect;
-
-   private:
-    //some intermediate data
-    float m_ratio_game_to_render = 1.f;
-
-   public:
-    // several constructor
-    CoordinatorTransformer(const Point2D& playable_min, const Point2D& playable_max, const SDL_Rect& renderer_boundary);
-    CoordinatorTransformer(const ObservationInterface* observation, const SDL_Rect& renderer_boundary);
-    CoordinatorTransformer(/* args */) = delete;
-    ~CoordinatorTransformer() = default;
-
-   public:
-    Point2D ToRenderPoint(const Point2D& game_point) const;
-    Point2D ToGamePoint(const Point2D& render_point) const;
-};
-
-CoordinatorTransformer::CoordinatorTransformer(const ObservationInterface* observation, const SDL_Rect& renderer_boundary) : CoordinatorTransformer(observation->GetGameInfo().playable_min, observation->GetGameInfo().playable_max, renderer_boundary) {}
-
-CoordinatorTransformer::CoordinatorTransformer(const Point2D& playable_min, const Point2D& playable_max, const SDL_Rect& renderer_boundary):
+CoordinateTransformer::CoordinateTransformer(const Point2D& playable_min, const Point2D& playable_max, const SDL_Rect& renderer_boundary):
 m_game_rect({playable_min.x, playable_min.y,(playable_max-playable_min).x,(playable_max-playable_min).y}),
 m_render_rect(renderer_boundary),
 m_ratio_game_to_render(m_game_rect.w/m_render_rect.w>m_game_rect.h/m_render_rect.h?m_render_rect.w/m_game_rect.w:m_render_rect.h/m_game_rect.h)
 {}
 
-Point2D CoordinatorTransformer::ToRenderPoint(const Point2D& game_point) const {
-    Point2D playable_pos = game_point - Point2D(m_game_rect.x, m_game_rect.y);
-    return Point2D(
-        playable_pos.x * m_ratio_game_to_render,
-        (m_game_rect.y - playable_pos.y) * m_ratio_game_to_render);
+Point2DI CoordinateTransformer::ToRenderPoint(const Point2D& game_point) const {
+    Point2D pos_relative_playable_min = game_point - Point2D(m_game_rect.x, m_game_rect.y);
+    return Point2DI(
+        pos_relative_playable_min.x * m_ratio_game_to_render + m_render_rect.x,
+        (m_game_rect.h - pos_relative_playable_min.y) * m_ratio_game_to_render + m_render_rect.y);
 }
 
-Point2D CoordinatorTransformer::ToGamePoint(const Point2D& render_point) const {
-    return Point2D(render_point.x / m_ratio_game_to_render + m_game_rect.x, m_game_rect.h - render_point.y / m_ratio_game_to_render + m_game_rect.y);
+Point2D CoordinateTransformer::ToGamePoint(const Point2D& render_point) const {
+    Point2D pos_relative_render_min = render_point - Point2D(m_render_rect.x, m_render_rect.y);
+    return Point2D(pos_relative_render_min.x / m_ratio_game_to_render + m_game_rect.x, m_game_rect.h - pos_relative_render_min.y / m_ratio_game_to_render + m_game_rect.y);
+}
+
+void CoordinateTransformer::SetPlayableGameMapSize(const ObservationInterface* observation){
+    SetPlayableGameMapSize(observation->GetGameInfo());
+}
+
+void CoordinateTransformer::SetPlayableGameMapSize(const GameInfo& game_info){
+    SetPlayableGameMapSize(game_info.playable_min, game_info.playable_max);
+}
+
+void CoordinateTransformer::SetPlayableGameMapSize(const Point2D& playable_min, const Point2D& playable_max){
+    Vector2D playable_length = playable_max - playable_min;
+    m_game_rect = {
+        playable_min.x,
+        playable_min.y,
+        playable_length.x,
+        playable_length.y};
+}
+
+float CoordinateTransformer::GetRatioGameToRender() const {
+    return m_ratio_game_to_render;
 }
 
 //! A fixed size health bar
@@ -88,12 +82,22 @@ struct HealthBar{
     SDL_Rect cover;
 };
 
-// DebugRenderer DebugRenderer::global_debug_renderer = DebugRenderer("Debug Renderer");
+struct CenterRect
+{
+    CenterRect(int x,int y,int w,int h):rect{x-w/2,y-h/2,w,h}{}
+    SDL_Rect rect;
+};
 
-DebugRenderer::DebugRenderer():DebugRenderer("Debug Renderer"){}
 
+// void DebugRenderer::DrawCenterRect(SDL_Renderer* renderer, const SDL_Rect* rect){
+//     SDL_Rect new_rect = {rect->x + rect->w / 2, rect->y + rect->h / 2, rect->w, rect->h};
+//     SDL_RenderDrawRect(renderer, &new_rect);
+// }
+
+DebugRenderer::DebugRenderer() : DebugRenderer("Debug Renderer"){}
+
+// use 3/4 of the screen size of default monitor to display
 DebugRenderer::DebugRenderer(const std::string& window_name){
-    // Init SDL2
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         const char *error = SDL_GetError();
@@ -109,18 +113,19 @@ DebugRenderer::DebugRenderer(const std::string& window_name){
         exit(1);
     }
     m_window = SDL_CreateWindow("StarCraftII Observer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, display_bound.w*3/4, display_bound.h*3/4, SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
-
     m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
     // Enable the use of alpha tannel
     SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
+
+    // initialize the transformer
 
     SDL_SetRenderDrawColor(m_renderer, 0xff, 0xff, 0xff, 0xff);
     SDL_RenderClear(m_renderer);
     SDL_RenderPresent(m_renderer);
 }
 
+// Set your own size of debug display
 DebugRenderer::DebugRenderer(const std::string& window_name, int x, int y, int w, int h){
-// Init SDL2
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         const char *error = SDL_GetError();
@@ -156,12 +161,57 @@ DebugRenderer& DebugRenderer::operator=(const sc2::DebugRenderer& rhs){
     return *this;
 }
 
-void DebugRenderer::DrawSolution(Solution<Command> solution, const ObservationInterface* observation, std::map<Tag, const Unit*> units_map){
-    // todo I must be able to draw all aspects of an ActionRaw: executor, target pos, target unit, and maybe target itself
-    //todo coordinator map
-    //todo 
-    //todo for each solution
+void DebugRenderer::ClearRenderer() {
+    SDL_SetRenderDrawColor(m_renderer, 0xff, 0xff, 0xff, 0xff);
+    SDL_RenderClear(m_renderer);
 }
+
+void DebugRenderer::Present(){
+    SDL_RenderPresent(m_renderer);
+}
+
+void DebugRenderer::DrawSolution(const Solution<Command>& solution, const ObservationInterface* observation, const std::map<Tag, const Unit*>& units_map){
+    int w, h;
+    SDL_GetWindowSize(m_window, &w, &h);
+    DrawOrders(solution.variable, observation, units_map, 0, 0, w, h);
+}
+
+void DebugRenderer::DrawOrders(const std::vector<Command>& orders, const ObservationInterface* observation, const std::map<Tag, const Unit*>& units_map){
+    int w, h;
+    SDL_GetWindowSize(m_window, &w, &h);
+    DrawOrders(orders, observation, units_map, 0, 0, w, h);
+}
+
+void DebugRenderer::DrawOrders(const std::vector<Command>& orders, const ObservationInterface *observation, const std::map<Tag, const Unit*>& units_map, int x, int y, int w, int h){
+    CoordinateTransformer transformer(observation, {x, y, w, h});
+    SDL_SetRenderDrawColor(m_renderer, 0xff, 0xff, 0, 0xff);
+    for (const Command& command : orders) {
+        //todo draw each command
+        const Unit* command_unit = units_map.at(command.unit_tag);
+        Point2DI start_point = transformer.ToRenderPoint(command_unit->pos);
+        for (const ActionRaw& action : command.actions) {
+            Point2DI end_point;
+            switch (action.target_type) {
+                case ActionRaw::TargetType::TargetNone:
+                    //if there is an action apply on itself, draw a small rect here
+                    CenterRect self_action_position(start_point.x, start_point.y, 3, 3);
+                    SDL_RenderDrawRect(m_renderer, &self_action_position.rect);
+                    break;
+                case ActionRaw::TargetType::TargetPosition:
+                    end_point = Point2DI(action.target_point.x, action.target_point.y);
+                    SDL_RenderDrawLine(m_renderer, start_point.x, start_point.y, end_point.x, end_point.y);
+                    break;
+                case ActionRaw::TargetType::TargetUnitTag:
+                    const Unit* target_u = units_map.at(action.TargetUnitTag);
+                    end_point = Point2DI(target_u->pos.x, target_u->pos.y);
+                    SDL_RenderDrawLine(m_renderer, start_point.x, start_point.y, end_point.x, end_point.y);
+                    break;
+            }
+            start_point = end_point;
+        }
+    }
+}
+
 
 
 void DebugRenderer::DrawObservations(const std::vector<const ObservationInterface*> observations){
@@ -190,19 +240,13 @@ void DebugRenderer::DrawObservation(const ObservationInterface *observation)
     int w, h;
     SDL_GetWindowSize(m_window, &w, &h);
 
-    SDL_SetRenderDrawColor(m_renderer, 0xff, 0xff, 0xff, 0xff);
-	SDL_RenderClear(m_renderer);
     DrawObservation(observation, 0,0,w,h);
-    SDL_RenderPresent(m_renderer);
 }
 
 // Without presenting and clearing
 void DebugRenderer::DrawObservation(const ObservationInterface *observation, int offset_x, int offset_y, int w, int h)
 {
-    //calculate the ratio from original map to draw window
-    Point2D playable_min = observation->GetGameInfo().playable_min;
-    Vector2D playable_length = {observation->GetGameInfo().playable_max.x - playable_min.x, observation->GetGameInfo().playable_max.y - playable_min.y};
-    float ratio = playable_length.x / w > playable_length.y / h ? w / playable_length.x : h / playable_length.y;
+    CoordinateTransformer coordinate_transformer(observation, {offset_x, offset_y, w, h});
     // handle how to draw the unit
     Units us = observation->GetUnits();
     Point2D playable_pos;
@@ -221,18 +265,15 @@ void DebugRenderer::DrawObservation(const ObservationInterface *observation, int
         {
             SDL_SetRenderDrawColor(m_renderer, 0, 0, 0xff, 0xff);
         }
-        playable_pos = u->pos - playable_min;
-        // get the corresponding pos in draw window
-        float x = (float)offset_x + playable_pos.x * ratio;
-        float y = (float)offset_y + (playable_length.y - playable_pos.y) * ratio;
-        int size = u->radius * ratio < minimize_size ? minimize_size : ceil(u->radius * ratio);
-        unit_rect = {(int)x, (int)y, (int)size, (int)size};
-        HealthBar health_bar(x,y-ceil(h/30),u->health_max, u->health, ceil(h/30), w/240);
+        Point2DI render_pos = coordinate_transformer.ToRenderPoint(u->pos);
+        int size = u->radius * coordinate_transformer.GetRatioGameToRender() < minimize_size ? minimize_size : ceil(u->radius * coordinate_transformer.GetRatioGameToRender());
+        unit_rect = {(int)render_pos.x, (int)render_pos.y, (int)size, (int)size};
+        HealthBar health_bar(render_pos.x, (int)render_pos.y - ceil(h / 30), u->health_max, u->health, ceil(h / 30), w / 240);
         health_bar.Draw(m_renderer);
         SDL_RenderDrawRect(m_renderer, &unit_rect);
         SDL_RenderFillRect(m_renderer, &unit_rect);
         //todo draw the cooldown
-        if(u->weapon_cooldown>0){
+        if (u->weapon_cooldown > 0) {
             SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0xff / 2);
             SDL_Rect cooldown_rect = {unit_rect.x + unit_rect.w * 1 / 4, unit_rect.y + unit_rect.h * 1 / 4, unit_rect.w / 2, unit_rect.h / 2};
             SDL_RenderDrawRect(m_renderer, &cooldown_rect);
@@ -240,9 +281,9 @@ void DebugRenderer::DrawObservation(const ObservationInterface *observation, int
         }
         //todo Draw the facing direction of a unit
         //todo calculate the line in the direction of the unit
-        Point2DI facing_line_start(x+size/2,y+size/2); // from the middle of the unit
-        SDL_SetRenderDrawColor(m_renderer,0,0,0,0xff/2);
-        SDL_RenderDrawLine(m_renderer,facing_line_start.x,facing_line_start.y,facing_line_start.x+m_facing_line_length* std::cos(u->facing), facing_line_start.y-m_facing_line_length* std::sin(u->facing));
+        Point2DI facing_line_start((int)render_pos.x + size / 2, (int)render_pos.y + size / 2);  // from the middle of the unit
+        SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0xff / 2);
+        SDL_RenderDrawLine(m_renderer, facing_line_start.x, facing_line_start.y, facing_line_start.x + m_facing_line_length * std::cos(u->facing), facing_line_start.y - m_facing_line_length * std::sin(u->facing));
     }
 }
 

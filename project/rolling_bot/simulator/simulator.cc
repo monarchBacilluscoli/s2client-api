@@ -8,25 +8,29 @@
 using namespace sc2;
 
 void Simulator::CopyAndSetState(const ObservationInterface* ob_source, DebugRenderer* debug_renderer) {
+    m_save = SaveMultiPlayerGame(ob_source);
+    m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);
+    // SetUnitsRelations(m_save, m_executor.Observation()->GetUnits());
+    //check the crush of unit relationship
+    //todo use set to check it
+    std::set<const Unit*> check_set;
+    for (const auto& item : m_relative_units) {
+        check_set.insert(item.second);
+    }
+    if (check_set.size() != m_relative_units.size()) {
+        std::cout << "mistake in copy: " << m_relative_units.size() - check_set.size() << std::endl;
+        std::cout << "difference between save and current units: " << m_relative_units.size() - Observation()->GetUnits().size() << std::endl;
+    }
+    if (!IsMultiPlayerGame()) {
+        m_executor.Control()->Save();
+    }
     // save from local instance
     if (debug_renderer) {
-        m_save = SaveMultiPlayerGame(ob_source);
-        m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);
-        // SetUnitsRelations(m_save, m_executor.Observation()->GetUnits());
-        //check the crush of unit relationship
-        //todo use set to check it
-        std::set<const Unit*> check_set;
-        for (const auto& item : m_relative_units) {
-            check_set.insert(item.second);
-        }
-        if (check_set.size() != m_relative_units.size()) {
-            std::cout << "mistake in copy: " << m_relative_units.size() - check_set.size() << std::endl;
-        }
-        if (!IsMultiPlayerGame()) {
-            m_executor.Control()->Save();
-        }
         // Maybe I only need to display the result
+        debug_renderer->ClearRenderer();
+        debug_renderer->DrawOrders(m_commands,m_executor.Observation(),m_relative_units);
         debug_renderer->DrawObservation(m_executor.Observation());
+        debug_renderer->Present();
     }
 }
 
@@ -39,7 +43,7 @@ void Simulator::SetUnitsRelations(State state, Units us_copied) {
     }
 }
 
-void Simulator::SetStartPoint(std::vector<Command> commands,
+void Simulator::SetStartPoint(const std::vector<Command>& commands,
                               const ObservationInterface* ob) {
     CopyAndSetState(ob);
     SetOrders(commands);
@@ -50,7 +54,11 @@ void Simulator::Run(int steps, DebugRenderer* debug_renderer) {
         const ObservationInterface* ob = GetObservations().front();
         for (size_t i = 0; i < (size_t)ceil(steps / GetStepSize()); i++) {
             Update();
+            debug_renderer->ClearRenderer();
+            debug_renderer->DrawOrders(m_commands,m_executor.Observation(),m_relative_units);
             debug_renderer->DrawObservation(ob);
+            // debug_renderer->DrawOrders()
+            debug_renderer->Present();
         }
     } else {
         for (size_t i = 0; i < (size_t)ceil(steps / GetStepSize()); i++) {
@@ -62,6 +70,14 @@ void Simulator::Run(int steps, DebugRenderer* debug_renderer) {
 const ObservationInterface* Simulator::Observation() const
 {
 	return m_executor.Observation();
+}
+
+DebugInterface* Simulator::Debug(){
+    return m_executor.Debug();
+}
+
+ActionInterface* Simulator::Actions(){
+    return m_executor.Actions();
 }
 
 float Simulator::GetTeamHealthLoss(Unit::Alliance alliance) const {
@@ -114,7 +130,7 @@ void Simulator::Load() {
     }
 }
 
-void Simulator::SetOrders(std::vector<Command> commands) {
+void Simulator::SetOrders(const std::vector<Command>& commands) {
     // Just simply press those actions in every unit
     //? Note that the orders can be stored into units or somewhere else is
     //limited in StarCraft II, I need to figure out it
@@ -138,6 +154,7 @@ void Simulator::SetOrders(std::vector<Command> commands) {
             }
         }
     }
+    m_commands = commands;
 }
 
 void Simulator::SetOpponent(Agent* agent) {

@@ -45,8 +45,8 @@ std::map<Tag, const Unit*> sc2::LoadMultiPlayerGame(State save, Client& current_
 		current_client.Debug()->DebugCreateUnit(state_u.unit_type, state_u.pos, state_u.player_id);
 	}
 	current_client.Debug()->SendDebug();
-	// the DebugCreateUnit() needs at least 2 loops to be executed
-	current_coordinator.Update();
+	// the DebugCreateUnit() needs at least 1 loops to be executed
+	// current_coordinator.Update();
 	current_coordinator.Update();
 	// from here, I need to ensure nobody will move, but if I do it like this...x
 	// todo set the relationship here! To ensure the minimize movement
@@ -62,6 +62,6 @@ std::map<Tag, const Unit*> sc2::LoadMultiPlayerGame(State save, Client& current_
 	current_client.Debug()->SendDebug();
 	// like CreateUnit(), DebugCreateUnit() needs at least 2 loops to be executed, too
 	current_coordinator.Update();
-	current_coordinator.Update();
+	// current_coordinator.Update();
     return unit_map;
 }

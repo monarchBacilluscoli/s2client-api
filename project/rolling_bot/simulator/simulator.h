@@ -10,9 +10,15 @@
 #include "debug_renderer/debug_renderer.h"
 #include "state.h"
 
+#include <iostream>
 
 namespace sc2 {
-class Executor : public Agent {};
+class Executor : public Agent {
+    //! for test
+    // void OnUnitDestroyed(const Unit* u) override {
+    //     std::cout << "Destroyed Unit:\t " << u->unit_type << "\t" << "("<< u->pos.x << "," <<u->pos.y<< ")" << "\t" << u->health << std::endl;
+    // }
+};
 
 class Simulator : public Coordinator {
    public:
@@ -29,11 +35,11 @@ class Simulator : public Coordinator {
     void SetOpponent(Difficulty difficulty);
 
     //! direct send the orders to units
-    void SetOrders(std::vector<Command> commands);
+    void SetOrders(const std::vector<Command>& commands);
     //! copy the game state from a specific game observation
     void CopyAndSetState(const ObservationInterface* ob, DebugRenderer* debug_renderer = nullptr);
     //! copys state and sets orders for preparation to run
-    void SetStartPoint(std::vector<Command> commands,
+    void SetStartPoint(const std::vector<Command>& commands,
                        const ObservationInterface* ob);
     //! runs for specific number of steps which can be set by user
     void Run(int steps, DebugRenderer* debug_renderer = nullptr);
@@ -42,10 +48,22 @@ class Simulator : public Coordinator {
     //? is anyone really needs a Run() which runs the game until gameover
     //! exposes the whole ObservationInterface to user
     const ObservationInterface* Observation() const;
+    //! exposes DebugInterface
+    DebugInterface* Debug();
+    //! exposes ActionInterface
+    ActionInterface* Actions();
 
     //! Compares current state with the start point to get specific unit group
     //! health loss
     float GetTeamHealthLoss(Unit::Alliance alliance) const;
+
+    const std::map<Tag, const Unit*>& GetRelativeUnits(){
+        return m_relative_units;
+    }
+    
+    const State& GetSave(){
+        return m_save;
+    }
 
    private:
     //! set units relations
@@ -62,6 +80,8 @@ class Simulator : public Coordinator {
     State m_initial_save;
     //! save of state
     State m_save;
+    //! orders sent in
+    std::vector<Command> m_commands;
 
     //! form resource tag to target unit
     std::map<Tag, const Unit*> m_relative_units;

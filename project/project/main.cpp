@@ -89,6 +89,65 @@ int main(int argc, char* argv[]) {
         //     }
         // }
     }
+    {
+        // //! Test for the simulator
+        // //
+        // Simulator sim;
+        // DebugRenderer debug_renderer;
+        // sim.SetProcessPath("/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64");
+        // sim.SetPortStart(3000);
+        // sim.SetMapPath("testBattle_distant_vs_melee_debug.SC2Map");
+        // sim.LaunchStarcraft();
+        // sim.StartGame();
+
+        
+        // //todo randomly creates units in a range
+        // for (size_t i = 0; true; i++) {
+        //     Units us = sim.Observation()->GetUnits();
+        //     std::for_each(us.begin(), us.end(), [&](const Unit* u) { sim.Debug()->DebugKillUnit(u); });
+        //     sim.Debug()->SendDebug();
+        //     for (size_t i = 0; i < 20; i++) {
+        //         std::cout << "unit number: " << sim.Observation()->GetUnits().size() << std::endl;
+        //         sim.Update();
+        //         std::cout << "unit number: " << sim.Observation()->GetUnits().size() << std::endl;
+        //         debug_renderer.DrawObservation(sim.Observation());
+        //     }
+        //     int unit_count = 20;
+        //     // for (size_t i = 0; i < unit_count; i++) {
+        //     //     float random = GetRandomFraction();
+        //     //     UnitTypeID ut = random > 0.5 ? UNIT_TYPEID::TERRAN_MARINE : UNIT_TYPEID::PROTOSS_ZEALOT;
+        //     //     uint32_t player_id = random > 0.5 ? 1 : 2;
+        //     //     sim.Debug()->DebugCreateUnit(ut, FindRandomLocation({16, 16}, {17, 17}), player_id);
+        //     // }
+        //     // sim.Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_MARINE, FindRandomLocation({16, 16}, {17, 17}), 1, unit_count);
+        //     for (size_t i = 0; i < unit_count; i++)
+        //     {
+        //         float random = GetRandomFraction();
+        //         UnitTypeID ut = random > 0.5 ? UNIT_TYPEID::TERRAN_MARINE : UNIT_TYPEID::PROTOSS_ZEALOT;
+        //         uint32_t player_id = random > 0.5 ? 1 : 2;
+        //         sim.Debug()->DebugCreateUnit(ut, FindRandomLocation({16, 16}, {17, 17}), player_id);
+        //     }
+
+        //     sim.Debug()->SendDebug();
+        //     for (size_t i = 0; i < 2; i++) {
+        //         std::cout << "unit number: " << sim.Observation()->GetUnits().size() << std::endl;
+        //         sim.Update();
+        //         std::cout << "unit number: " << sim.Observation()->GetUnits().size() << std::endl;
+        //         debug_renderer.DrawObservation(sim.Observation());
+        //     }
+        //     std::cout << "the result: " << sim.Observation()->GetUnits().size() << std::endl;
+        //     {
+        //         // std::cout << "1: ";
+        //         // sim.CopyAndSetState(sim.Observation(), &debug_renderer);
+        //         // std::cout << "2: ";
+        //         // sim.CopyAndSetState(sim.Observation(), &debug_renderer);
+        //         // std::cout << "3: ";
+        //         // sim.CopyAndSetState(sim.Observation(), &debug_renderer);
+        //     }
+
+        //     std::cout << std::endl;
+        // }
+    }
 
     // Before evething starts, kill all the StarCraftII instances started before.
     std::string process_name_to_be_killed = "SC2_x64";
@@ -135,8 +194,9 @@ int main(int argc, char* argv[]) {
     auto start = std::chrono::steady_clock::now();
     auto end = std::chrono::steady_clock::now();
     while (start = std::chrono::steady_clock::now(),
-              renderer.DrawObservation(ob),  // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
-        //    renderer.DrawRedRect(),
+           renderer.ClearRenderer(),
+           renderer.DrawObservation(ob),  // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
+           renderer.Present(),
            coordinator.Update()) {
         end = std::chrono::steady_clock::now();
         auto interval = end - start;
