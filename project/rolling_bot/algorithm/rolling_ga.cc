@@ -199,7 +199,6 @@ void sc2::RollingGA::Evaluate(Population& p) {
     std::for_each(setting_threads.begin(), setting_threads.end(), [](std::thread& t) -> void { t.join(); });
 
     RunSimulatorsSynchronous();
-    // RunSimulatorsOneByOne();
     //? output the best one for each generation, or outputs the average objectives for each generation
     float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
     float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();

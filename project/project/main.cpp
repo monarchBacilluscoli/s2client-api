@@ -21,11 +21,28 @@ public:
     }
     virtual void OnGameStart() final {
         std::cout << "Hello, World!" << std::endl;
+        //todo add attack then move action to each unit
+        GameInfo game_info = Observation()->GetGameInfo();
+        Units self_us = Observation()->GetUnits(Unit::Alliance::Self);
+        Units enemy_us = Observation()->GetUnits(Unit::Alliance::Enemy);
+        for (const Unit *u : self_us)
+        {
+            Actions()->UnitCommand(u, ABILITY_ID::ATTACK, GetRandomEntry(enemy_us), true);
+        }
+        //todo add move actions
+        for (const Unit* u: self_us)
+        {
+            for (size_t i = 0; i < 3; i++)
+            {
+                Actions()->UnitCommand(u,ABILITY_ID::MOVE, FindRandomLocation(game_info), true);
+            }
+        }
+        
     }
 
     virtual void OnUnitIdle(const Unit* unit) final {
         Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
-        Actions()->UnitCommand(unit,ABILITY_ID::ATTACK,GetRandomEntry(enemies),true);
+        // Actions()->UnitCommand(unit,ABILITY_ID::ATTACK,GetRandomEntry(enemies),true);
     }
 
     virtual void OnStep() final {
@@ -217,6 +234,10 @@ int main(int argc, char* argv[]) {
         // ismap.at(2);
         // std::cout << std::endl;
     }
+    {
+        //! Ensure if once attack deployed, the units can not take other actions anymore, unless the attack action deployed entirely
+        //todo start 
+    }
 
     // Some settings
     bool is_debug = true;
@@ -237,13 +258,12 @@ int main(int argc, char* argv[]) {
 
     //! Bots here
     Bot bot;
-    RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path);
-    rolling_bot.SetDebugOn(true);
-
-    rolling_bot.SetMaxGeneration(10);
+    // RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path);
+    // rolling_bot.SetDebugOn(true);
+    // rolling_bot.SetMaxGeneration(10);
 
     //! participants settings here
-    coordinator.SetParticipants({CreateParticipant(Race::Terran, &rolling_bot),
+    coordinator.SetParticipants({CreateParticipant(Race::Terran, &bot),
                                  CreateComputer(Race::Zerg)});
     coordinator.SetPortStart(main_process_port);
     coordinator.SetRealtime(real_time);
