@@ -38,6 +38,10 @@ private:
 };
 
 int main(int argc, char* argv[]) {
+    // Before evething starts, kill all the StarCraftII instances started before.
+    std::string process_name_to_be_killed = "SC2_x64";
+    std::string command = "ps -aux| grep " + process_name_to_be_killed + " | grep -v grep |awk '{print $2}' | xargs kill";
+    system(command.c_str());
     //! test code (Can be folded)
     {
         //! for real ga
@@ -91,7 +95,6 @@ int main(int argc, char* argv[]) {
     }
     {
         // //! Test for the simulator
-        // //
         // Simulator sim;
         // DebugRenderer debug_renderer;
         // sim.SetProcessPath("/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64");
@@ -101,58 +104,119 @@ int main(int argc, char* argv[]) {
         // sim.StartGame();
 
         
-        // //todo randomly creates units in a range
+        // // //todo randomly creates units in a range
         // for (size_t i = 0; true; i++) {
         //     Units us = sim.Observation()->GetUnits();
         //     std::for_each(us.begin(), us.end(), [&](const Unit* u) { sim.Debug()->DebugKillUnit(u); });
         //     sim.Debug()->SendDebug();
-        //     for (size_t i = 0; i < 20; i++) {
-        //         std::cout << "unit number: " << sim.Observation()->GetUnits().size() << std::endl;
-        //         sim.Update();
-        //         std::cout << "unit number: " << sim.Observation()->GetUnits().size() << std::endl;
-        //         debug_renderer.DrawObservation(sim.Observation());
-        //     }
+            
+        //     // Create 20 units
         //     int unit_count = 20;
-        //     // for (size_t i = 0; i < unit_count; i++) {
-        //     //     float random = GetRandomFraction();
-        //     //     UnitTypeID ut = random > 0.5 ? UNIT_TYPEID::TERRAN_MARINE : UNIT_TYPEID::PROTOSS_ZEALOT;
-        //     //     uint32_t player_id = random > 0.5 ? 1 : 2;
-        //     //     sim.Debug()->DebugCreateUnit(ut, FindRandomLocation({16, 16}, {17, 17}), player_id);
-        //     // }
-        //     // sim.Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_MARINE, FindRandomLocation({16, 16}, {17, 17}), 1, unit_count);
         //     for (size_t i = 0; i < unit_count; i++)
         //     {
         //         float random = GetRandomFraction();
         //         UnitTypeID ut = random > 0.5 ? UNIT_TYPEID::TERRAN_MARINE : UNIT_TYPEID::PROTOSS_ZEALOT;
         //         uint32_t player_id = random > 0.5 ? 1 : 2;
-        //         sim.Debug()->DebugCreateUnit(ut, FindRandomLocation({16, 16}, {17, 17}), player_id);
+        //         sim.Debug()->DebugCreateUnit(ut, FindRandomLocation({16, 16}, {18, 18}), player_id);
         //     }
+        //     //todo set all the units in a low hp
 
         //     sim.Debug()->SendDebug();
-        //     for (size_t i = 0; i < 2; i++) {
-        //         std::cout << "unit number: " << sim.Observation()->GetUnits().size() << std::endl;
-        //         sim.Update();
-        //         std::cout << "unit number: " << sim.Observation()->GetUnits().size() << std::endl;
-        //         debug_renderer.DrawObservation(sim.Observation());
-        //     }
-        //     std::cout << "the result: " << sim.Observation()->GetUnits().size() << std::endl;
-        //     {
-        //         // std::cout << "1: ";
-        //         // sim.CopyAndSetState(sim.Observation(), &debug_renderer);
-        //         // std::cout << "2: ";
-        //         // sim.CopyAndSetState(sim.Observation(), &debug_renderer);
-        //         // std::cout << "3: ";
-        //         // sim.CopyAndSetState(sim.Observation(), &debug_renderer);
-        //     }
+        //     sim.Update();
+        //     us = sim.Observation()->GetUnits();
+        //     for (const auto& u :us) {
+        //         if(u->health!=u->health_max){
+        //             std::cout << u->health << "\t" << u->health_max << std::endl;
 
+        //         }
+        //     }
         //     std::cout << std::endl;
+
+        //     // for (size_t i = 0; i < 20; i++) {
+        //     //     std::cout << "unit number: " << sim.Observation()->GetUnits().size() << std::endl;
+        //     //     sim.Update();
+        //     //     std::cout << "unit number: " << sim.Observation()->GetUnits().size() << std::endl;
+        //     //     debug_renderer.DrawObservation(sim.Observation());
+        //     // }
         // }
     }
+    {
+        // switch (1)
+        // {
+        // case 1:
+        //     std::cout << "1" << std::endl;
+        //     std::cout << "1" << std::endl;
+        //     break;
 
-    // Before evething starts, kill all the StarCraftII instances started before.
-    std::string process_name_to_be_killed = "SC2_x64";
-    std::string command = "ps -aux| grep " + process_name_to_be_killed + " | grep -v grep |awk '{print $2}' | xargs kill";
-    system(command.c_str());
+        // default:
+        //     std::cout << "default" << std::endl;
+        //     break;
+        // }
+
+        // //! test for the DrawSolution
+        // DebugRenderer renderer;
+        // //todo start a sim
+        // Simulator sim;
+        // sim.SetProcessPath("/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64");
+        // sim.SetPortStart(3000);
+        // sim.SetMapPath("testBattle_distant_vs_melee_debug.SC2Map");
+        // sim.LaunchStarcraft();
+        // sim.StartGame();
+        // //todo kill and create some units belong to me
+        // sim.Debug()->DebugKillUnits(sim.Observation()->GetUnits());
+        // sim.Debug()->SendDebug();
+        // for (size_t i = 0; i < 20; i++)
+        // {
+        //     sim.Update();
+        // }
+        // int unit_count = 5;
+        // int action_count = 3;
+        // GameInfo game_info = sim.Observation()->GetGameInfo();
+        // sim.Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_MARINE, {25, 25}, 1U, unit_count);
+        // sim.Debug()->SendDebug();
+        // for (size_t i = 0; i < 2; i++)
+        // {
+        //     sim.Update();
+        // }
+        // //todo set the relations from themself to themself
+        // Units us = sim.Observation()->GetUnits();
+        // std::map<Tag, const Unit*> units_map;
+        // for (const auto& u:us )
+        // {
+        //     units_map[u->tag] = u;
+        // }
+        // //todo generate some random positions to move for each unit
+        // Solution<Command> sol(unit_count);
+        // for (size_t i = 0; i < unit_count; i++)
+        // {
+        //     //todo construct each action series for each unit
+        //     Command& command = sol.variable[i];
+        //     command.unit_tag = us[i]->tag;
+        //     command.actions.resize(action_count);
+        //     for (size_t j = 0; j < action_count; j++) {
+        //         ActionRaw& action = command.actions[j];
+        //         action.target_type = ActionRaw::TargetType::TargetPosition;
+        //         action.target_point = FindRandomLocation(game_info);
+        //     }
+        // }
+        // for (size_t i = 0; true; i++)
+        // {
+        //     sim.Update();
+        //     renderer.ClearRenderer();
+        //     renderer.DrawObservation(sim.Observation());
+        //     renderer.DrawSolution(sol, sim.Observation(), units_map);
+        //     renderer.Present();
+        // }
+
+        //todo update and draw
+    }
+    {
+        //! test of out of range of map
+        // std::map<int, std::string> ismap;
+        // ismap[1] = "first";
+        // ismap.at(2);
+        // std::cout << std::endl;
+    }
 
     // Some settings
     bool is_debug = true;

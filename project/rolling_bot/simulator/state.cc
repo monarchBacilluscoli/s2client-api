@@ -1,29 +1,29 @@
 #include "state.h"
-#include "sc2lib/sc2_utils.h"
 #include <sc2utils/sc2_manage_process.h>
+#include <iostream>
+#include "sc2lib/sc2_utils.h"
 
 using namespace sc2;
 
-State sc2::SaveMultiPlayerGame(const ObservationInterface* observation)
-{
-	State save;
-	Units us = observation->GetUnits();
-	save.unit_states.resize(us.size());
-	const Unit* u;
-	for (size_t i = 0; i < us.size(); i++)
-	{
-		u = us.at(i);
-		save.unit_states[i] = UnitState({
-			u->unit_type,
-			u->pos,
-			static_cast<uint32_t>(u->owner),
-			u->tag, // this is just used for remote simulation
-			u->energy,
-			u->health,
-			u->shield
-			});
-	}
-	return save;
+State sc2::SaveMultiPlayerGame(const ObservationInterface* observation) {
+    State save;
+    Units us = observation->GetUnits();
+    save.unit_states.resize(us.size());
+    const Unit* u;
+    for (size_t i = 0; i < us.size(); i++) {
+        u = us.at(i);
+        save.unit_states[i] = UnitState({u->unit_type,
+                                         u->pos,
+                                         static_cast<uint32_t>(u->owner),
+                                         u->tag,  // this is just used for remote simulation
+                                         u->energy,
+                                         u->health,
+                                         u->shield});
+    }
+    if (save.unit_states.size() < us.size()) {
+        std::cout << "mistake between save an us: " << us.size() - save.unit_states.size() << std::endl;
+    }
+    return save;
 }
 
 std::map<Tag, const Unit*> sc2::LoadMultiPlayerGame(State save, Client& current_client, Coordinator& current_coordinator)
@@ -45,11 +45,7 @@ std::map<Tag, const Unit*> sc2::LoadMultiPlayerGame(State save, Client& current_
 		current_client.Debug()->DebugCreateUnit(state_u.unit_type, state_u.pos, state_u.player_id);
 	}
 	current_client.Debug()->SendDebug();
-	// the DebugCreateUnit() needs at least 1 loops to be executed
-	// current_coordinator.Update();
 	current_coordinator.Update();
-	// from here, I need to ensure nobody will move, but if I do it like this...x
-	// todo set the relationship here! To ensure the minimize movement
 	// just copys the units in save
 	const Unit* u_copied;
 	Units us_copied = current_client.Observation()->GetUnits();
@@ -60,8 +56,6 @@ std::map<Tag, const Unit*> sc2::LoadMultiPlayerGame(State save, Client& current_
 		current_client.Debug()->DebugSetEnergy(state_u.energy, u_copied);
 	}
 	current_client.Debug()->SendDebug();
-	// like CreateUnit(), DebugCreateUnit() needs at least 2 loops to be executed, too
 	current_coordinator.Update();
-	// current_coordinator.Update();
     return unit_map;
 }

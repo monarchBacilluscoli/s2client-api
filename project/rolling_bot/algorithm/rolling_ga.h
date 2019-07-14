@@ -62,7 +62,10 @@ namespace sc2{
 
         // Start up
         void SetSimulatorsStart(const ObservationInterface* observation_interface);
+        // Run multiple simulators at the same time (multi-threadedly)
         void RunSimulatorsSynchronous();
+        // for test
+        void RunSimulatorsOneByOne();
         // Get all the ObservationInterface from those simulators
         std::vector<const ObservationInterface*> GetAllSimsObservations() const;
 

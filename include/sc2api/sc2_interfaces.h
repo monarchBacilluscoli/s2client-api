@@ -471,6 +471,8 @@ public:
     //!< \param tag Unit to destroy.
     virtual void DebugKillUnit(const Unit* unit) = 0;
 
+    virtual void DebugKillUnits(const Units& units) = 0;
+
     //! Makes the entire map visible, i.e., removes the fog-of-war.
     virtual void DebugShowMap() = 0;
     //! Enables commands to be issued to enemy units.

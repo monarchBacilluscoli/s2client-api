@@ -10,25 +10,34 @@ using namespace sc2;
 void Simulator::CopyAndSetState(const ObservationInterface* ob_source, DebugRenderer* debug_renderer) {
     m_save = SaveMultiPlayerGame(ob_source);
     m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);
-    // SetUnitsRelations(m_save, m_executor.Observation()->GetUnits());
+    //! for test
+    //todo check the save and relative_units
+    for (const auto& unit_state : m_save.unit_states) {
+        int count = 0;
+        if (m_relative_units.find(unit_state.unit_tag) == m_relative_units.end()) {
+            count++;
+        }
+        if (count > 0) {
+            std::cout << "relationship mistake: " << count << std::endl;
+        }
+    }
     //check the crush of unit relationship
-    //todo use set to check it
     std::set<const Unit*> check_set;
     for (const auto& item : m_relative_units) {
         check_set.insert(item.second);
     }
-    if (check_set.size() != m_relative_units.size()) {
-        std::cout << "mistake in copy: " << m_relative_units.size() - check_set.size() << std::endl;
-        std::cout << "difference between save and current units: " << m_relative_units.size() - Observation()->GetUnits().size() << std::endl;
-    }
+    // if (check_set.size() != m_relative_units.size() || m_relative_units.size() != Observation()->GetUnits().size()) {
+    //     std::cout << "mistake in copy: " << m_relative_units.size() - check_set.size() << std::endl;
+    //     std::cout << "difference between save and current units: " << m_relative_units.size() - Observation()->GetUnits().size() << std::endl;
+    // }
     if (!IsMultiPlayerGame()) {
         m_executor.Control()->Save();
     }
-    // save from local instance
     if (debug_renderer) {
         // Maybe I only need to display the result
         debug_renderer->ClearRenderer();
-        debug_renderer->DrawOrders(m_commands,m_executor.Observation(),m_relative_units);
+        //! here must be somthing wrong!
+        // debug_renderer->DrawOrders(m_commands, m_executor.Observation(), m_relative_units);
         debug_renderer->DrawObservation(m_executor.Observation());
         debug_renderer->Present();
     }
@@ -55,9 +64,8 @@ void Simulator::Run(int steps, DebugRenderer* debug_renderer) {
         for (size_t i = 0; i < (size_t)ceil(steps / GetStepSize()); i++) {
             Update();
             debug_renderer->ClearRenderer();
-            debug_renderer->DrawOrders(m_commands,m_executor.Observation(),m_relative_units);
+            debug_renderer->DrawOrders(m_commands, m_executor.Observation(), m_relative_units);
             debug_renderer->DrawObservation(ob);
-            // debug_renderer->DrawOrders()
             debug_renderer->Present();
         }
     } else {
@@ -67,56 +75,52 @@ void Simulator::Run(int steps, DebugRenderer* debug_renderer) {
     }
 }
 
-const ObservationInterface* Simulator::Observation() const
-{
-	return m_executor.Observation();
+const ObservationInterface* Simulator::Observation() const {
+    return m_executor.Observation();
 }
 
-DebugInterface* Simulator::Debug(){
+DebugInterface* Simulator::Debug() {
     return m_executor.Debug();
 }
 
-ActionInterface* Simulator::Actions(){
+ActionInterface* Simulator::Actions() {
     return m_executor.Actions();
 }
 
 float Simulator::GetTeamHealthLoss(Unit::Alliance alliance) const {
-	uint32_t player_id = 0;
-	switch (alliance)
-	{
-	case sc2::Unit::Self:
-		player_id = Observation()->GetPlayerID();
-		break;
-	//case sc2::Unit::Ally:
-	//? I have no idea on how to handle that
-	//	break;
-	case sc2::Unit::Neutral:
-		player_id = 0;
-		break;
-	case sc2::Unit::Enemy:
-		player_id = Observation()->GetPlayerID() == 1 ? 2 : 1;
-		break;
-	default:
-		break;
-	}
-	float health_loss = 0.f;
-	// use the data from m_save and current data to simply calculate the health loss
-	for (const UnitState& state_u : m_save.unit_states)
-	{
-		if (state_u.player_id == player_id) {
-			const Unit* u = m_relative_units.at(state_u.unit_tag);
-			// check if the unit has been dead
-			// because the API will keep the a unit's health its number the last time he lived if he has been dead now
-			// I need calculate the shield at the same time
-			if (u->is_alive) {
-				health_loss += state_u.life - u->health + state_u.shields - u->shield;
-			}
-			else {
-				health_loss += state_u.life + state_u.shields;
-			}
-		}
-	}
-	return health_loss;
+    uint32_t player_id = 0;
+    switch (alliance) {
+        case sc2::Unit::Self:
+            player_id = Observation()->GetPlayerID();
+            break;
+        //case sc2::Unit::Ally:
+        //? I have no idea on how to handle that
+        //	break;
+        case sc2::Unit::Neutral:
+            player_id = 0;
+            break;
+        case sc2::Unit::Enemy:
+            player_id = Observation()->GetPlayerID() == 1 ? 2 : 1;
+            break;
+        default:
+            break;
+    }
+    float health_loss = 0.f;
+    // use the data from m_save and current data to simply calculate the health loss
+    for (const UnitState& state_u : m_save.unit_states) {
+        if (state_u.player_id == player_id) {
+            const Unit* u = m_relative_units.at(state_u.unit_tag);
+            // check if the unit has been dead
+            // because the API will keep the a unit's health its number the last time he lived if he has been dead now
+            // I need calculate the shield at the same time
+            if (u->is_alive) {
+                health_loss += state_u.life - u->health + state_u.shields - u->shield;
+            } else {
+                health_loss += state_u.life + state_u.shields;
+            }
+        }
+    }
+    return health_loss;
 }
 
 void Simulator::Load() {
@@ -130,7 +134,7 @@ void Simulator::Load() {
     }
 }
 
-void Simulator::SetOrders(const std::vector<Command>& commands) {
+void Simulator::SetOrders(const std::vector<Command>& commands, DebugRenderer* debug_renderer) {
     // Just simply press those actions in every unit
     //? Note that the orders can be stored into units or somewhere else is
     //limited in StarCraft II, I need to figure out it
@@ -155,6 +159,14 @@ void Simulator::SetOrders(const std::vector<Command>& commands) {
         }
     }
     m_commands = commands;
+    if (debug_renderer) {
+        // Maybe I only need to display the result
+        debug_renderer->ClearRenderer();
+        //! here must be somthing wrong!
+        debug_renderer->DrawOrders(m_commands, m_executor.Observation(), m_relative_units);
+        debug_renderer->DrawObservation(m_executor.Observation());
+        debug_renderer->Present();
+    }
 }
 
 void Simulator::SetOpponent(Agent* agent) {

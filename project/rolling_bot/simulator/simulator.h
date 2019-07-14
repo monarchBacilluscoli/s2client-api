@@ -16,7 +16,7 @@ namespace sc2 {
 class Executor : public Agent {
     //! for test
     // void OnUnitDestroyed(const Unit* u) override {
-    //     std::cout << "Destroyed Unit:\t " << u->unit_type << "\t" << "("<< u->pos.x << "," <<u->pos.y<< ")" << "\t" << u->health << std::endl;
+    //     // std::cout << "Destroyed Unit:\t " << u->unit_type << "\t" << "("<< u->pos.x << "," <<u->pos.y<< ")" << "\t" << u->health << std::endl;
     // }
 };
 
@@ -35,7 +35,7 @@ class Simulator : public Coordinator {
     void SetOpponent(Difficulty difficulty);
 
     //! direct send the orders to units
-    void SetOrders(const std::vector<Command>& commands);
+    void SetOrders(const std::vector<Command>& commands, DebugRenderer* debug_renderer = nullptr);
     //! copy the game state from a specific game observation
     void CopyAndSetState(const ObservationInterface* ob, DebugRenderer* debug_renderer = nullptr);
     //! copys state and sets orders for preparation to run
