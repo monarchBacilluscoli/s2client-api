@@ -30,14 +30,12 @@ std::map<Tag, const Unit*> sc2::LoadMultiPlayerGame(State save, Client& current_
 {
     std::map<Tag, const Unit*> unit_map;
     // kills all current units
-    for (const Unit* u : current_client.Observation()->GetUnits()) {
-        current_client.Debug()->DebugKillUnit(u);
-	}
-	current_client.Debug()->SendDebug();
-	// the wrekages need about 20 game loops to be cleaned
-	for (size_t i = 0; i < 20; i++)
-	{
-		current_coordinator.Update();
+    Units us = current_client.Observation()->GetUnits();
+    current_client.Debug()->DebugKillUnits(us);
+    current_client.Debug()->SendDebug();
+    // the wrekages need about 20 game loops to be cleaned
+    for (size_t i = 0; i < 20; i++) {
+        current_coordinator.Update();
 	}
 	// creates units from save
 	for (UnitState state_u: save.unit_states)
@@ -57,5 +55,7 @@ std::map<Tag, const Unit*> sc2::LoadMultiPlayerGame(State save, Client& current_
 	}
 	current_client.Debug()->SendDebug();
 	current_coordinator.Update();
+	//todo check the load results to see if here is any mistake
+	
     return unit_map;
 }

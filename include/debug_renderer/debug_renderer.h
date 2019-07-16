@@ -65,6 +65,7 @@ class DebugRenderer {
    private:
     void DrawObservation(const ObservationInterface* observation, int offset_x, int offset_y, int w, int h);
     void DrawOrders(const std::vector<Command>& orders, const ObservationInterface* observation, const std::map<Tag, const Unit*>& units_map, int x, int y, int w, int h);
+    void DrawOrders(const std::vector<Command>& orders, const ObservationInterface* observation, int x, int y, int w, int h);
     // according to properties of units and windows, draw the unit
     void DrawUnit(const Unit* unit);
 
@@ -80,9 +81,10 @@ class DebugRenderer {
      ~DebugRenderer();
 
      void ClearRenderer();
-
+    
      void DrawSolution(const Solution<Command>& solution, const ObservationInterface* observation, const std::map<Tag, const Unit*>& units_map);
      void DrawOrders(const std::vector<Command>& orders, const ObservationInterface* observation, const std::map<Tag, const Unit*>& units_map);
+     void DrawOrders(const std::vector<Command>& orders, const ObservationInterface* observation);
     
      //! Draw mutilple Observations in one window
      void DrawObservations(const std::vector<const ObservationInterface*> observations);

@@ -185,20 +185,20 @@ void sc2::RollingGA::Evaluate(Population& p) {
     // use different simulators to evaluate solutions respectively
     // for each sim, copy the state and deploy the commands!
     // //todo multi-threaded
-    // for (size_t i = 0; i < p.size(); i++) {
-    //     m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
-    //     m_simulators[i].SetOrders(p[i].variable);
-    // }
-	std::vector<std::thread> setting_threads(m_simulators.size());
     for (size_t i = 0; i < p.size(); i++) {
-        setting_threads[i] = std::thread([&, i] {
-            m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
-            m_simulators[i].SetOrders(p[i].variable);
-        });
+        m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
+        m_simulators[i].SetOrders(p[i].variable);
     }
-    std::for_each(setting_threads.begin(), setting_threads.end(), [](std::thread& t) -> void { t.join(); });
+	// std::vector<std::thread> setting_threads(m_simulators.size());
+    // for (size_t i = 0; i < p.size(); i++) {
+    //     setting_threads[i] = std::thread([&, i] {
+    //         m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
+    //         m_simulators[i].SetOrders(p[i].variable);
+    //     });
+    // }
+    // std::for_each(setting_threads.begin(), setting_threads.end(), [](std::thread& t) -> void { t.join(); });
 
-    RunSimulatorsSynchronous();
+    RunSimulatorsOneByOne();
     //? output the best one for each generation, or outputs the average objectives for each generation
     float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
     float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();

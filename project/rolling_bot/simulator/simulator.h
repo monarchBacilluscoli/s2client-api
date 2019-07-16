@@ -11,13 +11,29 @@
 #include "state.h"
 
 #include <iostream>
+#include <queue>
 
 namespace sc2 {
-class Executor : public Agent {
+class Executor : public Agent
+{
     //! for test
     // void OnUnitDestroyed(const Unit* u) override {
     //     // std::cout << "Destroyed Unit:\t " << u->unit_type << "\t" << "("<< u->pos.x << "," <<u->pos.y<< ")" << "\t" << u->health << std::endl;
     // }
+public:
+    // transform vector commands to map+queue commands for easy use
+    void SetCommands(const std::vector<Command> &commands);
+    void ClearCooldownData();
+    void ClearCommands();
+    void SetIsSetting(bool is_setting);
+
+    void OnStep() override;
+    // void OnUnitDestroyed(const Unit *u) override;
+
+private:
+    std::map<Tag, std::queue<ActionRaw>> m_commands;
+    std::map<Tag, float> m_cooldown_last_frame;
+    bool m_is_setting = true; // if in setting state, do not call any of the client event here
 };
 
 class Simulator : public Coordinator {

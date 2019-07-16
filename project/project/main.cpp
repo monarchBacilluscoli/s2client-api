@@ -20,24 +20,23 @@ public:
         m_renderer.SetIsDisplay(false);
     }
     virtual void OnGameStart() final {
-        std::cout << "Hello, World!" << std::endl;
-        //todo add attack then move action to each unit
-        GameInfo game_info = Observation()->GetGameInfo();
-        Units self_us = Observation()->GetUnits(Unit::Alliance::Self);
-        Units enemy_us = Observation()->GetUnits(Unit::Alliance::Enemy);
-        for (const Unit *u : self_us)
-        {
-            Actions()->UnitCommand(u, ABILITY_ID::ATTACK, GetRandomEntry(enemy_us), true);
-        }
-        //todo add move actions
-        for (const Unit* u: self_us)
-        {
-            for (size_t i = 0; i < 3; i++)
-            {
-                Actions()->UnitCommand(u,ABILITY_ID::MOVE, FindRandomLocation(game_info), true);
-            }
-        }
-        
+        // std::cout << "Hello, World!" << std::endl;
+        // //todo add attack then move action to each unit
+        // GameInfo game_info = Observation()->GetGameInfo();
+        // Units self_us = Observation()->GetUnits(Unit::Alliance::Self);
+        // Units enemy_us = Observation()->GetUnits(Unit::Alliance::Enemy);
+        // for (const Unit *u : self_us)
+        // {
+        //     Actions()->UnitCommand(u, ABILITY_ID::ATTACK, GetRandomEntry(enemy_us), true);
+        // }
+        // //todo add move actions
+        // for (const Unit* u: self_us)
+        // {
+        //     for (size_t i = 0; i < 3; i++)
+        //     {
+        //         Actions()->UnitCommand(u,ABILITY_ID::MOVE, FindRandomLocation(game_info), true);
+        //     }
+        // }
     }
 
     virtual void OnUnitIdle(const Unit* unit) final {
@@ -46,12 +45,29 @@ public:
     }
 
     virtual void OnStep() final {
-        std::cout << Observation()->GetGameLoop() << std::endl;
-        m_renderer.DrawObservation(Observation());
+        // std::cout << Observation()->GetGameLoop() << std::endl;
+        // m_renderer.DrawObservation(Observation());
+
+        // Units us = Observation()->GetUnits(Unit::Alliance::Self);
+        // std::vector<UnitOrder> orders;
+        // for (const auto& u:us)
+        // {
+        //     orders = u->orders;
+        //     std::cout << orders.size() << std::endl;
+        // }
+        if (Observation()->GetGameLoop() % 5 == 0) {
+            Units us = Observation()->GetUnits();
+            std::for_each(us.begin(), us.end(), [](const Unit* u) { std::cout << u->tag << "\t" << std::flush; });
+            Debug()->DebugKillUnits(us);
+            Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_MARINE, Point2D(24, 24), 1U, 5U);
+            Debug()->SendDebug();
+            std::cout << std::endl;
+        }
     }
 
-private:
+   private:
     DebugRenderer m_renderer;
+    RawActions m_stored_actions;
 };
 
 int main(int argc, char* argv[]) {
@@ -238,6 +254,9 @@ int main(int argc, char* argv[]) {
         //! Ensure if once attack deployed, the units can not take other actions anymore, unless the attack action deployed entirely
         //todo start 
     }
+    {
+        
+    }
 
     // Some settings
     bool is_debug = true;
@@ -258,12 +277,12 @@ int main(int argc, char* argv[]) {
 
     //! Bots here
     Bot bot;
-    // RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path);
-    // rolling_bot.SetDebugOn(true);
-    // rolling_bot.SetMaxGeneration(10);
+    RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path);
+    rolling_bot.SetDebugOn(true);
+    rolling_bot.SetMaxGeneration(10);
 
     //! participants settings here
-    coordinator.SetParticipants({CreateParticipant(Race::Terran, &bot),
+    coordinator.SetParticipants({CreateParticipant(Race::Terran, &rolling_bot),
                                  CreateComputer(Race::Zerg)});
     coordinator.SetPortStart(main_process_port);
     coordinator.SetRealtime(real_time);

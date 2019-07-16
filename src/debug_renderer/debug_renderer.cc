@@ -184,6 +184,12 @@ void DebugRenderer::DrawOrders(const std::vector<Command>& orders, const Observa
     DrawOrders(orders, observation, units_map, 0, 0, w, h);
 }
 
+void DebugRenderer::DrawOrders(const std::vector<Command>& orders, const ObservationInterface* observation){
+    int w, h;
+    SDL_GetWindowSize(m_window, &w, &h);
+    DrawOrders(orders, observation, 0, 0, w, h);
+}
+
 void DebugRenderer::DrawOrders(const std::vector<Command>& orders, const ObservationInterface *observation, const std::map<Tag, const Unit*>& units_map, int x, int y, int w, int h){
     CoordinateTransformer transformer(observation, {x, y, w, h});
     SDL_SetRenderDrawColor(m_renderer, 0xff/2, 0xff/2, 0, 0xff/2);
@@ -223,7 +229,37 @@ void DebugRenderer::DrawOrders(const std::vector<Command>& orders, const Observa
     }
 }
 
-
+void DebugRenderer::DrawOrders(const std::vector<Command>& orders, const ObservationInterface* observation, int x, int y, int w, int h){
+    CoordinateTransformer transformer(observation, {x, y, w, h});
+    SDL_SetRenderDrawColor(m_renderer, 0xff / 2, 0xff / 2, 0, 0xff / 2);
+    for (const Command& command : orders) {
+        const Unit* command_unit = observation->GetUnit(command.unit_tag);
+        if (command_unit) { // Some units can have been dead once it is created.. since it has very low hp and it is very easy to be killed in only one frame.
+            Point2DI start_point = transformer.ToRenderPoint(command_unit->pos);
+            for (const ActionRaw& action : command.actions) {
+                Point2DI end_point;
+                switch (action.target_type) {
+                    case ActionRaw::TargetType::TargetNone: {
+                        //if there is an action apply on itself, draw a small rect here
+                        end_point = start_point;  // It doesn't have to transform to render point
+                        CenterRect self_action_position(start_point.x, start_point.y, 3, 3);
+                        SDL_RenderDrawRect(m_renderer, &self_action_position.rect);
+                    } break;
+                    case ActionRaw::TargetType::TargetPosition: {
+                        end_point = transformer.ToRenderPoint(action.target_point);
+                        SDL_RenderDrawLine(m_renderer, start_point.x, start_point.y, end_point.x, end_point.y);
+                    } break;
+                    case ActionRaw::TargetType::TargetUnitTag: {
+                        const Unit* target_u = observation->GetUnit(command.unit_tag);
+                        end_point = transformer.ToRenderPoint(target_u->pos);
+                        SDL_RenderDrawLine(m_renderer, start_point.x, start_point.y, end_point.x, end_point.y);
+                    } break;
+                }
+                start_point = end_point;
+            }
+        }
+    }
+}
 
 void DebugRenderer::DrawObservations(const std::vector<const ObservationInterface*> observations){
     //todo get main window size

@@ -7,29 +7,119 @@
 
 using namespace sc2;
 
+void Executor::OnStep() {
+    //todo on each step, check if each unit has finished its current command, if so, set the next order for it
+    if (m_is_setting || m_commands.empty())
+    {
+        return;
+    }
+    // std::cout << m_commands.size() << "\t" << std::flush;
+    Units us = Observation()->GetUnits(Unit::Alliance::Self);
+    for (const Unit *u : us)
+    {
+        // check if the current has been finished
+        if (u->orders.empty() || // no order now
+            m_cooldown_last_frame.find(u->tag) != m_cooldown_last_frame.end() && m_cooldown_last_frame[u->tag] < u->weapon_cooldown || // this unit has executed a new attack
+            u->weapon_cooldown > 0.f) // the first time this unit attack (I think it can not happen)
+        {
+            // execute the next action
+            if(m_commands.find(u->tag)==m_commands.end()){
+                // std::cout << m_commands.size() << "\t" << std::flush;
+                std::cout << "mistake" << std::endl;
+            }
+            if (!m_commands.at(u->tag).empty()) {
+                ActionRaw action = m_commands.at(u->tag).front();
+                switch (action.target_type) {
+                    case ActionRaw::TargetType::TargetNone: {
+                        Actions()->UnitCommand(u, action.ability_id);
+                    } break;
+                    case ActionRaw::TargetType::TargetPosition: {
+                        Actions()->UnitCommand(u, action.ability_id, action.target_point);
+                    } break;
+                    case ActionRaw::TargetType::TargetUnitTag: {
+                        Actions()->UnitCommand(u, action.ability_id, action.target_tag);
+                    }
+                    default:
+                        break;
+                }
+                m_commands.at(u->tag).pop();
+            }else{
+                //todo if no actions available, what can I do?
+            }
+        }
+        m_cooldown_last_frame[u->tag] = u->weapon_cooldown;
+    }
+}
+
+// void Executor::OnUnitDestroyed(const Unit* u){
+//     if(m_is_setting){
+//         return;
+//     }
+//     //todo delete the commands and state
+//     m_cooldown_last_frame.erase(u->tag);
+//     m_commands.erase(u->tag);
+// }
+
+void Executor::SetCommands(const std::vector<Command> &commands)
+{
+    //todo copy the vector to queue member
+    m_commands.clear();
+    for (const Command& command : commands) {
+        // if (!Observation()->GetUnit(command.unit_tag))
+        // {
+        //     std::cout << "no this unit here" << std::endl;
+        // }
+        std::queue<ActionRaw> &target_command = m_commands[command.unit_tag] = std::queue<ActionRaw>();
+        for (const ActionRaw &action : command.actions)
+        {
+            // set the queue
+            target_command.push(action);
+        }
+    }
+    // if (m_commands.size() == 1)
+    // {
+    //     std::cout<<"m_commands.size()==1 @Executor::SetCommands()"<<std::flush;
+    // }
+}
+
+void Executor::ClearCommands(){
+    m_commands.clear();
+}
+
+void Executor::SetIsSetting(bool is_setting){
+    m_is_setting = is_setting;
+}
+
+void Executor::ClearCooldownData(){
+    m_cooldown_last_frame.clear();
+}
+
 void Simulator::CopyAndSetState(const ObservationInterface* ob_source, DebugRenderer* debug_renderer) {
+    m_executor.ClearCooldownData();
+    m_executor.ClearCommands();
+    m_executor.SetIsSetting(true);
     m_save = SaveMultiPlayerGame(ob_source);
     m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);
     //! for test
     //todo check the save and relative_units
-    for (const auto& unit_state : m_save.unit_states) {
-        int count = 0;
-        if (m_relative_units.find(unit_state.unit_tag) == m_relative_units.end()) {
-            count++;
-        }
-        if (count > 0) {
-            std::cout << "relationship mistake: " << count << std::endl;
-        }
-    }
-    //check the crush of unit relationship
+    // for (const auto& unit_state : m_save.unit_states) {
+    //     int count = 0;
+    //     if (m_relative_units.find(unit_state.unit_tag) == m_relative_units.end()) {
+    //         count++;
+    //     }
+    //     if (count > 0) {
+    //         std::cout << "relationship mistake: " << count << std::endl;
+    //     }
+    // }
+    //! check the crush of unit relationship
     std::set<const Unit*> check_set;
     for (const auto& item : m_relative_units) {
         check_set.insert(item.second);
     }
-    // if (check_set.size() != m_relative_units.size() || m_relative_units.size() != Observation()->GetUnits().size()) {
-    //     std::cout << "mistake in copy: " << m_relative_units.size() - check_set.size() << std::endl;
-    //     std::cout << "difference between save and current units: " << m_relative_units.size() - Observation()->GetUnits().size() << std::endl;
-    // }
+    if (check_set.size() != m_relative_units.size() || m_relative_units.size() != Observation()->GetUnits().size()) {
+        std::cout << "mistake in copy: " << m_relative_units.size() - check_set.size() << std::endl; // it means that some units were mistaken to be seen as the same one
+        std::cout << "difference between save and current units: " << m_relative_units.size() - Observation()->GetUnits().size() << std::endl; // it can mean that some units has been dead
+    }
     if (!IsMultiPlayerGame()) {
         m_executor.Control()->Save();
     }
@@ -37,10 +127,10 @@ void Simulator::CopyAndSetState(const ObservationInterface* ob_source, DebugRend
         // Maybe I only need to display the result
         debug_renderer->ClearRenderer();
         //! here must be somthing wrong!
-        // debug_renderer->DrawOrders(m_commands, m_executor.Observation(), m_relative_units);
         debug_renderer->DrawObservation(m_executor.Observation());
         debug_renderer->Present();
     }
+    m_executor.SetIsSetting(false);
 }
 
 void Simulator::SetUnitsRelations(State state, Units us_copied) {
@@ -59,12 +149,13 @@ void Simulator::SetStartPoint(const std::vector<Command>& commands,
 }
 
 void Simulator::Run(int steps, DebugRenderer* debug_renderer) {
+    m_executor.SetIsSetting(false);
     if (debug_renderer) {
         const ObservationInterface* ob = GetObservations().front();
         for (size_t i = 0; i < (size_t)ceil(steps / GetStepSize()); i++) {
             Update();
             debug_renderer->ClearRenderer();
-            debug_renderer->DrawOrders(m_commands, m_executor.Observation(), m_relative_units);
+            debug_renderer->DrawOrders(m_commands, m_executor.Observation());
             debug_renderer->DrawObservation(ob);
             debug_renderer->Present();
         }
@@ -73,6 +164,7 @@ void Simulator::Run(int steps, DebugRenderer* debug_renderer) {
             Update();
         }
     }
+    m_executor.SetIsSetting(true);
 }
 
 const ObservationInterface* Simulator::Observation() const {
@@ -136,34 +228,24 @@ void Simulator::Load() {
 
 void Simulator::SetOrders(const std::vector<Command>& commands, DebugRenderer* debug_renderer) {
     // Just simply press those actions in every unit
-    //? Note that the orders can be stored into units or somewhere else is
-    //limited in StarCraft II, I need to figure out it
-    for (const Command& cmd : commands) {
-        for (const ActionRaw& act : cmd.actions) {
-            switch (act.target_type) {
-                case ActionRaw::TargetType::TargetNone:
-                    m_executor.Actions()->UnitCommand(
-                        m_relative_units[cmd.unit_tag], act.ability_id, true);
-                    break;
-                case ActionRaw::TargetType::TargetPosition:
-                    m_executor.Actions()->UnitCommand(
-                        m_relative_units[cmd.unit_tag], act.ability_id,
-                        act.target_point, true);
-                    break;
-                case ActionRaw::TargetType::TargetUnitTag:
-                    m_executor.Actions()->UnitCommand(
-                        m_relative_units[cmd.unit_tag], act.ability_id,
-                        m_relative_units[act.target_tag], true);
-                    break;
+    //? Note that the orders can be stored into units or somewhere else is limited in StarCraft II, I need to figure out it
+    m_commands = commands;
+    // std::cout << "original commands size: " << commands.size()<<std::endl;
+    // translate the command into local tag command
+    for (Command& cmd : m_commands) {
+        cmd.unit_tag = m_relative_units.at(cmd.unit_tag)->tag;
+        for (ActionRaw& act : cmd.actions) {
+            if(act.target_type == ActionRaw::TargetUnitTag){
+                act.target_tag = m_relative_units.at(cmd.unit_tag)->tag;
             }
         }
     }
-    m_commands = commands;
+    m_executor.SetCommands(m_commands);
+    //todo need to translate the command, I mean the tags of units from the original process to simulation process
     if (debug_renderer) {
         // Maybe I only need to display the result
         debug_renderer->ClearRenderer();
-        //! here must be somthing wrong!
-        debug_renderer->DrawOrders(m_commands, m_executor.Observation(), m_relative_units);
+        debug_renderer->DrawOrders(m_commands, m_executor.Observation());
         debug_renderer->DrawObservation(m_executor.Observation());
         debug_renderer->Present();
     }
