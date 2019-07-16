@@ -230,6 +230,7 @@ void Simulator::SetOrders(const std::vector<Command>& commands, DebugRenderer* d
     // Just simply press those actions in every unit
     //? Note that the orders can be stored into units or somewhere else is limited in StarCraft II, I need to figure out it
     m_commands = commands;
+    m_executor.SetIsSetting(true);
     // std::cout << "original commands size: " << commands.size()<<std::endl;
     // translate the command into local tag command
     for (Command& cmd : m_commands) {
@@ -249,6 +250,7 @@ void Simulator::SetOrders(const std::vector<Command>& commands, DebugRenderer* d
         debug_renderer->DrawObservation(m_executor.Observation());
         debug_renderer->Present();
     }
+    m_executor.SetIsSetting(false);
 }
 
 void Simulator::SetOpponent(Agent* agent) {

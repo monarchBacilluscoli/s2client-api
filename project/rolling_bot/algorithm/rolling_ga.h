@@ -91,8 +91,8 @@ namespace sc2{
 
         // Settings
         int m_objective_size = 2;
-        int m_sims_step_size = 8;
-        int m_run_length = 64;  //? Does the step_size in simulator matter?
+        int m_sims_step_size = 1;
+        int m_run_length = 128;  //? Does the step_size in simulator matter?
         //! the command length for each unit
         int m_command_length = 8;
         float m_attack_possibility = 0.3f; // it's related to the m_run_length

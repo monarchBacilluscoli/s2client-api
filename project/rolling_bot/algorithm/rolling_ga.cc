@@ -39,12 +39,16 @@ void sc2::RollingGA::SetSimulators(const std::string& net_address, int port_star
 
 void sc2::RollingGA::SetSimulatorsStart(const ObservationInterface* ob)
 {
-	SetObservation(ob);
-	//todo try to implement them in multi threads
-	for (Simulator& sim :m_simulators)
-	{
-		sim.CopyAndSetState(ob);
-	}
+    SetObservation(ob);
+    //todo try to implement them in multi threads
+    std::cout << m_simulators.size() << std::endl;
+    for (size_t i = 0; i < m_simulators.size(); i++) {
+        m_simulators[i].CopyAndSetState(ob);
+    }
+
+    // for (Simulator& sim : m_simulators) {
+    //     sim.CopyAndSetState(ob);
+    // }
 }
 
 void sc2::RollingGA::RunSimulatorsSynchronous() 
