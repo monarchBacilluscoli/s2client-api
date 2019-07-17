@@ -30,18 +30,31 @@ class RollingBot : public Agent {
     virtual void OnStep() override {
         // after a specific interval, the algorhim should run once
         if (Observation()->GetGameLoop() % m_interval_size == 0) {
-            // todo first setup the simulator
+            //  first setup the simulator
             m_rolling_ga.SetSimulatorsStart(Observation());
-            // todo then pass it to algorithm and let algorithm run
+            //  then pass it to algorithm and let algorithm run
             Solution<Command> sol =
                 m_rolling_ga.Run()
                     .front();  // you must control the frames to run
                                // in m_sim.Initialize(), not here
-            // todo after running, get the solution to deploy
+            //  after running, get the solution to deploy
             DeploySolution(sol);
             //? for test
             std::cout << "deploy!" << std::endl;
         }
+    }
+
+    virtual void OnUnitDestoyed(const Unit* u){
+        if(Observation()->GetUnits().empty()){
+            std::cout << "No unit to use!" << std::endl;
+            char c;
+            std::cin >> c;
+            //todo I should give control to the main()
+        }
+    }
+    // Settings for bot
+    void SetIntervalLength(int frames){
+        m_interval_size = frames;
     }
 
     // Settings for GA
@@ -96,7 +109,7 @@ class RollingBot : public Agent {
     }
 
     //! Number of frames for which the algorithm should run once
-    int m_interval_size = 80;  // about 5 seconds
+    int m_interval_size = 160;  // about 5 seconds
     //
     int m_population_size = 20;
     //

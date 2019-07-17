@@ -82,13 +82,13 @@ protected:
     virtual Solution<T> GenerateSolution() = 0;
 
     //! Settings
-    int m_max_generation = 2;
+    int m_max_generation = 20;
     //! Controls how many parents ...
     float m_cross_over_rate = 1.f;
     //! Controls how many offspring solutions should be mutated
     float m_mutate_rate = 0.2f;
     //! Controls the population size after each selection
-    int m_population_size = 4;
+    int m_population_size = 50;
     //! Controls the ratio between the parents population and the offspring population in each reproduction
     float m_reproduce_rate = 1.f;
 

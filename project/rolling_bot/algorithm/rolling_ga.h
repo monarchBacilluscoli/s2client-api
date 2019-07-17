@@ -49,6 +49,7 @@ namespace sc2{
         void SetSimlatorsOpponent(const PlayerSetup& opponent);
         void SetSimulatorsMultithreaded(bool multithreaded);
 
+        //? here is something wrong
         void SetPopulationSize(int population_size) override {
             if (population_size > m_population_size) {
                 m_simulators.resize(population_size);
@@ -95,7 +96,7 @@ namespace sc2{
         int m_run_length = 128;  //? Does the step_size in simulator matter?
         //! the command length for each unit
         int m_command_length = 8;
-        float m_attack_possibility = 0.3f; // it's related to the m_run_length
+        float m_attack_possibility = 0.7f; // it's related to the m_run_length
         int m_mutate_step = 100;
         //! to reduce uncertainty, uses multiple simulators to evaluate one solution
         //! this is the number of sims to be used to evaluate one solution

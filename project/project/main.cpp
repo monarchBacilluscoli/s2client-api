@@ -186,30 +186,114 @@ int main(int argc, char* argv[]) {
         //     break;
         // }
 
-        // //! test for the DrawSolution
+        // // //! test for the DrawSolution
         // DebugRenderer renderer;
         // //todo start a sim
         // Simulator sim;
         // sim.SetProcessPath("/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64");
         // sim.SetPortStart(3000);
-        // sim.SetMapPath("testBattle_distant_vs_melee_debug.SC2Map");
+        // // sim.SetMapPath("EnemyTower.SC2Map");
+        // sim.SetMapPath("EnemyBunker.SC2Map");
+        // sim.SetStepSize(1);
         // sim.LaunchStarcraft();
         // sim.StartGame();
-        // //todo kill and create some units belong to me
+        //todo kill and create some units belong to me
         // sim.Debug()->DebugKillUnits(sim.Observation()->GetUnits());
         // sim.Debug()->SendDebug();
         // for (size_t i = 0; i < 20; i++)
         // {
         //     sim.Update();
+        //     std::cout << sim.Observation()->GetGameLoop() << std::endl;
         // }
-        // int unit_count = 5;
+        // {
+        //     //!test the new OnStep function
+        //     for (size_t i = 0; 1; i++)
+        //     {
+        //         sim.StartGame();
+        //         //! test DrawSolution()
+        //         int unit_count = sim.Observation()->GetUnits(Unit::Alliance::Self).size();
+        //         int action_count = 3;
+        //         int run_frames = 600;
+        //         GameInfo game_info = sim.Observation()->GetGameInfo();
+        //         //todo generate random movements
+        //         std::vector<Command> commands(unit_count);
+        //         Units us = sim.Observation()->GetUnits(Unit::Alliance::Self);
+        //         for (int i = 0; i < unit_count; i++)
+        //         {
+        //             commands[i].unit_tag = us[i]->tag;
+        //             commands[i].actions.resize(action_count);
+        //             for (size_t j = 0; j < action_count; j++)
+        //             {
+        //                 ActionRaw &action = commands[i].actions[j];
+        //                 action.ability_id = ABILITY_ID::ATTACK;
+        //                 action.target_type = ActionRaw::TargetType::TargetPosition;
+        //                 action.target_point = game_info.playable_max - (game_info.playable_max - Point2D(1, 1) - game_info.playable_min) / action_count * (j+0.02);
+        //                 std::cout << "(" << action.target_point.x << ", " << action.target_point.y << ")"
+        //                           << "\t";
+        //             }
+        //             std::cout << std::endl;
+        //         }
+        //         sim.Update();
+        //         sim.Update();
+        //         sim.SetDirectOrders(commands);
+        //         int frames = 60;
+        //         auto start = std::chrono::steady_clock::now();
+        //         auto end = std::chrono::steady_clock::now();
+        //         for (size_t i = 0; i < run_frames; i++)
+        //         {
+        //             start = std::chrono::steady_clock::now();
+        //             sim.Update();
+        //             renderer.ClearRenderer();
+        //             renderer.DrawObservation(sim.Observation());
+        //             renderer.DrawOrders(commands, sim.Observation());
+        //             renderer.Present();
+        //             end = std::chrono::steady_clock::now();
+        //             auto interval = end - start;
+        //             std::this_thread::sleep_for(std::chrono::milliseconds(1000 / frames) - interval);
+        //         }
+        //     }
+        // }
+        // int unit_count = 2;
         // int action_count = 3;
         // GameInfo game_info = sim.Observation()->GetGameInfo();
-        // sim.Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_MARINE, {25, 25}, 1U, unit_count);
+        // // sim.Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_MARINE, {25, 25}, 1U, unit_count);
+        // for (size_t i = 0; i < unit_count; i++)
+        // {
+        //     sim.Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_MARINE, FindRandomLocation(sim.Observation()->GetGameInfo()), 1U);
+        // }
+        
         // sim.Debug()->SendDebug();
         // for (size_t i = 0; i < 2; i++)
         // {
         //     sim.Update();
+        // }
+        // {
+        //     for (size_t i = 0; 1; i++)
+        //     {
+        //         //! test DrawSolution()
+        //         //todo generate random movements
+        //         std::vector<Command> commands(unit_count);
+        //         Units us = sim.Observation()->GetUnits(Unit::Alliance::Self);
+        //         for (int i = 0; i < unit_count; i++)
+        //         {
+        //             commands[i].unit_tag = us[i]->tag;
+        //             commands[i].actions.resize(action_count);
+        //             for (size_t j = 0; j < action_count; j++)
+        //             {
+        //                 ActionRaw &action = commands[i].actions[j];
+        //                 action.ability_id = ABILITY_ID::MOVE;
+        //                 action.target_type = ActionRaw::TargetType::TargetPosition;
+        //                 action.target_point = FindRandomLocation(sim.Observation()->GetGameInfo());
+        //                 std::cout << "(" << action.target_point.x << ", " << action.target_point.y << ")"
+        //                           << "\t";
+        //             }
+        //             std::cout << std::endl;
+        //         }
+        //         renderer.ClearRenderer();
+        //         renderer.DrawObservation(sim.Observation());
+        //         renderer.DrawOrders(commands, sim.Observation());
+        //         renderer.Present();
+        //     }
         // }
         // //todo set the relations from themself to themself
         // Units us = sim.Observation()->GetUnits();
@@ -254,15 +338,14 @@ int main(int argc, char* argv[]) {
         //! Ensure if once attack deployed, the units can not take other actions anymore, unless the attack action deployed entirely
         //todo start 
     }
-    {
-        
-    }
+
 
     // Some settings
     bool is_debug = true;
     std::string net_address = "127.0.0.1";
-    std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
-    std::string starcraft_path = "/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64";    
+    // std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
+    std::string map_path = "EnemyTower.SC2Map";
+    std::string starcraft_path = "/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64";
     int port_start = 4000;
     int main_process_port = 5379;
     bool real_time = false;
@@ -273,13 +356,15 @@ int main(int argc, char* argv[]) {
     DebugRenderer renderer;
 
     Coordinator coordinator;
+    coordinator.SetProcessPath(starcraft_path);
     coordinator.LoadSettings(argc, argv);
 
     //! Bots here
     Bot bot;
     RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path);
     rolling_bot.SetDebugOn(true);
-    rolling_bot.SetMaxGeneration(10);
+    rolling_bot.SetMaxGeneration(20);
+    // rolling_bot.SetPopulationSize(50);
 
     //! participants settings here
     coordinator.SetParticipants({CreateParticipant(Race::Terran, &rolling_bot),
@@ -305,8 +390,7 @@ int main(int argc, char* argv[]) {
         auto interval = end - start;
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / frames) -
                                     interval);
-        
-    }
+        }
     // is_debug = false;
 
     return 0;

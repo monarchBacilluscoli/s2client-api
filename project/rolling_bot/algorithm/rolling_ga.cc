@@ -4,6 +4,8 @@
 #include<algorithm>
 #include<iostream>
 
+#define MULTI_THREADED
+
 using namespace sc2;
 
 void sc2::RollingGA::SetSimulators(const std::string& net_address, int port_start, const std::string& process_path, const std::string& map_path)
@@ -45,10 +47,6 @@ void sc2::RollingGA::SetSimulatorsStart(const ObservationInterface* ob)
     for (size_t i = 0; i < m_simulators.size(); i++) {
         m_simulators[i].CopyAndSetState(ob);
     }
-
-    // for (Simulator& sim : m_simulators) {
-    //     sim.CopyAndSetState(ob);
-    // }
 }
 
 void sc2::RollingGA::RunSimulatorsSynchronous() 
@@ -59,7 +57,7 @@ void sc2::RollingGA::RunSimulatorsSynchronous()
             threads[i] = std::thread{[&, i]() -> void {
                 m_simulators[i].Run(m_run_length, &m_debug_renderers[i]);
             }};
-            //todo if debug flag is on, the debug renderes are involved
+            // if debug flag is on, the debug renderes are involved
         }
     } else {
         std::vector<std::thread> threads(m_simulators.size());
@@ -67,7 +65,7 @@ void sc2::RollingGA::RunSimulatorsSynchronous()
             threads[i] = std::thread{[&, i]() -> void {
                 m_simulators[i].Run(m_run_length);
             }};
-            //todo if debug flag is on, the debug renderes are involved
+            // if debug flag is on, the debug renderes are involved
         }
     }
     for (auto& t : threads) {
@@ -95,7 +93,7 @@ void sc2::RollingGA::SetObservation(const ObservationInterface* observation)
 	m_unit_type = m_observation->GetUnitTypeData(); //? why isn't here anything wrong?
 	m_my_team = m_observation->GetUnits(Unit::Alliance::Self);
 	m_enemy_team = m_observation->GetUnits(Unit::Alliance::Enemy);
-	m_playable_dis = Point2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
+	m_playable_dis = Vector2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
 }
 
 void sc2::RollingGA::SetRunLength(int length)
@@ -153,20 +151,25 @@ Solution<Command> RollingGA::GenerateSolution() {
 	RawActions raw_actions(m_command_length);
 	for (size_t i = 0; i < m_my_team.size(); i++)
 	{
+
 		sol.variable[i].unit_tag = m_my_team[i]->tag;
-		float moveable_radius = MoveDistance(m_my_team[i], m_run_length* m_command_length, m_unit_type);
+		float move_dis_per_run = MoveDistance(m_my_team[i], m_run_length, m_unit_type);
+		float longest_map_bound = std::max(m_playable_dis.x, m_playable_dis.y);
+		float moveable_radius = std::min(longest_map_bound, move_dis_per_run); //todo Think about the boundaries of the map!
 		Point2D current_location = m_my_team[i]->pos;
 		sol.variable[i].actions.resize(m_command_length);
-		for (ActionRaw& action_raw : sol.variable[i].actions)
-		{ 
+		for (ActionRaw &action_raw : sol.variable[i].actions)
+		{
 			// randomly choose to move or attack
-			if (GetRandomFraction() < m_attack_possibility) {
+			if (GetRandomFraction() < m_attack_possibility)
+			{
 				// randomly choose a location to attack...
 				action_raw.ability_id = ABILITY_ID::ATTACK;
 				action_raw.target_type = ActionRaw::TargetType::TargetPosition; //? pay attention here is my test code which need to changes
 				action_raw.target_point = m_my_team[i]->pos + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
 			}
-			else {
+			else
+			{
 				action_raw.ability_id = ABILITY_ID::MOVE;
 				action_raw.target_type = ActionRaw::TargetType::TargetPosition;
 				// construct move action
@@ -189,20 +192,26 @@ void sc2::RollingGA::Evaluate(Population& p) {
     // use different simulators to evaluate solutions respectively
     // for each sim, copy the state and deploy the commands!
     // //todo multi-threaded
-    for (size_t i = 0; i < p.size(); i++) {
-        m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
-        m_simulators[i].SetOrders(p[i].variable);
-    }
-	// std::vector<std::thread> setting_threads(m_simulators.size());
-    // for (size_t i = 0; i < p.size(); i++) {
-    //     setting_threads[i] = std::thread([&, i] {
-    //         m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
-    //         m_simulators[i].SetOrders(p[i].variable);
-    //     });
-    // }
-    // std::for_each(setting_threads.begin(), setting_threads.end(), [](std::thread& t) -> void { t.join(); });
 
-    RunSimulatorsOneByOne();
+	#ifdef MULTI_THREADED
+	std::vector<std::thread> setting_threads(m_simulators.size());
+    for (size_t i = 0; i < p.size(); i++) {
+        setting_threads[i] = std::thread([&, i] {
+            m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
+            m_simulators[i].SetOrders(p[i].variable);
+        });
+    }
+    std::for_each(setting_threads.begin(), setting_threads.end(), [](std::thread& t) -> void { t.join(); });
+	RunSimulatorsSynchronous();
+	#else
+	for (size_t i = 0; i < p.size(); i++)
+	{
+		m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
+		m_simulators[i].SetOrders(p[i].variable);
+	}
+	RunSimulatorsOneByOne();
+	#endif
+	
     //? output the best one for each generation, or outputs the average objectives for each generation
     float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
     float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();

@@ -21,6 +21,7 @@ namespace sc2 {
     };
 
     //! Save the current game status to a State object
+    //! note that you'd better not set the step size as any number that larger than 1, or this load function will not function properly...
     //! \param observation The Observation object which can observe current game, the client it belongs to should have the whole view of the map, or it will be meaningless
     State SaveMultiPlayerGame(const ObservationInterface* observation);
     //! Loads a game state from a State object

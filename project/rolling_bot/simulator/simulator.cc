@@ -17,30 +17,67 @@ void Executor::OnStep() {
     Units us = Observation()->GetUnits(Unit::Alliance::Self);
     for (const Unit *u : us)
     {
+        bool has_cooldown_time = (m_cooldown_last_frame.find(u->tag) != m_cooldown_last_frame.end());
         // check if the current has been finished
-        if (u->orders.empty() || // no order now
-            m_cooldown_last_frame.find(u->tag) != m_cooldown_last_frame.end() && m_cooldown_last_frame[u->tag] < u->weapon_cooldown || // this unit has executed a new attack
-            u->weapon_cooldown > 0.f) // the first time this unit attack (I think it can not happen)
+        if (u->orders.empty() ||                                                         // no order now
+            (has_cooldown_time && m_cooldown_last_frame[u->tag] < u->weapon_cooldown) || // this unit has executed a new attack
+            (!has_cooldown_time && u->weapon_cooldown > 0.f))                            // the first time this unit attack (I think it can not happen)
         {
             // execute the next action
             if(m_commands.find(u->tag)==m_commands.end()){
                 // std::cout << m_commands.size() << "\t" << std::flush;
                 std::cout << "mistake" << std::endl;
             }
-            if (!m_commands.at(u->tag).empty()) {
+            if (!m_commands.at(u->tag).empty())
+            {
                 ActionRaw action = m_commands.at(u->tag).front();
-                switch (action.target_type) {
-                    case ActionRaw::TargetType::TargetNone: {
+                //todo distinguish the attack action and move action
+                if (action.ability_id == ABILITY_ID::ATTACK)
+                {
+                    switch (action.target_type)
+                    { 
+                    case ActionRaw::TargetType::TargetNone:
+                    {
                         Actions()->UnitCommand(u, action.ability_id);
-                    } break;
-                    case ActionRaw::TargetType::TargetPosition: {
-                        Actions()->UnitCommand(u, action.ability_id, action.target_point);
-                    } break;
-                    case ActionRaw::TargetType::TargetUnitTag: {
+                    }
+                    break;
+                    case ActionRaw::TargetType::TargetPosition:
+                    {
+                        //move threr then attack the nearest unit
+                        Actions()->UnitCommand(u, ABILITY_ID::MOVE, action.target_point);
+                        Actions()->UnitCommand(u, action.ability_id, action.target_point, true);
+                    }
+                    break;
+                    case ActionRaw::TargetType::TargetUnitTag:
+                    {
+                        // directly deploy
                         Actions()->UnitCommand(u, action.ability_id, action.target_tag);
                     }
                     default:
                         break;
+                    }
+                }
+                else //! for now, "else" means move action
+                {
+                    switch (action.target_type)
+                    {
+                    case ActionRaw::TargetType::TargetNone:
+                    {
+                        Actions()->UnitCommand(u, action.ability_id);
+                    }
+                    break;
+                    case ActionRaw::TargetType::TargetPosition:
+                    {
+                        Actions()->UnitCommand(u, action.ability_id, action.target_point);
+                    }
+                    break;
+                    case ActionRaw::TargetType::TargetUnitTag:
+                    {
+                        Actions()->UnitCommand(u, action.ability_id, action.target_tag);
+                    }
+                    default:
+                        break;
+                    }
                 }
                 m_commands.at(u->tag).pop();
             }else{
@@ -252,6 +289,21 @@ void Simulator::SetOrders(const std::vector<Command>& commands, DebugRenderer* d
     }
     m_executor.SetIsSetting(false);
 }
+
+void Simulator::SetDirectOrders(const std::vector<Command> &commands, DebugRenderer *debug_renderer){
+    m_commands = commands;
+    m_executor.SetIsSetting(true);
+    m_executor.SetCommands(m_commands);
+    if (debug_renderer) {
+        // Maybe I only need to display the result
+        debug_renderer->ClearRenderer();
+        debug_renderer->DrawOrders(m_commands, m_executor.Observation());
+        debug_renderer->DrawObservation(m_executor.Observation());
+        debug_renderer->Present();
+    }
+    m_executor.SetIsSetting(false);
+}
+
 
 void Simulator::SetOpponent(Agent* agent) {
     SetParticipants({CreateParticipant(Race::Terran, &m_executor),

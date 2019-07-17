@@ -41,7 +41,6 @@ class Simulator : public Coordinator {
     Simulator() {
         SetParticipants(
             {CreateParticipant(Terran, &m_executor), CreateComputer(Terran)});
-        SetStepSize(m_step_size);
     }
     ~Simulator() = default;
 
@@ -52,6 +51,8 @@ class Simulator : public Coordinator {
 
     //! direct send the orders to units
     void SetOrders(const std::vector<Command>& commands, DebugRenderer* debug_renderer = nullptr);
+    //! no unit tag translation, use the local unit tags
+    void SetDirectOrders(const std::vector<Command> &commands, DebugRenderer *debug_renderer = nullptr);
     //! copy the game state from a specific game observation
     void CopyAndSetState(const ObservationInterface* ob, DebugRenderer* debug_renderer = nullptr);
     //! copys state and sets orders for preparation to run
@@ -87,9 +88,6 @@ class Simulator : public Coordinator {
     //! here
     void SetUnitsRelations(State state, Units us_copied);
 
-    //! simulation step size
-    //! if you want the simulation to speed up, you can set a higher value
-    int m_step_size = 8;
     //! the bot to be called outside to send orders or get observations
     Executor m_executor;
     //! save of the caller' state when calls it
