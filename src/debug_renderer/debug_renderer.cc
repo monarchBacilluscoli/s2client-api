@@ -7,6 +7,16 @@ using namespace sc2;
 
 float DebugRenderer::ratio_between_window_and_unit = 20.f;
 
+std::vector<CandidateColor> LineChartRenderer::candidate_colors = {
+    {0,0,0,0xff},
+    {0xff,0,0,0xff},
+    {0,0xff,0,0xff},
+    {0,0,0xff,0xff},
+    {0xff,0xff,0,0xff},
+    {0,0xff,0xff,0xff},
+    {0xff,0,0xff,0xff}
+};
+
 CoordinateTransformer::CoordinateTransformer(const ObservationInterface *observation, const SDL_Rect &renderer_boundary) : CoordinateTransformer(observation->GetGameInfo().playable_min, observation->GetGameInfo().playable_max, renderer_boundary) {}
 
 CoordinateTransformer::CoordinateTransformer(const Point2D &playable_min, const Point2D &playable_max, const SDL_Rect &renderer_boundary) : m_game_rect({playable_min.x, playable_min.y, (playable_max - playable_min).x, (playable_max - playable_min).y}),
@@ -435,4 +445,81 @@ DebugRenderers::DebugRenderers(int count)
 DebugRenderer &DebugRenderers::operator[](int count)
 {
     return m_debug_renderers[count];
+}
+
+LineChartRenderer::LineChartRenderer(){
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    {
+        const char *error = SDL_GetError();
+        std::cout << "SDL_Init() failed with error: " << error << std::endl;
+        exit(1);
+    }
+    // I hope that everybody will run it with a monitor...
+    SDL_Rect display_bound;
+    if (SDL_GetDisplayBounds(0, &display_bound) != 0)
+    {
+        const char *error = SDL_GetError();
+        std::cout << "SDL_GetDisplayBounds() failed with error: " << error << std::endl;
+        exit(1);
+    }
+    m_window = SDL_CreateWindow("StarCraftII Observer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, display_bound.w * 1 / 3, display_bound.h * 1 / 3, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
+    // Enable the use of alpha tannel
+    SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
+
+    // initialize the transformer
+    SDL_SetRenderDrawColor(m_renderer, 0xff, 0xff, 0xff, 0xff);
+    SDL_RenderClear(m_renderer);
+    SDL_RenderPresent(m_renderer);
+}
+
+void LineChartRenderer::DrawLines(std::vector<std::list<float>> data){
+    // I will use the lines to fullfill the window
+    float max = -10000.f; //todo need to be modified
+    float min = 10000.f;
+    size_t max_size = 0;
+    size_t data_size = data.size();
+
+    for (size_t i = 0; i < data_size; i++)
+    {
+        float current_max = *std::max_element(data[i].begin(), data[i].end());
+        float current_min = *std::min_element(data[i].begin(), data[i].end());
+        max = std::max(current_max, max);
+        min = std::min(current_min, min);
+    }
+    for (size_t i = 0; i < data_size; i++)
+    {
+        max_size = std::max(max_size, data[i].size());
+    }
+    //todo calculate the transfromation from original data to points on renderer
+    float amplitude = max-min;
+    int window_w, window_h;
+    SDL_GetWindowSize(m_window, &window_w, &window_h);
+    float ratio_w = window_w / max_size;
+    float ratio_h = window_h / amplitude;
+    for (size_t i = 0; i < max_size; i++)
+    {
+        auto it = data[i].begin();
+        //todo draw each line on renderer;
+        for (size_t j = 0; j < data[i].size(); j++)
+        {
+            SDL_SetRenderDrawColor(m_renderer, candidate_colors[i].r, candidate_colors[i].g, candidate_colors[i].b, candidate_colors[i].a);
+            int x1 = std::max(j - 1, size_t(0)) * ratio_w;
+            int x2 = j * ratio_w;
+            int y1 = *it;
+            int y2 = it ++ == data[i].end() ? *it : *(--it);
+            SDL_RenderDrawLine(m_renderer, x1, y1, x2, y2);
+        }
+    }
+}
+
+void LineChartRenderer::ClearRenderer()
+{
+    SDL_SetRenderDrawColor(m_renderer, 0xff, 0xff, 0xff, 0xff);
+    SDL_RenderClear(m_renderer);
+}
+
+void LineChartRenderer::Present()
+{
+    SDL_RenderPresent(m_renderer);
 }

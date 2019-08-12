@@ -236,6 +236,7 @@ void sc2::RollingGA::Evaluate(Population& p) {
               << "ally_team_loss_best:\t" << self_team_loss_best << "\t"
               << "enemy_team_loss_avg:\t" << enemy_team_loss_total / p.size() << "\t"
               << "enemy_team_loss_best:\t" << enemy_team_loss_best << std::endl;
+	//todo show the data
 }
 
 std::vector<const ObservationInterface*> RollingGA::GetAllSimsObservations() const {

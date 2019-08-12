@@ -9,8 +9,10 @@
 #include <vector>
 #include "../project/rolling_bot/algorithm/solution.h"
 #include "../project/rolling_bot/simulator/command.h"
+#include <list>
 
-namespace sc2 {
+namespace sc2
+{
 
 //! SDL_Rect only contains int data, but coordinators in game map are float data
 struct FloatRect{
@@ -119,5 +121,30 @@ class DebugRenderers {
     DebugRenderer& operator[](int count);
 };
 }  // namespace sc2
+
+struct CandidateColor
+{
+    Uint8 r,g,b;
+    Uint8 a;
+};
+
+
+class LineChartRenderer
+{
+private:
+    SDL_Window* m_window = nullptr;
+    SDL_Renderer* m_renderer = nullptr;
+
+    static std::vector<CandidateColor> candidate_colors;
+
+public:
+    LineChartRenderer(/* args */);
+    ~LineChartRenderer();
+    void DrawLines(std::vector<std::list<float>> data_batch);
+    // void DrawLine(std::vector<std::list<float>> data);
+
+    void ClearRenderer();
+    void Present();
+};
 
 #endif //DEBUG_RENDERER_H
