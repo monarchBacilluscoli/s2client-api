@@ -14,6 +14,7 @@
 using namespace sc2;
 
 //! for test use
+//! test the ssh github rep
 class Bot : public Agent {
 public:
     Bot(){
