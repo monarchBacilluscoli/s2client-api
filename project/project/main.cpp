@@ -363,7 +363,7 @@ int main(int argc, char* argv[]) {
     Bot bot;
     RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path);
     rolling_bot.SetDebugOn(true);
-    rolling_bot.SetMaxGeneration(20);
+    rolling_bot.SetMaxGeneration(100);
     // rolling_bot.SetPopulationSize(50);
 
     //! participants settings here
