@@ -25,10 +25,11 @@ namespace sc2{
         RollingGA() = delete;
 
         RollingGA(
-            const std::string& net_address,
+            const std::string &net_address,
             int port_start,
-            const std::string& process_path,
-            const std::string& map_path): m_debug_renderers(m_population_size) {
+            const std::string &process_path,
+            const std::string &map_path, int m_population_size = 50) : m_debug_renderers(m_population_size)
+        {
             // simulator number now is simply equal to population size
             m_simulators.resize(m_population_size);
             SetSimulators(net_address, port_start, process_path, map_path);

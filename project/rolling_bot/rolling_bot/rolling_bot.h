@@ -20,8 +20,8 @@ class RollingBot : public Agent {
     //! in remote client, especially the map_path (a lot of errors have happend
     //! to it)
     RollingBot(const std::string& net_address, int port_start,
-               const std::string& process_path, const std::string& map_path)
-        : m_rolling_ga(net_address, port_start, process_path, map_path) {}
+               const std::string& process_path, const std::string& map_path, int population_size=50)
+        : m_rolling_ga(net_address, port_start, process_path, map_path, population_size) {}
     virtual void OnGameStart() override {
         // only after game starting I can initialize the ga, or the information
         // will not be passed to it

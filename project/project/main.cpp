@@ -352,6 +352,8 @@ int main(int argc, char* argv[]) {
     bool multi_threaded = false;
     // use this to control the cauculation times per second
     uint frames = 60;
+    int population_size = 50;
+    int max_generations = 100;
 
     DebugRenderer renderer;
 
@@ -361,10 +363,9 @@ int main(int argc, char* argv[]) {
 
     //! Bots here
     Bot bot;
-    RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path);
+    RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path, population_size);
     rolling_bot.SetDebugOn(true);
-    rolling_bot.SetMaxGeneration(100);
-    // rolling_bot.SetPopulationSize(50);
+    rolling_bot.SetMaxGeneration(max_generations);
 
     //! participants settings here
     coordinator.SetParticipants({CreateParticipant(Race::Terran, &rolling_bot),
