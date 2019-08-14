@@ -1,5 +1,5 @@
 # Come on, how can I write my own CMakeLists...
-# I need to add libgnuplot and boost into this project.
+# I need to add libgnuplot and boost into this project for data visualization. So please install boost on the computer running this project.
 
 include_directories("../include")
 include_directories("./")
