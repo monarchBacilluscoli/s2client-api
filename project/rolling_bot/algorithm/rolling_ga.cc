@@ -3,6 +3,7 @@
 #include<numeric>
 #include<algorithm>
 #include<iostream>
+#include"gnuplot-iostream.h"
 
 #define MULTI_THREADED
 
@@ -236,7 +237,8 @@ void sc2::RollingGA::Evaluate(Population& p) {
               << "ally_team_loss_best:\t" << self_team_loss_best << "\t"
               << "enemy_team_loss_avg:\t" << enemy_team_loss_total / p.size() << "\t"
               << "enemy_team_loss_best:\t" << enemy_team_loss_best << std::endl;
-	//todo show the data
+	//todo use gnuplot to show the data
+	//todo store all the data and print them
 }
 
 std::vector<const ObservationInterface*> RollingGA::GetAllSimsObservations() const {
