@@ -84,8 +84,10 @@ namespace sc2{
         // run
         //! According to known information generates solutions which is as valid as possiable 
         virtual Solution<Command> GenerateSolution() override;
-        //! According to game conditions generates solutions which is as valid as possiable
+        //! 
         virtual void Mutate(Solution<Command>& s) override;
+        //! choose only one unit and exchange a subarray of orders of each solution
+        virtual void
         //! Plaese set the start point before you evaluate
         virtual void Evaluate(Population& p) override;
         // to take place the default function
