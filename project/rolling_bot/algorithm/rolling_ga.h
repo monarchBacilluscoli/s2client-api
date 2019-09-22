@@ -87,7 +87,7 @@ namespace sc2{
         //! 
         virtual void Mutate(Solution<Command>& s) override;
         //! choose only one unit and exchange a subarray of orders of each solution
-        virtual void
+        virtual Population CrossOver(const Solution<Command> &s1, const Solution<Command> &s2) override;
         //! Plaese set the start point before you evaluate
         virtual void Evaluate(Population& p) override;
         // to take place the default function
@@ -96,7 +96,7 @@ namespace sc2{
         // Settings
         int m_objective_size = 2;
         int m_sims_step_size = 1;
-        int m_run_length = 128;  //? Does the step_size in simulator matter?
+        int m_run_length = 600;
         //! the command length for each unit
         int m_command_length = 8;
         float m_attack_possibility = 0.7f; // it's related to the m_run_length

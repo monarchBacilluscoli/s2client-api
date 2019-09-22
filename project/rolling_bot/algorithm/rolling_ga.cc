@@ -9,6 +9,10 @@
 
 using namespace sc2;
 
+using Population = std::vector<Solution<Command>>;
+using Evaluator = std::function<float(const std::vector<Command> &)>;
+using Compare = std::function<bool(const Solution<Command> &, const Solution<Command> &)>;
+
 void sc2::RollingGA::SetSimulators(const std::string& net_address, int port_start, const std::string& process_path, const std::string& map_path)
 {
 	assert(!m_simulators.empty());
@@ -187,6 +191,24 @@ void sc2::RollingGA::Mutate(Solution<Command>& s)
 	ActionRaw& action = GetRandomEntry(GetRandomEntry(s.variable).actions);
 	action.target_point += Point2D(GetRandomInteger(-1, 1) * m_playable_dis.x, GetRandomInteger(-1, 1) * m_playable_dis.y) / m_mutate_step;
 }
+Population sc2::RollingGA::CrossOver(const Solution<Command> &a, const Solution<Command> &b){
+	//todo random select one unit
+	int unit_index = GetRandomInteger(0, a.variable.size() - 1);
+	//todo exchange the subarray at the same pos in two units' commands
+	Population offspring = { a,b };
+	size_t order_size = a.variable[unit_index].actions.size();
+	size_t start = sc2::GetRandomInteger(0, order_size - 1);
+	size_t end = sc2::GetRandomInteger(0, order_size - 1);
+	if (start > end) {
+        std::swap(start, end);
+    }
+    for (size_t i = start; i < end; i++)
+    {
+        std::swap(offspring[0].variable[unit_index].actions[i], offspring[1].variable[unit_index].actions[i]);
+    }
+    return offspring;
+}
+
 
 void sc2::RollingGA::Evaluate(Population& p) {
     assert(p.size() <= m_simulators.size());

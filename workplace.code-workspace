@@ -52,7 +52,8 @@
 			"tuple": "cpp",
 			"typeinfo": "cpp",
 			"utility": "cpp",
-			"cstdarg": "cpp"
+			"cstdarg": "cpp",
+			"numeric": "cpp"
 		},
 		"files.exclude": {
 			"**.bat": true,
