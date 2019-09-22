@@ -11,4 +11,5 @@ Point2D FindCenterOfMap(const GameInfo& game_info);
 
 const Unit *SelectNearestUnitFromPoint(const Point2D &p, const Units &us);
 float MoveDistance(const Unit* u, int frames, const UnitTypes& uts);
+Point2D FixOutsidePointIntoMap(const Point2D& pos, const Point2D& min, const Point2D& max);
 }  // namespace sc2

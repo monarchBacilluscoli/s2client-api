@@ -35,8 +35,8 @@ class RollingBot : public Agent {
             //  then pass it to algorithm and let algorithm run
             Solution<Command> sol =
                 m_rolling_ga.Run()
-                    .front();  // you must control the frames to run
-                               // in m_sim.Initialize(), not here
+                    .front(); // you must control the frames to run
+                              // in m_sim.Initialize(), not here
             //  after running, get the solution to deploy
             DeploySolution(sol);
             //? for test

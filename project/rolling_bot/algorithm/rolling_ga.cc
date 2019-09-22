@@ -156,29 +156,43 @@ Solution<Command> RollingGA::GenerateSolution() {
 	RawActions raw_actions(m_command_length);
 	for (size_t i = 0; i < m_my_team.size(); i++)
 	{
-
 		sol.variable[i].unit_tag = m_my_team[i]->tag;
-		float move_dis_per_run = MoveDistance(m_my_team[i], m_run_length, m_unit_type);
+		// float move_dis_per_run = MoveDistance(m_my_team[i], m_run_length, m_unit_type);
+		float move_dis_per_run = m_playable_dis.y / 3;
 		float longest_map_bound = std::max(m_playable_dis.x, m_playable_dis.y);
 		float moveable_radius = std::min(longest_map_bound, move_dis_per_run); //todo Think about the boundaries of the map!
 		Point2D current_location = m_my_team[i]->pos;
 		sol.variable[i].actions.resize(m_command_length);
-		for (ActionRaw &action_raw : sol.variable[i].actions)
+		// for (ActionRaw &action_raw : sol.variable[i].actions)
+		for (size_t j = 0; j <= sol.variable[i].actions.size(); ++j)
 		{
+			ActionRaw &action_raw = sol.variable[i].actions[j];
 			// randomly choose to move or attack
 			if (GetRandomFraction() < m_attack_possibility)
 			{
 				// randomly choose a location to attack...
 				action_raw.ability_id = ABILITY_ID::ATTACK;
 				action_raw.target_type = ActionRaw::TargetType::TargetPosition; //? pay attention here is my test code which need to changes
-				action_raw.target_point = m_my_team[i]->pos + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
+				if (j == 0)
+				{
+					action_raw.target_point = current_location + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
+				}else{
+					// hope the last target point is a move position
+					action_raw.target_point = sol.variable[i].actions[j-1].target_point + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
+				}
+				action_raw.target_point = FixOutsidePointIntoMap(action_raw.target_point, m_game_info.playable_min, m_game_info.playable_max);
 			}
 			else
 			{
 				action_raw.ability_id = ABILITY_ID::MOVE;
 				action_raw.target_type = ActionRaw::TargetType::TargetPosition;
 				// construct move action
-				action_raw.target_point += m_my_team[i]->pos + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
+				if(j == 0){
+					action_raw.target_point = current_location + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
+				}else{
+					action_raw.target_point = sol.variable[i].actions[j-1].target_point + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
+				}
+				action_raw.target_point = FixOutsidePointIntoMap(action_raw.target_point, m_game_info.playable_min, m_game_info.playable_max);
 			}
 		}
 	}
@@ -189,7 +203,19 @@ void sc2::RollingGA::Mutate(Solution<Command>& s)
 {
 	// the user must ensure that the actions is not empty
 	ActionRaw& action = GetRandomEntry(GetRandomEntry(s.variable).actions);
-	action.target_point += Point2D(GetRandomInteger(-1, 1) * m_playable_dis.x, GetRandomInteger(-1, 1) * m_playable_dis.y) / m_mutate_step;
+	if (action.ability_id == ABILITY_ID::ATTACK)
+	{
+		// todo if the action is attack, move the target point to the mass center of the enemies / one weakest enemy / nearest enemy / one random unit
+		// action.target_point += SelectNearestUnitFromPoint(action.target_point, m_observation->GetUnits(Unit::Alliance::Enemy));
+		Vector2D from_p_to_e = GetRandomEntry(m_enemy_team)->pos - action.target_point;
+		action.target_point += from_p_to_e * GetRandomFraction();
+	}
+	else
+	{
+		// todo if the action is move
+		action.target_point += Point2D(GetRandomInteger(-1, 1) * m_playable_dis.x, GetRandomInteger(-1, 1) * m_playable_dis.y) / m_mutate_step;
+	}
+	action.target_point = FixOutsidePointIntoMap(action.target_point, m_game_info.playable_min, m_game_info.playable_max);
 }
 Population sc2::RollingGA::CrossOver(const Solution<Command> &a, const Solution<Command> &b){
 	//todo random select one unit

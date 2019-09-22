@@ -96,7 +96,7 @@ namespace sc2{
         // Settings
         int m_objective_size = 2;
         int m_sims_step_size = 1;
-        int m_run_length = 600;
+        int m_run_length = 300;
         //! the command length for each unit
         int m_command_length = 8;
         float m_attack_possibility = 0.7f; // it's related to the m_run_length

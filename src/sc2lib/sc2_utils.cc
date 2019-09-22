@@ -45,4 +45,23 @@ float MoveDistance(const Unit* u, int frames, const UnitTypes& uts) {
     return uts[u->unit_type].movement_speed / frames_per_second * frames;
 }
 
+// move the invalid point2D into playable area
+Point2D FixOutsidePointIntoMap(const Point2D& pos, const Point2D& min, const Point2D& max){
+    Point2D ret = pos;
+    // check all the directions and fix them
+
+    if(ret.x<min.x){
+        ret.x = min.x+4.f;
+    }else if(ret.x>max.x){
+        ret.x = max.x-4.f;
+    }
+
+    if(ret.y<min.y){
+        ret.y = min.y+4.f;
+    }else if(ret.y>max.y){
+        ret.y = max.y-4.f;
+    }
+    return ret;
+}
+
 }

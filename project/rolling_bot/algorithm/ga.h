@@ -86,7 +86,7 @@ protected:
     //! Controls how many parents ...
     float m_cross_over_rate = 1.f;
     //! Controls how many offspring solutions should be mutated
-    float m_mutate_rate = 0.2f;
+    float m_mutate_rate = 0.5f;
     //! Controls the population size after each selection
     int m_population_size = 50;
     //! Controls the ratio between the parents population and the offspring population in each reproduction
@@ -97,6 +97,8 @@ protected:
 
     //! Runtime data
     Population m_population;
+    //! generation count
+    size_t m_current_generation = 0;
 };
 
 template <class T>
@@ -137,8 +139,9 @@ std::vector<Solution<T>> GA<T>::Run()
     GenerateSolutions(m_population, m_population_size);
     Evaluate(m_population);
     SortSolutions(m_population, m_compare);
-    for (size_t i = 0; i < m_max_generation; i++)
+    for (m_current_generation = 0; m_current_generation < m_max_generation; m_current_generation++)
     {
+        //todo According to current generation, I can adjust the mutation rate
         Population offspring;
         Reproduce(m_population, offspring, m_reproduce_rate * m_population_size);
         Evaluate(offspring);

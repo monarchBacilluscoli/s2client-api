@@ -8,7 +8,7 @@
 using namespace sc2;
 
 void Executor::OnStep() {
-    //todo on each step, check if each unit has finished its current command, if so, set the next order for it
+    // on each step, check if each unit has finished its current command, if so, set the next order for it
     if (m_is_setting || m_commands.empty())
     {
         return;
@@ -20,7 +20,7 @@ void Executor::OnStep() {
         bool has_cooldown_time = (m_cooldown_last_frame.find(u->tag) != m_cooldown_last_frame.end());
         // check if the current has been finished
         if (u->orders.empty() ||                                                         // no order now
-            (has_cooldown_time && m_cooldown_last_frame[u->tag] < u->weapon_cooldown) || // this unit has executed a new attack
+            (has_cooldown_time && (m_cooldown_last_frame[u->tag] < u->weapon_cooldown)) || // this unit has executed a new attack just now
             (!has_cooldown_time && u->weapon_cooldown > 0.f))                            // the first time this unit attack (I think it can not happen)
         {
             // execute the next action
@@ -43,7 +43,7 @@ void Executor::OnStep() {
                     break;
                     case ActionRaw::TargetType::TargetPosition:
                     {
-                        //move threr then attack the nearest unit
+                        //move threr then attack automatically according to the game AI
                         Actions()->UnitCommand(u, ABILITY_ID::MOVE, action.target_point);
                         Actions()->UnitCommand(u, action.ability_id, action.target_point, true);
                     }
