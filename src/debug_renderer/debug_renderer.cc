@@ -8,14 +8,13 @@ using namespace sc2;
 float DebugRenderer::ratio_between_window_and_unit = 20.f;
 
 std::vector<CandidateColor> LineChartRenderer::candidate_colors = {
-    {0,0,0,0xff},
-    {0xff,0,0,0xff},
-    {0,0xff,0,0xff},
-    {0,0,0xff,0xff},
-    {0xff,0xff,0,0xff},
-    {0,0xff,0xff,0xff},
-    {0xff,0,0xff,0xff}
-};
+    {0, 0, 0, 0xff},
+    {0xff, 0, 0, 0xff},
+    {0, 0xff, 0, 0xff},
+    {0, 0, 0xff, 0xff},
+    {0xff, 0xff, 0, 0xff},
+    {0, 0xff, 0xff, 0xff},
+    {0xff, 0, 0xff, 0xff}};
 
 CoordinateTransformer::CoordinateTransformer(const ObservationInterface *observation, const SDL_Rect &renderer_boundary) : CoordinateTransformer(observation->GetGameInfo().playable_min, observation->GetGameInfo().playable_max, renderer_boundary) {}
 
@@ -447,7 +446,8 @@ DebugRenderer &DebugRenderers::operator[](int count)
     return m_debug_renderers[count];
 }
 
-LineChartRenderer::LineChartRenderer(){
+LineChartRenderer::LineChartRenderer()
+{
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         const char *error = SDL_GetError();
@@ -473,7 +473,8 @@ LineChartRenderer::LineChartRenderer(){
     SDL_RenderPresent(m_renderer);
 }
 
-void LineChartRenderer::DrawLines(std::vector<std::list<float>> data){
+void LineChartRenderer::DrawLines(std::vector<std::list<float>> data)
+{
     // I will use the lines to fullfill the window
     float max = -10000.f; //todo need to be modified
     float min = 10000.f;
@@ -492,7 +493,7 @@ void LineChartRenderer::DrawLines(std::vector<std::list<float>> data){
         max_size = std::max(max_size, data[i].size());
     }
     //todo calculate the transfromation from original data to points on renderer
-    float amplitude = max-min;
+    float amplitude = max - min;
     int window_w, window_h;
     SDL_GetWindowSize(m_window, &window_w, &window_h);
     float ratio_w = window_w / max_size;
@@ -507,7 +508,7 @@ void LineChartRenderer::DrawLines(std::vector<std::list<float>> data){
             int x1 = std::max(j - 1, size_t(0)) * ratio_w;
             int x2 = j * ratio_w;
             int y1 = *it;
-            int y2 = it ++ == data[i].end() ? *it : *(--it);
+            int y2 = it++ == data[i].end() ? *it : *(--it);
             SDL_RenderDrawLine(m_renderer, x1, y1, x2, y2);
         }
     }

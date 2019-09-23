@@ -11,6 +11,8 @@
 #include "debug_renderer/debug_renderer.h"
 #include "ga.h"
 #include "solution.h"
+#include "gnuplot-iostream.h"
+#include <boost/tuple/tuple.hpp>
 
 namespace sc2{
     class RollingGA :public GA<Command>
@@ -82,6 +84,8 @@ namespace sc2{
         );
 
         // run
+        //!
+        virtual void InitBeforeRun() override;
         //! According to known information generates solutions which is as valid as possiable 
         virtual Solution<Command> GenerateSolution() override;
         //! 
@@ -92,6 +96,7 @@ namespace sc2{
         virtual void Evaluate(Population& p) override;
         // to take place the default function
         //virtual void EvaluateSingleSolution(Solution<Command>& s) override {};
+        virtual void ShowGraphEachGeneration() override;
 
         // Settings
         int m_objective_size = 2;
@@ -99,7 +104,7 @@ namespace sc2{
         int m_run_length = 300;
         //! the command length for each unit
         int m_command_length = 8;
-        float m_attack_possibility = 0.7f; // it's related to the m_run_length
+        float m_attack_possibility = 0.9f; // it's related to the m_run_length
         int m_mutate_step = 100;
         //! to reduce uncertainty, uses multiple simulators to evaluate one solution
         //! this is the number of sims to be used to evaluate one solution
@@ -119,11 +124,17 @@ namespace sc2{
         Units m_enemy_team;
         const ObservationInterface* m_observation;
 
+        // Information of generations, needed to show the algorithm status
+        std::vector<float> m_self_team_loss_ave;
+        std::vector<float> m_self_team_loss_best;
+        std::vector<float> m_enemy_team_loss_ave;
+        std::vector<float> m_enemy_team_loss_best;
+
         // Tools
         DebugRenderers m_debug_renderers;
+        Gnuplot m_gp;
 
         // Misc
-        
         const double PI = atan(1.) * 4.;
     };
 }

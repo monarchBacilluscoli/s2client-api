@@ -70,7 +70,6 @@ void sc2::RollingGA::RunSimulatorsSynchronous()
             threads[i] = std::thread{[&, i]() -> void {
                 m_simulators[i].Run(m_run_length);
             }};
-            // if debug flag is on, the debug renderes are involved
         }
     }
     for (auto& t : threads) {
@@ -147,6 +146,15 @@ void RollingGA::SetDebugMode(bool is_debug) {
         // m_debug_renderer.SetIsDisplay(false);
     }
     m_is_debug = is_debug;
+}
+
+void RollingGA::InitBeforeRun() {
+	m_self_team_loss_ave.clear();
+	m_self_team_loss_best.clear();
+	m_enemy_team_loss_ave.clear();
+	m_enemy_team_loss_best.clear();
+	m_gp << "set title 'Algorithm Status'" << std::endl;
+	m_gp << "set xrange [0:" << m_max_generation << "]" << std::endl;
 }
 
 Solution<Command> RollingGA::GenerateSolution() {
@@ -285,8 +293,23 @@ void sc2::RollingGA::Evaluate(Population& p) {
               << "ally_team_loss_best:\t" << self_team_loss_best << "\t"
               << "enemy_team_loss_avg:\t" << enemy_team_loss_total / p.size() << "\t"
               << "enemy_team_loss_best:\t" << enemy_team_loss_best << std::endl;
-	//todo use gnuplot to show the data
-	//todo store all the data and print them
+	//todo store all the data
+	m_self_team_loss_ave.push_back(self_team_loss_total / p.size());
+	m_self_team_loss_best.push_back(self_team_loss_best);
+	m_enemy_team_loss_ave.push_back(enemy_team_loss_total / p.size());
+	m_enemy_team_loss_best.push_back(enemy_team_loss_best);
+}
+
+void RollingGA::ShowGraphEachGeneration(){
+	// set the index here;
+	std::vector<float> indices(m_current_generation+1); 
+	std::iota(indices.begin(),indices.end(),1);
+	// set all the lines to be showed
+	m_gp << "plot" << m_gp.file1d(boost::make_tuple(indices, m_self_team_loss_ave)) << "with lines title 'self lost ave',"
+		 << m_gp.file1d(boost::make_tuple(indices, m_self_team_loss_best)) << "with lines title 'self lost best',"
+		 << m_gp.file1d(boost::make_tuple(indices, m_enemy_team_loss_ave)) << "with lines title 'enemy lost ave',"
+		 << m_gp.file1d(boost::make_tuple(indices, m_enemy_team_loss_best)) << "with lines title 'enemy lost best',"
+		 << std::endl;
 }
 
 std::vector<const ObservationInterface*> RollingGA::GetAllSimsObservations() const {

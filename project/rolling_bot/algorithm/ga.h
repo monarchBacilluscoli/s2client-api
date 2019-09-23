@@ -81,6 +81,14 @@ protected:
     //? pure virtual
     virtual Solution<T> GenerateSolution() = 0;
 
+    //! Print the graph, pure virtual method
+    virtual void ShowGraphEachGeneration(){};
+    //! 
+    virtual void InitBeforeRun(){
+        m_population.clear();
+        m_population.resize(m_population_size);
+    };
+
     //! Settings
     int m_max_generation = 10;
     //! Controls how many parents ...
@@ -135,11 +143,12 @@ inline bool Solution<T>::sum_greater(const Solution<T>& a, const Solution<T>& b)
 template<class T>
 std::vector<Solution<T>> GA<T>::Run()
 {
+    InitBeforeRun();
     m_population.resize(m_population_size);
     GenerateSolutions(m_population, m_population_size);
     Evaluate(m_population);
     SortSolutions(m_population, m_compare);
-    for (m_current_generation = 0; m_current_generation < m_max_generation; m_current_generation++)
+    for (m_current_generation = 1; m_current_generation <= m_max_generation; m_current_generation++)
     {
         //todo According to current generation, I can adjust the mutation rate
         Population offspring;
@@ -148,6 +157,7 @@ std::vector<Solution<T>> GA<T>::Run()
         m_population.insert(m_population.begin(), offspring.begin(), offspring.end());
         SortSolutions(m_population, m_compare);
         m_population.erase(m_population.begin() + m_population_size, m_population.end()); //
+        ShowGraphEachGeneration();
     }
     return m_population;
 }
