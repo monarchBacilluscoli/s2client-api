@@ -149,6 +149,8 @@ void RollingGA::SetDebugMode(bool is_debug) {
 }
 
 void RollingGA::InitBeforeRun() {
+	// call init() of the father class
+	GA::InitBeforeRun();
 	m_self_team_loss_ave.clear();
 	m_self_team_loss_best.clear();
 	m_enemy_team_loss_ave.clear();
@@ -158,11 +160,12 @@ void RollingGA::InitBeforeRun() {
 }
 
 Solution<Command> RollingGA::GenerateSolution() {
-	//? These is a way to get avaliable abilities in s2client-api, but it is time consuming
+	//? These is a way to get avaliable abilities in s2client-api, but it is time-consuming
 	//? But for now, I choose to limit the chosen of abilities in only move and attack
-	Solution<Command> sol(m_my_team.size(), m_objective_size);
+	size_t team_size = m_my_team.size();
+	Solution<Command> sol(team_size, m_objective_size);
 	RawActions raw_actions(m_command_length);
-	for (size_t i = 0; i < m_my_team.size(); i++)
+	for (size_t i = 0; i < team_size; i++)
 	{
 		sol.variable[i].unit_tag = m_my_team[i]->tag;
 		// float move_dis_per_run = MoveDistance(m_my_team[i], m_run_length, m_unit_type);
@@ -171,8 +174,7 @@ Solution<Command> RollingGA::GenerateSolution() {
 		float moveable_radius = std::min(longest_map_bound, move_dis_per_run); //todo Think about the boundaries of the map!
 		Point2D current_location = m_my_team[i]->pos;
 		sol.variable[i].actions.resize(m_command_length);
-		// for (ActionRaw &action_raw : sol.variable[i].actions)
-		for (size_t j = 0; j <= sol.variable[i].actions.size(); ++j)
+		for (size_t j = 0; j < m_command_length; j++)
 		{
 			ActionRaw &action_raw = sol.variable[i].actions[j];
 			// randomly choose to move or attack
@@ -229,7 +231,7 @@ Population sc2::RollingGA::CrossOver(const Solution<Command> &a, const Solution<
 	//todo random select one unit
 	int unit_index = GetRandomInteger(0, a.variable.size() - 1);
 	//todo exchange the subarray at the same pos in two units' commands
-	Population offspring = { a,b };
+	Population offspring({a, b});
 	size_t order_size = a.variable[unit_index].actions.size();
 	size_t start = sc2::GetRandomInteger(0, order_size - 1);
 	size_t end = sc2::GetRandomInteger(0, order_size - 1);
@@ -258,7 +260,13 @@ void sc2::RollingGA::Evaluate(Population& p) {
             m_simulators[i].SetOrders(p[i].variable);
         });
     }
-    std::for_each(setting_threads.begin(), setting_threads.end(), [](std::thread& t) -> void { t.join(); });
+    // std::for_each(setting_threads.begin(), setting_threads.end(), [](std::thread& t) -> void { t.join(); });
+	int thread_size = setting_threads.size();
+	for (size_t i = 0; i < thread_size; i++)
+	{
+		setting_threads[i].join();
+	}
+	
 	RunSimulatorsSynchronous();
 	#else
 	for (size_t i = 0; i < p.size(); i++)
@@ -305,6 +313,7 @@ void RollingGA::ShowGraphEachGeneration(){
 	std::vector<float> indices(m_current_generation+1); 
 	std::iota(indices.begin(),indices.end(),1);
 	// set all the lines to be showed
+	m_gp << "set style func linespoints" << std::endl;
 	m_gp << "plot" << m_gp.file1d(boost::make_tuple(indices, m_self_team_loss_ave)) << "with lines title 'self lost ave',"
 		 << m_gp.file1d(boost::make_tuple(indices, m_self_team_loss_best)) << "with lines title 'self lost best',"
 		 << m_gp.file1d(boost::make_tuple(indices, m_enemy_team_loss_ave)) << "with lines title 'enemy lost ave',"

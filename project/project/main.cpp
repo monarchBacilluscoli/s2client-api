@@ -342,48 +342,48 @@ int main(int argc, char* argv[]) {
         //todo start 
     }
     {
-    //! Gnuplot test
-    	Gnuplot gp;
+        //     //! Gnuplot test
+        //         Gnuplot gp;
 
-	std::vector<std::pair<double, double> > xy_pts_A;
-	for(double x=-2; x<2; x+=0.01) {
-		double y = x*x*x;
-		xy_pts_A.push_back(std::make_pair(x, y));
-	}
+        //     std::vector<std::pair<double, double> > xy_pts_A;
+        //     for(double x=-2; x<2; x+=0.01) {
+        //         double y = x*x*x;
+        //         xy_pts_A.push_back(std::make_pair(x, y));
+        //     }
 
-	std::vector<std::pair<double, double> > xy_pts_B;
-	for(double x=-2; x<2; x+=0.01) {
-		double y = x*x;
-        xy_pts_B.push_back(std::make_pair(x, y));
-    }
+        //     std::vector<std::pair<double, double> > xy_pts_B;
+        //     for(double x=-2; x<2; x+=0.01) {
+        //         double y = x*x;
+        //         xy_pts_B.push_back(std::make_pair(x, y));
+        //     }
 
-    std::vector<double> xy_pts_Cx;
-    std::vector<double> xy_pts_Cy;
-    for (double x = -2; x < 2; x+=0.2)
-    {
-        xy_pts_Cx.push_back(x);
-        xy_pts_Cy.push_back(x);
-    }
-    boost::tuple<std::vector<double>,std::vector<double>> xy_pts_C = boost::make_tuple(xy_pts_Cx,xy_pts_Cy);
+        //     std::vector<double> xy_pts_Cx;
+        //     std::vector<double> xy_pts_Cy;
+        //     for (double x = -2; x < 2; x+=0.2)
+        //     {
+        //         xy_pts_Cx.push_back(x);
+        //         xy_pts_Cy.push_back(x);
+        //     }
+        //     boost::tuple<std::vector<double>,std::vector<double>> xy_pts_C = boost::make_tuple(xy_pts_Cx,xy_pts_Cy);
 
-    gp << "set xrange [-2:2]\nset yrange [-2:2]\n";
-	// Data will be sent via a temporary file.  These are erased when you call
-	// gp.clearTmpfiles() or when gp goes out of scope.  If you pass a filename
-	// (e.g. "gp.file1d(pts, 'mydata.dat')"), then the named file will be created
-	// and won't be deleted (this is useful when creating a script).
-	gp << "plot" << gp.file1d(xy_pts_A) << "with lines title 'cubic',"
-		<< gp.file1d(xy_pts_C) << "with line title 'square'," 
-        << gp.file1d(xy_pts_B) << "with line title 'linear'"
-        << std::endl;
+        //     gp << "set xrange [-2:2]\nset yrange [-2:2]\n";
+        //     // Data will be sent via a temporary file.  These are erased when you call
+        //     // gp.clearTmpfiles() or when gp goes out of scope.  If you pass a filename
+        //     // (e.g. "gp.file1d(pts, 'mydata.dat')"), then the named file will be created
+        //     // and won't be deleted (this is useful when creating a script).
+        //     gp << "plot" << gp.file1d(xy_pts_A) << "with lines title 'cubic',"
+        //         << gp.file1d(xy_pts_C) << "with line title 'square'," 
+        //         << gp.file1d(xy_pts_B) << "with line title 'linear'"
+        //         << std::endl;
 
-    gp << "plot" << gp.file1d(xy_pts_A) << "with lines title 'cubic'" << std::endl;
+        //     gp << "plot" << gp.file1d(xy_pts_A) << "with lines title 'cubic'" << std::endl;
 
-#ifdef _WIN32
-	// For Windows, prompt for a keystroke before the Gnuplot object goes out of scope so that
-	// the gnuplot window doesn't get closed.
-	std::cout << "Press enter to exit." << std::endl;
-	std::cin.get();
-#endif
+        // #ifdef _WIN32
+        //     // For Windows, prompt for a keystroke before the Gnuplot object goes out of scope so that
+        //     // the gnuplot window doesn't get closed.
+        //     std::cout << "Press enter to exit." << std::endl;
+        //     std::cin.get();
+        // #endif
     }
 
     // Some settings
@@ -399,8 +399,8 @@ int main(int argc, char* argv[]) {
     bool multi_threaded = false;
     // use this to control the cauculation times per second
     uint frames = 60;
-    int population_size = 50;
-    int max_generations = 30;
+    int population_size = 10;
+    int max_generations = 2;
 
     DebugRenderer renderer;
 

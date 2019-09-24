@@ -53,7 +53,8 @@
 			"typeinfo": "cpp",
 			"utility": "cpp",
 			"cstdarg": "cpp",
-			"numeric": "cpp"
+			"numeric": "cpp",
+			"codecvt": "cpp"
 		},
 		"files.exclude": {
 			"**.bat": true,

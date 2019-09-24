@@ -19,6 +19,8 @@ class GA {
 public:
     GA() = default;
 
+    GA(size_t population_size) : m_population_size(population_size){};
+
     ~GA() = default; //? whether or not the reference of evaluators can effect the destruction.
 
     void SetMaxGeneration(int max_generation) {
@@ -144,7 +146,6 @@ template<class T>
 std::vector<Solution<T>> GA<T>::Run()
 {
     InitBeforeRun();
-    m_population.resize(m_population_size);
     GenerateSolutions(m_population, m_population_size);
     Evaluate(m_population);
     SortSolutions(m_population, m_compare);

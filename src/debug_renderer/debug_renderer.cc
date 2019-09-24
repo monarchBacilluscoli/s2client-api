@@ -89,19 +89,21 @@ struct HealthBar
     // Don't forget to present the draw
     void Draw(SDL_Renderer *renderer)
     {
-        // store the original draw color of current renderer for restore it after draw
-        Uint8 r, g, b, a;
-        SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a);
-        // Black frame first
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff / 2);
-        SDL_RenderDrawRect(renderer, &frame);
-        // Red bar cover then
-        SDL_SetRenderDrawColor(renderer, 0xff, 0, 0, 0xff / 2);
-        SDL_RenderDrawRect(renderer, &cover);
-        SDL_RenderFillRect(renderer, &cover);
-        SDL_SetRenderDrawColor(renderer, r, g, b, a);
-        // draw the text of current health
-        //todo set the message text
+        if(renderer!=nullptr){
+            // store the original draw color of current renderer for restore it after draw
+            Uint8 r, g, b, a;
+            SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a);
+            // Black frame first
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff / 2);
+            SDL_RenderDrawRect(renderer, &frame);
+            // Red bar cover then
+            SDL_SetRenderDrawColor(renderer, 0xff, 0, 0, 0xff / 2);
+            SDL_RenderDrawRect(renderer, &cover);
+            SDL_RenderFillRect(renderer, &cover);
+            SDL_SetRenderDrawColor(renderer, r, g, b, a);
+            // draw the text of current health
+            //todo set the message text
+        }
     }
     SDL_Rect frame;
     SDL_Rect cover;
@@ -190,8 +192,10 @@ DebugRenderer &DebugRenderer::operator=(const sc2::DebugRenderer &rhs)
 
 void DebugRenderer::ClearRenderer()
 {
-    SDL_SetRenderDrawColor(m_renderer, 0xff, 0xff, 0xff, 0xff);
-    SDL_RenderClear(m_renderer);
+    if(m_renderer!=nullptr){
+        SDL_SetRenderDrawColor(m_renderer, 0xff, 0xff, 0xff, 0xff);
+        SDL_RenderClear(m_renderer);
+    }
 }
 
 void DebugRenderer::Present()
@@ -375,7 +379,7 @@ void DebugRenderer::DrawObservation(const ObservationInterface *observation, int
         Point2DI render_pos = coordinate_transformer.ToRenderPoint(u->pos);
         int size = u->radius * coordinate_transformer.GetRatioGameToRender() < minimize_size ? minimize_size : ceil(u->radius * coordinate_transformer.GetRatioGameToRender());
         unit_rect = {(int)render_pos.x, (int)render_pos.y, (int)size, (int)size};
-        HealthBar health_bar(render_pos.x, (int)render_pos.y - ceil(h / 30), u->health_max, u->health, ceil(h / 30), w / 240);
+        HealthBar health_bar(render_pos.x, (int)render_pos.y - ceil(h / 30), u->health_max, u->health, ceil(h / 30), 0.2f);
         health_bar.Draw(m_renderer);
         SDL_RenderDrawRect(m_renderer, &unit_rect);
         SDL_RenderFillRect(m_renderer, &unit_rect);

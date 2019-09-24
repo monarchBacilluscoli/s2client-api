@@ -30,10 +30,12 @@ namespace sc2{
             const std::string &net_address,
             int port_start,
             const std::string &process_path,
-            const std::string &map_path, int m_population_size = 50) : m_debug_renderers(m_population_size)
+            const std::string &map_path, 
+            size_t population_size = 50) : GA::GA(population_size), m_debug_renderers(population_size)
         {
             // simulator number now is simply equal to population size
-            m_simulators.resize(m_population_size);
+            m_simulators.resize(population_size);
+            
             SetSimulators(net_address, port_start, process_path, map_path);
             // m_debug_renderer.SetIsDisplay(false);
             SetCompare(Solution<Command>::multi_greater);
