@@ -134,7 +134,7 @@ namespace sc2{
 
         // Tools
         DebugRenderers m_debug_renderers;
-        Gnuplot m_gp;
+        Gnuplot m_gp, m_gp_mo;
 
         // Misc
         const double PI = atan(1.) * 4.;

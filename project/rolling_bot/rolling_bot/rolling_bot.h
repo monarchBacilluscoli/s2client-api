@@ -29,7 +29,8 @@ class RollingBot : public Agent {
     }
     virtual void OnStep() override {
         // after a specific interval, the algorhim should run once
-        if (Observation()->GetGameLoop() % m_interval_size == 0) {
+        if (Observation()->GetGameLoop() % m_interval_size == 0 && !Observation()->GetUnits(Unit::Alliance::Enemy).empty() && !Observation()->GetUnits(Unit::Alliance::Self).empty())
+        {
             //  first setup the simulator
             m_rolling_ga.SetSimulatorsStart(Observation());
             //  then pass it to algorithm and let algorithm run

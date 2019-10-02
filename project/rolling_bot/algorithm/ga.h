@@ -8,13 +8,15 @@
 #include <numeric>
 #include <vector>
 #include "solution.h"
+#include "algorithm"
 
-template<class T>
-class GA {
+template <class T>
+class GA
+{
 
     using Population = std::vector<Solution<T>>;
-    using Evaluator = std::function<float(const std::vector<T>&)>;
-    using Compare = std::function<bool(const Solution<T>&, const Solution<T>&)>;
+    using Evaluator = std::function<float(const std::vector<T> &)>;
+    using Compare = std::function<bool(const Solution<T> &, const Solution<T> &)>;
 
 public:
     GA() = default;
@@ -23,37 +25,45 @@ public:
 
     ~GA() = default; //? whether or not the reference of evaluators can effect the destruction.
 
-    void SetMaxGeneration(int max_generation) {
+    void SetMaxGeneration(int max_generation)
+    {
         m_max_generation = max_generation;
     }
 
-    void SetCrossOverRate(int crossover_rate) {
+    void SetCrossOverRate(int crossover_rate)
+    {
         m_cross_over_rate = crossover_rate;
     }
 
-    void SetMutateRate(int mutate_rate) {
+    void SetMutateRate(int mutate_rate)
+    {
         m_mutate_rate = mutate_rate;
     }
 
-    virtual void SetPopulationSize(int population_size) {
+    virtual void SetPopulationSize(int population_size)
+    {
         m_population_size = population_size;
         m_population.resize(m_population_size);
     }
 
-    void SetReproduceRate(int reproduce_rate) {
+    void SetReproduceRate(int reproduce_rate)
+    {
         m_reproduce_rate = reproduce_rate;
     }
 
-    void SetCompare(Compare compare) {
+    void SetCompare(Compare compare)
+    {
         m_compare = compare;
     }
 
-    void SetEvaluator(Evaluator* evaluator) {
+    void SetEvaluator(Evaluator *evaluator)
+    {
         m_evaluators.resize(1);
         m_evaluators[0] = evaluator;
     }
 
-    void SetEvaluators(std::vector<Evaluator*> evaluators){
+    void SetEvaluators(std::vector<Evaluator *> evaluators)
+    {
         m_evaluators = evaluators;
     }
 
@@ -62,31 +72,34 @@ public:
 
 protected:
     //! simply calls the GenerateSolution() repeatedly to generate original population
-    virtual void GenerateSolutions(Population& pop, int size);
+    virtual void GenerateSolutions(Population &pop, int size);
     //! two parents generate a unmutated soluton
-    virtual std::vector<Solution<T>> CrossOver(const Solution<T>& a, const Solution<T>& b);
+    virtual std::vector<Solution<T>> CrossOver(const Solution<T> &a, const Solution<T> &b);
     //! pure virtual mutate a solution
-    virtual void Mutate(Solution<T>& s) = 0;
+    virtual void Mutate(Solution<T> &s) = 0;
     //! a population generate another population
     // The spring_size need to be smaller than the size of parents
-    virtual void Reproduce(const Population& parents, Population& offspring, int spring_size);
+    virtual void Reproduce(const Population &parents, Population &offspring, int spring_size);
     //! Just calls the EvaluateSingleSolution() repeatedly to evaluate a population
-    virtual void Evaluate(Population& p);
+    virtual void Evaluate(Population &p);
     //! According to the compare to sort the population, no multi-objective rank being considered
-    virtual void SortSolutions(Population& p, const Compare& compare);
+    virtual void SortSolutions(Population &p, const Compare &compare);
 
+    //! set rank to each solution for the use of multi-objective method
+    virtual void DominanceSort(Population &p);
     //! two parents generate two children by crossover and mutation
-    virtual std::vector<Solution<T>> Produce(const Solution<T>& a, const Solution<T>& b);
+    virtual std::vector<Solution<T>> Produce(const Solution<T> &a, const Solution<T> &b);
     //! Calls those evaluators to evaluate one solution
-    virtual void EvaluateSingleSolution(Solution<T>& solution);
+    virtual void EvaluateSingleSolution(Solution<T> &solution);
     //! Generate one solution
     //? pure virtual
     virtual Solution<T> GenerateSolution() = 0;
 
     //! Print the graph, pure virtual method
     virtual void ShowGraphEachGeneration(){};
-    //! 
-    virtual void InitBeforeRun(){
+    //!
+    virtual void InitBeforeRun()
+    {
         m_population.clear();
         m_population.resize(m_population_size);
     };
@@ -103,7 +116,7 @@ protected:
     float m_reproduce_rate = 1.f;
 
     Compare m_compare = Solution<T>::sum_greater;
-    std::vector<Evaluator*> m_evaluators = {nullptr}; // for easy to use
+    std::vector<Evaluator *> m_evaluators = {nullptr}; // for easy to use
 
     //! Runtime data
     Population m_population;
@@ -136,13 +149,53 @@ bool Solution<T>::multi_greater(const Solution<T> &a, const Solution<T> &b)
     return true;
 }
 
-template<class T>
-inline bool Solution<T>::sum_greater(const Solution<T>& a, const Solution<T>& b)
+template <class T>
+inline bool Solution<T>::sum_greater(const Solution<T> &a, const Solution<T> &b)
 {
     return std::accumulate(a.objectives.begin(), a.objectives.end(), 0.f) > std::accumulate(b.objectives.begin(), b.objectives.end(), 0.f);
 }
 
-template<class T>
+template <class T>
+inline DOMINANCE Solution<T>::Dominate(const Solution<T> &a, const Solution<T> &b)
+{
+    int better_count = 0, worse_count = 0;
+    int sz = a.objectives.size();
+    for (size_t i = 0; i < sz; i++)
+    {
+        if (abs(a.objectives[i] - b.objectives[i]) > 0.000005)
+        {
+            if (a.objectives[i] > b.objectives[i])
+            {
+                ++better_count;
+            }
+            else
+            {
+                ++worse_count;
+            }
+        }
+        if (better_count != 0 && worse_count != 0)
+        {
+            return DOMINANCE::EQUAL;
+        }
+    }
+    if (better_count == 0 && worse_count == 0)
+    {
+        return DOMINANCE::EQUAL;
+    }
+    else
+    {
+        if (better_count)
+        {
+            return DOMINANCE::BETTER;
+        }
+        else
+        {
+            return DOMINANCE::WORSE;
+        }
+    }
+}
+
+template <class T>
 std::vector<Solution<T>> GA<T>::Run()
 {
     InitBeforeRun();
@@ -163,23 +216,25 @@ std::vector<Solution<T>> GA<T>::Run()
     return m_population;
 }
 
-template<class T>
-inline void GA<T>::GenerateSolutions(Population& pop, int size)
+template <class T>
+inline void GA<T>::GenerateSolutions(Population &pop, int size)
 {
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++)
+    {
         pop[i] = GenerateSolution();
     }
 }
 
-template<class T>
-inline std::vector<Solution<T>> GA<T>::CrossOver(const Solution<T>& a, const Solution<T>& b)
+template <class T>
+inline std::vector<Solution<T>> GA<T>::CrossOver(const Solution<T> &a, const Solution<T> &b)
 {
     //! you can use #define NDBUG to disabled assert()
     assert(a.variable.size() > 0 && a.variable.size() == b.variable.size());
-    std::vector<Solution<T>> offspring = { a,b };
+    std::vector<Solution<T>> offspring = {a, b};
     size_t start = sc2::GetRandomInteger(0, a.variable.size() - 1);
     size_t end = sc2::GetRandomInteger(0, a.variable.size() - 1);
-    if (start > end) {
+    if (start > end)
+    {
         std::swap(start, end);
     }
     for (size_t i = start; i < end; i++)
@@ -189,63 +244,123 @@ inline std::vector<Solution<T>> GA<T>::CrossOver(const Solution<T>& a, const Sol
     return offspring;
 }
 
-template<class T>
-inline std::vector<Solution<T>> GA<T>::Produce(const Solution<T>& a, const Solution<T>& b)
+template <class T>
+inline std::vector<Solution<T>> GA<T>::Produce(const Solution<T> &a, const Solution<T> &b)
 {
     std::vector<Solution<T>> children;
-    if (sc2::GetRandomFraction() < m_cross_over_rate) { //? it should't be here, instead, it should be outside
+    if (sc2::GetRandomFraction() < m_cross_over_rate)
+    { //? it should't be here, instead, it should be outside
         children = CrossOver(a, b);
     }
-    else {
-        children = { a,b };
-    }
-    for (Solution<T>& c: children)
+    else
     {
-        if (sc2::GetRandomFraction() < m_mutate_rate) {
+        children = {a, b};
+    }
+    for (Solution<T> &c : children)
+    {
+        if (sc2::GetRandomFraction() < m_mutate_rate)
+        {
             Mutate(c);
         }
     }
     return children;
 }
 
-template<class T>
-inline void GA<T>::Reproduce(const Population& parents, Population& offspring, int spring_size)
+template <class T>
+inline void GA<T>::Reproduce(const Population &parents, Population &offspring, int spring_size)
 {
     assert(spring_size <= parents.size()); //! for now, I can not reproduce a larger offspring population
     offspring.resize(spring_size);
-    for (size_t i = 0; i < spring_size; i+=2)
+    for (size_t i = 0; i < spring_size; i += 2)
     {
         std::vector<Solution<T>> instant_children = Produce(parents[i], parents[i + 1]);
         offspring[i] = instant_children[0];
-        if (i + 1 < spring_size) {
+        if (i + 1 < spring_size)
+        {
             offspring[i + 1] = instant_children[1];
         }
     }
 }
 
-template<class T>
-inline void GA<T>::Evaluate(Population& p)
+template <class T>
+inline void GA<T>::Evaluate(Population &p)
 {
-    for (Solution<T>& s: p)
+    for (Solution<T> &s : p)
     {
         EvaluateSingleSolution(s);
     }
 }
 
-template<class T>
-inline void GA<T>::SortSolutions(Population& p, const Compare& compare)
+template <class T>
+inline void GA<T>::SortSolutions(Population &p, const Compare &compare)
 {
     std::sort(p.begin(), p.end(), compare);
 }
 
+template <class T>
+void GA<T>::DominanceSort(Population &p)
+{
+    // set dominate relationship
+    size_t pop_sz = p.size();
+    for (size_t i = 0; i < pop_sz - 1; i++)
+    {
+        for (size_t j = i + 1; j < pop_sz; j++)
+        {
+            switch (Solution<T>::Dominate(p[i], p[j]))
+            {
+            case DOMINANCE::BETTER:
+                p[i].dominant_solutions.push_back(&p[j]);
+                p[j].dominated_count++;
+                break;
+            case DOMINANCE::WORSE:
+                p[j].dominant_solutions.push_back(&p[i]);
+                p[i].dominated_count++;
+                break;
+            default:
+                //if p[i] and p[j] are equal, do nothing
+                break;
+            }
+        }
+    }
+    // set rank and sort
+    int current_set_count = 0;
+    int current_rank = 0;
+    while (current_set_count < pop_sz)
+    {
+        std::list<int> current_layer_indices;
+        for (size_t i = 0; i < pop_sz; i++)
+        {
+            if (p[i].dominated_count == 0 && p[i].rank > current_rank)
+            {
+                // set rank and store the solution into current layer
+                p[i].rank = current_rank;
+                current_layer_indices.push_back(i);
+            }
+        }
+        // handle the solutions dominated by solutions in current layer
+        int current_layer_sz = current_layer_indices.size();
+        //handle count first
+        for (const auto &index : current_layer_indices)
+        {
+            for (auto &item : p[index].dominant_solutions)
+            {
+                item->dominated_count--;
+            }
+            p[index].dominant_solutions.clear();
+        }
+        current_set_count += current_layer_sz;
+        ++current_rank;
+    }
+    std::sort(p.begin(), p.end(), [](const Solution<T> &a, const Solution<T> &b) -> bool { return a.rank < b.rank; });
+}
 
-template<class T>
-inline void GA<T>::EvaluateSingleSolution(Solution<T>& solution)
+template <class T>
+inline void GA<T>::EvaluateSingleSolution(Solution<T> &solution)
 {
     assert(solution.objectives.size() == m_evaluators.size()); //? or I can add, but this will effect the performance, so you'd better set the settings properly before the run
     for (size_t i = 0; i < m_evaluators.size(); i++)
     {
-       solution.objectives[i] = (*m_evaluators[i])(solution.variable);
+        solution.objectives[i] = (*m_evaluators[i])(solution.variable);
     }
 }
 

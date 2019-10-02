@@ -54,7 +54,9 @@
 			"utility": "cpp",
 			"cstdarg": "cpp",
 			"numeric": "cpp",
-			"codecvt": "cpp"
+			"codecvt": "cpp",
+			"bitset": "cpp",
+			"algorithm": "cpp"
 		},
 		"files.exclude": {
 			"**.bat": true,

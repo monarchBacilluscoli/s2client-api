@@ -311,7 +311,7 @@ void sc2::RollingGA::Evaluate(Population& p) {
 void RollingGA::ShowGraphEachGeneration(){
 	// set the index here;
 	std::vector<float> indices(m_current_generation+1); 
-	std::iota(indices.begin(),indices.end(),1);
+	std::iota(indices.begin(),indices.end(),0);
 	// set all the lines to be showed
 	m_gp << "set style func linespoints" << std::endl;
 	m_gp << "plot" << m_gp.file1d(boost::make_tuple(indices, m_self_team_loss_ave)) << "with lines title 'self lost ave',"
@@ -319,6 +319,21 @@ void RollingGA::ShowGraphEachGeneration(){
 		 << m_gp.file1d(boost::make_tuple(indices, m_enemy_team_loss_ave)) << "with lines title 'enemy lost ave',"
 		 << m_gp.file1d(boost::make_tuple(indices, m_enemy_team_loss_best)) << "with lines title 'enemy lost best',"
 		 << std::endl;
+	//todo construct a vector to store all solutions' objectives
+	if (!m_population.empty())
+	{
+		size_t obj_sz = m_population.front().objectives.size();
+		std::vector<std::vector<float>> objs(m_population_size, m_population.front().objectives);
+		for (size_t i = 1; i < m_population_size; i++)
+		{
+			objs[i] = m_population.at(i).objectives;
+		}
+		// m_gp_mo << "set xrange [-300:0]\nset yrange [0:300]\n";
+		m_gp_mo << "set xlabel 'damage to enemy'" << std::endl
+				<< " set ylabel 'damage to me'" << std::endl;
+		m_gp_mo << "plot" << m_gp.file1d(objs)
+				<< "lt -1 pi -4 pt 6 title 'individuals'" << std::endl;
+	}
 }
 
 std::vector<const ObservationInterface*> RollingGA::GetAllSimsObservations() const {
