@@ -73,6 +73,7 @@ void sc2::RollingGA::RunSimulatorsSynchronous()
         }
     }
     for (auto& t : threads) {
+		//todo add code to handle the overtime problem
         t.join();
     }
 }

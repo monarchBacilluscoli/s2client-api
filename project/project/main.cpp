@@ -73,11 +73,18 @@ public:
     RawActions m_stored_actions;
 };
 
-int main(int argc, char* argv[]) {
-    // Before evething starts, kill all the StarCraftII instances started before.
-    std::string process_name_to_be_killed = "SC2_x64";
-    std::string command = "ps -aux| grep " + process_name_to_be_killed + " | grep -v grep |awk '{print $2}' | xargs kill";
-    system(command.c_str());
+int main(int argc, char *argv[])
+{
+    // Before evething starts, kill all the superfluous processes started before.
+    std::vector<std::string> process_names_to_be_killed({"SC2_x64",
+                                                         "gnuplot"});
+    int kill_sz = process_names_to_be_killed.size();
+    for (size_t i = 0; i < kill_sz; i++)
+    {
+        std::string kill_command = "ps -aux| grep " + process_names_to_be_killed[i] + " | grep -v grep |awk '{print $2}' | xargs kill";
+        system(kill_command.c_str());
+    }
+
     //! test code (Can be folded)
     {
         //! for real ga
