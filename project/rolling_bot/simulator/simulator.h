@@ -9,6 +9,7 @@
 #include "command.h"
 #include "debug_renderer/debug_renderer.h"
 #include "state.h"
+#include <mutex>
 
 #include <iostream>
 #include <queue>

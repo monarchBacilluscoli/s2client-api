@@ -408,8 +408,8 @@ int main(int argc, char *argv[])
     bool multi_threaded = false;
     // use this to control the cauculation times per second
     uint frames = 60;
-    int population_size = 30;
-    int max_generations = 30;
+    int population_size = 50;
+    int max_generations = 50;
 
     DebugRenderer renderer;
 

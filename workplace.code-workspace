@@ -56,7 +56,8 @@
 			"numeric": "cpp",
 			"codecvt": "cpp",
 			"bitset": "cpp",
-			"algorithm": "cpp"
+			"algorithm": "cpp",
+			"future": "cpp"
 		},
 		"files.exclude": {
 			"**.bat": true,

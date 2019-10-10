@@ -186,10 +186,12 @@ void Simulator::SetStartPoint(const std::vector<Command>& commands,
 }
 
 void Simulator::Run(int steps, DebugRenderer* debug_renderer) {
+    // set false to let simu bot to use the normal mode to call the OnStep
     m_executor.SetIsSetting(false);
+    int game_loop = (size_t)ceil(steps / GetStepSize());
     if (debug_renderer) {
         const ObservationInterface* ob = GetObservations().front();
-        for (size_t i = 0; i < (size_t)ceil(steps / GetStepSize()); i++) {
+        for (size_t i = 0; i < game_loop; i++) {
             Update();
             debug_renderer->ClearRenderer();
             debug_renderer->DrawOrders(m_commands, m_executor.Observation());
@@ -197,7 +199,7 @@ void Simulator::Run(int steps, DebugRenderer* debug_renderer) {
             debug_renderer->Present();
         }
     } else {
-        for (size_t i = 0; i < (size_t)ceil(steps / GetStepSize()); i++) {
+        for (size_t i = 0; i < game_loop; i++) {
             Update();
         }
     }

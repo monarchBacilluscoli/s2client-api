@@ -1,5 +1,7 @@
 #include"rolling_ga.h"
 #include<thread>
+#include<future>
+#include<chrono>
 #include<numeric>
 #include<algorithm>
 #include<iostream>
@@ -48,7 +50,7 @@ void sc2::RollingGA::SetSimulatorsStart(const ObservationInterface* ob)
 {
     SetObservation(ob);
     //todo try to implement them in multi threads
-    std::cout << m_simulators.size() << std::endl;
+    std::cout <<"simulator size: "<< m_simulators.size() << std::endl;
     for (size_t i = 0; i < m_simulators.size(); i++) {
         m_simulators[i].CopyAndSetState(ob);
     }
@@ -56,26 +58,60 @@ void sc2::RollingGA::SetSimulatorsStart(const ObservationInterface* ob)
 
 void sc2::RollingGA::RunSimulatorsSynchronous() 
 {
-    std::vector<std::thread> threads(m_simulators.size());
-    if (m_is_debug) {
-        for (size_t i = 0; i < threads.size(); i++) {
-            threads[i] = std::thread{[&, i]() -> void {
-                m_simulators[i].Run(m_run_length, &m_debug_renderers[i]);
-            }};
-            // if debug flag is on, the debug renderes are involved
-        }
-    } else {
-        std::vector<std::thread> threads(m_simulators.size());
-        for (size_t i = 0; i < threads.size(); i++) {
-            threads[i] = std::thread{[&, i]() -> void {
-                m_simulators[i].Run(m_run_length);
-            }};
-        }
-    }
-    for (auto& t : threads) {
-		//todo add code to handle the overtime problem
-        t.join();
-    }
+    // std::vector<std::thread> threads(m_simulators.size());
+    // if (m_is_debug) {
+    //     for (size_t i = 0; i < threads.size(); i++) {
+    //         threads[i] = std::thread{[&, i]() -> void {
+    //             m_simulators[i].Run(m_run_length, &m_debug_renderers[i]);
+    //         }};
+    //         // if debug flag is on, the debug renderes are involved
+    //     }
+    // } else {
+    //     std::vector<std::thread> threads(m_simulators.size());
+    //     for (size_t i = 0; i < threads.size(); i++) {
+    //         threads[i] = std::thread{[&, i]() -> void {
+    //             m_simulators[i].Run(m_run_length);
+    //         }};
+    //     }
+    // }
+    // for (auto& t : threads) {
+	// 	//todo add code to handle the timeout problem
+    //     t.join();
+    // }
+	std::vector<std::future<void>> futures(m_simulators.size()); //! you'd better not add this in the scope
+	if (m_is_debug)
+	{
+		for (size_t i = 0; i < futures.size(); i++)
+		{
+			futures[i] = std::async(std::launch::async, [&, i]() -> void {
+				m_simulators[i].Run(m_run_length, &m_debug_renderers[i]);
+			});
+			// if debug flag is on, the debug renderes are involved
+		}
+	}
+	else
+	{
+		std::vector<std::future<void>> futures(m_simulators.size());
+		for (size_t i = 0; i < futures.size(); i++)
+		{
+			futures[i] = std::async(std::launch::async, [&, i]() -> void {
+				m_simulators[i].Run(m_run_length);
+			});
+		}
+	}
+	std::chrono::time_point<std::chrono::steady_clock> deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(20000);
+	for (auto &f : futures)
+	{
+		//todo add code to handle the timeout problem
+		if (f.wait_until(deadline) == std::future_status::timeout)
+		{
+			std::cout << "timeout " << '\t' << std::endl;
+		}
+		else
+		{
+			//std::cout << "no timeout " << '\t' << std::endl;
+		}
+	}
 }
 
 void sc2::RollingGA::RunSimulatorsOneByOne() {
@@ -278,7 +314,7 @@ void sc2::RollingGA::Evaluate(Population& p) {
 	RunSimulatorsOneByOne();
 	#endif
 	
-    //? output the best one for each generation, or outputs the average objectives for each generation
+    // output the best one and the average objectives for each generation for each generation
     float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
     float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();
     for (size_t i = 0; i < p.size(); i++) {
@@ -297,12 +333,12 @@ void sc2::RollingGA::Evaluate(Population& p) {
         p[i].objectives[0] = m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Enemy);
         p[i].objectives[1] = -m_simulators[i].GetTeamHealthLoss(Unit::Alliance::Self);
     }
-    //! output the the results
+    // output the the results
     std::cout << "ally_team_loss_avg:\t" << self_team_loss_total / p.size() << "\t"
               << "ally_team_loss_best:\t" << self_team_loss_best << "\t"
               << "enemy_team_loss_avg:\t" << enemy_team_loss_total / p.size() << "\t"
               << "enemy_team_loss_best:\t" << enemy_team_loss_best << std::endl;
-	//todo store all the data
+	// store all the data
 	m_self_team_loss_ave.push_back(self_team_loss_total / p.size());
 	m_self_team_loss_best.push_back(self_team_loss_best);
 	m_enemy_team_loss_ave.push_back(enemy_team_loss_total / p.size());
@@ -310,6 +346,7 @@ void sc2::RollingGA::Evaluate(Population& p) {
 }
 
 void RollingGA::ShowGraphEachGeneration(){
+	//todo I can use another thread to do this display
 	// set the index here;
 	std::vector<float> indices(m_current_generation+1); 
 	std::iota(indices.begin(),indices.end(),0);
