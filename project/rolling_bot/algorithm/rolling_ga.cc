@@ -357,7 +357,7 @@ void RollingGA::ShowGraphEachGeneration(){
 		 << m_gp.file1d(boost::make_tuple(indices, m_enemy_team_loss_ave)) << "with lines title 'enemy lost ave',"
 		 << m_gp.file1d(boost::make_tuple(indices, m_enemy_team_loss_best)) << "with lines title 'enemy lost best',"
 		 << std::endl;
-	//todo construct a vector to store all solutions' objectives
+	// display the objectives of all solutions
 	if (!m_population.empty())
 	{
 		size_t obj_sz = m_population.front().objectives.size();
@@ -367,6 +367,7 @@ void RollingGA::ShowGraphEachGeneration(){
 			objs[i] = m_population.at(i).objectives;
 		}
 		// m_gp_mo << "set xrange [-300:0]\nset yrange [0:300]\n";
+		// todo set the colors of the first three solution set
 		m_gp_mo << "set xlabel 'damage to enemy'" << std::endl
 				<< " set ylabel 'damage to me'" << std::endl;
 		m_gp_mo << "plot" << m_gp.file1d(objs)
@@ -381,3 +382,4 @@ std::vector<const ObservationInterface*> RollingGA::GetAllSimsObservations() con
     }
     return observations;
 }
+

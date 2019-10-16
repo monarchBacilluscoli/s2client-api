@@ -36,7 +36,6 @@ struct Solution
     static bool multi_greater(const Solution<T>& a, const Solution<T>& b);
     static bool sum_greater(const Solution<T>& a, const Solution<T>& b);
     static DOMINANCE Dominate(const Solution<T>& a, const Solution<T>& b);
-    // static bool 
 };
 
 #endif //SOLUTION_H

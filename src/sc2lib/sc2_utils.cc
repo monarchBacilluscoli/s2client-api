@@ -8,6 +8,7 @@ namespace sc2 {
 const int frames_per_second = 16;
 
 Point2D FindRandomLocation(const Point2D& min, const Point2D& max) {
+    assert(min.x < max.x && min.y < max.y);
     Point2D target_pos;
     float playable_w = max.x - min.x;
     float playable_h = max.y - min.y;

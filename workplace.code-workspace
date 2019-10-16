@@ -57,7 +57,17 @@
 			"codecvt": "cpp",
 			"bitset": "cpp",
 			"algorithm": "cpp",
-			"future": "cpp"
+			"future": "cpp",
+			"list": "cpp",
+			"string": "cpp",
+			"complex": "cpp",
+			"iomanip": "cpp",
+			"cfenv": "cpp",
+			"iterator": "cpp",
+			"map": "cpp",
+			"memory_resource": "cpp",
+			"random": "cpp",
+			"set": "cpp"
 		},
 		"files.exclude": {
 			"**.bat": true,

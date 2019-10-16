@@ -76,6 +76,7 @@ namespace sc2{
         std::vector<const ObservationInterface*> GetAllSimsObservations() const;
 
         ~RollingGA() = default;
+
     private:
         void SetObservation(const ObservationInterface* observation);
         //! Use this to set the the client to run simulators, the map loaded and other settings
@@ -99,6 +100,22 @@ namespace sc2{
         // to take place the default function
         //virtual void EvaluateSingleSolution(Solution<Command>& s) override {};
         virtual void ShowGraphEachGeneration() override;
+        // // divide the population by rank into subsets which size is set by users
+        // static void DividePopulationByRank(const Population &pop, std::vector<std::vector<Solution<Command>>> &subsets)
+        // {
+        //     if (pop.empty() || pop[0].rank == std::numeric_limits<int>::max())
+        //     {
+        //         return;
+        //     }
+        //     int sz = subsets.size();
+        //     for (size_t i = 0; i < sz; i++)
+        //     {
+                
+        //     }
+        // }
+        virtual void SortSolutions(Population& pop) override{
+            DominanceSort(pop);
+        }
 
         // Settings
         int m_objective_size = 2;
@@ -138,6 +155,8 @@ namespace sc2{
 
         // Misc
         const double PI = atan(1.) * 4.;
+
+        // thread pool (used to put aside those thread without answer)
     };
 }
 

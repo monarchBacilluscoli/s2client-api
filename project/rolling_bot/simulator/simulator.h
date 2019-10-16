@@ -9,7 +9,9 @@
 #include "command.h"
 #include "debug_renderer/debug_renderer.h"
 #include "state.h"
+#include <thread>
 #include <mutex>
+#include <future>
 
 #include <iostream>
 #include <queue>
@@ -37,53 +39,58 @@ private:
     bool m_is_setting = true; // if in setting state, do not call any of the client event here
 };
 
-class Simulator : public Coordinator {
-   public:
-    Simulator() {
+class Simulator : public Coordinator
+{
+public:
+    Simulator()
+    {
         SetParticipants(
             {CreateParticipant(Terran, &m_executor), CreateComputer(Terran)});
     }
     ~Simulator() = default;
 
     //! set your opponent as a user-defined bot
-    void SetOpponent(Agent* agent);
+    void SetOpponent(Agent *agent);
     //! set your opponent as a built-in bot - a computer
     void SetOpponent(Difficulty difficulty);
 
     //! direct send the orders to units
-    void SetOrders(const std::vector<Command>& commands, DebugRenderer* debug_renderer = nullptr);
+    void SetOrders(const std::vector<Command> &commands, DebugRenderer *debug_renderer = nullptr);
     //! no unit tag translation, use the local unit tags
     void SetDirectOrders(const std::vector<Command> &commands, DebugRenderer *debug_renderer = nullptr);
-    //! copy the game state from a specific game observation
-    void CopyAndSetState(const ObservationInterface* ob, DebugRenderer* debug_renderer = nullptr);
+    //! copy the game state from a specific game observation.
+    // the debug_renderer was only used to debug this function when I worte it.
+    void CopyAndSetState(const ObservationInterface *ob, DebugRenderer *debug_renderer = nullptr);
     //! copys state and sets orders for preparation to run
-    void SetStartPoint(const std::vector<Command>& commands,
-                       const ObservationInterface* ob);
+    void SetStartPoint(const std::vector<Command> &commands,
+                       const ObservationInterface *ob);
     //! runs for specific number of steps which can be set by user
-    void Run(int steps, DebugRenderer* debug_renderer = nullptr);
+    void Run(int steps, DebugRenderer *debug_renderer = nullptr);
     //! load the copied state
     void Load();
     //? is anyone really needs a Run() which runs the game until gameover
     //! exposes the whole ObservationInterface to user
-    const ObservationInterface* Observation() const;
+    const ObservationInterface *Observation() const;
     //! exposes DebugInterface
-    DebugInterface* Debug();
+    DebugInterface *Debug();
     //! exposes ActionInterface
-    ActionInterface* Actions();
+    ActionInterface *Actions();
 
     //! Compares current state with the start point to get specific unit group
     //! health loss
     float GetTeamHealthLoss(Unit::Alliance alliance) const;
 
-    const std::map<Tag, const Unit*>& GetRelativeUnits(){
+    const std::map<Tag, const Unit *> &GetRelativeUnits()
+    {
         return m_relative_units;
     }
-    
-    const State& GetSave(){
+
+    const State &GetSave()
+    {
         return m_save;
     }
 
-   private:
+private:
     //! set units relations
     //! so the caller of this simultor doesn't have to know the tags of units
     //! here
@@ -99,7 +106,49 @@ class Simulator : public Coordinator {
     std::vector<Command> m_commands;
 
     //! form resource tag to target unit
-    std::map<Tag, const Unit*> m_relative_units;
+    std::map<Tag, const Unit *> m_relative_units;
+};
+
+struct Simulators{
+    public:
+    Simulators() = default;
+    Simulators(int size, const std::string& net_address, int port_start, const std::string& process_path, const std::string& map_path):
+    simulators(size),
+    m_net_address(net_address),
+    m_port_start(port_start),
+    m_process_path(process_path),
+    m_map_path(map_path)
+    {
+        for (Simulator& sim: simulators)
+        {
+            //sim.SetNetAddress(m_net_address);
+            sim.SetPortStart(port_start);
+            sim.SetProcessPath(process_path);
+            sim.SetMapPath(map_path);
+            sim.SetStepSize(1);
+            port_start += 2;
+        }
+    }
+    void StartAsync()
+    {
+        std::vector<std::future<void>> futures(simulators.size());
+        for (size_t i = 0; i < futures.size(); i++)
+        {
+            futures[i] = std::async(std::launch::async, [&, i]() -> void {
+                simulators[i].LaunchStarcraft();
+                simulators[i].StartGame();
+            });
+        }
+    }
+
+    //simulators
+    std::vector<Simulator> simulators;
+
+    // settings
+    std::string m_net_address;
+    int m_port_start;
+    std::string m_process_path;
+    std::string m_map_path;
 };
 
 }  // namespace sc2

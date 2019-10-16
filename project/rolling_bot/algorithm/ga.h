@@ -83,7 +83,8 @@ protected:
     //! Just calls the EvaluateSingleSolution() repeatedly to evaluate a population
     virtual void Evaluate(Population &p);
     //! According to the compare to sort the population, no multi-objective rank being considered
-    virtual void SortSolutions(Population &p, const Compare &compare);
+    // virtual void SortSolutions(Population &p, const Compare &compare);
+    virtual void SortSolutions(Population &p) = 0;
 
     //! set rank to each solution for the use of multi-objective method
     virtual void DominanceSort(Population &p);
@@ -201,7 +202,7 @@ std::vector<Solution<T>> GA<T>::Run()
     InitBeforeRun();
     GenerateSolutions(m_population, m_population_size);
     Evaluate(m_population);
-    SortSolutions(m_population, m_compare);
+    SortSolutions(m_population);
     for (m_current_generation = 1; m_current_generation <= m_max_generation; m_current_generation++)
     {
         //todo According to current generation, I can adjust the mutation rate
@@ -209,7 +210,7 @@ std::vector<Solution<T>> GA<T>::Run()
         Reproduce(m_population, offspring, m_reproduce_rate * m_population_size);
         Evaluate(offspring);
         m_population.insert(m_population.begin(), offspring.begin(), offspring.end());
-        SortSolutions(m_population, m_compare);
+        SortSolutions(m_population);
         m_population.erase(m_population.begin() + m_population_size, m_population.end()); //
         ShowGraphEachGeneration();
     }
@@ -291,15 +292,20 @@ inline void GA<T>::Evaluate(Population &p)
     }
 }
 
-template <class T>
-inline void GA<T>::SortSolutions(Population &p, const Compare &compare)
-{
-    std::sort(p.begin(), p.end(), compare);
-}
+// // simple sort function, only Compare is used
+// template <class T>
+// inline void GA<T>::SortSolutions(Population &p, const Compare &compare)
+// {
+//     std::sort(p.begin(), p.end(), compare);
+// }
 
 template <class T>
 void GA<T>::DominanceSort(Population &p)
 {
+    // make sure all the rank is set right
+    for(auto& item:p){
+        item.rank = std::numeric_limits<int>::max();
+    }
     // set dominate relationship
     size_t pop_sz = p.size();
     for (size_t i = 0; i < pop_sz - 1; i++)

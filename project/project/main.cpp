@@ -13,16 +13,20 @@
 #include "gnuplot-iostream.h"
 #include <cmath>
 #include <boost/tuple/tuple.hpp>
+#include "test_bots/test_multi_thread/test_multi_thread_bot.h"
 
 using namespace sc2;
 
 //! for test use
-class Bot : public Agent {
+class Bot : public Agent
+{
 public:
-    Bot(){
+    Bot()
+    {
         m_renderer.SetIsDisplay(false);
     }
-    virtual void OnGameStart() final {
+    virtual void OnGameStart() final
+    {
         // std::cout << "Hello, World!" << std::endl;
         // //todo add attack then move action to each unit
         // GameInfo game_info = Observation()->GetGameInfo();
@@ -42,12 +46,14 @@ public:
         // }
     }
 
-    virtual void OnUnitIdle(const Unit* unit) final {
+    virtual void OnUnitIdle(const Unit *unit) final
+    {
         Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
         // Actions()->UnitCommand(unit,ABILITY_ID::ATTACK,GetRandomEntry(enemies),true);
     }
 
-    virtual void OnStep() final {
+    virtual void OnStep() final
+    {
         // std::cout << Observation()->GetGameLoop() << std::endl;
         // m_renderer.DrawObservation(Observation());
 
@@ -58,9 +64,10 @@ public:
         //     orders = u->orders;
         //     std::cout << orders.size() << std::endl;
         // }
-        if (Observation()->GetGameLoop() % 5 == 0) {
+        if (Observation()->GetGameLoop() % 5 == 0)
+        {
             Units us = Observation()->GetUnits();
-            std::for_each(us.begin(), us.end(), [](const Unit* u) { std::cout << u->tag << "\t" << std::flush; });
+            std::for_each(us.begin(), us.end(), [](const Unit *u) { std::cout << u->tag << "\t" << std::flush; });
             Debug()->DebugKillUnits(us);
             Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_MARINE, Point2D(24, 24), 1U, 5U);
             Debug()->SendDebug();
@@ -68,7 +75,7 @@ public:
         }
     }
 
-   private:
+private:
     DebugRenderer m_renderer;
     RawActions m_stored_actions;
 };
@@ -135,8 +142,7 @@ int main(int argc, char *argv[])
         //                                     interval);
         //     }
         // }
-    }
-    {
+    } {
         // //! Test for the simulator
         // Simulator sim;
         // DebugRenderer debug_renderer;
@@ -146,13 +152,12 @@ int main(int argc, char *argv[])
         // sim.LaunchStarcraft();
         // sim.StartGame();
 
-        
         // // //todo randomly creates units in a range
         // for (size_t i = 0; true; i++) {
         //     Units us = sim.Observation()->GetUnits();
         //     std::for_each(us.begin(), us.end(), [&](const Unit* u) { sim.Debug()->DebugKillUnit(u); });
         //     sim.Debug()->SendDebug();
-            
+
         //     // Create 20 units
         //     int unit_count = 20;
         //     for (size_t i = 0; i < unit_count; i++)
@@ -182,8 +187,7 @@ int main(int argc, char *argv[])
         //     //     debug_renderer.DrawObservation(sim.Observation());
         //     // }
         // }
-    }
-    {
+    } {
         // switch (1)
         // {
         // case 1:
@@ -271,7 +275,7 @@ int main(int argc, char *argv[])
         // {
         //     sim.Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_MARINE, FindRandomLocation(sim.Observation()->GetGameInfo()), 1U);
         // }
-        
+
         // sim.Debug()->SendDebug();
         // for (size_t i = 0; i < 2; i++)
         // {
@@ -336,19 +340,16 @@ int main(int argc, char *argv[])
         // }
 
         //todo update and draw
-    }
-    {
+    } {
         //! test of out of range of map
         // std::map<int, std::string> ismap;
         // ismap[1] = "first";
         // ismap.at(2);
         // std::cout << std::endl;
-    }
-    {
+    } {
         //! Ensure if once attack deployed, the units can not take other actions anymore, unless the attack action deployed entirely
-        //todo start 
-    }
-    {
+        //todo start
+    } {
         //     //! Gnuplot test
         //         Gnuplot gp;
 
@@ -379,7 +380,7 @@ int main(int argc, char *argv[])
         //     // (e.g. "gp.file1d(pts, 'mydata.dat')"), then the named file will be created
         //     // and won't be deleted (this is useful when creating a script).
         //     gp << "plot" << gp.file1d(xy_pts_A) << "with lines title 'cubic',"
-        //         << gp.file1d(xy_pts_C) << "with line title 'square'," 
+        //         << gp.file1d(xy_pts_C) << "with line title 'square',"
         //         << gp.file1d(xy_pts_B) << "with line title 'linear'"
         //         << std::endl;
 
@@ -400,7 +401,7 @@ int main(int argc, char *argv[])
     // std::string map_path = "EnemyTower.SC2Map";
     // std::string map_path = "EnemyTowerVSThor.SC2Map";
     std::string map_path = "EnemyTowerVSThorMarine.SC2Map";
-    
+
     std::string starcraft_path = "/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64";
     int port_start = 4000;
     int main_process_port = 5379;
@@ -410,6 +411,19 @@ int main(int argc, char *argv[])
     uint frames = 60;
     int population_size = 50;
     int max_generations = 50;
+
+    //! multi-thread test bot
+    {
+        std::string map_path = "OnlyFriends.SC2Map";
+        TestMultiThreadBot mt_bot(100, net_address, port_start, starcraft_path, map_path);
+        for (size_t i = 0; true ; i++)
+        {
+            int unfinished_size = mt_bot.RandomActionsAllSims(std::chrono::milliseconds(10000));
+            std::cout << "run " << i << " finished" << std::endl
+                      << "unfinished thread number: " << unfinished_size << std::endl;
+            // std::cout << "time: " << std::put_time(std::localtime(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())), "date: %X\ntime: %X\n") << std::endl;
+        }
+    }
 
     DebugRenderer renderer;
 
@@ -430,7 +444,7 @@ int main(int argc, char *argv[])
     coordinator.SetRealtime(real_time);
     coordinator.SetMultithreaded(multi_threaded);
 
-    const ObservationInterface* ob = coordinator.GetObservations().front();
+    const ObservationInterface *ob = coordinator.GetObservations().front();
 
     coordinator.LaunchStarcraft();
     coordinator.StartGame(map_path);
@@ -440,14 +454,15 @@ int main(int argc, char *argv[])
     auto end = std::chrono::steady_clock::now();
     while (start = std::chrono::steady_clock::now(),
            renderer.ClearRenderer(),
-           renderer.DrawObservation(ob),  // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
+           renderer.DrawObservation(ob), // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
            renderer.Present(),
-           coordinator.Update()) {
+           coordinator.Update())
+    {
         end = std::chrono::steady_clock::now();
         auto interval = end - start;
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / frames) -
                                     interval);
-        }
+    }
     // is_debug = false;
 
     return 0;
