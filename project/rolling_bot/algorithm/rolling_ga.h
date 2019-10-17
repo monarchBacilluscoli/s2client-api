@@ -13,6 +13,7 @@
 #include "solution.h"
 #include "gnuplot-iostream.h"
 #include <boost/tuple/tuple.hpp>
+#include "../simulator/simulator_pool.h"
 
 namespace sc2{
     class RollingGA :public GA<Command>
@@ -31,7 +32,7 @@ namespace sc2{
             int port_start,
             const std::string &process_path,
             const std::string &map_path, 
-            size_t population_size = 50) : GA::GA(population_size), m_debug_renderers(population_size)
+            size_t population_size = 50) : GA::GA(population_size), m_debug_renderers(population_size)/*, m_simulation_pool(population_size,net_address, port_start, process_path, map_path)*/
         {
             // simulator number now is simply equal to population size
             m_simulators.resize(population_size);
@@ -157,6 +158,7 @@ namespace sc2{
         const double PI = atan(1.) * 4.;
 
         // thread pool (used to put aside those thread without answer)
+        // SimulatorPool m_simulation_pool;
     };
 }
 
