@@ -8,31 +8,35 @@
 #include "../algorithm/rolling_ga.h"
 #include "../simulator/simulator.h"
 
-namespace sc2 {
+namespace sc2
+{
 
-class RollingBot : public Agent {
-    using Evaluator = std::function<float(const std::vector<Command>&)>;
+class RollingBot : public Agent
+{
+    using Evaluator = std::function<float(const std::vector<Command> &)>;
 
-   public:
+public:
     RollingBot() = delete;
     //! the only thing this constructor needs to do is to provid all parameters
     //! the simulator needs You need to ensure that all the settings are valid
     //! in remote client, especially the map_path (a lot of errors have happend
     //! to it)
-    RollingBot(const std::string& net_address, int port_start,
-               const std::string& process_path, const std::string& map_path, int population_size=50)
+    RollingBot(const std::string &net_address, int port_start,
+               const std::string &process_path, const std::string &map_path, int population_size = 50)
         : m_rolling_ga(net_address, port_start, process_path, map_path, population_size) {}
-    virtual void OnGameStart() override {
+    virtual void OnGameStart() override
+    {
         // only after game starting I can initialize the ga, or the information
         // will not be passed to it
-        m_rolling_ga.InitializeObservation(Observation());
+        m_rolling_ga.Initialize(Observation());
     }
-    virtual void OnStep() override {
+    virtual void OnStep() override
+    {
         // after a specific interval, the algorhim should run once
         if (Observation()->GetGameLoop() % m_interval_size == 0 && !Observation()->GetUnits(Unit::Alliance::Enemy).empty() && !Observation()->GetUnits(Unit::Alliance::Self).empty())
         {
             //  first setup the simulator
-            m_rolling_ga.SetSimulatorsStart(Observation());
+            // m_rolling_ga.SetSimulatorsStart(Observation());
             //  then pass it to algorithm and let algorithm run
             Solution<Command> sol =
                 m_rolling_ga.Run()
@@ -45,8 +49,10 @@ class RollingBot : public Agent {
         }
     }
 
-    virtual void OnUnitDestoyed(const Unit* u){
-        if(Observation()->GetUnits().empty()){
+    virtual void OnUnitDestoyed(const Unit *u)
+    {
+        if (Observation()->GetUnits().empty())
+        {
             std::cout << "No unit to use!" << std::endl;
             char c;
             std::cin >> c;
@@ -54,74 +60,78 @@ class RollingBot : public Agent {
         }
     }
     // Settings for bot
-    void SetIntervalLength(int frames){
+    void SetIntervalLength(int frames)
+    {
         m_interval_size = frames;
     }
 
     // Settings for GA
-    void SetPopulationSize(int population_size) {
+    void SetPopulationSize(int population_size)
+    {
         m_rolling_ga.SetPopulationSize(population_size);
     }
-    void SetMaxGeneration(int max_generation) {
+    void SetMaxGeneration(int max_generation)
+    {
         m_rolling_ga.SetMaxGeneration(max_generation);
     }
-    void SetDebugOn(bool is_debug){
+    void SetDebugOn(bool is_debug)
+    {
         m_rolling_ga.SetDebugMode(is_debug);
     }
 
     // Settings for Sims
     void SetSimStepSize(int steps);
 
-    const std::vector<const ObservationInterface*> GetAllSimsObservations(){
-        return m_rolling_ga.GetAllSimsObservations();
-    }
-
-   private:
+private:
     //! the funciton to deploy the solution
-    void DeploySolution(Solution<Command> sol) {
-        for (const Command& c : sol.variable) {
+    void DeploySolution(Solution<Command> sol)
+    {
+        for (const Command &c : sol.variable)
+        {
             // todo before deploying the first command this time, the command
             // queue should be cleared
             bool queued_command = true;
-            for (size_t i = 0; i < c.actions.size(); i++) {
+            for (size_t i = 0; i < c.actions.size(); i++)
+            {
                 queued_command = (i == 0) ? false : true;
-                switch (c.actions[i].target_type) {
-                    case ActionRaw::TargetType::TargetNone:
-                        Actions()->UnitCommand(
-                            Observation()->GetUnit(c.unit_tag),
-                            c.actions[i].ability_id, queued_command);
-                        break;
-                    case ActionRaw::TargetType::TargetPosition:
-                        Actions()->UnitCommand(
-                            Observation()->GetUnit(c.unit_tag),
-                            c.actions[i].ability_id, c.actions[i].target_point,
-                            queued_command);
-                        break;
-                    case ActionRaw::TargetType::TargetUnitTag:
-                        Actions()->UnitCommand(
-                            Observation()->GetUnit(c.unit_tag),
-                            c.actions[i].ability_id,
-                            Observation()->GetUnit(c.actions[i].TargetUnitTag), 
-                            queued_command);
-                        break;
+                switch (c.actions[i].target_type)
+                {
+                case ActionRaw::TargetType::TargetNone:
+                    Actions()->UnitCommand(
+                        Observation()->GetUnit(c.unit_tag),
+                        c.actions[i].ability_id, queued_command);
+                    break;
+                case ActionRaw::TargetType::TargetPosition:
+                    Actions()->UnitCommand(
+                        Observation()->GetUnit(c.unit_tag),
+                        c.actions[i].ability_id, c.actions[i].target_point,
+                        queued_command);
+                    break;
+                case ActionRaw::TargetType::TargetUnitTag:
+                    Actions()->UnitCommand(
+                        Observation()->GetUnit(c.unit_tag),
+                        c.actions[i].ability_id,
+                        Observation()->GetUnit(c.actions[i].TargetUnitTag),
+                        queued_command);
+                    break;
                 }
             }
         }
     }
 
     //! Number of frames for which the algorithm should run once
-    int m_interval_size = 160;  // about 5 seconds
+    int m_interval_size = 160; // about 5 seconds
     //
     int m_population_size = 20;
     //
     int m_max_generation = 20;
 
     //! the simulator which is used as a forward model...
-    Simulator m_sim;
-    std::vector<Simulator> m_simulators;
+    // Simulator m_sim;
+    // std::vector<Simulator> m_simulators;
     //! The algorithm object
     RollingGA m_rolling_ga;
 };
-}  // namespace sc2
+} // namespace sc2
 
-#endif  // !ROLLING_BOT_H
+#endif // !ROLLING_BOT_H

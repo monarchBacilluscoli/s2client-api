@@ -56,6 +56,8 @@ public:
 
     //! direct send the orders to units
     void SetOrders(const std::vector<Command> &commands, DebugRenderer *debug_renderer = nullptr);
+    //! get the stored orders
+    std::vector<Command> GetOrders() { return m_commands; }
     //! no unit tag translation, use the local unit tags
     void SetDirectOrders(const std::vector<Command> &commands, DebugRenderer *debug_renderer = nullptr);
     //! copy the game state from a specific game observation.

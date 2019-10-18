@@ -414,15 +414,15 @@ int main(int argc, char *argv[])
 
     //! multi-thread test bot
     {
-        std::string map_path = "OnlyFriends.SC2Map";
-        TestMultiThreadBot mt_bot(100, net_address, port_start, starcraft_path, map_path);
-        for (size_t i = 0; true ; i++)
-        {
-            int unfinished_size = mt_bot.RandomActionsAllSims(std::chrono::milliseconds(10000));
-            std::cout << "run " << i << " finished" << std::endl
-                      << "unfinished thread number: " << unfinished_size << std::endl;
-            // std::cout << "time: " << std::put_time(std::localtime(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())), "date: %X\ntime: %X\n") << std::endl;
-        }
+        // std::string map_path = "OnlyFriends.SC2Map";
+        // TestMultiThreadBot mt_bot(100, net_address, port_start, starcraft_path, map_path);
+        // for (size_t i = 0; true ; i++)
+        // {
+        //     int unfinished_size = mt_bot.RandomActionsAllSims(std::chrono::milliseconds(10000));
+        //     std::cout << "run " << i << " finished" << std::endl
+        //               << "unfinished thread number: " << unfinished_size << std::endl;
+        //     // std::cout << "time: " << std::put_time(std::localtime(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())), "date: %X\ntime: %X\n") << std::endl;
+        // }
     }
 
     DebugRenderer renderer;
