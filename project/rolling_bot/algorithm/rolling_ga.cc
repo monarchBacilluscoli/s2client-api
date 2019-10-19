@@ -1,11 +1,11 @@
-#include"rolling_ga.h"
-#include<thread>
-#include<future>
-#include<chrono>
-#include<numeric>
-#include<algorithm>
-#include<iostream>
-#include"gnuplot-iostream.h"
+#include "rolling_ga.h"
+#include <thread>
+#include <future>
+#include <chrono>
+#include <numeric>
+#include <algorithm>
+#include <iostream>
+#include "gnuplot-iostream.h"
 
 #define MULTI_THREADED
 
@@ -56,7 +56,7 @@ using Compare = std::function<bool(const Solution<Command> &, const Solution<Com
 //     }
 // }
 
-// void sc2::RollingGA::RunSimulatorsSynchronous() 
+// void sc2::RollingGA::RunSimulatorsSynchronous()
 // {
 // 	std::vector<std::future<void>> futures(m_simulators.size()); //! you'd better not add this in the scope
 // 	if (m_is_debug)
@@ -107,7 +107,7 @@ using Compare = std::function<bool(const Solution<Command> &, const Solution<Com
 //     }
 // }
 
-void sc2::RollingGA::SetInfoFromObservation(const ObservationInterface* observation)
+void sc2::RollingGA::SetInfoFromObservation(const ObservationInterface *observation)
 {
 	m_observation = observation;
 	m_game_info = m_observation->GetGameInfo();
@@ -156,16 +156,21 @@ void sc2::RollingGA::SetAttackPossibility(float attack_possibility)
 // 	}
 // }
 
-void RollingGA::SetDebugMode(bool is_debug) {
-    if (is_debug) {
-        // m_debug_renderer.SetIsDisplay(true);
-    } else {
-        // m_debug_renderer.SetIsDisplay(false);
-    }
-    m_is_debug = is_debug;
+void RollingGA::SetDebugMode(bool is_debug)
+{
+	if (is_debug)
+	{
+		// m_debug_renderer.SetIsDisplay(true);
+	}
+	else
+	{
+		// m_debug_renderer.SetIsDisplay(false);
+	}
+	m_is_debug = is_debug;
 }
 
-void RollingGA::InitBeforeRun() {
+void RollingGA::InitBeforeRun()
+{
 	// call init() of the father class
 	GA::InitBeforeRun();
 	m_self_team_loss_ave.clear();
@@ -173,10 +178,12 @@ void RollingGA::InitBeforeRun() {
 	m_enemy_team_loss_ave.clear();
 	m_enemy_team_loss_best.clear();
 	m_gp << "set title 'Algorithm Status'" << std::endl;
+	m_gp_mo << "set title 'Solution Distribution'" << std::endl;
 	m_gp << "set xrange [0:" << m_max_generation << "]" << std::endl;
 }
 
-Solution<Command> RollingGA::GenerateSolution() {
+Solution<Command> RollingGA::GenerateSolution()
+{
 	//? These is a way to get avaliable abilities in s2client-api, but it is time-consuming
 	//? But for now, I choose to limit the chosen of abilities in only move and attack
 	size_t team_size = m_my_team.size();
@@ -203,9 +210,11 @@ Solution<Command> RollingGA::GenerateSolution() {
 				if (j == 0)
 				{
 					action_raw.target_point = current_location + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
-				}else{
+				}
+				else
+				{
 					// hope the last target point is a move position
-					action_raw.target_point = sol.variable[i].actions[j-1].target_point + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
+					action_raw.target_point = sol.variable[i].actions[j - 1].target_point + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
 				}
 				action_raw.target_point = FixOutsidePointIntoMap(action_raw.target_point, m_game_info.playable_min, m_game_info.playable_max);
 			}
@@ -214,10 +223,13 @@ Solution<Command> RollingGA::GenerateSolution() {
 				action_raw.ability_id = ABILITY_ID::MOVE;
 				action_raw.target_type = ActionRaw::TargetType::TargetPosition;
 				// construct move action
-				if(j == 0){
+				if (j == 0)
+				{
 					action_raw.target_point = current_location + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
-				}else{
-					action_raw.target_point = sol.variable[i].actions[j-1].target_point + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
+				}
+				else
+				{
+					action_raw.target_point = sol.variable[i].actions[j - 1].target_point + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
 				}
 				action_raw.target_point = FixOutsidePointIntoMap(action_raw.target_point, m_game_info.playable_min, m_game_info.playable_max);
 			}
@@ -226,10 +238,10 @@ Solution<Command> RollingGA::GenerateSolution() {
 	return sol;
 }
 
-void sc2::RollingGA::Mutate(Solution<Command>& s)
+void sc2::RollingGA::Mutate(Solution<Command> &s)
 {
 	// the user must ensure that the actions is not empty
-	ActionRaw& action = GetRandomEntry(GetRandomEntry(s.variable).actions);
+	ActionRaw &action = GetRandomEntry(GetRandomEntry(s.variable).actions);
 	if (action.ability_id == ABILITY_ID::ATTACK)
 	{
 		// todo if the action is attack, move the target point to the mass center of the enemies / one weakest enemy / nearest enemy / one random unit
@@ -244,7 +256,8 @@ void sc2::RollingGA::Mutate(Solution<Command>& s)
 	}
 	action.target_point = FixOutsidePointIntoMap(action.target_point, m_game_info.playable_min, m_game_info.playable_max);
 }
-Population sc2::RollingGA::CrossOver(const Solution<Command> &a, const Solution<Command> &b){
+Population sc2::RollingGA::CrossOver(const Solution<Command> &a, const Solution<Command> &b)
+{
 	//todo random select one unit
 	int unit_index = GetRandomInteger(0, a.variable.size() - 1);
 	//todo exchange the subarray at the same pos in two units' commands
@@ -252,78 +265,82 @@ Population sc2::RollingGA::CrossOver(const Solution<Command> &a, const Solution<
 	size_t order_size = a.variable[unit_index].actions.size();
 	size_t start = sc2::GetRandomInteger(0, order_size - 1);
 	size_t end = sc2::GetRandomInteger(0, order_size - 1);
-	if (start > end) {
-        std::swap(start, end);
-    }
-    for (size_t i = start; i < end; i++)
-    {
-        std::swap(offspring[0].variable[unit_index].actions[i], offspring[1].variable[unit_index].actions[i]);
-    }
-    return offspring;
+	if (start > end)
+	{
+		std::swap(start, end);
+	}
+	for (size_t i = start; i < end; i++)
+	{
+		std::swap(offspring[0].variable[unit_index].actions[i], offspring[1].variable[unit_index].actions[i]);
+	}
+	return offspring;
 }
 
-
-void sc2::RollingGA::Evaluate(Population& pop) {
-    // assert(p.size() <= m_simulators.size());
-    // use different simulators to evaluate solutions respectively
-    // for each sim, copy the state and deploy the commands!
-    // //todo multi-threaded
+void sc2::RollingGA::Evaluate(Population &pop)
+{
+	// assert(p.size() <= m_simulators.size());
+	// use different simulators to evaluate solutions respectively
+	// for each sim, copy the state and deploy the commands!
+	// //todo multi-threaded
 	//! construct the orders vec
 
-	#ifdef MULTI_THREADED
+#ifdef MULTI_THREADED
 	m_simulation_pool.CopyStateAndSendOrders(m_observation, pop);
 	// std::vector<std::thread> setting_threads(m_simulators.size());
-    // for (size_t i = 0; i < p.size(); i++) {
-    //     setting_threads[i] = std::thread([&, i] {
-    //         m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
-    //         m_simulators[i].SetOrders(p[i].variable);
-    //     });
-    // }
-    // // std::for_each(setting_threads.begin(), setting_threads.end(), [](std::thread& t) -> void { t.join(); });
+	// for (size_t i = 0; i < p.size(); i++) {
+	//     setting_threads[i] = std::thread([&, i] {
+	//         m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
+	//         m_simulators[i].SetOrders(p[i].variable);
+	//     });
+	// }
+	// // std::for_each(setting_threads.begin(), setting_threads.end(), [](std::thread& t) -> void { t.join(); });
 	// int thread_size = setting_threads.size();
 	// for (size_t i = 0; i < thread_size; i++)
 	// {
 	// 	setting_threads[i].join();
 	// }
-	
+
 	// RunSimulatorsSynchronous();
 	m_simulation_pool.RunSimsAsync(m_run_length, m_debug_renderers);
-	#else
-	// for (size_t i = 0; i < p.size(); i++)
-	// {
-	// 	m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
-	// 	m_simulators[i].SetOrders(p[i].variable);
-	// }
-	// RunSimulatorsOneByOne();
-	#endif
-	
-    // output the best one and the average objectives for each generation for each generation
-    float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
-    float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();
+#else
+// for (size_t i = 0; i < p.size(); i++)
+// {
+// 	m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
+// 	m_simulators[i].SetOrders(p[i].variable);
+// }
+// RunSimulatorsOneByOne();
+#endif
+
+	// output the best one and the average objectives for each generation for each generation
+	float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
+	float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();
 	size_t sz = pop.size();
-    for (size_t i = 0; i < sz; i++) {
+	for (size_t i = 0; i < sz; i++)
+	{
 		self_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
 		enemy_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
 
 		// set the 2 objectives
-        pop[i].objectives[1] = -self_loss;
-        pop[i].objectives[0] = enemy_loss;
-		
+		pop[i].objectives[1] = -self_loss;
+		pop[i].objectives[0] = enemy_loss;
+
 		// calculate the average and the best
-        self_team_loss_total += self_loss;
-        enemy_team_loss_total += enemy_loss;
-        if (self_team_loss_best > self_loss) {
-            self_team_loss_best = self_loss;
-        }
-        if (enemy_team_loss_best < enemy_loss) {
-            enemy_team_loss_best = enemy_loss;
-        }
-    }
-    // output the the results
-    std::cout << "ally_team_loss_avg:\t" << self_team_loss_total / pop.size() << "\t"
-              << "ally_team_loss_best:\t" << self_team_loss_best << "\t"
-              << "enemy_team_loss_avg:\t" << enemy_team_loss_total / pop.size() << "\t"
-              << "enemy_team_loss_best:\t" << enemy_team_loss_best << std::endl;
+		self_team_loss_total += self_loss;
+		enemy_team_loss_total += enemy_loss;
+		if (self_team_loss_best > self_loss)
+		{
+			self_team_loss_best = self_loss;
+		}
+		if (enemy_team_loss_best < enemy_loss)
+		{
+			enemy_team_loss_best = enemy_loss;
+		}
+	}
+	// output the the results
+	std::cout << "ally_team_loss_avg:\t" << self_team_loss_total / pop.size() << "\t"
+			  << "ally_team_loss_best:\t" << self_team_loss_best << "\t"
+			  << "enemy_team_loss_avg:\t" << enemy_team_loss_total / pop.size() << "\t"
+			  << "enemy_team_loss_best:\t" << enemy_team_loss_best << std::endl;
 	// store all the data
 	m_self_team_loss_ave.push_back(self_team_loss_total / pop.size());
 	m_self_team_loss_best.push_back(self_team_loss_best);
@@ -331,11 +348,12 @@ void sc2::RollingGA::Evaluate(Population& pop) {
 	m_enemy_team_loss_best.push_back(enemy_team_loss_best);
 }
 
-void RollingGA::ShowGraphEachGeneration(){
+void RollingGA::ShowGraphEachGeneration()
+{
 	//todo I can use another thread to do this display
 	// set the index here;
-	std::vector<float> indices(m_current_generation+1); 
-	std::iota(indices.begin(),indices.end(),0);
+	std::vector<float> indices(m_current_generation + 1);
+	std::iota(indices.begin(), indices.end(), 0);
 	// set all the lines to be showed
 	m_gp << "set style func linespoints" << std::endl;
 	m_gp << "plot" << m_gp.file1d(boost::make_tuple(indices, m_self_team_loss_ave)) << "with lines title 'self lost ave',"
@@ -357,7 +375,8 @@ void RollingGA::ShowGraphEachGeneration(){
 		m_gp_mo << "set xlabel 'damage to enemy'" << std::endl
 				<< " set ylabel 'damage to me'" << std::endl;
 		m_gp_mo << "plot" << m_gp.file1d(objs)
-				<< "lt -1 pi -4 pt 6 title 'individuals'" << std::endl;
+				<< "lt -1 pi -4 pt 6 title 'current individuals'," << m_gp.file1d(m_last_solution_dis) << "with points textcolor rgb 'violet' title 'individuals of last generation'" << std::endl;
+		m_last_solution_dis = objs;
 	}
 }
 
@@ -368,4 +387,3 @@ void RollingGA::ShowGraphEachGeneration(){
 //     }
 //     return observations;
 // }
-

@@ -148,6 +148,7 @@ namespace sc2{
         std::vector<float> m_self_team_loss_best;
         std::vector<float> m_enemy_team_loss_ave;
         std::vector<float> m_enemy_team_loss_best;
+        std::vector<std::vector<float>> m_last_solution_dis{};
 
         // Tools
         DebugRenderers m_debug_renderers;

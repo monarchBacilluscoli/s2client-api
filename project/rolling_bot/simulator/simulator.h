@@ -16,7 +16,8 @@
 #include <iostream>
 #include <queue>
 
-namespace sc2 {
+namespace sc2
+{
 class Executor : public Agent
 {
     //! for test
@@ -56,8 +57,10 @@ public:
 
     //! direct send the orders to units
     void SetOrders(const std::vector<Command> &commands, DebugRenderer *debug_renderer = nullptr);
-    //! get the stored orders
+    //! get the stored orders (tag-translated)
     std::vector<Command> GetOrders() { return m_commands; }
+    //! get the original orders (sent and stored, raw orders)
+    std::vector<Command> GetOriginalOrders() { return m_original_commands; }
     //! no unit tag translation, use the local unit tags
     void SetDirectOrders(const std::vector<Command> &commands, DebugRenderer *debug_renderer = nullptr);
     //! copy the game state from a specific game observation.
@@ -105,23 +108,25 @@ private:
     //! save of state
     State m_save;
     //! orders sent in
+    std::vector<Command> m_original_commands;
+    //! translated orders by local unit tags rather than original tags
     std::vector<Command> m_commands;
 
     //! form resource tag to target unit
     std::map<Tag, const Unit *> m_relative_units;
 };
 
-struct Simulators{
-    public:
+struct Simulators
+{
+public:
     Simulators() = default;
-    Simulators(int size, const std::string& net_address, int port_start, const std::string& process_path, const std::string& map_path):
-    simulators(size),
-    m_net_address(net_address),
-    m_port_start(port_start),
-    m_process_path(process_path),
-    m_map_path(map_path)
+    Simulators(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path) : simulators(size),
+                                                                                                                                         m_net_address(net_address),
+                                                                                                                                         m_port_start(port_start),
+                                                                                                                                         m_process_path(process_path),
+                                                                                                                                         m_map_path(map_path)
     {
-        for (Simulator& sim: simulators)
+        for (Simulator &sim : simulators)
         {
             //sim.SetNetAddress(m_net_address);
             sim.SetPortStart(port_start);
@@ -153,6 +158,6 @@ struct Simulators{
     std::string m_map_path;
 };
 
-}  // namespace sc2
+} // namespace sc2
 
-#endif  // SIMULATOR_H
+#endif // SIMULATOR_H

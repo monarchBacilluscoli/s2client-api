@@ -51,12 +51,19 @@ void SimulatorPool::SetSims(int size, const std::string &net_address, int port_s
 
 void SimulatorPool::StartSimsAsync()
 {
-    for (Simulation<void> &simulation : m_simulations)
+    //todo ensure I have set the map right. and then use the map to start all games
+    int i = 0;
+    for (Simulation<void> *simulation : m_sol_sim_map)
     {
-        simulation.result_holder = std::async(std::launch::async, [&]() -> void {
-            simulation.sim.LaunchStarcraft();
-            simulation.sim.StartGame();
+        // std::cout << i++ << std::endl;
+        simulation->result_holder = std::async(std::launch::async, [sim = simulation]() -> void {
+            sim->sim.LaunchStarcraft();
+            sim->sim.StartGame();
         });
+    }
+    for (Simulation<void> *simulation : m_sol_sim_map)
+    {
+        simulation->result_holder.wait();
     }
 }
 
@@ -64,74 +71,88 @@ void SimulatorPool::CopyStateAndSendOrders(const ObservationInterface *ob, const
 {
     m_observation = ob;
     //if the orders' size is larger than the simulations' size, add some new simulations
-    if (orders.size() > m_simulations.size())
+    int sz = orders.size();
+    if (sz > m_simulations.size())
     {
         int target_size = orders.size();
         int set_index = m_sol_sim_map.size();
         m_sol_sim_map.resize(target_size);
-        int diff_sz = orders.size() - m_simulations.size();
+        int diff_sz = target_size - m_simulations.size();
         // add, set and start the new sims one by one
-        for (size_t i = 0; i < diff_sz; i++)
+        for (size_t i = set_index; i < target_size; ++i)
         {
             m_simulations.emplace_back(Simulation<void>());
             Simulator &sim = m_simulations.back().sim;
             sim.SetBaseSettings(m_port_end, m_process_path, m_map_path, 1);
 
-            std::async(std::launch::async, [&]() -> void {
+            m_simulations.back().result_holder = std::async(std::launch::async, [&]() -> void {
                 sim.LaunchStarcraft();
                 sim.StartGame();
             });
 
             m_port_end += 2;
-            m_sol_sim_map[set_index++] = &m_simulations.back(); // don't forget to set the map
+            m_sol_sim_map[i] = &m_simulations.back(); // don't forget to set the map
+        }
+        for (size_t i = set_index; i < target_size; ++i)
+        {
+            m_sol_sim_map[i]->result_holder.wait();
         }
     }
-    //copy and set state async
-    //todo modify the 
-    int sz = orders.size();
-    std::list<Simulation<void>>::iterator it = m_simulations.begin();
-    int i = 0;
-    for (size_t i = 0; i < sz && it != m_simulations.end(); ++i, ++it)
+    for (size_t i = 0; i < sz; ++i)
     {
-        (*it).sim.CopyAndSetState(ob);
-        (*it).sim.SetOrders(orders[i]);
+        m_sol_sim_map[i]->result_holder = std::async([&sim = m_sol_sim_map[i]->sim, &ob, &order = orders[i]] {
+            sim.CopyAndSetState(ob);
+            sim.SetOrders(order);
+        });
+    }
+    for (size_t i = 0; i < sz; ++i)
+    {
+        m_sol_sim_map[i]->result_holder.wait(); // must ensure all the thread finished, then you can do the next things
     }
 }
 
 void SimulatorPool::CopyStateAndSendOrders(const ObservationInterface *ob, const Population &pop)
 {
+    size_t pop_size = pop.size();
     m_observation = ob;
     //if the orders' size is larger than the simulations' size, add some new simulations
-    if (pop.size() > m_simulations.size())
+    if (pop_size > m_simulations.size())
     {
-        int target_size = pop.size();
-        int set_index = m_sol_sim_map.size();
-        m_sol_sim_map.resize(target_size);
         int diff_sz = pop.size() - m_simulations.size();
+        int set_index = m_sol_sim_map.size();
+        m_sol_sim_map.resize(pop_size);
         // add, set and start the new sims one by one
-        for (size_t i = 0; i < diff_sz; i++)
+        for (size_t i = set_index; i < pop_size; i++)
         {
             m_simulations.emplace_back(Simulation<void>());
             Simulator &sim = m_simulations.back().sim;
             sim.SetBaseSettings(m_port_end, m_process_path, m_map_path, 1);
 
-            std::async(std::launch::async, [&]() -> void {
+            m_simulations.back().result_holder = std::async(std::launch::async, [&]() -> void {
                 sim.LaunchStarcraft();
                 sim.StartGame();
             });
 
             m_port_end += 2;
-            m_sol_sim_map[set_index++] = &m_simulations.back(); // don't forget to set the map
+            m_sol_sim_map[i] = &m_simulations.back(); // don't forget to set the map
+        }
+        for (size_t i = set_index; i < pop_size; i++)
+        {
+            m_sol_sim_map[i]->result_holder.wait();
         }
     }
-    //copy and set state
-    int sz = pop.size();
-    std::list<Simulation<void>>::iterator it = m_simulations.begin();
-    int i = 0;
-    for (size_t i = 0; i < sz && it != m_simulations.end(); ++i, ++it)
+    //copy and set state asyncly
+    for (size_t i = 0; i < pop_size; ++i)
     {
-        (*it).sim.CopyAndSetState(ob);
-        (*it).sim.SetOrders(pop[i].variable);
+        m_sol_sim_map[i]->result_holder = std::async([&sim = m_sol_sim_map[i]->sim, &ob, &order = pop[i].variable]() -> void {
+            sim.CopyAndSetState(ob);
+            sim.SetOrders(order);
+        });
+    }
+    for (size_t i = 0; i < pop_size; ++i)
+    {
+        m_sol_sim_map[i]->result_holder.wait(); // must ensure all the thread finished, then you can do the next things
+        // std::cout << i << "copied!" << std::endl;
     }
 }
 
@@ -164,17 +185,18 @@ void SimulatorPool::RunSimsAsync(int steps, DebugRenderers &debug_renderers)
         }
         case std::future_status::timeout:
         { // add a new simulation and reset the map... but how to handle the result?
-            std::cout<< "sim"<< i <<" timeout..." <<std::endl;
-            m_simulations.push_back(Simulation<void>());
+            std::cout << "sim" << i << " timeout..." << std::endl;
+            Simulation<void> sim = Simulation<void>();
+            m_simulations.emplace_back();
             Simulation<void> &new_sim = m_simulations.back();
             new_sim.sim.SetBaseSettings(m_port_end, m_process_path, m_map_path);
             m_port_end += 2;
-            thread_list.push_back(std::thread{[&new_sim, &observation = m_observation, orders = m_sol_sim_map[i]->sim.GetOrders()]() -> void {
-                new_sim.sim.LaunchStarcraft();
-                new_sim.sim.StartGame();
-                new_sim.sim.CopyAndSetState(observation);
-                new_sim.sim.SetOrders(orders);
-            }});
+            // thread_list.push_back(std::thread{[&new_sim, &observation = m_observation, orders = m_sol_sim_map[i]->sim.GetOrders()]() -> void {
+            new_sim.sim.LaunchStarcraft();
+            new_sim.sim.StartGame();
+            new_sim.sim.CopyAndSetState(m_observation);
+            new_sim.sim.SetOrders(m_sol_sim_map[i]->sim.GetOriginalOrders());
+            // }});
             m_sol_sim_map[i] = &new_sim;
             break;
         }

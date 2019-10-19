@@ -17,6 +17,7 @@ using Population = std::vector<Solution<Command>>;
 template <typename T>
 struct Simulation
 {
+    //Simulation() : sim(), result_holder(){};
     Simulator sim;
     // T is used to hold result type, but for now, void is enough
     std::future<T> result_holder;
@@ -83,7 +84,7 @@ private:
     int m_port_end = m_port_start;
     std::string m_process_path;
     std::string m_map_path;
-    std::chrono::milliseconds m_wait_duration{30000};
+    std::chrono::milliseconds m_wait_duration{10000};
 
     // observation interface to store the game state
     // used in RunSimsAsync() to recopy state to all the restarted sims

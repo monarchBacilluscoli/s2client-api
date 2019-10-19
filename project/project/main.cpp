@@ -404,7 +404,7 @@ int main(int argc, char *argv[])
 
     std::string starcraft_path = "/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64";
     int port_start = 4000;
-    int main_process_port = 5379;
+    int main_process_port = 6379;
     bool real_time = false;
     bool multi_threaded = false;
     // use this to control the cauculation times per second
