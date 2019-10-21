@@ -83,6 +83,8 @@ public:
     DebugRenderer(const std::string &window_name);
     ~DebugRenderer();
 
+    void Reconstruct();
+
     void ClearRenderer();
 
     void DrawSolution(const Solution<Command> &solution, const ObservationInterface *observation, const std::map<Tag, const Unit *> &units_map);
@@ -120,6 +122,9 @@ public:
     //! according to the monitor windows size, set the subwindows size and positions
     DebugRenderers(int count);
     // I dont have to write the destructor, since program will call the item's destructor automatically when they are no longer useful
+
+    // Reconstruct all renderers
+    void ReconstructAll();
     // get size
     size_t size() { return m_debug_renderers.size(); };
     //! get subwindow

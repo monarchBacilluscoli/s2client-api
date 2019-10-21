@@ -5,6 +5,7 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include <set>
 #include <thread>
 #include "simulator.h"
 
@@ -21,6 +22,8 @@ struct Simulation
     Simulator sim;
     // T is used to hold result type, but for now, void is enough
     std::future<T> result_holder;
+    //todo I need to add a debug_renderer here
+    DebugRenderer *debug_renderer{nullptr};
 };
 
 class SimulatorPool
@@ -37,7 +40,8 @@ public:
     // for easy use
     void CopyStateAndSendOrders(const ObservationInterface *ob, const Population &pop);
     // Run all the simulations for specific number of steps
-    void RunSimsAsync(int steps, DebugRenderers &debug_renderers);
+    void RunSimsAsync(int steps, DebugRenderers &debug_renderers); // concurrency version
+    void RunSimsOneByOne(int steps, DebugRenderers &debug_renderers); // single-thread version
     // get the observation interface to get the result of the simulation
     const ObservationInterface *GetObservation(int i) const
     {
@@ -94,6 +98,8 @@ private:
     std::list<Simulation<void>> m_simulations;
     // the solution-simulation map. Why don't I use map? Intger indices are enough and suitble
     std::vector<Simulation<void> *> m_sol_sim_map;
+    // 
+    std::set<int> m_timeout_index_set;
 };
 
 } // namespace sc2

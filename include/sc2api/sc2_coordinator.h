@@ -39,6 +39,7 @@ public:
 
     void SetBaseSettings(int port_start, const std::string& process_path, const std::string &map_path, int step_size = 1);
 
+
     //! Specifies whether bots or replays OnStep function should be run in parallel. If set to true make sure your bots are thread-safe
     //! if they reach into shared code.
     //! \param value True to multithread, false otherwise.

@@ -317,6 +317,9 @@ void sc2::RollingGA::Evaluate(Population &pop)
 	size_t sz = pop.size();
 	for (size_t i = 0; i < sz; i++)
 	{
+		#if 1 //! test code
+		/*test code here*/
+		#endif //! test code
 		self_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
 		enemy_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
 
@@ -375,7 +378,7 @@ void RollingGA::ShowGraphEachGeneration()
 		m_gp_mo << "set xlabel 'damage to enemy'" << std::endl
 				<< " set ylabel 'damage to me'" << std::endl;
 		m_gp_mo << "plot" << m_gp.file1d(objs)
-				<< "lt -1 pi -4 pt 6 title 'current individuals'," << m_gp.file1d(m_last_solution_dis) << "with points textcolor rgb 'violet' title 'individuals of last generation'" << std::endl;
+				<< "with points lc rgb 'red' pt 6 title 'current individuals'," << m_gp.file1d(m_last_solution_dis) << "with points lc rgb 'blue' pt 6 title 'individuals of last generation'" << std::endl;
 		m_last_solution_dis = objs;
 	}
 }

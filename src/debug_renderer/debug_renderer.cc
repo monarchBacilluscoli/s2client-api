@@ -177,17 +177,61 @@ DebugRenderer::~DebugRenderer()
     SDL_Quit();
 }
 
+//todo I need a deep copy
 DebugRenderer &DebugRenderer::operator=(const sc2::DebugRenderer &rhs)
 {
-    //todo destory current pointer
+    // Get the current data of the window
+    int x, y, w, h;
+    std::string w_name;
+    Uint32 w_flags;
+    SDL_GetWindowPosition(rhs.m_window, &x, &y);
+    SDL_GetWindowSize(rhs.m_window, &w, &h);
+    SDL_GetWindowData(rhs.m_window, w_name.c_str());
+    w_flags = SDL_GetWindowFlags(rhs.m_window);
+    // Get the current data of the renderer
+    SDL_RendererInfo r_info;
+    SDL_BlendMode r_bmode;
+    SDL_GetRendererInfo(rhs.m_renderer, &r_info);
+    SDL_GetRenderDrawBlendMode(rhs.m_renderer, &r_bmode);
+    // Reconstruct the window and renderer
     SDL_DestroyRenderer(m_renderer);
     SDL_DestroyWindow(m_window);
-    //todo get the passed object‘s pointer
-    m_renderer = rhs.m_renderer;
-    m_window = rhs.m_window;
-    m_facing_line_length = rhs.m_facing_line_length;
+    m_window = SDL_CreateWindow(w_name.c_str(), x, y, w, h, w_flags);
+    m_renderer = SDL_CreateRenderer(m_window, -1, r_info.flags);
+    SDL_SetRenderDrawBlendMode(m_renderer, r_bmode);
+
+    ClearRenderer();
+    Present();
 
     return *this;
+}
+
+
+
+void DebugRenderer::Reconstruct(){
+    // Get the current data of the window
+    int x, y, w, h;
+    std::string w_name;
+    Uint32 w_flags;
+    SDL_GetWindowPosition(m_window, &x, &y);
+    SDL_GetWindowSize(m_window, &w, &h);
+    SDL_GetWindowData(m_window, w_name.c_str());
+    w_flags = SDL_GetWindowFlags(m_window);
+    // Get the current data of the renderer
+    SDL_RendererInfo r_info;
+    SDL_BlendMode r_bmode;
+    SDL_GetRendererInfo(m_renderer, &r_info);
+    SDL_GetRenderDrawBlendMode(m_renderer, &r_bmode);
+    // Reconstruct the window and renderer
+    SDL_DestroyRenderer(m_renderer);
+    SDL_DestroyWindow(m_window);
+    m_window = SDL_CreateWindow(w_name.c_str(), x, y, w, h, w_flags);
+    m_renderer = SDL_CreateRenderer(m_window, -1, r_info.flags);
+    SDL_SetRenderDrawBlendMode(m_renderer, r_bmode);
+
+    SDL_SetRenderDrawColor(m_renderer, 0xff, 0xff, 0xff, 0xff);
+    SDL_RenderClear(m_renderer);
+    SDL_RenderPresent(m_renderer);
 }
 
 void DebugRenderer::ClearRenderer()
@@ -448,6 +492,13 @@ DebugRenderers::DebugRenderers(int count)
 DebugRenderer &DebugRenderers::operator[](int count)
 {
     return m_debug_renderers[count];
+}
+
+void DebugRenderers::ReconstructAll(){
+    for (DebugRenderer& renderer:m_debug_renderers)
+    {
+        renderer.Reconstruct();
+    }
 }
 
 LineChartRenderer::LineChartRenderer()
