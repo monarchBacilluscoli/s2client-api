@@ -10,10 +10,10 @@
 #include "../rolling_bot/algorithm/ga.h"
 #include "../rolling_bot/algorithm/real_ga.h"
 #include "../rolling_bot/rolling_bot/rolling_bot.h"
-#include "gnuplot-iostream.h"
+// #include "gnuplot-iostream.h"
 #include <cmath>
-#include <boost/tuple/tuple.hpp>
-#include "test_bots/test_multi_thread/test_multi_thread_bot.h"
+// #include "test_bots/test_multi_thread/test_multi_thread_bot.h"
+#include "../rolling_bot/algorithm/differential_evolution.h"
 
 using namespace sc2;
 
@@ -372,7 +372,7 @@ int main(int argc, char *argv[])
         //         xy_pts_Cx.push_back(x);
         //         xy_pts_Cy.push_back(x);
         //     }
-        //     boost::tuple<std::vector<double>,std::vector<double>> xy_pts_C = boost::make_tuple(xy_pts_Cx,xy_pts_Cy);
+        //     boost::tuple<std::vector<double>,std::vector<double>> xy_pts_C = std::make_tuple(xy_pts_Cx,xy_pts_Cy);
 
         //     gp << "set xrange [-2:2]\nset yrange [-2:2]\n";
         //     // Data will be sent via a temporary file.  These are erased when you call
@@ -410,7 +410,7 @@ int main(int argc, char *argv[])
     // use this to control the cauculation times per second
     uint frames = 60;
     int population_size = 50;
-    int max_generations = 50;
+    int max_generations = 20;
 
     //! multi-thread test bot
     {

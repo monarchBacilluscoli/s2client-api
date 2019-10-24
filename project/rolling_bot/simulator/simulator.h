@@ -70,7 +70,7 @@ public:
     void SetStartPoint(const std::vector<Command> &commands,
                        const ObservationInterface *ob);
     //! runs for specific number of steps which can be set by user
-    void Run(int steps, DebugRenderer *debug_renderer = nullptr);
+    std::thread::id Run(int steps, DebugRenderer *debug_renderer = nullptr);
     //! load the copied state
     void Load();
     //? is anyone really needs a Run() which runs the game until gameover
@@ -80,6 +80,7 @@ public:
     DebugInterface *Debug();
     //! exposes ActionInterface
     ActionInterface *Actions();
+    // std::thread::id iddd;
 
     //! Compares current state with the start point to get specific unit group
     //! health loss

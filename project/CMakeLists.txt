@@ -1,5 +1,6 @@
 # Come on, how can I write my own CMakeLists...
 # I need to add libgnuplot and boost into this project for data visualization. So please install boost on the computer running this project.
+#! actually, there is no need for the use of boost, std::tuple is enough
 
 include_directories("../include")
 include_directories("./")

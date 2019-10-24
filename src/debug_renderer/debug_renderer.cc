@@ -223,7 +223,7 @@ void DebugRenderer::Reconstruct(){
     SDL_GetRendererInfo(m_renderer, &r_info);
     SDL_GetRenderDrawBlendMode(m_renderer, &r_bmode);
     // Reconstruct the window and renderer
-    SDL_DestroyRenderer(m_renderer);
+    SDL_DestroyRenderer(m_renderer); // if it get stuck in anothre thread, it cannot be destroyed here
     SDL_DestroyWindow(m_window);
     m_window = SDL_CreateWindow(w_name.c_str(), x, y, w, h, w_flags);
     m_renderer = SDL_CreateRenderer(m_window, -1, r_info.flags);

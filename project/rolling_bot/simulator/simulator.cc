@@ -201,7 +201,7 @@ void Simulator::SetStartPoint(const std::vector<Command> &commands,
     SetOrders(commands);
 }
 
-void Simulator::Run(int steps, DebugRenderer *debug_renderer)
+std::thread::id Simulator::Run(int steps, DebugRenderer *debug_renderer)
 {
     // set false to let simu bot to use the normal mode to call the OnStep
     m_executor.SetIsSetting(false);
@@ -226,6 +226,7 @@ void Simulator::Run(int steps, DebugRenderer *debug_renderer)
         }
     }
     m_executor.SetIsSetting(true);
+    return std::this_thread::get_id();
 }
 
 const ObservationInterface *Simulator::Observation() const

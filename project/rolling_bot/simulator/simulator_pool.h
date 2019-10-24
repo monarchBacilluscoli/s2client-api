@@ -22,7 +22,7 @@ struct Simulation
     Simulator sim;
     // T is used to hold result type, but for now, void is enough
     std::future<T> result_holder;
-    //todo I need to add a debug_renderer here
+    // useful?
     DebugRenderer *debug_renderer{nullptr};
 };
 
@@ -36,9 +36,9 @@ public:
     void SetSims(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path);
     void StartSimsAsync();
     // copy the state from main game and set the orders to simulations
-    void CopyStateAndSendOrders(const ObservationInterface *ob, const std::vector<std::vector<Command>> &orders);
+    void CopyStateAndSendOrdersAsync(const ObservationInterface *ob, const std::vector<std::vector<Command>> &orders);
     // for easy use
-    void CopyStateAndSendOrders(const ObservationInterface *ob, const Population &pop);
+    void CopyStateAndSendOrdersAsync(const ObservationInterface *ob, const Population &pop);
     // Run all the simulations for specific number of steps
     void RunSimsAsync(int steps, DebugRenderers &debug_renderers); // concurrency version
     void RunSimsOneByOne(int steps, DebugRenderers &debug_renderers); // single-thread version
@@ -56,15 +56,15 @@ public:
     ~SimulatorPool() = default;
 
 private:
-    // void SetAndStartSims(const std::list<Simulation<void>>::iterator &begin,
-    //                      const std::list<Simulation<void>>::iterator &end,
+    // void SetAndStartSims(const std::list<Simulation<std::thread::id>>::iterator &begin,
+    //                      const std::list<Simulation<std::thread::id>>::iterator &end,
     //                      const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path)
     // {
     //     SetSims(begin, end, net_address, port_start, process_path, map_path);
     //     StartSims(begin, end);
     // }
-    // void SetSims(const std::list<Simulation<void>>::iterator &begin,
-    //              const std::list<Simulation<void>>::iterator &end,
+    // void SetSims(const std::list<Simulation<std::thread::id>>::iterator &begin,
+    //              const std::list<Simulation<std::thread::id>>::iterator &end,
     //              const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path)
     // {
     //     for (auto it = begin; it != end; ++it)
@@ -95,9 +95,9 @@ private:
     const ObservationInterface *m_observation;
 
     // Simulation list to hold simulations and their thread holder
-    std::list<Simulation<void>> m_simulations;
+    std::list<Simulation<std::thread::id>> m_simulations;
     // the solution-simulation map. Why don't I use map? Intger indices are enough and suitble
-    std::vector<Simulation<void> *> m_sol_sim_map;
+    std::vector<Simulation<std::thread::id> *> m_sol_sim_map;
     // 
     std::set<int> m_timeout_index_set;
 };

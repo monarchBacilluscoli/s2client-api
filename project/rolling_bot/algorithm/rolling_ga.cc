@@ -177,9 +177,10 @@ void RollingGA::InitBeforeRun()
 	m_self_team_loss_best.clear();
 	m_enemy_team_loss_ave.clear();
 	m_enemy_team_loss_best.clear();
-	m_gp << "set title 'Algorithm Status'" << std::endl;
-	m_gp_mo << "set title 'Solution Distribution'" << std::endl;
-	m_gp << "set xrange [0:" << m_max_generation << "]" << std::endl;
+	// m_gp << "set title 'Algorithm Status'" << std::endl;
+	m_line_chart_renderer.SetTitle("Algorithm Status");
+	m_line_chart_renderer.SetXRange(0.f, m_max_generation);
+	// m_gp << "set xrange [0:" << m_max_generation << "]" << std::endl;
 }
 
 Solution<Command> RollingGA::GenerateSolution()
@@ -258,9 +259,9 @@ void sc2::RollingGA::Mutate(Solution<Command> &s)
 }
 Population sc2::RollingGA::CrossOver(const Solution<Command> &a, const Solution<Command> &b)
 {
-	//todo random select one unit
+	// random select one unit
 	int unit_index = GetRandomInteger(0, a.variable.size() - 1);
-	//todo exchange the subarray at the same pos in two units' commands
+	// exchange the subarray at the same pos in two units' commands
 	Population offspring({a, b});
 	size_t order_size = a.variable[unit_index].actions.size();
 	size_t start = sc2::GetRandomInteger(0, order_size - 1);
@@ -271,7 +272,20 @@ Population sc2::RollingGA::CrossOver(const Solution<Command> &a, const Solution<
 	}
 	for (size_t i = start; i < end; i++)
 	{
-		std::swap(offspring[0].variable[unit_index].actions[i], offspring[1].variable[unit_index].actions[i]);
+		ActionRaw &action1 = offspring[0].variable[unit_index].actions[i];
+		ActionRaw &action2 = offspring[0].variable[unit_index].actions[i];
+		std::swap(action1, action2);
+		//todo randomly use the quantile points of two actions to set the target posisiton
+		if (action1.ability_id == action2.ability_id && action1.target_type == ActionRaw::TargetType::TargetPosition && action2.target_type == ActionRaw::TargetType::TargetPosition)
+		{
+			if (GetRandomFraction() < 0.5)
+			{
+				Point2D pos1 = action1.target_point;
+				Point2D pos2 = action2.target_point;
+				action1.target_point = 0.75f * pos1 + 0.25f * pos2;
+				action2.target_point = 0.25f * pos1 + 0.75f * pos2;
+			}
+		}
 	}
 	return offspring;
 }
@@ -285,7 +299,7 @@ void sc2::RollingGA::Evaluate(Population &pop)
 	//! construct the orders vec
 
 #ifdef MULTI_THREADED
-	m_simulation_pool.CopyStateAndSendOrders(m_observation, pop);
+	m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, pop);
 	// std::vector<std::thread> setting_threads(m_simulators.size());
 	// for (size_t i = 0; i < p.size(); i++) {
 	//     setting_threads[i] = std::thread([&, i] {
@@ -317,9 +331,6 @@ void sc2::RollingGA::Evaluate(Population &pop)
 	size_t sz = pop.size();
 	for (size_t i = 0; i < sz; i++)
 	{
-		#if 1 //! test code
-		/*test code here*/
-		#endif //! test code
 		self_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
 		enemy_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
 
@@ -358,13 +369,17 @@ void RollingGA::ShowGraphEachGeneration()
 	std::vector<float> indices(m_current_generation + 1);
 	std::iota(indices.begin(), indices.end(), 0);
 	// set all the lines to be showed
-	m_gp << "set style func linespoints" << std::endl;
-	m_gp << "plot" << m_gp.file1d(boost::make_tuple(indices, m_self_team_loss_ave)) << "with lines title 'self lost ave',"
-		 << m_gp.file1d(boost::make_tuple(indices, m_self_team_loss_best)) << "with lines title 'self lost best',"
-		 << m_gp.file1d(boost::make_tuple(indices, m_enemy_team_loss_ave)) << "with lines title 'enemy lost ave',"
-		 << m_gp.file1d(boost::make_tuple(indices, m_enemy_team_loss_best)) << "with lines title 'enemy lost best',"
-		 << std::endl;
-	// display the objectives of all solutions
+	// m_gp << "set style func linespoints" << std::endl;
+	// m_gp << "plot" << m_gp.file1d(std::make_tuple(indices, m_self_team_loss_ave)) << "with lines title 'self lost ave',"
+	// 	 << m_gp.file1d(std::make_tuple(indices, m_self_team_loss_best)) << "with lines title 'self lost best',"
+	// 	 << m_gp.file1d(std::make_tuple(indices, m_enemy_team_loss_ave)) << "with lines title 'enemy lost ave',"
+	// 	 << m_gp.file1d(std::make_tuple(indices, m_enemy_team_loss_best)) << std::string("with lines title 'enemy lost best',")
+	// 	 << std::endl;
+	// show the graph of algorithm status
+	std::list<std::vector<float>> data{m_self_team_loss_ave, m_self_team_loss_best, m_enemy_team_loss_ave, m_enemy_team_loss_best};
+	std::vector<std::string> names{"self lost ave", "self lost best", "enemy lost ave", "enemy lost best"};
+	m_line_chart_renderer.Show(data, indices, names);
+	// show the graph of the objectives of all solutions
 	if (!m_population.empty())
 	{
 		size_t obj_sz = m_population.front().objectives.size();
@@ -375,11 +390,14 @@ void RollingGA::ShowGraphEachGeneration()
 		}
 		// m_gp_mo << "set xrange [-300:0]\nset yrange [0:300]\n";
 		// todo set the colors of the first three solution set
-		m_gp_mo << "set xlabel 'damage to enemy'" << std::endl
-				<< " set ylabel 'damage to me'" << std::endl;
-		m_gp_mo << "plot" << m_gp.file1d(objs)
-				<< "with points lc rgb 'red' pt 6 title 'current individuals'," << m_gp.file1d(m_last_solution_dis) << "with points lc rgb 'blue' pt 6 title 'individuals of last generation'" << std::endl;
-		m_last_solution_dis = objs;
+		// m_gp_mo << "set xlabel 'damage to enemy'" << std::endl
+		// 		<< " set ylabel 'damage to me'" << std::endl;
+		// m_gp_mo << "plot" << m_gp_mo.file1d(objs)
+		// 		<< "with points lc rgb 'red' pt 4 title 'current individuals'," << m_gp_mo.file1d(m_last_solution_dis) << "with points lc rgb 'blue' pt 1 title 'individuals of last generation'" << std::endl;
+		std::list<std::vector<std::vector<float>>> data{m_last_solution_dis, objs};
+		std::vector<std::string> names{"individuals of last generation","current individuals"};
+		m_objectives_distribution_graph.Show(data, names);
+			m_last_solution_dis = objs;
 	}
 }
 
