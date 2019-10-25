@@ -13,7 +13,7 @@
 // #include "gnuplot-iostream.h"
 #include <cmath>
 // #include "test_bots/test_multi_thread/test_multi_thread_bot.h"
-#include "../rolling_bot/algorithm/differential_evolution.h"
+#include "../rolling_bot/algorithm/rolling_de.h"
 
 using namespace sc2;
 

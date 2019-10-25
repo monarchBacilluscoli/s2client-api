@@ -4,9 +4,8 @@
 
 #include <sc2api/sc2_common.h>
 #include <cassert>
-#include <functional>
-#include <numeric>
 #include <vector>
+#include <functional>
 #include "solution.h"
 #include "algorithm"
 
@@ -86,8 +85,6 @@ protected:
     // virtual void SortSolutions(Population &p, const Compare &compare);
     virtual void SortSolutions(Population &p) = 0;
 
-    //! set rank to each solution for the use of multi-objective method
-    virtual void DominanceSort(Population &p);
     //! two parents generate two children by crossover and mutation
     virtual std::vector<Solution<T>> Produce(const Solution<T> &a, const Solution<T> &b);
     //! Calls those evaluators to evaluate one solution
@@ -124,77 +121,6 @@ protected:
     //! generation count
     size_t m_current_generation = 0;
 };
-
-template <class T>
-bool Solution<T>::multi_greater(const Solution<T> &a, const Solution<T> &b)
-{
-    bool equal = true;
-    // If any of the b's dimensions is bigger than a, return false
-    for (size_t i = 0; i < a.objectives.size(); i++)
-    {
-        if (a.objectives[i] < b.objectives[i])
-        {
-            return false;
-        }
-        else if (equal && abs(a.objectives[i] - b.objectives[i]) > 0.000001)
-        {
-            equal = false;
-        }
-    }
-    // If all the demensions are equal, return false
-    if (equal)
-    {
-        return false;
-    }
-    // else return true
-    return true;
-}
-
-template <class T>
-inline bool Solution<T>::sum_greater(const Solution<T> &a, const Solution<T> &b)
-{
-    return std::accumulate(a.objectives.begin(), a.objectives.end(), 0.f) > std::accumulate(b.objectives.begin(), b.objectives.end(), 0.f);
-}
-
-template <class T>
-inline DOMINANCE Solution<T>::Dominate(const Solution<T> &a, const Solution<T> &b)
-{
-    int better_count = 0, worse_count = 0;
-    int sz = a.objectives.size();
-    for (size_t i = 0; i < sz; i++)
-    {
-        if (abs(a.objectives[i] - b.objectives[i]) > 0.000005)
-        {
-            if (a.objectives[i] > b.objectives[i])
-            {
-                ++better_count;
-            }
-            else
-            {
-                ++worse_count;
-            }
-        }
-        if (better_count != 0 && worse_count != 0)
-        {
-            return DOMINANCE::EQUAL;
-        }
-    }
-    if (better_count == 0 && worse_count == 0)
-    {
-        return DOMINANCE::EQUAL;
-    }
-    else
-    {
-        if (better_count)
-        {
-            return DOMINANCE::BETTER;
-        }
-        else
-        {
-            return DOMINANCE::WORSE;
-        }
-    }
-}
 
 template <class T>
 std::vector<Solution<T>> GA<T>::Run()
@@ -290,74 +216,6 @@ inline void GA<T>::Evaluate(Population &p)
     {
         EvaluateSingleSolution(s);
     }
-}
-
-// // simple sort function, only Compare is used
-// template <class T>
-// inline void GA<T>::SortSolutions(Population &p, const Compare &compare)
-// {
-//     std::sort(p.begin(), p.end(), compare);
-// }
-
-template <class T>
-void GA<T>::DominanceSort(Population &p)
-{
-    // make sure all the rank is set right
-    for(auto& item:p){
-        item.rank = std::numeric_limits<int>::max();
-    }
-    // set dominate relationship
-    size_t pop_sz = p.size();
-    for (size_t i = 0; i < pop_sz - 1; i++)
-    {
-        for (size_t j = i + 1; j < pop_sz; j++)
-        {
-            switch (Solution<T>::Dominate(p[i], p[j]))
-            {
-            case DOMINANCE::BETTER:
-                p[i].dominant_solutions.push_back(&p[j]);
-                p[j].dominated_count++;
-                break;
-            case DOMINANCE::WORSE:
-                p[j].dominant_solutions.push_back(&p[i]);
-                p[i].dominated_count++;
-                break;
-            default:
-                //if p[i] and p[j] are equal, do nothing
-                break;
-            }
-        }
-    }
-    // set rank and sort
-    int current_set_count = 0;
-    int current_rank = 0;
-    while (current_set_count < pop_sz)
-    {
-        std::list<int> current_layer_indices;
-        for (size_t i = 0; i < pop_sz; i++)
-        {
-            if (p[i].dominated_count == 0 && p[i].rank > current_rank)
-            {
-                // set rank and store the solution into current layer
-                p[i].rank = current_rank;
-                current_layer_indices.push_back(i);
-            }
-        }
-        // handle the solutions dominated by solutions in current layer
-        int current_layer_sz = current_layer_indices.size();
-        //handle count first
-        for (const auto &index : current_layer_indices)
-        {
-            for (auto &item : p[index].dominant_solutions)
-            {
-                item->dominated_count--;
-            }
-            p[index].dominant_solutions.clear();
-        }
-        current_set_count += current_layer_sz;
-        ++current_rank;
-    }
-    std::sort(p.begin(), p.end(), [](const Solution<T> &a, const Solution<T> &b) -> bool { return a.rank < b.rank; });
 }
 
 template <class T>

@@ -1,7 +1,5 @@
 #include "simulator_pool.h"
 
-// #define __FUNCTION__
-
 namespace sc2
 {
 using Population = std::vector<Solution<Command>>;
@@ -209,7 +207,7 @@ void SimulatorPool::RunSimsAsync(int steps, DebugRenderers &debug_renderers)
             I need to reconstruct it from inside!
             ...no use, the reconstruct function gets blocked...
             */
-           //reset the simulation
+            //reset the simulation
             Simulation<std::thread::id> sim = Simulation<std::thread::id>();
             m_simulations.emplace_back();
             Simulation<std::thread::id> &new_sim = m_simulations.back();

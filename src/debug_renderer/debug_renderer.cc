@@ -73,13 +73,13 @@ struct HealthBar
         // height = std::min(10, height);
         if (height > 2)
         { // if height>2, it means there is still space between the upper and lower lines of frames to set the cover bar.
-            frame = {x, y, ceil(max_value * health_scale) + 2, height};
-            cover = {x + 1, y + 1, current_value * health_scale, height - 2};
+            frame = {x, y, int(ceil(max_value * health_scale)) + 2, height};
+            cover = {x + 1, y + 1, int(current_value * health_scale), height - 2};
         }
         else
         { // If height<2, it means the frame and cover must be overlaped
-            frame = {x, y, ceil(max_value * health_scale), height};
-            cover = {x, y, current_value * health_scale, height};
+            frame = {x, y, int(ceil(max_value * health_scale)), height};
+            cover = {x, y, int(current_value * health_scale), height};
         }
     }
     void SetCurrentValue(int current_value)

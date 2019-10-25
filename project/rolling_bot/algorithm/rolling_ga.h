@@ -1,8 +1,8 @@
 /*! \file rolling_GA.h
     \brief Genetic Algorithm for Rolling Bot to use to optimize the orders for teams.
 */
-#ifndef ROLLING_GA
-#define ROLLING_GA
+#ifndef ROLLING_GA_H
+#define ROLLING_GA_H
 
 #include <sc2api/sc2_api.h>
 #include <sc2lib/sc2_utils.h>
@@ -118,7 +118,7 @@ private:
     // }
     virtual void SortSolutions(Population &pop) override
     {
-        DominanceSort(pop);
+        Solution<Command>::DominanceSort(pop);
     }
 
     // Settings
@@ -166,4 +166,4 @@ private:
 };
 } // namespace sc2
 
-#endif // !ROLLING_GA
+#endif // !ROLLING_GA_H

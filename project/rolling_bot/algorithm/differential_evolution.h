@@ -1,5 +1,5 @@
-#ifndef DIFFERENTIAL_EVOLUTION
-#define DIFFERENTIAL_EVOLUTION
+#ifndef DIFFERENTIAL_EVOLUTION_H
+#define DIFFERENTIAL_EVOLUTION_H
 
 #include <algorithm>
 #include "evolutionary_algorithm.h"
@@ -7,7 +7,7 @@
 namespace sc2
 {
 template <class T>
-class DifferentialEvolution : public EvolutionaryAlgorithm<T>
+class DifferentialEvolution : virtual public EvolutionaryAlgorithm<T>
 {
     using EA = EvolutionaryAlgorithm<T>;
 
@@ -16,17 +16,17 @@ protected:
     float m_crossover_rate = .5f;
 
     // methods
-    std::vector<int> m_index_vec{}; // used for get unduplicated random numbers
+    // std::vector<int> m_index_vec{}; // used for get unduplicated random numbers
 
 public:
     DifferentialEvolution() : EvolutionaryAlgorithm<T>(){};
     //todo constructor with all parameters
-    DifferentialEvolution(int max_generation,
+    DifferentialEvolution(int objective_size,
+                          int max_generation,
                           int population_size,
-                          int objective_size,
-                          int crossover_rate = .5f, int random_seed = 0) : EvolutionaryAlgorithm<T>(max_generation, population_size, objective_size, random_seed), m_crossover_rate{crossover_rate}, m_index_vec{population_size}
+                          float crossover_rate = .5f, int random_seed = 0) : EvolutionaryAlgorithm<T>(objective_size, max_generation, population_size, random_seed), m_crossover_rate(crossover_rate)/*, m_index_vec(population_size)*/
     {
-        std::iota(m_index_vec.begin(), m_index_vec.end(), 0);
+        //std::iota(m_index_vec.begin(), m_index_vec.end(), 0);
     };
     virtual ~DifferentialEvolution() = default;
 
@@ -66,4 +66,4 @@ void DifferentialEvolution<T>::Breed()
 
 } // namespace sc2
 
-#endif // DIFFERENTIAL_EVOLUTION
+#endif // DIFFERENTIAL_EVOLUTION_H

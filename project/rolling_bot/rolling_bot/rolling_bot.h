@@ -7,6 +7,7 @@
 #include <string>
 #include "../algorithm/rolling_ga.h"
 #include "../simulator/simulator.h"
+#include "../algorithm/rolling_de.h"
 
 namespace sc2
 {

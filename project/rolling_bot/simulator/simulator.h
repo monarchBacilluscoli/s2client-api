@@ -6,12 +6,12 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "command.h"
 #include "debug_renderer/debug_renderer.h"
 #include "state.h"
 #include <thread>
 #include <mutex>
 #include <future>
+#include "command.h"
 
 #include <iostream>
 #include <queue>
