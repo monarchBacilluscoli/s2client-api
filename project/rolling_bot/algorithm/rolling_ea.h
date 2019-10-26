@@ -18,7 +18,7 @@ protected:
 
 public:
     RollingEA() = delete;
-    RollingEA(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int objective_size, int max_generation, int population_size, int crossover_rate = .5f, int random_seed = 0) : EvolutionaryAlgorithm(objective_size, max_generation, population_size, random_seed), m_simulator_pool(population_size, net_address, port_start, process_path, map_path)
+    RollingEA(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation, int population_size, int crossover_rate = .5f, int random_seed = 0) : EvolutionaryAlgorithm(2, max_generation, population_size, random_seed, {std::string("enemy loss"), std::string("my team loss")}), m_simulator_pool(population_size, net_address, port_start, process_path, map_path)
     {
         m_simulator_pool.StartSimsAsync();
         m_objective_distribution.SetTitle("Objectives Distribution");

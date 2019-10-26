@@ -82,14 +82,6 @@ public:
 
 private:
     void SetInfoFromObservation(const ObservationInterface *observation);
-    //! Use this to set the the client to run simulators, the map loaded and other settings
-    // void SetSimulators(const std::string& net_address,
-    //     int port_start,
-    //     const std::string& process_path,
-    //     const std::string& map_path
-    // );
-
-    // run
     //!
     virtual void InitBeforeRun() override;
     //! According to known information generates solutions which is as valid as possiable
@@ -103,19 +95,7 @@ private:
     // to take place the default function
     //virtual void EvaluateSingleSolution(Solution<Command>& s) override {};
     virtual void ShowGraphEachGeneration() override;
-    // // divide the population by rank into subsets which size is set by users
-    // static void DividePopulationByRank(const Population &pop, std::vector<std::vector<Solution<Command>>> &subsets)
-    // {
-    //     if (pop.empty() || pop[0].rank == std::numeric_limits<int>::max())
-    //     {
-    //         return;
-    //     }
-    //     int sz = subsets.size();
-    //     for (size_t i = 0; i < sz; i++)
-    //     {
-
-    //     }
-    // }
+    //
     virtual void SortSolutions(Population &pop) override
     {
         Solution<Command>::DominanceSort(pop);

@@ -376,7 +376,7 @@ void RollingGA::ShowGraphEachGeneration()
 	// 	 << m_gp.file1d(std::make_tuple(indices, m_enemy_team_loss_best)) << std::string("with lines title 'enemy lost best',")
 	// 	 << std::endl;
 	// show the graph of algorithm status
-	std::list<std::vector<float>> data{m_self_team_loss_ave, m_self_team_loss_best, m_enemy_team_loss_ave, m_enemy_team_loss_best};
+	std::vector<std::vector<float>> data{m_self_team_loss_ave, m_self_team_loss_best, m_enemy_team_loss_ave, m_enemy_team_loss_best};
 	std::vector<std::string> names{"self lost ave", "self lost best", "enemy lost ave", "enemy lost best"};
 	m_line_chart_renderer.Show(data, indices, names);
 	// show the graph of the objectives of all solutions
@@ -400,11 +400,3 @@ void RollingGA::ShowGraphEachGeneration()
 			m_last_solution_dis = objs;
 	}
 }
-
-// std::vector<const ObservationInterface*> RollingGA::GetAllSimsObservations() const {
-//     std::vector<const ObservationInterface*> observations(m_simulators.size());
-//     for (size_t i = 0; i < m_simulators.size(); i++) {
-//         observations[i] = m_simulators[i].Observation();
-//     }
-//     return observations;
-// }

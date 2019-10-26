@@ -22,6 +22,7 @@ protected:
     int m_max_generation = 10;
     int m_population_size = 50;
     int m_current_generation = 0;
+    std::vector<std::string> m_objective_names{std::vector<std::string>(m_objective_size)};
 
     //! data
     Population m_population{};
@@ -29,16 +30,16 @@ protected:
 
     //! methods
     std::list<std::vector<std::vector<float>>> m_history_objs{}; // for debug or record use
-    std::vector<std::vector<float>> m_history_objs_ave{};
-    std::vector<std::vector<float>> m_history_objs_best{};
-    std::vector<std::vector<float>> m_history_objs_worst{};
-    std::mt19937 m_random_engine{0};
+    std::vector<std::vector<float>> m_history_objs_ave{};        // one list one objective
+    std::vector<std::vector<float>> m_history_objs_best{};       // one list one objective
+    std::vector<std::vector<float>> m_history_objs_worst{};      // one list one objective
     LineChartRenderer2D m_overall_evolution_status_renderer;
+    std::mt19937 m_random_engine{0};
 
 public:
-    EvolutionaryAlgorithm(){};
+    EvolutionaryAlgorithm() = default;
     //todo a constructor with all parameters
-    EvolutionaryAlgorithm(int m_objecitve_size, int max_generation, int population_size, int random_seed = 0) : m_max_generation{max_generation}, m_population_size{population_size}, m_objective_size{m_objective_size}, m_random_engine{random_seed}
+    EvolutionaryAlgorithm(int objective_size, int max_generation, int population_size, int random_seed = 0, std::vector<std::string> objective_names = std::vector<std::string>()) : m_max_generation{max_generation}, m_population_size{population_size}, m_objective_size{objective_size}, m_random_engine{random_seed}
     {
         m_overall_evolution_status_renderer.SetTitle("Evolution Status");
     };
@@ -48,6 +49,7 @@ public:
     void SetPopulationSize(int pop_size);
     void SetObjectiveSize(int obj_size);
     void SetRandomEngineSeed(int seed);
+    void SetObjectiveNames(const std::vector<std::string> &objective_names);
 
     int GetMaxGeneration() const { return m_max_generation; };
     int GetPopulationSize() const { return m_population_size; };
@@ -67,10 +69,11 @@ protected:
     virtual void Select() = 0;   // select which solutions to enter into the next generation
     //todo maybe I need a ActionAfterEachGeneration() to store all the objs or somthing else
     virtual void ActionAfterEachGeneration();
-    virtual void RecordRunningData(){};
+    virtual void RecordRunningData();
     virtual void ShowGraphEachGeneration(); //todo show the overall status
 
     void RecordObjectives();
+    void ShowOverallStatusGraphEachGeneration();
 };
 
 template <class T>
@@ -98,6 +101,12 @@ void EvolutionaryAlgorithm<T>::SetRandomEngineSeed(int seed)
 }
 
 template <class T>
+void EvolutionaryAlgorithm<T>::SetObjectiveNames(const std::vector<std::string> &objective_names)
+{
+    m_objective_names = objective_names;
+}
+
+template <class T>
 void EvolutionaryAlgorithm<T>::InitBeforeRun()
 {
     m_population.clear();
@@ -112,7 +121,7 @@ void EvolutionaryAlgorithm<T>::Run()
     Generate();
     Evaluate();
     Sort();
-    for (m_current_generation = 1; m_current_generation < m_max_generation; ++m_current_generation)
+    for (m_current_generation = 1; m_current_generation <= m_max_generation; ++m_current_generation)
     {
         Breed();
         Evaluate();
@@ -126,6 +135,12 @@ void EvolutionaryAlgorithm<T>::ActionAfterEachGeneration()
 {
     RecordRunningData();
     ShowGraphEachGeneration();
+}
+
+template <class T>
+void EvolutionaryAlgorithm<T>::RecordRunningData()
+{
+    RecordObjectives();
 }
 
 template <class T>
@@ -149,7 +164,7 @@ void EvolutionaryAlgorithm<T>::RecordObjectives()
     for (size_t i = 0; i < m_objective_size; ++i)
     {
         // ave
-        current_ave_objs[i] = std::accumulate(current_generation_objs.begin(), current_generation_objs.end(), [i](float initial_value, const std::vector<float> &so2) -> float {
+        current_ave_objs[i] = std::accumulate(current_generation_objs.begin(), current_generation_objs.end(), 0.f, [i](float initial_value, const std::vector<float> &so2) -> float {
             return initial_value + so2[i];
         });
         current_ave_objs[i] /= pop_sz;
@@ -169,7 +184,25 @@ void EvolutionaryAlgorithm<T>::RecordObjectives()
 template <class T>
 void EvolutionaryAlgorithm<T>::ShowGraphEachGeneration()
 {
-    //todo
+    //todo show the evolution status of the algorithm
+    ShowOverallStatusGraphEachGeneration();
+}
+
+template <class T>
+void EvolutionaryAlgorithm<T>::ShowOverallStatusGraphEachGeneration()
+{
+    std::list<std::vector<std::vector<float>>> data_list{m_history_objs_ave, m_history_objs_best, m_history_objs_worst};
+    std::vector<int> generation_indices(m_current_generation + 1);
+    std::iota(generation_indices.begin(), generation_indices.end(), 0);
+    std::vector<std::string> line_names(m_objective_size * 3);
+    // names order is obj1_ave, obj2_ave,.. objN_ave, obj1_best, ..., obj1_worst ,objN_worst
+    for (size_t i = 0; i < m_objective_size; ++i)
+    {
+        line_names[0 + i] = m_objective_names[i] + " average";
+        line_names[m_objective_size + i] = m_objective_names[i] + " best";
+        line_names[m_objective_size * 2 + i] = m_objective_names[i] + " worst";
+    }
+    m_overall_evolution_status_renderer.Show(data_list, generation_indices, line_names);
 }
 
 } // namespace sc2
