@@ -57,7 +57,7 @@ public:
     const Population &GetPopulation() const { return m_population; };
     int GetCurrentGeneration() const { return m_current_generation; };
 
-    virtual void Run();
+    virtual Population &Run();
 
 protected:
     virtual void InitBeforeRun();
@@ -115,7 +115,7 @@ void EvolutionaryAlgorithm<T>::InitBeforeRun()
 }
 
 template <class T>
-void EvolutionaryAlgorithm<T>::Run()
+std::vector<Solution<T>> &EvolutionaryAlgorithm<T>::Run()
 {
     InitBeforeRun();
     Generate();
@@ -127,6 +127,7 @@ void EvolutionaryAlgorithm<T>::Run()
         Select();
         ActionAfterEachGeneration();
     }
+    return m_population;
 }
 
 template <class T>
