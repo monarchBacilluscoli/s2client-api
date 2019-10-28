@@ -10,10 +10,11 @@
 #include "../rolling_bot/algorithm/ga.h"
 #include "../rolling_bot/algorithm/real_ga.h"
 #include "../rolling_bot/rolling_bot/rolling_bot.h"
+#include "../rolling_bot/rolling_bot/rolling_bot2.h"
 // #include "gnuplot-iostream.h"
 #include <cmath>
 // #include "test_bots/test_multi_thread/test_multi_thread_bot.h"
-#include "../rolling_bot/algorithm/rolling_de.h"
+// #include "../rolling_bot/algorithm/rolling_de.h"
 
 using namespace sc2;
 
@@ -434,6 +435,7 @@ int main(int argc, char *argv[])
     //! Bots here
     Bot bot;
     RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path, population_size);
+    // RollingBot2 rolling_bot2(net_address, port_start,starcraft_path, map_path);
     rolling_bot.SetDebugOn(true);
     rolling_bot.SetMaxGeneration(max_generations);
 

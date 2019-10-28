@@ -89,7 +89,8 @@ struct HealthBar
     // Don't forget to present the draw
     void Draw(SDL_Renderer *renderer)
     {
-        if(renderer!=nullptr){
+        if (renderer != nullptr)
+        {
             // store the original draw color of current renderer for restore it after draw
             Uint8 r, g, b, a;
             SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a);
@@ -206,9 +207,8 @@ DebugRenderer &DebugRenderer::operator=(const sc2::DebugRenderer &rhs)
     return *this;
 }
 
-
-
-void DebugRenderer::Reconstruct(){
+void DebugRenderer::Reconstruct()
+{
     // Get the current data of the window
     int x, y, w, h;
     std::string w_name;
@@ -236,7 +236,8 @@ void DebugRenderer::Reconstruct(){
 
 void DebugRenderer::ClearRenderer()
 {
-    if(m_renderer!=nullptr){
+    if (m_renderer != nullptr)
+    {
         SDL_SetRenderDrawColor(m_renderer, 0xff, 0xff, 0xff, 0xff);
         SDL_RenderClear(m_renderer);
     }
@@ -494,8 +495,9 @@ DebugRenderer &DebugRenderers::operator[](int count)
     return m_debug_renderers[count];
 }
 
-void DebugRenderers::ReconstructAll(){
-    for (DebugRenderer& renderer:m_debug_renderers)
+void DebugRenderers::ReconstructAll()
+{
+    for (DebugRenderer &renderer : m_debug_renderers)
     {
         renderer.Reconstruct();
     }
