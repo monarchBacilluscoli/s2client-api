@@ -39,8 +39,6 @@ public:
         m_objectives_distribution_graph.SetTitle("Solution Distribution");
         m_objectives_distribution_graph.SetXLabel("total damage to enemy");
         m_objectives_distribution_graph.SetYLabel("total damage to me");
-        // m_debug_renderer.SetIsDisplay(false);
-        // SetCompare(Solution<Command>::multi_greater);
     }
 
     // Initialization and setup.
@@ -54,9 +52,6 @@ public:
     void SetCommandLength(int command_length);
     void SetAttackPossibility(float attack_possibility);
 
-    // void SetSimlatorsOpponent(const PlayerSetup& opponent);
-    // void SetSimulatorsMultithreaded(bool multithreaded);
-
     // //? here is something wrong
     // void SetPopulationSize(int population_size) override {
     //     if (population_size > m_population_size) {
@@ -68,15 +63,6 @@ public:
     // }
     // Other settings
     void SetDebugMode(bool is_debug);
-
-    // // Start up
-    // void SetSimulatorsStart(const ObservationInterface* observation_interface);
-    // Run multiple simulators at the same time (multi-threadedly)
-    // void RunSimulatorsSynchronous();
-    // for test
-    // void RunSimulatorsOneByOne();
-    // Get all the ObservationInterface from those simulators
-    // std::vector<const ObservationInterface*> GetAllSimsObservations() const;
 
     ~RollingGA() = default;
 
@@ -92,10 +78,7 @@ private:
     virtual Population CrossOver(const Solution<Command> &s1, const Solution<Command> &s2) override;
     //! Plaese set the start point before you evaluate
     virtual void Evaluate(Population &p) override;
-    // to take place the default function
-    //virtual void EvaluateSingleSolution(Solution<Command>& s) override {};
     virtual void ShowGraphEachGeneration() override;
-    //
     virtual void SortSolutions(Population &pop) override
     {
         Solution<Command>::DominanceSort(pop);

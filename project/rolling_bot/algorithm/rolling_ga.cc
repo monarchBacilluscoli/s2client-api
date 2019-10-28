@@ -15,98 +15,6 @@ using Population = std::vector<Solution<Command>>;
 using Evaluator = std::function<float(const std::vector<Command> &)>;
 using Compare = std::function<bool(const Solution<Command> &, const Solution<Command> &)>;
 
-// void sc2::RollingGA::SetSimulators(const std::string& net_address, int port_start, const std::string& process_path, const std::string& map_path)
-// {
-// 	assert(!m_simulators.empty());
-// 	// Set all simulator's properties
-// 	for (Simulator& sim:m_simulators)
-// 	{
-// 		// sim.SetNetAddress(net_address);
-// 		sim.SetPortStart(port_start);
-// 		sim.SetProcessPath(process_path);
-// 		sim.SetMapPath(map_path);
-// 		sim.SetStepSize(m_sims_step_size);
-// 		// since there are up to two agent players, for simplicity I'd better make the port +2 at each time
-// 		port_start += 2;
-//         // //! here for test
-//         // sim.LaunchStarcraft();
-//         // sim.StartGame();
-//     }
-//     std::vector<std::thread> start_game_threads(m_simulators.size());
-// 	for (size_t i = 0; i < start_game_threads.size(); i++)
-// 	{
-// 		start_game_threads[i] = std::thread([&, i]()->void{
-// 			m_simulators[i].LaunchStarcraft();
-// 			// m_simulators[i].Connect(m_simulators[i].GetPortStart());
-// 			m_simulators[i].StartGame();
-// 		});
-// 	}
-// 	for (auto& t : start_game_threads) {
-// 		t.join();
-// 	}
-// }
-
-// void sc2::RollingGA::SetSimulatorsStart(const ObservationInterface* ob)
-// {
-//     SetInfoFromObservation(ob);
-//     //todo try to implement them in multi threads
-//     std::cout <<"simulator size: "<< m_simulation_pool.size() << std::endl;
-//     for (size_t i = 0; i < m_simulators.size(); i++) {
-//         m_simulators[i].CopyAndSetState(ob);
-//     }
-// }
-
-// void sc2::RollingGA::RunSimulatorsSynchronous()
-// {
-// 	std::vector<std::future<void>> futures(m_simulators.size()); //! you'd better not add this in the scope
-// 	if (m_is_debug)
-// 	{
-// 		for (size_t i = 0; i < futures.size(); i++)
-// 		{
-// 			futures[i] = std::async(std::launch::async, [&, i]() -> void {
-// 				m_simulators[i].Run(m_run_length, &m_debug_renderers[i]);
-// 			});
-// 			// if debug flag is on, the debug renderes are involved
-// 		}
-// 	}
-// 	else
-// 	{
-// 		std::vector<std::future<void>> futures(m_simulators.size());
-// 		for (size_t i = 0; i < futures.size(); i++)
-// 		{
-// 			futures[i] = std::async(std::launch::async, [&, i]() -> void {
-// 				m_simulators[i].Run(m_run_length);
-// 			});
-// 		}
-// 	}
-// 	std::chrono::time_point<std::chrono::steady_clock> deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(20000);
-// 	for (auto &f : futures)
-// 	{
-// 		//todo add code to handle the timeout problem
-// 		if (f.wait_until(deadline) == std::future_status::timeout)
-// 		{
-// 			std::cout << "timeout " << '\t' << std::endl;
-// 		}
-// 		else
-// 		{
-// 			//std::cout << "no timeout " << '\t' << std::endl;
-// 		}
-// 	}
-// }
-
-// void sc2::RollingGA::RunSimulatorsOneByOne() {
-//     int count = m_simulators.size();
-//     if (m_is_debug) {
-//         for (size_t i = 0; i < count; i++) {
-//             m_simulators[i].Run(m_run_length, &m_debug_renderers[i]);
-//         }
-//     } else {
-//         for (size_t i = 0; i < count; i++) {
-//             m_simulators[i].Run(m_run_length);
-//         }
-//     }
-// }
-
 void sc2::RollingGA::SetInfoFromObservation(const ObservationInterface *observation)
 {
 	m_observation = observation;
@@ -131,30 +39,6 @@ void sc2::RollingGA::SetAttackPossibility(float attack_possibility)
 {
 	m_attack_possibility = attack_possibility;
 }
-
-// void sc2::RollingGA::SetSimlatorsOpponent(const PlayerSetup& opponent)
-// {
-// 	if (opponent.agent == nullptr) {
-// 		for (auto& sim : m_simulators)
-// 		{
-// 			sim.SetOpponent(opponent.difficulty);
-// 		}
-// 	}
-// 	else {
-// 		for (auto& sim : m_simulators)
-// 		{
-// 			sim.SetOpponent(opponent.agent);
-// 		}
-// 	}
-// }
-
-// void RollingGA::SetSimulatorsMultithreaded(bool multithreaded)
-// {
-// 	for (auto& sim:m_simulators)
-// 	{
-// 		sim.SetMultithreaded(multithreaded);
-// 	}
-// }
 
 void RollingGA::SetDebugMode(bool is_debug)
 {
@@ -292,37 +176,12 @@ Population sc2::RollingGA::CrossOver(const Solution<Command> &a, const Solution<
 
 void sc2::RollingGA::Evaluate(Population &pop)
 {
-	// assert(p.size() <= m_simulators.size());
-	// use different simulators to evaluate solutions respectively
-	// for each sim, copy the state and deploy the commands!
-	// //todo multi-threaded
-	//! construct the orders vec
 
 #ifdef MULTI_THREADED
 	m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, pop);
-	// std::vector<std::thread> setting_threads(m_simulators.size());
-	// for (size_t i = 0; i < p.size(); i++) {
-	//     setting_threads[i] = std::thread([&, i] {
-	//         m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
-	//         m_simulators[i].SetOrders(p[i].variable);
-	//     });
-	// }
-	// // std::for_each(setting_threads.begin(), setting_threads.end(), [](std::thread& t) -> void { t.join(); });
-	// int thread_size = setting_threads.size();
-	// for (size_t i = 0; i < thread_size; i++)
-	// {
-	// 	setting_threads[i].join();
-	// }
-
-	// RunSimulatorsSynchronous();
 	m_simulation_pool.RunSimsAsync(m_run_length, m_debug_renderers);
 #else
-// for (size_t i = 0; i < p.size(); i++)
-// {
-// 	m_simulators[i].CopyAndSetState(m_observation, m_is_debug ? &m_debug_renderers[i] : nullptr);
-// 	m_simulators[i].SetOrders(p[i].variable);
-// }
-// RunSimulatorsOneByOne();
+	//todo one by one?
 #endif
 
 	// output the best one and the average objectives for each generation for each generation

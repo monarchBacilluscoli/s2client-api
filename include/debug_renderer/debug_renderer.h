@@ -127,7 +127,7 @@ public:
     void ReconstructAll();
     // get size
     size_t size() { return m_debug_renderers.size(); };
-    //! get subwindow
+    // get subwindow
     DebugRenderer &operator[](int count);
 };
 } // namespace sc2
@@ -138,22 +138,22 @@ struct CandidateColor
     Uint8 a;
 };
 
-class LineChartRenderer
-{
-private:
-    SDL_Window *m_window = nullptr;
-    SDL_Renderer *m_renderer = nullptr;
+// class LineChartRenderer
+// {
+// private:
+//     SDL_Window *m_window = nullptr;
+//     SDL_Renderer *m_renderer = nullptr;
 
-    static std::vector<CandidateColor> candidate_colors;
+//     static std::vector<CandidateColor> candidate_colors;
 
-public:
-    LineChartRenderer(/* args */);
-    ~LineChartRenderer();
-    void DrawLines(std::vector<std::list<float>> data_batch);
-    // void DrawLine(std::vector<std::list<float>> data);
+// public:
+//     LineChartRenderer(/* args */);
+//     ~LineChartRenderer();
+//     void DrawLines(std::vector<std::list<float>> data_batch);
+//     // void DrawLine(std::vector<std::list<float>> data);
 
-    void ClearRenderer();
-    void Present();
-};
+//     void ClearRenderer();
+//     void Present();
+// };
 
 #endif //DEBUG_RENDERER_H

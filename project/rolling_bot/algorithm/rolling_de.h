@@ -24,6 +24,9 @@ public:
     virtual ~RollingDE();
 
 protected:
+    void InitBeforeRun() override;
+    virtual Solution<Command> Mutate(const Solution<Command> &base_sol, const Solution<Command> &material_sol1, const Solution<Command> &material_sol2) override;
+    virtual void Crossover(const Solution<Command> &parent, Solution<Command> &child) override;
 };
 } // namespace sc2
 

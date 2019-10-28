@@ -14,8 +14,6 @@ namespace sc2
 
 class RollingBot : public Agent
 {
-    using Evaluator = std::function<float(const std::vector<Command> &)>;
-
 public:
     RollingBot() = delete;
     //! the only thing this constructor needs to do is to provid all parameters

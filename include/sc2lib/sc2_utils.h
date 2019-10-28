@@ -4,6 +4,7 @@
 #include "sc2api/sc2_map_info.h"
 
 namespace sc2 {
+const double PI = atan(1.) * 4.;
 
 Point2D FindRandomLocation(const Point2D& min, const Point2D& max);
 Point2D FindRandomLocation(const GameInfo& game_info);

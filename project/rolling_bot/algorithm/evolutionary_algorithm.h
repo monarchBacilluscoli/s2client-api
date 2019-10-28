@@ -65,7 +65,6 @@ protected:
     virtual void Generate() = 0; // Generate the initial population
     virtual void Breed() = 0;    // use parent population to generate child population
     virtual void Evaluate() = 0; // Evaluate all solutions
-    virtual void Sort() = 0;     // sort all solutions, prepare them for select
     virtual void Select() = 0;   // select which solutions to enter into the next generation
     //todo maybe I need a ActionAfterEachGeneration() to store all the objs or somthing else
     virtual void ActionAfterEachGeneration();
@@ -73,7 +72,8 @@ protected:
     virtual void ShowGraphEachGeneration(); //todo show the overall status
 
     void RecordObjectives();
-    void ShowOverallStatusGraphEachGeneration();
+    virtual void ShowOverallStatusGraphEachGeneration();
+    virtual void ShowSolutionDistribution(int showed_generations_count) = 0;
 };
 
 template <class T>
@@ -120,13 +120,12 @@ void EvolutionaryAlgorithm<T>::Run()
     InitBeforeRun();
     Generate();
     Evaluate();
-    Sort();
     for (m_current_generation = 1; m_current_generation <= m_max_generation; ++m_current_generation)
     {
         Breed();
         Evaluate();
-        Sort();
-        ShowGraphEachGeneration();
+        Select();
+        ActionAfterEachGeneration();
     }
 }
 
@@ -154,7 +153,7 @@ void EvolutionaryAlgorithm<T>::RecordObjectives()
     {
         current_generation_objs[i] = m_population[i].objectives;
     }
-    // average objs
+    // objs statistical data
     m_history_objs_ave.emplace_back(std::vector<float>(m_objective_size));
     m_history_objs_best.emplace_back(std::vector<float>(m_objective_size));
     m_history_objs_worst.emplace_back(std::vector<float>(m_objective_size));
@@ -186,13 +185,19 @@ void EvolutionaryAlgorithm<T>::ShowGraphEachGeneration()
 {
     //todo show the evolution status of the algorithm
     ShowOverallStatusGraphEachGeneration();
+    ShowSolutionDistribution(3); // show the last generations objs distribution
 }
 
 template <class T>
 void EvolutionaryAlgorithm<T>::ShowOverallStatusGraphEachGeneration()
 {
-    std::list<std::vector<std::vector<float>>> data_list{m_history_objs_ave, m_history_objs_best, m_history_objs_worst};
-    std::vector<int> generation_indices(m_current_generation + 1);
+    std::vector<std::vector<float>> data;
+    data.reserve(2 * 3 * m_objective_size);                                            // I don't know if it is useful
+    data.insert(data.end(), m_history_objs_ave.begin(), m_history_objs_ave.end());     // insert objective_size's vectors in data
+    data.insert(data.end(), m_history_objs_best.begin(), m_history_objs_best.end());   // insert objective_size's vectors in data
+    data.insert(data.end(), m_history_objs_worst.begin(), m_history_objs_worst.end()); // insert objective_size's vectors in data
+
+    std::vector<float> generation_indices(m_current_generation + 1);
     std::iota(generation_indices.begin(), generation_indices.end(), 0);
     std::vector<std::string> line_names(m_objective_size * 3);
     // names order is obj1_ave, obj2_ave,.. objN_ave, obj1_best, ..., obj1_worst ,objN_worst
@@ -202,7 +207,7 @@ void EvolutionaryAlgorithm<T>::ShowOverallStatusGraphEachGeneration()
         line_names[m_objective_size + i] = m_objective_names[i] + " best";
         line_names[m_objective_size * 2 + i] = m_objective_names[i] + " worst";
     }
-    m_overall_evolution_status_renderer.Show(data_list, generation_indices, line_names);
+    m_overall_evolution_status_renderer.Show(data, generation_indices, line_names);
 }
 
 } // namespace sc2

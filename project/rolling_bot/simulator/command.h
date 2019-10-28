@@ -24,13 +24,22 @@ struct Command
     };
     bool operator!=(const Command &rhs) const { return !(*this == rhs); };
 
-    Command(const Command& rhs):unit_tag(rhs.unit_tag),actions(rhs.actions){}
+    Command(const Command &rhs) : unit_tag(rhs.unit_tag), actions(rhs.actions) {}
 
-    Command& operator=(const Command &rhs)
+    Command &operator=(const Command &rhs)
     {
         unit_tag = rhs.unit_tag;
         actions.assign(rhs.actions.begin(), rhs.actions.end());
         return *this;
+    }
+
+    size_t size()
+    {
+        return actions.size();
+    }
+    ActionRaw &operator[](size_t index)
+    {
+        return actions[index];
     }
 };
 } // namespace sc2

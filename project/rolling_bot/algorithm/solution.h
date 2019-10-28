@@ -18,6 +18,7 @@ template <class T>
 struct Solution
 {
     using Population = std::vector<Solution<T>>;
+
     std::vector<float> objectives = std::vector<float>();
     std::vector<T> variable = std::vector<T>();
     int rank = std::numeric_limits<int>::max(); // I haven't used it yet
@@ -34,7 +35,8 @@ struct Solution
     }
 
     Solution<T>() = default;
-    Solution<T>(const std::vector<T> &rhs) : objectives(rhs.objectives), variable(rhs.variable) {}
+    Solution<T>(const Solution<T> &rhs) : variable(rhs.variable) {} //! attention
+    Solution<T>(const std::vector<T> &variable) : variable(variable) {}
     Solution<T>(int variable_size, int objective_size) : variable(variable_size), objectives(objective_size) {}
     Solution<T>(int variable_size) : variable(variable_size), objectives(1) {}
 
@@ -42,6 +44,7 @@ struct Solution
     // return true means the orders of the two items keep unchanged
     static bool multi_greater(const Solution<T> &a, const Solution<T> &b);
     static bool sum_greater(const Solution<T> &a, const Solution<T> &b);
+    static bool RankLess(const Solution<T> &a, const Solution<T> &b); // looks like it should not be a member function of Solution. If so, it will not be used as a Compare, since it accept one more parameter - this pointer
     static DOMINANCE Dominate(const Solution<T> &a, const Solution<T> &b);
     static void DominanceSort(Population &pop);
 };
@@ -118,6 +121,12 @@ DOMINANCE Solution<T>::Dominate(const Solution<T> &a, const Solution<T> &b)
 }
 
 template <class T>
+bool Solution<T>::RankLess(const Solution<T> &l, const Solution<T> &r)
+{
+    return l.rank < r.rank;
+}
+
+template <class T>
 void Solution<T>::DominanceSort(Population &p)
 {
     // make sure all the rank is set right
@@ -176,7 +185,7 @@ void Solution<T>::DominanceSort(Population &p)
         current_set_count += current_layer_sz;
         ++current_rank;
     }
-    std::sort(p.begin(), p.end(), [](const Solution<T> &a, const Solution<T> &b) -> bool { return a.rank < b.rank; });
+    std::sort(p.begin(), p.end(), &Solution<T>::RankLess);
 }
 
 #endif //SOLUTION_H

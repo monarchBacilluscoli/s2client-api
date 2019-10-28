@@ -173,7 +173,7 @@ void SimulatorPool::RunSimsAsync(int steps, DebugRenderers &debug_renderers)
     // check the debug renderer size and sims' size
     if (debug_renderers.size() < m_sol_sim_map.size())
     {
-        throw("debug_renderers are fewer than simulations size@SimulatorPool::" + std::string(__FUNCTION__));
+        throw("debug_renderers are fewer than simulations size@" + std::string(__FUNCTION__));
     }
     // run all the sims synchronously
     size_t sz = m_sol_sim_map.size();
@@ -233,7 +233,7 @@ void SimulatorPool::RunSimsAsync(int steps, DebugRenderers &debug_renderers)
         }
         default:
         {
-            throw("how can this async task be deffered?@SimulatorPool::" + std::string(__FUNCTION__));
+            throw("how can this async task be deffered?@" + std::string(__FUNCTION__));
             break;
         }
         }
@@ -249,7 +249,7 @@ void SimulatorPool::RunSimsOneByOne(int steps, DebugRenderers &debug_renderers)
 {
     if (debug_renderers.size() < m_sol_sim_map.size())
     {
-        throw("debug_renderers are fewer than simulations size@SimulatorPool::" + std::string(__FUNCTION__));
+        throw("debug_renderers are fewer than simulations size@" + std::string(__FUNCTION__));
     }
     size_t sz = m_sol_sim_map.size();
     for (size_t i = 0; i < sz; i++)

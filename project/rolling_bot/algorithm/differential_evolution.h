@@ -13,6 +13,7 @@ class DifferentialEvolution : virtual public EvolutionaryAlgorithm<T>
 
 protected:
     // settings
+    float m_scale_factor = .5f;
     float m_crossover_rate = .5f;
 
     // methods
@@ -24,25 +25,40 @@ public:
     DifferentialEvolution(int objective_size,
                           int max_generation,
                           int population_size,
-                          float crossover_rate = .5f, int random_seed = 0) : EvolutionaryAlgorithm<T>(objective_size, max_generation, population_size, random_seed), m_crossover_rate(crossover_rate)/*, m_index_vec(population_size)*/
-    {
-        //std::iota(m_index_vec.begin(), m_index_vec.end(), 0);
-    };
+                          float scale_factor = .5,
+                          float crossover_rate = .5f, int random_seed = 0) : EvolutionaryAlgorithm<T>(objective_size, max_generation, population_size, random_seed), m_scale_factor(scale_factor), m_crossover_rate(crossover_rate){};
     virtual ~DifferentialEvolution() = default;
+
+    void SetCrossoverRate(float rate)
+    {
+        m_crossover_rate = rate;
+    }
+    float CrossoverRate()
+    {
+        return m_crossover_rate;
+    }
+    void SetScaleFactor(float factor)
+    {
+        m_scale_factor = factor;
+    }
+    float ScaleFactor()
+    {
+        return m_scale_factor;
+    }
 
 protected:
     virtual void InitBeforeRun() override;
     virtual void Breed() override;
 
     virtual Solution<T> Mutate(const Solution<T> &base_sol, const Solution<T> &material_sol1, const Solution<T> &material_sol2) = 0;
-    virtual Solution<T> Crossover(const Solution<T> &parent, const Solution<T> &child) = 0; // can not be implemented, since there are so many solution types
+    virtual void Crossover(const Solution<T> &parent, Solution<T> &child) = 0; // can not be implemented, since there are so many solution types
 };
 
 template <class T>
 void DifferentialEvolution<T>::InitBeforeRun()
 {
     EvolutionaryAlgorithm<T>::InitBeforeRun();
-    //std::shuffle(m_index_vec.begin(), m_index_vec.end(), EA::m_random_engine);
+    //todo the code only belonging to DE<T>
 }
 
 template <class T>
@@ -59,8 +75,8 @@ void DifferentialEvolution<T>::Breed()
         int index_b = random_dis(EA::m_random_engine);
         Solution<T> &material_a = EA::m_population[index_a];
         Solution<T> &material_b = EA::m_population[index_b];
-        Solution<T> child = Mutate(EA::m_population[i], material_a, material_b);
-        EvolutionaryAlgorithm<T>::m_offspring[i] = Crossover(EA::m_population[i], child);
+        EvolutionaryAlgorithm<T>::m_offspring[i] = Mutate(EA::m_population[i], material_a, material_b);
+        Crossover(EA::m_population[i], EvolutionaryAlgorithm<T>::m_offspring[i]);
     }
 }
 

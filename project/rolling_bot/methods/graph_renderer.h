@@ -53,20 +53,7 @@ public:
     };
     virtual ~LineChartRenderer2D() = default;
 
-    // // one list one line
-    // void Show(const std::list<std::vector<float>> &data_y, const std::vector<float> &data_x, const std::vector<std::string> &line_names)
-    // {
-    //     //! data check is provided by gnuplot
-    //     int data_sz = data_y.size();
-    //     m_gp << "plot";
-    //     int i = 0;
-    //     for (auto it = data_y.begin(); it != data_y.end() && i < data_sz; ++it, ++i)
-    //     {
-    //         m_gp << m_gp.file1d(std::make_tuple(data_x, *it)) << "with lines title " << GraphRenderer::SingleQuoteString(line_names[i]) << ",";
-    //     }
-    //     m_gp << std::endl;
-    // }
-
+    // one TContainer one line
     template <typename T, template <typename, typename> class TContainer> // support at least both list and vector
     void Show(const TContainer<std::vector<T>, std::allocator<std::vector<T>>> &data_y, const std::vector<T> &data_x, const std::vector<std::string> &line_names)
     {
@@ -87,11 +74,43 @@ public:
     ScatterRenderer2D() : GraphRenderer2D(){};
     virtual ~ScatterRenderer2D() = default;
 
-    // void Show(const std::list<std::vector<std::vector<float>>> &objs, const std::vector<std::string> &names)
+    static int MaxGroupSize()
+    {
+        return g_max_group_count;
+    }
+
+    // One TContainer one group of points
+    template <template <typename, typename> class TContainer>
+    void Show(const TContainer<std::vector<std::vector<float>>, std::allocator<std::vector<std::vector<float>>>> &objs, const std::vector<std::string> &names)
+    {
+        size_t obj_group_sz = objs.size();
+        if (obj_group_sz > g_max_group_count)
+        {
+            throw("ScatterRenderer2D can not render so many groups of points, please check the ScatterRenderer2D::MaxGroupSize to get the max size@" + std::string(__FUNCTION__));
+        }
+        if (obj_group_sz != names.size())
+        {
+            throw("The size of names and objs group size must be equal@" + std::string(__FUNCTION__));
+        }
+        m_gp << "plot";
+        int i = 0;
+        for (auto it = objs.begin(); it != objs.end(); ++it)
+        {
+            m_gp << m_gp.file1d(*it) << "with points pt " << i + 1 << " title " << SingleQuoteString(names[i]) << ",";
+            ++i;
+        }
+        m_gp << std::endl;
+    }
+
+    // template <template <typename, typename> class TContainer>
+    // void Show(const TContainer<std::vector<std::vector<float>>, std::allocator<std::vector<std::vector<float>>>> &objs, const std::vector<std::string> &name)
     // {
-    //     size_t obj_sz = objs.size();
+    //     size_t obj_group_sz = objs.size();
+    //     if (obj_group_sz > g_max_group_count)
+    //     {
+    //         throw("ScatterRenderer2D can not render so many groups of points, please check the ScatterRenderer2D::MaxGroupSize to get the max size@" + std::string(__FUNCTION__));
+    //     }
     //     m_gp << "plot";
-    //     int obj_group_sz;
     //     int i = 0;
     //     for (auto it = objs.begin(); it != objs.end(); ++it)
     //     {
@@ -101,20 +120,29 @@ public:
     //     m_gp << std::endl;
     // }
 
-    template <template <typename, typename> class TContainer>
-    void Show(const TContainer<std::vector<std::vector<float>>, std::allocator<std::vector<std::vector<float>>>> &objs, const std::vector<std::string> &names)
+    void Show(const std::list<std::vector<std::vector<float>>>::iterator &begin, const std::list<std::vector<std::vector<float>>>::iterator &end, const std::vector<std::string> &names)
     {
-        size_t obj_sz = objs.size();
+        int group_size = std::distance(begin, end);
+        if (group_size > g_max_group_count)
+        {
+            throw("ScatterRenderer2D can not render so many groups of points, please check the ScatterRenderer2D::MaxGroupSize to get the max size@" + std::string(__FUNCTION__));
+        }
+        if (group_size != names.size())
+        {
+            throw("The size of names and objs group size must be equal@" + std::string(__FUNCTION__));
+        }
         m_gp << "plot";
-        int obj_group_sz;
         int i = 0;
-        for (auto it = objs.begin(); it != objs.end(); ++it)
+        for (auto it = begin; it != end; ++it)
         {
             m_gp << m_gp.file1d(*it) << "with points pt " << i + 1 << " title " << SingleQuoteString(names[i]) << ",";
             ++i;
         }
         m_gp << std::endl;
     }
+
+private:
+    static const int g_max_group_count = 23; // depends on gnuplot
 };
 
 #endif // GRAPH_RENDERER_H
