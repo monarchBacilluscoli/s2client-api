@@ -92,8 +92,8 @@ int main(int argc, char *argv[])
         std::string kill_command = "ps -aux| grep " + process_names_to_be_killed[i] + " | grep -v grep |awk '{print $2}' | xargs kill";
         system(kill_command.c_str());
     }
-
     //! test code (Can be folded)
+{
     {
         //! for real ga
         // {
@@ -394,6 +394,7 @@ int main(int argc, char *argv[])
         //     std::cin.get();
         // #endif
     }
+}
 
     // Some settings
     bool is_debug = true;
@@ -434,13 +435,14 @@ int main(int argc, char *argv[])
 
     //! Bots here
     Bot bot;
-    RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path, population_size);
-    // RollingBot2 rolling_bot2(net_address, port_start,starcraft_path, map_path);
-    rolling_bot.SetDebugOn(true);
-    rolling_bot.SetMaxGeneration(max_generations);
+    // RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path);
+    // rolling_bot.SetDebugOn(true);
+    // rolling_bot.SetMaxGeneration(max_generations);    
+
+    RollingBot2 rolling_bot2(net_address, port_start, starcraft_path, map_path);
 
     //! participants settings here
-    coordinator.SetParticipants({CreateParticipant(Race::Terran, &rolling_bot),
+    coordinator.SetParticipants({CreateParticipant(Race::Terran, &rolling_bot2),
                                  CreateComputer(Race::Zerg)});
     coordinator.SetPortStart(main_process_port);
     coordinator.SetRealtime(real_time);

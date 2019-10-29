@@ -73,7 +73,6 @@ Solution<Command> RollingGA::GenerateSolution()
 	//? But for now, I choose to limit the chosen of abilities in only move and attack
 	size_t team_size = m_my_team.size();
 	Solution<Command> sol(team_size, m_objective_size);
-	RawActions raw_actions(m_command_length);
 	for (size_t i = 0; i < team_size; i++)
 	{
 		sol.variable[i].unit_tag = m_my_team[i]->tag;

@@ -4,8 +4,9 @@ namespace sc2
 {
 void RollingDE::InitBeforeRun()
 {
-    RollingEA::InitBeforeRun();
-    RollingDE::InitBeforeRun(); // I think it is ok to call the EvolutionaryAlgorithm::InitBeforeRun() twice
+    EvolutionaryAlgorithm::InitBeforeRun();
+    DifferentialEvolution<Command>::InitOnlySelfMembersBeforeRun(); // I think it is ok to call the EvolutionaryAlgorithm::InitBeforeRun() twice
+    RollingEA::InitOnlySelfMembersBeforeRun();
     //todo Initialization only for this class
 }
 

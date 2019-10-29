@@ -46,6 +46,7 @@ public:
 protected:
     // override functions
     void InitBeforeRun() override;
+    void InitOnlySelfMembersBeforeRun();
     void Generate() override;
     void Evaluate() override;
     void Select() override;

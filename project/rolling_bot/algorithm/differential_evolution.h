@@ -48,6 +48,7 @@ public:
 
 protected:
     virtual void InitBeforeRun() override;
+    void InitOnlySelfMembersBeforeRun();
     virtual void Breed() override;
 
     virtual Solution<T> Mutate(const Solution<T> &base_sol, const Solution<T> &material_sol1, const Solution<T> &material_sol2) = 0;
@@ -62,11 +63,14 @@ void DifferentialEvolution<T>::InitBeforeRun()
 }
 
 template <class T>
+void DifferentialEvolution<T>::InitOnlySelfMembersBeforeRun() {}
+
+template <class T>
 void DifferentialEvolution<T>::Breed()
 {
     // mutate each? solution in population, get the transition solution
     int sz = DifferentialEvolution<T>::m_population.size();
-    EA::m_offspring.resize(sz);
+    EA::m_offspring.resize(sz, Solution<T>(0, EA::m_objective_size));
     std::uniform_int_distribution<int> random_dis(0, sz - 1);
     for (size_t i = 0; i < sz; ++i)
     {

@@ -39,7 +39,7 @@ protected:
 public:
     EvolutionaryAlgorithm() = default;
     //todo a constructor with all parameters
-    EvolutionaryAlgorithm(int objective_size, int max_generation, int population_size, int random_seed = 0, std::vector<std::string> objective_names = std::vector<std::string>()) : m_max_generation{max_generation}, m_population_size{population_size}, m_objective_size{objective_size}, m_random_engine{random_seed}
+    EvolutionaryAlgorithm(int objective_size, int max_generation, int population_size, int random_seed = 0, std::vector<std::string> objective_names = std::vector<std::string>()) : m_max_generation{max_generation}, m_population_size{population_size}, m_objective_size{objective_size}, m_random_engine{random_seed}, m_history_objs_ave{objective_size}, m_history_objs_best{objective_size}, m_history_objs_worst{objective_size}, m_objective_names{objective_size}
     {
         m_overall_evolution_status_renderer.SetTitle("Evolution Status");
     };
@@ -111,6 +111,10 @@ void EvolutionaryAlgorithm<T>::InitBeforeRun()
 {
     m_population.clear();
     m_population.resize(m_population_size);
+    for (Solution<T> &sol : m_population)
+    {
+        sol.objectives.resize(m_objective_size);
+    }
     m_overall_evolution_status_renderer.SetXRange(0, m_max_generation);
 }
 
@@ -198,7 +202,7 @@ void EvolutionaryAlgorithm<T>::ShowOverallStatusGraphEachGeneration()
     data.insert(data.end(), m_history_objs_best.begin(), m_history_objs_best.end());   // insert objective_size's vectors in data
     data.insert(data.end(), m_history_objs_worst.begin(), m_history_objs_worst.end()); // insert objective_size's vectors in data
 
-    std::vector<float> generation_indices(m_current_generation + 1);
+    std::vector<float> generation_indices(m_history_objs_ave[0].size());
     std::iota(generation_indices.begin(), generation_indices.end(), 0);
     std::vector<std::string> line_names(m_objective_size * 3);
     // names order is obj1_ave, obj2_ave,.. objN_ave, obj1_best, ..., obj1_worst ,objN_worst

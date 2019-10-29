@@ -11,7 +11,20 @@ void RollingEA::Initialize(const ObservationInterface *observation)
 void RollingEA::InitBeforeRun()
 {
     EvolutionaryAlgorithm::InitBeforeRun();
-    InitFromObservation();
+    InitFromObservation(); // set the m_my_team and some other things
+    for (Solution<Command> &sol : m_population)
+    {
+        sol.variable.resize(m_my_team.size());
+        sol.objectives.resize(m_objective_size);
+    }
+}
+
+void RollingEA::InitOnlySelfMembersBeforeRun(){ // doesn't call the base class's Init function
+    InitFromObservation(); // set the m_my_team and some other things
+    for (Solution<Command> &sol : m_population)
+    {
+        sol.variable.resize(m_my_team.size());
+    }
 }
 
 void RollingEA::Generate()
@@ -38,7 +51,7 @@ void RollingEA::Evaluate(Population &pop)
 {
     m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, m_population);
     m_simulation_pool.RunSimsAsync(m_run_length, m_debug_renderers);
-
+    
     float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
     float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();
     size_t sz = m_population.size();
@@ -46,7 +59,7 @@ void RollingEA::Evaluate(Population &pop)
     {
         self_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
         enemy_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
-
+        pop[i].objectives.resize(m_objective_size);
         // set the 2 objectives
         pop[i].objectives[0] = enemy_loss;
         pop[i].objectives[1] = -self_loss;
@@ -86,7 +99,6 @@ void RollingEA::ShowSolutionDistribution(int showed_generations_count)
 void RollingEA::GenerateOne(Solution<Command> &sol)
 {
     size_t team_size = m_my_team.size();
-    RawActions raw_actions(m_command_length);
     for (size_t i = 0; i < team_size; i++)
     {
         sol.variable[i].unit_tag = m_my_team[i]->tag;

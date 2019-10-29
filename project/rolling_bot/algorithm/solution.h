@@ -35,7 +35,7 @@ struct Solution
     }
 
     Solution<T>() = default;
-    Solution<T>(const Solution<T> &rhs) : variable(rhs.variable) {} //! attention
+    Solution<T>(const Solution<T> &rhs) : variable(rhs.variable), objectives(rhs.objectives) {} //! attention
     Solution<T>(const std::vector<T> &variable) : variable(variable) {}
     Solution<T>(int variable_size, int objective_size) : variable(variable_size), objectives(objective_size) {}
     Solution<T>(int variable_size) : variable(variable_size), objectives(1) {}
