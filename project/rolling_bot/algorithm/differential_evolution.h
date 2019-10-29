@@ -79,7 +79,7 @@ void DifferentialEvolution<T>::Breed()
         int index_b = random_dis(EA::m_random_engine);
         Solution<T> &material_a = EA::m_population[index_a];
         Solution<T> &material_b = EA::m_population[index_b];
-        EvolutionaryAlgorithm<T>::m_offspring[i] = Mutate(EA::m_population[i], material_a, material_b);
+        EA::m_offspring[i] = Mutate(EA::m_population[i], material_a, material_b);
         Crossover(EA::m_population[i], EvolutionaryAlgorithm<T>::m_offspring[i]);
     }
 }

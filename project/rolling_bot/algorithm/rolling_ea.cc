@@ -68,12 +68,11 @@ void RollingEA::Evaluate(Population &pop)
 
 void RollingEA::Select()
 {
-    Solution<Command>::DominanceSort(m_offspring);
-    std::vector<Solution<Command>> pop_pool;
+    m_population.insert(m_population.end(), m_offspring.begin(), m_offspring.end());
+    Solution<Command>::DominanceSort(m_population);
     //! looks like m_population must have been sorted
-    std::merge(m_population.begin(), m_population.end(), m_offspring.begin(), m_offspring.end(), std::back_inserter(pop_pool), Solution<Command>::RankLess);
-    pop_pool.resize(m_population_size);
-    std::swap(pop_pool, m_population);
+    m_population.resize(m_population_size);
+    return;
 }
 
 void RollingEA::InitFromObservation()

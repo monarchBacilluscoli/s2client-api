@@ -32,6 +32,7 @@ public:
         m_objective_distribution.SetTitle("Objectives Distribution");
         m_objective_distribution.SetXLabel("total damage to enemy");
         m_objective_distribution.SetYLabel("total damage to me");
+        SetObjectiveNames({"Enemy Loss", "My Team Loss"});
     }
     virtual ~RollingEA() = default;
 

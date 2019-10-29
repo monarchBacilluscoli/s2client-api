@@ -1,4 +1,5 @@
 #include "rolling_de.h"
+#include <sc2lib/sc2_utils.h>
 
 namespace sc2
 {
@@ -40,12 +41,13 @@ Solution<Command> RollingDE::Mutate(const Solution<Command> &base_sol, const Sol
             const ActionRaw &action_m1 = unit_actions_m1[j];
             const ActionRaw &action_m2 = unit_actions_m2[j];
             ActionRaw &action_p = unit_actions_p[j];
-            if (action_p.ability_id == action_m1.ability_id && action_p.ability_id == action_m2.ability_id)
+            if (/*action_p.ability_id == action_m1.ability_id && action_p.ability_id == action_m2.ability_id*/ true)
             {
                 if (action_p.target_type == ActionRaw::TargetType::TargetPosition && action_m1.target_type == ActionRaw::TargetType::TargetPosition && action_m2.target_type == ActionRaw::TargetType::TargetPosition)
                 {
                     Vector2D difference = action_m1.target_point - action_m2.target_point;
                     action_p.target_point = action_p.target_point + m_scale_factor * (difference);
+                    action_p.target_point = FixOutsidePointIntoMap(action_p.target_point, m_game_info.playable_min, m_game_info.playable_max);
                 }
             }
         }
@@ -72,12 +74,27 @@ void RollingDE::Crossover(const Solution<Command> &parent, Solution<Command> &ch
         const RawActions &actions_parent = parent.variable[i].actions;
         for (size_t j = 0; j < command_size; j++)
         {
-            //if crossover, means the child's current action don't need to be changed, since it has been the mutated action
             if (GetRandomFraction() > m_crossover_rate)
             {
                 actions_child[j] = actions_parent[j];
             }
         }
+#if 0 //! test code \
+    //todo output child actions
+        for (const auto &item : actions_child)
+        {
+            std::cout << "(" << item.target_point.x << "," << item.target_point.y << ")"
+                      << "\t";
+        }
+        std::cout << std::endl;
+        //todo output parent actions
+        for (const auto &item : actions_parent)
+        {
+            std::cout << "(" << item.target_point.x << "," << item.target_point.y << ")"
+                      << "\t";
+        }
+        std::cout << std::endl;
+#endif //! test code>
     }
 }
 } // namespace sc2

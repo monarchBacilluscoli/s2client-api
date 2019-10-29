@@ -39,7 +39,7 @@ protected:
 public:
     EvolutionaryAlgorithm() = default;
     //todo a constructor with all parameters
-    EvolutionaryAlgorithm(int objective_size, int max_generation, int population_size, int random_seed = 0, std::vector<std::string> objective_names = std::vector<std::string>()) : m_max_generation{max_generation}, m_population_size{population_size}, m_objective_size{objective_size}, m_random_engine{random_seed}, m_history_objs_ave{objective_size}, m_history_objs_best{objective_size}, m_history_objs_worst{objective_size}, m_objective_names{objective_size}
+    EvolutionaryAlgorithm(int objective_size, int max_generation, int population_size, int random_seed = 0, std::vector<std::string> objective_names = std::vector<std::string>()) : m_max_generation(max_generation), m_population_size(population_size), m_objective_size(objective_size), m_random_engine{random_seed}, m_history_objs_ave(objective_size), m_history_objs_best(objective_size), m_history_objs_worst(objective_size), m_objective_names(objective_size)
     {
         m_overall_evolution_status_renderer.SetTitle("Evolution Status");
     };
@@ -111,6 +111,17 @@ void EvolutionaryAlgorithm<T>::InitBeforeRun()
 {
     m_population.clear();
     m_population.resize(m_population_size);
+    m_history_objs.clear();
+    m_history_objs_ave.resize(m_objective_size);
+    m_history_objs_best.resize(m_objective_size)`;
+    m_history_objs_worst.resize(m_objective_size);
+    for (size_t i = 0; i < m_objective_size; i++)
+    {
+        m_history_objs_ave[i].clear();
+        m_history_objs_best[i].clear();
+        m_history_objs_worst[i].clear();
+    }
+    
     for (Solution<T> &sol : m_population)
     {
         sol.objectives.resize(m_objective_size);
@@ -124,6 +135,7 @@ std::vector<Solution<T>> &EvolutionaryAlgorithm<T>::Run()
     InitBeforeRun();
     Generate();
     Evaluate();
+    ActionAfterEachGeneration();
     for (m_current_generation = 1; m_current_generation <= m_max_generation; ++m_current_generation)
     {
         Breed();
@@ -159,29 +171,29 @@ void EvolutionaryAlgorithm<T>::RecordObjectives()
         current_generation_objs[i] = m_population[i].objectives;
     }
     // objs statistical data
-    m_history_objs_ave.emplace_back(std::vector<float>(m_objective_size));
-    m_history_objs_best.emplace_back(std::vector<float>(m_objective_size));
-    m_history_objs_worst.emplace_back(std::vector<float>(m_objective_size));
-    std::vector<float> &current_ave_objs = m_history_objs_ave.back();
-    std::vector<float> &current_best_objs = m_history_objs_best.back();
-    std::vector<float> &current_worst_objs = m_history_objs_worst.back();
+    // m_history_objs_ave.emplace_back(std::vector<float>(m_objective_size));
+    // m_history_objs_best.emplace_back(std::vector<float>(m_objective_size));
+    // m_history_objs_worst.emplace_back(std::vector<float>(m_objective_size));
+    // std::vector<float> &current_ave_objs = m_history_objs_ave.back();
+    // std::vector<float> &current_best_objs = m_history_objs_best.back();
+    // std::vector<float> &current_worst_objs = m_history_objs_worst.back();
     for (size_t i = 0; i < m_objective_size; ++i)
     {
         // ave
-        current_ave_objs[i] = std::accumulate(current_generation_objs.begin(), current_generation_objs.end(), 0.f, [i](float initial_value, const std::vector<float> &so2) -> float {
+        m_history_objs_ave[i].push_back(std::accumulate(current_generation_objs.begin(), current_generation_objs.end(), 0.f, [i](float initial_value, const std::vector<float> &so2) -> float {
             return initial_value + so2[i];
-        });
-        current_ave_objs[i] /= pop_sz;
+        }));
+        m_history_objs_ave[i].back() /= pop_sz;
         // best
         auto best_iter_i = std::max_element(current_generation_objs.begin(), current_generation_objs.end(), [i](const std::vector<float> &so1, const std::vector<float> so2) -> bool {
             return so1[i] < so2[i];
         });
-        current_best_objs[i] = (*best_iter_i)[i];
+        m_history_objs_best[i].push_back((*best_iter_i)[i]);
         // worst
         auto worst_iter_i = std::min_element(current_generation_objs.begin(), current_generation_objs.end(), [i](const std::vector<float> &so1, const std::vector<float> &so2) -> bool {
-            return so1[i] > so2[i];
+            return so1[i] < so2[i];
         });
-        current_worst_objs[i] = (*worst_iter_i)[i];
+        m_history_objs_worst[i].push_back((*worst_iter_i)[i]);
     }
 }
 
@@ -200,17 +212,17 @@ void EvolutionaryAlgorithm<T>::ShowOverallStatusGraphEachGeneration()
     data.reserve(2 * 3 * m_objective_size);                                            // I don't know if it is useful
     data.insert(data.end(), m_history_objs_ave.begin(), m_history_objs_ave.end());     // insert objective_size's vectors in data
     data.insert(data.end(), m_history_objs_best.begin(), m_history_objs_best.end());   // insert objective_size's vectors in data
-    data.insert(data.end(), m_history_objs_worst.begin(), m_history_objs_worst.end()); // insert objective_size's vectors in data
+    // data.insert(data.end(), m_history_objs_worst.begin(), m_history_objs_worst.end()); // insert objective_size's vectors in data
 
-    std::vector<float> generation_indices(m_history_objs_ave[0].size());
+    std::vector<float> generation_indices(m_current_generation + 1);
     std::iota(generation_indices.begin(), generation_indices.end(), 0);
-    std::vector<std::string> line_names(m_objective_size * 3);
+    std::vector<std::string> line_names(m_objective_size * 2);
     // names order is obj1_ave, obj2_ave,.. objN_ave, obj1_best, ..., obj1_worst ,objN_worst
     for (size_t i = 0; i < m_objective_size; ++i)
     {
         line_names[0 + i] = m_objective_names[i] + " average";
         line_names[m_objective_size + i] = m_objective_names[i] + " best";
-        line_names[m_objective_size * 2 + i] = m_objective_names[i] + " worst";
+        // line_names[m_objective_size * 2 + i] = m_objective_names[i] + " worst";
     }
     m_overall_evolution_status_renderer.Show(data, generation_indices, line_names);
 }

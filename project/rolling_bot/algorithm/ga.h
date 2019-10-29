@@ -12,7 +12,6 @@
 template <class T>
 class GA
 {
-
     using Population = std::vector<Solution<T>>;
     using Evaluator = std::function<float(const std::vector<T> &)>;
     using Compare = std::function<bool(const Solution<T> &, const Solution<T> &)>;
