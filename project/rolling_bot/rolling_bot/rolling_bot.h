@@ -28,23 +28,38 @@ public:
         // only after game starting I can initialize the ga, or the information
         // will not be passed to it
         m_rolling_ga.Initialize(Observation());
+        m_my_team = Observation()->GetUnits(Unit::Alliance::Self);
+        for (const Unit* u:m_my_team)
+        {
+            m_my_units_cooldown_last_frame[u->tag] = u->weapon_cooldown;
+        }
     }
     virtual void OnStep() override
     {
-        // after a specific interval, the algorhim should run once
+        //todo after a specific interval, run the algorithm and get the final orders to be given
         if (Observation()->GetGameLoop() % m_interval_size == 0 && !Observation()->GetUnits(Unit::Alliance::Enemy).empty() && !Observation()->GetUnits(Unit::Alliance::Self).empty())
         {
             //  first setup the simulator
             // m_rolling_ga.SetSimulatorsStart(Observation());
             //  then pass it to algorithm and let algorithm run
-            Solution<Command> sol =
+            m_selected_solution =
                 m_rolling_ga.Run()
-                    .front(); // you must control the frames to run
+                    .front().variable; // you must control the frames to run
                               // in m_sim.Initialize(), not here
             //  after running, get the solution to deploy
-            DeploySolution(sol);
+            DeploySolution(m_selected_solution);
             //? for test
             std::cout << "deploy!" << std::endl;
+        }
+        // todo if it is not the gameloop to run the algorithm, deploy the command
+        else
+        {
+            Units m_my_team = Observation()->GetUnits(Unit::Alliance::Self);
+            for (const Unit *u : m_my_team)
+            {
+                
+            }
+            
         }
     }
 
@@ -87,12 +102,11 @@ private:
     {
         for (const Command &c : sol.variable)
         {
-            // todo before deploying the first command this time, the command
-            // queue should be cleared
+            // todo before deploying the first command this time, the command queue should be cleared
             bool queued_command = true;
             for (size_t i = 0; i < c.actions.size(); i++)
             {
-                queued_command = (i == 0) ? false : true;
+                queued_command = (i == 0) ? false : true; // The first command should replace all the commands set to the unit before
                 switch (c.actions[i].target_type)
                 {
                 case ActionRaw::TargetType::TargetNone:
@@ -118,15 +132,18 @@ private:
         }
     }
 
-    //! Number of frames for which the algorithm should run once
-    int m_interval_size = 160; // about 5 seconds
-    //
+    
+    int m_interval_size = 160; //! Number of frames for which the algorithm should run once // about 5 seconds
     int m_population_size = 20;
-    //
     int m_max_generation = 20;
 
     //! The algorithm object
     RollingGA m_rolling_ga;
+
+    // data
+    Solution<Command> m_selected_solution;
+    std::map<Tag, float> m_my_units_cooldown_last_frame;
+    Units m_my_team;
 };
 } // namespace sc2
 

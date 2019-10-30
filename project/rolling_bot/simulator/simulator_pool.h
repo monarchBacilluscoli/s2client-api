@@ -41,6 +41,7 @@ public:
     void CopyStateAndSendOrdersAsync(const ObservationInterface *ob, const Population &pop);
     // Run all the simulations for specific number of steps
     void RunSimsAsync(int steps, DebugRenderers &debug_renderers); // concurrency version
+    void RunSimsAsync(int steps);
     void RunSimsOneByOne(int steps, DebugRenderers &debug_renderers); // single-thread version
     // get the observation interface to get the result of the simulation
     const ObservationInterface *GetObservation(int i) const

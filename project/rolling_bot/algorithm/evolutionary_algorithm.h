@@ -113,7 +113,7 @@ void EvolutionaryAlgorithm<T>::InitBeforeRun()
     m_population.resize(m_population_size);
     m_history_objs.clear();
     m_history_objs_ave.resize(m_objective_size);
-    m_history_objs_best.resize(m_objective_size)`;
+    m_history_objs_best.resize(m_objective_size);
     m_history_objs_worst.resize(m_objective_size);
     for (size_t i = 0; i < m_objective_size; i++)
     {

@@ -42,14 +42,6 @@ void sc2::RollingGA::SetAttackPossibility(float attack_possibility)
 
 void RollingGA::SetDebugMode(bool is_debug)
 {
-	if (is_debug)
-	{
-		// m_debug_renderer.SetIsDisplay(true);
-	}
-	else
-	{
-		// m_debug_renderer.SetIsDisplay(false);
-	}
 	m_is_debug = is_debug;
 }
 
@@ -178,7 +170,14 @@ void sc2::RollingGA::Evaluate(Population &pop)
 
 #ifdef MULTI_THREADED
 	m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, pop);
-	m_simulation_pool.RunSimsAsync(m_run_length, m_debug_renderers);
+	if (m_is_debug)
+	{
+		m_simulation_pool.RunSimsAsync(m_run_length, m_debug_renderers);
+	}
+	else
+	{
+		m_simulation_pool.RunSimsAsync(m_run_length);
+	}
 #else
 	//todo one by one?
 #endif
@@ -253,8 +252,8 @@ void RollingGA::ShowGraphEachGeneration()
 		// m_gp_mo << "plot" << m_gp_mo.file1d(objs)
 		// 		<< "with points lc rgb 'red' pt 4 title 'current individuals'," << m_gp_mo.file1d(m_last_solution_dis) << "with points lc rgb 'blue' pt 1 title 'individuals of last generation'" << std::endl;
 		std::list<std::vector<std::vector<float>>> data{m_last_solution_dis, objs};
-		std::vector<std::string> names{"individuals of last generation","current individuals"};
+		std::vector<std::string> names{"individuals of last generation", "current individuals"};
 		m_objectives_distribution_graph.Show(data, names);
-			m_last_solution_dis = objs;
+		m_last_solution_dis = objs;
 	}
 }

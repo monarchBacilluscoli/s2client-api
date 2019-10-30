@@ -102,7 +102,7 @@ protected:
     };
 
     //! Settings
-    int m_max_generation = 10;
+    int m_max_generation = 30;
     //! Controls how many parents ...
     float m_cross_over_rate = 1.f;
     //! Controls how many offspring solutions should be mutated
