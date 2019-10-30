@@ -16,9 +16,6 @@ protected:
     float m_scale_factor = .5f;
     float m_crossover_rate = .5f;
 
-    // methods
-    // std::vector<int> m_index_vec{}; // used for get unduplicated random numbers
-
 public:
     DifferentialEvolution() : EvolutionaryAlgorithm<T>(){};
     //todo constructor with all parameters
@@ -26,7 +23,7 @@ public:
                           int max_generation,
                           int population_size,
                           float scale_factor = .5,
-                          float crossover_rate = .5f, int random_seed = 0) : EvolutionaryAlgorithm<T>(objective_size, max_generation, population_size, random_seed), m_scale_factor(scale_factor), m_crossover_rate(crossover_rate){};
+                          float crossover_rate = .5f, int random_seed = 0, std::vector<std::string> objective_names = std::vector<std::string>()) : EA(objective_size, max_generation, population_size, random_seed, objective_names), m_scale_factor(scale_factor), m_crossover_rate(crossover_rate){};
     virtual ~DifferentialEvolution() = default;
 
     void SetCrossoverRate(float rate)
@@ -69,7 +66,7 @@ template <class T>
 void DifferentialEvolution<T>::Breed()
 {
     // mutate each? solution in population, get the transition solution
-    int sz = DifferentialEvolution<T>::m_population.size();
+    int sz = EA::m_population.size();
     EA::m_offspring.resize(sz, Solution<T>(0, EA::m_objective_size));
     std::uniform_int_distribution<int> random_dis(0, sz - 1);
     for (size_t i = 0; i < sz; ++i)

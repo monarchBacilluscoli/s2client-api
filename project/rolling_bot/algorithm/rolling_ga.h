@@ -22,8 +22,6 @@ class RollingGA : public GA<Command>
 
 public:
     using Population = std::vector<Solution<Command>>;
-    using Evaluator = std::function<float(const std::vector<Command> &)>;
-    using Compare = std::function<bool(const Solution<Command> &, const Solution<Command> &)>;
 
 public:
     RollingGA() = delete;

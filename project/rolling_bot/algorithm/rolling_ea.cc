@@ -19,7 +19,8 @@ void RollingEA::InitBeforeRun()
     }
 }
 
-void RollingEA::InitOnlySelfMembersBeforeRun(){ // doesn't call the base class's Init function
+void RollingEA::InitOnlySelfMembersBeforeRun()
+{                          // doesn't call the base class's Init function
     InitFromObservation(); // set the m_my_team and some other things
     for (Solution<Command> &sol : m_population)
     {
@@ -50,8 +51,15 @@ void RollingEA::Evaluate()
 void RollingEA::Evaluate(Population &pop)
 {
     m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, m_population);
-    m_simulation_pool.RunSimsAsync(m_run_length, m_debug_renderers);
-    
+    if (m_is_debug)
+    {
+        m_simulation_pool.RunSimsAsync(m_run_length, m_debug_renderers);
+    }
+    else
+    {
+        m_simulation_pool.RunSimsAsync(m_run_length);
+    }
+
     float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
     float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();
     size_t sz = m_population.size();

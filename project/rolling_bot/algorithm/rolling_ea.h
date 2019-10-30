@@ -21,12 +21,13 @@ protected:
     // methods
     ScatterRenderer2D m_objective_distribution;
     DebugRenderers m_debug_renderers;
+    bool m_is_debug = true;
     // simulators
     SimulatorPool m_simulation_pool;
 
 public:
     RollingEA() = delete;
-    RollingEA(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation, int population_size, float crossover_rate = .5f, int random_seed = 0) : EvolutionaryAlgorithm(2, max_generation, population_size, random_seed, {std::string("enemy loss"), std::string("my team loss")}), m_debug_renderers(population_size), m_simulation_pool(population_size, net_address, port_start, process_path, map_path)
+    RollingEA(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation, int population_size, int random_seed = 0) : EvolutionaryAlgorithm(2, max_generation, population_size, random_seed, {std::string("enemy loss"), std::string("my team loss")}), m_debug_renderers(population_size), m_simulation_pool(population_size, net_address, port_start, process_path, map_path)
     {
         m_simulation_pool.StartSimsAsync();
         m_objective_distribution.SetTitle("Objectives Distribution");
@@ -43,6 +44,7 @@ public:
     void SetRunLength(int run_length) { m_run_length = run_length; }
     void SetCommandLength(int command_length) { m_command_length = command_length; }
     void SetAttackPossibility(float attack_possibility) { m_attack_possibility = attack_possibility; }
+    void SetDebug(bool is_debug) { m_is_debug = is_debug; }
 
 protected:
     // override functions
@@ -55,7 +57,7 @@ protected:
 
 protected:
     // only belong to this class
-    void Evaluate(Population& pop);
+    void Evaluate(Population &pop);
     void InitFromObservation();
     void GenerateOne(Solution<Command> &sol);
 };

@@ -70,7 +70,7 @@ public:
 
 protected:
     //! simply calls the GenerateSolution() repeatedly to generate original population
-    virtual void GenerateSolutions(Population &pop, int size);
+    virtual void Generate(Population &pop, int size);
     //! two parents generate a unmutated soluton
     virtual std::vector<Solution<T>> CrossOver(const Solution<T> &a, const Solution<T> &b);
     //! pure virtual mutate a solution
@@ -125,7 +125,7 @@ template <class T>
 std::vector<Solution<T>> GA<T>::Run()
 {
     InitBeforeRun();
-    GenerateSolutions(m_population, m_population_size);
+    Generate(m_population, m_population_size);
     Evaluate(m_population);
     SortSolutions(m_population);
     for (m_current_generation = 1; m_current_generation <= m_max_generation; m_current_generation++)
@@ -143,7 +143,7 @@ std::vector<Solution<T>> GA<T>::Run()
 }
 
 template <class T>
-inline void GA<T>::GenerateSolutions(Population &pop, int size)
+inline void GA<T>::Generate(Population &pop, int size)
 {
     for (size_t i = 0; i < size; i++)
     {

@@ -12,8 +12,6 @@
 using namespace sc2;
 
 using Population = std::vector<Solution<Command>>;
-using Evaluator = std::function<float(const std::vector<Command> &)>;
-using Compare = std::function<bool(const Solution<Command> &, const Solution<Command> &)>;
 
 void sc2::RollingGA::SetInfoFromObservation(const ObservationInterface *observation)
 {
@@ -54,10 +52,8 @@ void RollingGA::InitBeforeRun()
 	m_self_team_loss_best.clear();
 	m_enemy_team_loss_ave.clear();
 	m_enemy_team_loss_best.clear();
-	// m_gp << "set title 'Algorithm Status'" << std::endl;
 	m_line_chart_renderer.SetTitle("Algorithm Status");
 	m_line_chart_renderer.SetXRange(0.f, m_max_generation);
-	// m_gp << "set xrange [0:" << m_max_generation << "]" << std::endl;
 }
 
 Solution<Command> RollingGA::GenerateSolution()

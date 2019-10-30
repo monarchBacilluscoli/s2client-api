@@ -18,7 +18,7 @@ public:
     /* I must call the construct of the virtual base class, since all the virtual derived classes will not call it (since the multiple calls will cause multiple constructing, it is banned)
     So, the parameters in constructors of the direct virtual derived classes are useless.
     */
-    RollingDE(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation = 50, int population_size = 50, float crossover_rate = .5f, int random_seed = rand()) : EvolutionaryAlgorithm(2, max_generation, population_size, random_seed), DifferentialEvolution(2, max_generation, population_size), RollingEA(net_address, port_start, process_path, map_path, max_generation, population_size, crossover_rate, random_seed)
+    RollingDE(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation = 50, int population_size = 50, float scale_factor = .5f, float crossover_rate = .5f, int random_seed = rand()) : EvolutionaryAlgorithm(2, max_generation, population_size, random_seed), DifferentialEvolution(2, max_generation, population_size, scale_factor, crossover_rate), RollingEA(net_address, port_start, process_path, map_path, max_generation, population_size, random_seed)
     {
         SetAttackPossibility(.9f);
     }
