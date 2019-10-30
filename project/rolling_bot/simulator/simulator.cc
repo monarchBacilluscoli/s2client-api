@@ -92,15 +92,6 @@ void Executor::OnStep()
     }
 }
 
-// void Executor::OnUnitDestroyed(const Unit* u){
-//     if(m_is_setting){
-//         return;
-//     }
-//     //todo delete the commands and state
-//     m_cooldown_last_frame.erase(u->tag);
-//     m_commands.erase(u->tag);
-// }
-
 void Executor::SetCommands(const std::vector<Command> &commands)
 {
     //todo copy the vector to queue member
