@@ -10,7 +10,7 @@ class GeneticAlgorithm : virtual public EvolutionaryAlgorithm<T>
 {
     using EA = EvolutionaryAlgorithm<T>;
 
-private:
+protected:
     //settings
     float m_crossover_rate = 1.f;
     float m_mutation_rate = .3f;
@@ -32,7 +32,7 @@ public:
     }
     void SetMutationRate(float rate)
     {
-        m_mutation_rate = factor;
+        m_mutation_rate = rate;
     }
     float MutationRate()
     {
@@ -43,7 +43,7 @@ protected:
     virtual void Breed() override;
 
     virtual void InitBeforeRun() override;
-    void InitOnlySelfMemeberBeforeRun(){/*nothing*/};
+    void InitOnlySelfMemeberBeforeRun();
     virtual void Crossover() = 0;
     virtual void Mutate() = 0;
 };
@@ -52,6 +52,7 @@ template <typename T>
 void GeneticAlgorithm<T>::InitBeforeRun()
 {
     EA::InitBeforeRun();
+    InitOnlySelfMemeberBeforeRun();
     //todo something else?
 }
 
@@ -60,6 +61,12 @@ void GeneticAlgorithm<T>::Breed()
 {
     Crossover();
     Mutate();
+}
+
+template <typename T>
+void GeneticAlgorithm<T>::InitOnlySelfMemeberBeforeRun()
+{
+    //nothing
 }
 
 } // namespace sc2

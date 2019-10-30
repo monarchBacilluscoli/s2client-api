@@ -149,7 +149,7 @@ public:
     }
     void SetDebugOn(bool is_debug)
     {
-        m_rolling_ga.SetDebugMode(is_debug);
+        m_rolling_ga.SetDebug(is_debug);
     }
 
     // Settings for Sims

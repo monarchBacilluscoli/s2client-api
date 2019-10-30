@@ -71,7 +71,7 @@ protected:
     virtual void RecordRunningData();
     virtual void ShowGraphEachGeneration(); //todo show the overall status
 
-    void RecordObjectives();
+    virtual void RecordObjectives();
     virtual void ShowOverallStatusGraphEachGeneration();
     virtual void ShowSolutionDistribution(int showed_generations_count) = 0;
 };
@@ -79,7 +79,7 @@ protected:
 template <class T>
 void EvolutionaryAlgorithm<T>::SetMaxGeneration(int max_ge)
 {
-    m_population_size = max_ge;
+    m_max_generation = max_ge;
 }
 
 template <class T>
@@ -121,7 +121,7 @@ void EvolutionaryAlgorithm<T>::InitBeforeRun()
         m_history_objs_best[i].clear();
         m_history_objs_worst[i].clear();
     }
-    
+
     for (Solution<T> &sol : m_population)
     {
         sol.objectives.resize(m_objective_size);
@@ -170,18 +170,11 @@ void EvolutionaryAlgorithm<T>::RecordObjectives()
     {
         current_generation_objs[i] = m_population[i].objectives;
     }
-    // objs statistical data
-    // m_history_objs_ave.emplace_back(std::vector<float>(m_objective_size));
-    // m_history_objs_best.emplace_back(std::vector<float>(m_objective_size));
-    // m_history_objs_worst.emplace_back(std::vector<float>(m_objective_size));
-    // std::vector<float> &current_ave_objs = m_history_objs_ave.back();
-    // std::vector<float> &current_best_objs = m_history_objs_best.back();
-    // std::vector<float> &current_worst_objs = m_history_objs_worst.back();
     for (size_t i = 0; i < m_objective_size; ++i)
     {
         // ave
-        m_history_objs_ave[i].push_back(std::accumulate(current_generation_objs.begin(), current_generation_objs.end(), 0.f, [i](float initial_value, const std::vector<float> &so2) -> float {
-            return initial_value + so2[i];
+        m_history_objs_ave[i].push_back(std::accumulate(current_generation_objs.begin(), current_generation_objs.end(), 0.f, [i](float initial_value, const std::vector<float> &so) -> float {
+            return initial_value + so[i];
         }));
         m_history_objs_ave[i].back() /= pop_sz;
         // best
@@ -209,9 +202,9 @@ template <class T>
 void EvolutionaryAlgorithm<T>::ShowOverallStatusGraphEachGeneration()
 {
     std::vector<std::vector<float>> data;
-    data.reserve(2 * 3 * m_objective_size);                                            // I don't know if it is useful
-    data.insert(data.end(), m_history_objs_ave.begin(), m_history_objs_ave.end());     // insert objective_size's vectors in data
-    data.insert(data.end(), m_history_objs_best.begin(), m_history_objs_best.end());   // insert objective_size's vectors in data
+    data.reserve(2 * 3 * m_objective_size);                                          // I don't know if it is useful
+    data.insert(data.end(), m_history_objs_ave.begin(), m_history_objs_ave.end());   // insert objective_size's vectors in data
+    data.insert(data.end(), m_history_objs_best.begin(), m_history_objs_best.end()); // insert objective_size's vectors in data
     // data.insert(data.end(), m_history_objs_worst.begin(), m_history_objs_worst.end()); // insert objective_size's vectors in data
 
     std::vector<float> generation_indices(m_current_generation + 1);

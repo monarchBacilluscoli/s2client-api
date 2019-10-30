@@ -8,10 +8,13 @@ namespace sc2
 {
 class RollingEA : virtual public EvolutionaryAlgorithm<Command> //! because of virtual inheritance, the base class's constructor is invalid
 {
+public:
+using EA = EvolutionaryAlgorithm<Command>;
 protected:
     // game data
     const ObservationInterface *m_observation;
     Units m_my_team;
+    Units m_enemy_team;
     GameInfo m_game_info;
     Vector2D m_playable_dis;
     // settings about game
@@ -60,6 +63,7 @@ protected:
     void Evaluate(Population &pop);
     void InitFromObservation();
     void GenerateOne(Solution<Command> &sol);
+    virtual void RecordObjectives() override;
 };
 
 } // namespace sc2

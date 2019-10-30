@@ -11,12 +11,7 @@ void RollingEA::Initialize(const ObservationInterface *observation)
 void RollingEA::InitBeforeRun()
 {
     EvolutionaryAlgorithm::InitBeforeRun();
-    InitFromObservation(); // set the m_my_team and some other things
-    for (Solution<Command> &sol : m_population)
-    {
-        sol.variable.resize(m_my_team.size());
-        sol.objectives.resize(m_objective_size);
-    }
+    InitOnlySelfMembersBeforeRun();
 }
 
 void RollingEA::InitOnlySelfMembersBeforeRun()
@@ -25,6 +20,7 @@ void RollingEA::InitOnlySelfMembersBeforeRun()
     for (Solution<Command> &sol : m_population)
     {
         sol.variable.resize(m_my_team.size());
+        sol.objectives.resize(m_objective_size);
     }
 }
 
@@ -59,7 +55,6 @@ void RollingEA::Evaluate(Population &pop)
     {
         m_simulation_pool.RunSimsAsync(m_run_length);
     }
-
     float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
     float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();
     size_t sz = m_population.size();
@@ -85,6 +80,7 @@ void RollingEA::Select()
 
 void RollingEA::InitFromObservation()
 {
+    m_enemy_team = m_observation->GetUnits(Unit::Alliance::Enemy);
     m_my_team = m_observation->GetUnits(Unit::Alliance::Self);
     m_game_info = m_observation->GetGameInfo();
     m_playable_dis = Vector2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
@@ -153,4 +149,34 @@ void RollingEA::GenerateOne(Solution<Command> &sol)
         }
     }
 }
+void RollingEA::RecordObjectives()
+{
+    // all the objs
+    int pop_sz = m_population.size();
+    m_history_objs.emplace_back(std::vector<std::vector<float>>(pop_sz, std::vector<float>(m_objective_size)));
+    std::vector<std::vector<float>> &current_generation_objs = m_history_objs.back();
+    for (size_t i = 0; i < pop_sz; ++i)
+    {
+        current_generation_objs[i] = m_population[i].objectives;
+    }
+    for (size_t i = 0; i < m_objective_size; ++i)
+    {
+        // ave
+        EA::m_history_objs_ave[i].push_back(std::abs(std::accumulate(current_generation_objs.begin(), current_generation_objs.end(), 0.f, [i](float initial_value, const std::vector<float> &so2) -> float {
+            return initial_value + so2[i];
+        })));
+        EA::m_history_objs_ave[i].back() /= pop_sz;
+        // best
+        auto best_iter_i = std::max_element(current_generation_objs.begin(), current_generation_objs.end(), [i](const std::vector<float> &so1, const std::vector<float> so2) -> bool {
+            return so1[i] < so2[i];
+        });
+        EA::m_history_objs_best[i].push_back(std::abs((*best_iter_i)[i]));
+        // worst
+        auto worst_iter_i = std::min_element(current_generation_objs.begin(), current_generation_objs.end(), [i](const std::vector<float> &so1, const std::vector<float> &so2) -> bool {
+            return so1[i] < so2[i];
+        });
+        EA::m_history_objs_worst[i].push_back(std::abs((*worst_iter_i)[i]));
+    }
+}
+
 } // namespace sc2

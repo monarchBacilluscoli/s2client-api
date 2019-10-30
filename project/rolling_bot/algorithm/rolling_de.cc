@@ -79,7 +79,7 @@ void RollingDE::Crossover(const Solution<Command> &parent, Solution<Command> &ch
                 actions_child[j] = actions_parent[j];
             }
         }
-#if 0 //! test code \
+#if 0  //! test code \
     //todo output child actions
         for (const auto &item : actions_child)
         {
@@ -97,4 +97,5 @@ void RollingDE::Crossover(const Solution<Command> &parent, Solution<Command> &ch
 #endif //! test code>
     }
 }
+
 } // namespace sc2

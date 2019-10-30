@@ -6,22 +6,23 @@
 
 #include <sc2api/sc2_api.h>
 #include <sc2lib/sc2_utils.h>
-#include "../simulator/command.h"
-#include "../simulator/simulator.h"
-#include "debug_renderer/debug_renderer.h"
-#include "ga.h"
-#include "solution.h"
-#include "gnuplot-iostream.h"
-#include "../simulator/simulator_pool.h"
-#include "../methods/graph_renderer.h"
+#include "rolling_ea.h"
+#include "genetic_algorithm.h"
 
 namespace sc2
 {
-class RollingGA : public GA<Command>
+class RollingGA : public RollingEA, public GeneticAlgorithm<Command>
 {
+protected:
+    int m_mutate_step = 100; //?
+
+    // Misc
+    const double PI = atan(1.) * 4.;
 
 public:
     using Population = std::vector<Solution<Command>>;
+    using GA = GeneticAlgorithm<Command>;
+    using EA = EvolutionaryAlgorithm<Command>;
 
 public:
     RollingGA() = delete;
@@ -31,99 +32,24 @@ public:
         int port_start,
         const std::string &process_path,
         const std::string &map_path,
-        size_t population_size = 50) : GA::GA(population_size), m_debug_renderers(population_size), m_simulation_pool(population_size, net_address, port_start, process_path, map_path)
+        int max_generation = 50,
+        int population_size = 50,
+        float crossover_rate = 1.f,
+        float mutation_rate = .3f,
+        int random_seed = rand()) : EA(2, max_generation, population_size, random_seed, {"Enemy Loss", "My Team Loss"}), GA(2, max_generation, population_size, crossover_rate, mutation_rate, random_seed), RollingEA(net_address, port_start, process_path, map_path, max_generation, population_size, random_seed)
     {
-        m_simulation_pool.StartSimsAsync();
-        m_objectives_distribution_graph.SetTitle("Solution Distribution");
-        m_objectives_distribution_graph.SetXLabel("total damage to enemy");
-        m_objectives_distribution_graph.SetYLabel("total damage to me");
     }
-
-    // Initialization and setup.
-    //? I have to write an initialization function here
-    void Initialize(const ObservationInterface *observation)
-    {
-        SetInfoFromObservation(observation);
-    }
-
-    void SetRunLength(int run_length);
-    void SetCommandLength(int command_length);
-    void SetAttackPossibility(float attack_possibility);
-
-    // //? here is something wrong
-    // void SetPopulationSize(int population_size) override {
-    //     if (population_size > m_population_size) {
-    //         m_simulators.resize(population_size);
-    //         // Uses the settings before to set all simulators again
-    //         SetSimulators(m_simulators[0].GetNetAddress(), m_simulators[0].GetPortStart(), m_simulators[0].GetExePath(), m_simulators[0].GetMapPath());
-    //     }
-    //     m_population_size = population_size;
-    // }
-    // Other settings
-    void SetDebugMode(bool is_debug);
 
     ~RollingGA() = default;
 
-private:
-    void SetInfoFromObservation(const ObservationInterface *observation);
-    //!
+protected:
     virtual void InitBeforeRun() override;
-    //! According to known information generates solutions which is as valid as possiable
-    virtual Solution<Command> GenerateSolution() override;
-    //!
-    virtual void Mutate(Solution<Command> &s) override;
-    //! choose only one unit and exchange a subarray of orders of each solution
-    virtual Population CrossOver(const Solution<Command> &s1, const Solution<Command> &s2) override;
-    //! Plaese set the start point before you evaluate
-    virtual void Evaluate(Population &p) override;
-    virtual void ShowGraphEachGeneration() override;
-    virtual void SortSolutions(Population &pop) override
-    {
-        Solution<Command>::DominanceSort(pop);
-    }
+    virtual void InitOnlySelfMemeberBeforeRun();
+    virtual void Mutate() override;
+    virtual void Crossover() override;
 
-    // Settings
-    int m_objective_size = 2;
-    int m_sims_step_size = 1;
-    int m_run_length = 300;
-    //! the command length for each unit
-    int m_command_length = 8;
-    float m_attack_possibility = 0.9f; // it's related to the m_run_length
-    int m_mutate_step = 100;
-    //! to reduce uncertainty, uses multiple simulators to evaluate one solution
-    //! this is the number of sims to be used to evaluate one solution
-    int m_evaluate_multiplier = 3;
-    bool m_is_debug = false;
-
-    // thread pool (used to put aside those thread without answer)
-    SimulatorPool m_simulation_pool;
-
-    // Information
-    // map info to privide bundary of the map (maybe useless)
-    GameInfo m_game_info;
-    Point2D m_playable_dis;
-    //! unit type info
-    UnitTypes m_unit_type;
-    //! current number of my units
-    Units m_my_team;
-    Units m_enemy_team;
-    // for easy use, set in Initialize()
-    const ObservationInterface *m_observation;
-
-    // Information of generations, needed to show the algorithm status
-    std::vector<float> m_self_team_loss_ave;
-    std::vector<float> m_self_team_loss_best;
-    std::vector<float> m_enemy_team_loss_ave;
-    std::vector<float> m_enemy_team_loss_best;
-    std::vector<std::vector<float>> m_last_solution_dis{};
-
-    // Tools
-    DebugRenderers m_debug_renderers;
-    LineChartRenderer2D m_line_chart_renderer;
-    ScatterRenderer2D m_objectives_distribution_graph;
-
-    // Misc
-    const double PI = atan(1.) * 4.;
+    Population Crossover_(const Solution<Command> &a, const Solution<Command> &b);
+    void Mutate_(Solution<Command> &a);
 };
 } // namespace sc2
 

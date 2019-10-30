@@ -399,10 +399,10 @@ int main(int argc, char *argv[])
     // Some settings
     bool is_debug = true;
     std::string net_address = "127.0.0.1";
-    std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
+    // std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
     // std::string map_path = "EnemyTower.SC2Map";
     // std::string map_path = "EnemyTowerVSThor.SC2Map";
-    // std::string map_path = "EnemyTowerVSThorMarine.SC2Map";
+    std::string map_path = "EnemyTowerVSThorMarine.SC2Map";
 
     std::string starcraft_path = "/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64";
     int port_start = 4000;
@@ -436,7 +436,7 @@ int main(int argc, char *argv[])
     //! Bots here
     Bot bot;
     RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path);
-    rolling_bot.SetDebugOn(false);
+    rolling_bot.SetDebugOn(is_debug);
     rolling_bot.SetMaxGeneration(max_generations);    
 
     // RollingBot2 rolling_bot(net_address, port_start, starcraft_path, map_path);
