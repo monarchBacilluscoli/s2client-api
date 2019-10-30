@@ -436,7 +436,7 @@ int main(int argc, char *argv[])
     //! Bots here
     Bot bot;
     RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path);
-    rolling_bot.SetDebugOn(true);
+    rolling_bot.SetDebugOn(false);
     rolling_bot.SetMaxGeneration(max_generations);    
 
     // RollingBot2 rolling_bot(net_address, port_start, starcraft_path, map_path);

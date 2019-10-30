@@ -1,10 +1,11 @@
 #ifndef ROLLING_BOT_H
 #define ROLLING_BOT_H
 
+#include <queue>
+#include <string>
 #include <sc2api/sc2_api.h>
 #include <functional>
 #include <iostream>
-#include <string>
 #include "../algorithm/rolling_ga.h"
 #include "../simulator/simulator.h"
 #include "../algorithm/rolling_de.h"
@@ -29,9 +30,9 @@ public:
         // will not be passed to it
         m_rolling_ga.Initialize(Observation());
         m_my_team = Observation()->GetUnits(Unit::Alliance::Self);
-        for (const Unit* u:m_my_team)
+        for (const Unit *u : m_my_team)
         {
-            m_my_units_cooldown_last_frame[u->tag] = u->weapon_cooldown;
+            m_my_team_cooldown_last_frame[u->tag] = u->weapon_cooldown;
         }
     }
     virtual void OnStep() override
@@ -42,12 +43,9 @@ public:
             //  first setup the simulator
             // m_rolling_ga.SetSimulatorsStart(Observation());
             //  then pass it to algorithm and let algorithm run
-            m_selected_solution =
-                m_rolling_ga.Run()
-                    .front().variable; // you must control the frames to run
-                              // in m_sim.Initialize(), not here
-            //  after running, get the solution to deploy
-            DeploySolution(m_selected_solution);
+            std::vector<Command> selected_solution =
+                m_rolling_ga.Run().front().variable;
+            m_selected_commands = Command::ParseCommands(selected_solution);
             //? for test
             std::cout << "deploy!" << std::endl;
         }
@@ -57,9 +55,70 @@ public:
             Units m_my_team = Observation()->GetUnits(Unit::Alliance::Self);
             for (const Unit *u : m_my_team)
             {
-                
+                bool is_cooling_down = (m_my_team_cooldown_last_frame.find(u->tag) != m_my_team_cooldown_last_frame.end() && std::abs(m_my_team_cooldown_last_frame[u->tag]) < 0.0001f);
+                if (u->orders.empty() || (is_cooling_down && (m_my_team_cooldown_last_frame[u->tag] < u->weapon_cooldown)) ||
+                    (!is_cooling_down && u->weapon_cooldown > 0.0001f)) // 需要下一个动作
+                {
+                    if (m_selected_commands.find(u->tag) != m_selected_commands.end())
+                    {
+                        std::cout << "returned solution don't have this unit's commands@" + std::string(__FUNCTION__) << std::endl;
+                    }
+                    std::deque<ActionRaw> &unit_commands = m_selected_commands[u->tag];
+                    if (!m_selected_commands.at(u->tag).empty())
+                    {
+                        const ActionRaw &action = unit_commands.front();
+                        //todo 注入并执行
+                        if (action.ability_id == ABILITY_ID::ATTACK)
+                        {
+                            switch (action.target_type)
+                            {
+                            case ActionRaw::TargetType::TargetNone:
+                            {
+                                Actions()->UnitCommand(u, action.ability_id);
+                            }
+                            break;
+                            case ActionRaw::TargetType::TargetPosition:
+                            {
+                                //move threr then attack automatically according to the game AI
+                                Actions()->UnitCommand(u, ABILITY_ID::MOVE, action.target_point);
+                                Actions()->UnitCommand(u, action.ability_id, action.target_point, true);
+                            }
+                            break;
+                            case ActionRaw::TargetType::TargetUnitTag:
+                            {
+                                // directly deploy
+                                Actions()->UnitCommand(u, action.ability_id, action.target_tag);
+                            }
+                            default:
+                                break;
+                            }
+                        }
+                        else //! for now, "else" means move action
+                        {
+                            switch (action.target_type)
+                            {
+                            case ActionRaw::TargetType::TargetNone:
+                            {
+                                Actions()->UnitCommand(u, action.ability_id);
+                            }
+                            break;
+                            case ActionRaw::TargetType::TargetPosition:
+                            {
+                                Actions()->UnitCommand(u, action.ability_id, action.target_point);
+                            }
+                            break;
+                            case ActionRaw::TargetType::TargetUnitTag:
+                            {
+                                Actions()->UnitCommand(u, action.ability_id, action.target_tag);
+                            }
+                            default:
+                                break;
+                            }
+                        }
+                        unit_commands.pop_front();
+                    }
+                }
             }
-            
         }
     }
 
@@ -98,41 +157,40 @@ public:
 
 private:
     //! the funciton to deploy the solution
-    void DeploySolution(Solution<Command> sol)
-    {
-        for (const Command &c : sol.variable)
-        {
-            // todo before deploying the first command this time, the command queue should be cleared
-            bool queued_command = true;
-            for (size_t i = 0; i < c.actions.size(); i++)
-            {
-                queued_command = (i == 0) ? false : true; // The first command should replace all the commands set to the unit before
-                switch (c.actions[i].target_type)
-                {
-                case ActionRaw::TargetType::TargetNone:
-                    Actions()->UnitCommand(
-                        Observation()->GetUnit(c.unit_tag),
-                        c.actions[i].ability_id, queued_command);
-                    break;
-                case ActionRaw::TargetType::TargetPosition:
-                    Actions()->UnitCommand(
-                        Observation()->GetUnit(c.unit_tag),
-                        c.actions[i].ability_id, c.actions[i].target_point,
-                        queued_command);
-                    break;
-                case ActionRaw::TargetType::TargetUnitTag:
-                    Actions()->UnitCommand(
-                        Observation()->GetUnit(c.unit_tag),
-                        c.actions[i].ability_id,
-                        Observation()->GetUnit(c.actions[i].TargetUnitTag),
-                        queued_command);
-                    break;
-                }
-            }
-        }
-    }
+    // void DeploySolution(Solution<Command> sol)
+    // {
+    //     for (const Command &c : sol.variable)
+    //     {
+    //         // todo before deploying the first command this time, the command queue should be cleared
+    //         bool queued_command = true;
+    //         for (size_t i = 0; i < c.actions.size(); i++)
+    //         {
+    //             queued_command = (i == 0) ? false : true; // The first command should replace all the commands set to the unit before
+    //             switch (c.actions[i].target_type)
+    //             {
+    //             case ActionRaw::TargetType::TargetNone:
+    //                 Actions()->UnitCommand(
+    //                     Observation()->GetUnit(c.unit_tag),
+    //                     c.actions[i].ability_id, queued_command);
+    //                 break;
+    //             case ActionRaw::TargetType::TargetPosition:
+    //                 Actions()->UnitCommand(
+    //                     Observation()->GetUnit(c.unit_tag),
+    //                     c.actions[i].ability_id, c.actions[i].target_point,
+    //                     queued_command);
+    //                 break;
+    //             case ActionRaw::TargetType::TargetUnitTag:
+    //                 Actions()->UnitCommand(
+    //                     Observation()->GetUnit(c.unit_tag),
+    //                     c.actions[i].ability_id,
+    //                     Observation()->GetUnit(c.actions[i].TargetUnitTag),
+    //                     queued_command);
+    //                 break;
+    //             }
+    //         }
+    //     }
+    // }
 
-    
     int m_interval_size = 160; //! Number of frames for which the algorithm should run once // about 5 seconds
     int m_population_size = 20;
     int m_max_generation = 20;
@@ -141,8 +199,9 @@ private:
     RollingGA m_rolling_ga;
 
     // data
-    Solution<Command> m_selected_solution;
-    std::map<Tag, float> m_my_units_cooldown_last_frame;
+    // std::vector<Command> m_selected_solution;
+    std::map<Tag, std::deque<ActionRaw>> m_selected_commands;
+    std::map<Tag, float> m_my_team_cooldown_last_frame;
     Units m_my_team;
 };
 } // namespace sc2

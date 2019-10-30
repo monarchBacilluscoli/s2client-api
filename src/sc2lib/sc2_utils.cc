@@ -65,4 +65,6 @@ Point2D FixOutsidePointIntoMap(const Point2D& pos, const Point2D& min, const Poi
     return ret;
 }
 
+
+
 }

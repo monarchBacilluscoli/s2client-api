@@ -18,7 +18,7 @@ void Executor::OnStep()
     Units us = Observation()->GetUnits(Unit::Alliance::Self);
     for (const Unit *u : us)
     {
-        bool has_cooldown_time = (m_cooldown_last_frame.find(u->tag) != m_cooldown_last_frame.end());
+        bool has_cooldown_time = (m_cooldown_last_frame.find(u->tag) != m_cooldown_last_frame.end() && std::abs(m_cooldown_last_frame[u->tag]) < 0.0001f);
         // check if the current has been finished
         if (u->orders.empty() ||                                                           // no order now
             (has_cooldown_time && (m_cooldown_last_frame[u->tag] < u->weapon_cooldown)) || // this unit has executed a new attack just now
@@ -107,21 +107,12 @@ void Executor::SetCommands(const std::vector<Command> &commands)
     m_commands.clear();
     for (const Command &command : commands)
     {
-        // if (!Observation()->GetUnit(command.unit_tag))
-        // {
-        //     std::cout << "no this unit here" << std::endl;
-        // }
         std::queue<ActionRaw> &target_command = m_commands[command.unit_tag] = std::queue<ActionRaw>();
         for (const ActionRaw &action : command.actions)
         {
-            // set the queue
             target_command.push(action);
         }
     }
-    // if (m_commands.size() == 1)
-    // {
-    //     std::cout<<"m_commands.size()==1 @Executor::SetCommands()"<<std::flush;
-    // }
 }
 
 void Executor::ClearCommands()

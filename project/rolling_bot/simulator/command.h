@@ -6,6 +6,8 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
+#include <map>
+#include <deque>
 #include <sc2api/sc2_action.h>
 #include <sc2api/sc2_gametypes.h>
 
@@ -41,7 +43,10 @@ struct Command
     {
         return actions[index];
     }
+
+    static std::map<Tag, std::deque<ActionRaw>> ParseCommands(const std::vector<Command> &commands);
 };
+
 } // namespace sc2
 
 #endif // !COMMAND

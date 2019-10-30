@@ -49,6 +49,7 @@ void RollingGA::InitBeforeRun()
 {
 	// call init() of the father class
 	GA::InitBeforeRun();
+	SetInfoFromObservation(m_observation);
 	m_self_team_loss_ave.clear();
 	m_self_team_loss_best.clear();
 	m_enemy_team_loss_ave.clear();
