@@ -49,11 +49,11 @@ void RollingEA::Evaluate(Population &pop)
     m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, m_population);
     if (m_is_debug)
     {
-        m_simulation_pool.RunSimsAsync(m_run_length, m_debug_renderers);
+        m_simulation_pool.RunSimsAsync(m_sim_length, m_debug_renderers);
     }
     else
     {
-        m_simulation_pool.RunSimsAsync(m_run_length);
+        m_simulation_pool.RunSimsAsync(m_sim_length);
     }
     float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
     float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();
@@ -124,7 +124,7 @@ void RollingEA::GenerateOne(Solution<Command> &sol)
     for (size_t i = 0; i < team_size; i++)
     {
         sol.variable[i].unit_tag = m_my_team[i]->tag;
-        // float move_dis_per_run = MoveDistance(m_my_team[i], m_run_length, m_unit_type);
+        // float move_dis_per_run = MoveDistance(m_my_team[i], m_sim_length, m_unit_type);
         float move_dis_per_run = m_playable_dis.y / 3;
         float longest_map_bound = std::max(m_playable_dis.x, m_playable_dis.y);
         float moveable_radius = std::min(longest_map_bound, move_dis_per_run); //todo Think about the boundaries of the map!

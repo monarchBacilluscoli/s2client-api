@@ -44,7 +44,7 @@ void RollingGA::Crossover()
 	m_offspring.reserve(m_population_size * 2); // Errr, for easy use
 	for (size_t i = 0; i < m_population_size; i += 2)
 	{
-		Population temp_children = Crossover_(EA::m_population[i], EA::m_population[i + 1]);
+		Population temp_children = Crossover_(EA::m_population[i], EA::m_population[GetRandomInteger(0,m_population_size-1)]);
 		EA::m_offspring.insert(m_offspring.end(), temp_children.cbegin(), temp_children.cend());
 	}
 }

@@ -23,9 +23,9 @@ void sc2::RollingGA::SetInfoFromObservation(const ObservationInterface *observat
 	m_playable_dis = Vector2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
 }
 
-void sc2::RollingGA::SetRunLength(int length)
+void sc2::RollingGA::SetSimLength(int length)
 {
-	m_run_length = length;
+	m_sim_length = length;
 }
 
 void sc2::RollingGA::SetCommandLength(int command_length)
@@ -65,7 +65,7 @@ Solution<Command> RollingGA::GenerateSolution()
 	for (size_t i = 0; i < team_size; i++)
 	{
 		sol.variable[i].unit_tag = m_my_team[i]->tag;
-		// float move_dis_per_run = MoveDistance(m_my_team[i], m_run_length, m_unit_type);
+		// float move_dis_per_run = MoveDistance(m_my_team[i], m_sim_length, m_unit_type);
 		float move_dis_per_run = m_playable_dis.y / 3;
 		float longest_map_bound = std::max(m_playable_dis.x, m_playable_dis.y);
 		float moveable_radius = std::min(longest_map_bound, move_dis_per_run); //todo Think about the boundaries of the map!
@@ -169,11 +169,11 @@ void sc2::RollingGA::Evaluate(Population &pop)
 	m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, pop);
 	if (m_is_debug)
 	{
-		m_simulation_pool.RunSimsAsync(m_run_length, m_debug_renderers);
+		m_simulation_pool.RunSimsAsync(m_sim_length, m_debug_renderers);
 	}
 	else
 	{
-		m_simulation_pool.RunSimsAsync(m_run_length);
+		m_simulation_pool.RunSimsAsync(m_sim_length);
 	}
 #else
 	//todo one by one?

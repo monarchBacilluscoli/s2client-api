@@ -46,7 +46,7 @@ public:
         SetInfoFromObservation(observation);
     }
 
-    void SetRunLength(int run_length);
+    void SetSimLength(int run_length);
     void SetCommandLength(int command_length);
     void SetAttackPossibility(float attack_possibility);
 
@@ -85,10 +85,10 @@ private:
     // Settings
     int m_objective_size = 2;
     int m_sims_step_size = 1;
-    int m_run_length = 300;
+    int m_sim_length = 300;
     //! the command length for each unit
     int m_command_length = 8;
-    float m_attack_possibility = 0.9f; // it's related to the m_run_length
+    float m_attack_possibility = 0.9f; // it's related to the m_sim_length
     int m_mutate_step = 100;
     //! to reduce uncertainty, uses multiple simulators to evaluate one solution
     //! this is the number of sims to be used to evaluate one solution

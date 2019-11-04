@@ -48,7 +48,7 @@ public:
         SetInfoFromObservation(observation);
     }
 
-    void SetRunLength(int run_length);
+    void SetSimLength(int run_length);
     void SetCommandLength(int command_length);
     void SetAttackPossibility(float attack_possibility);
 

@@ -138,6 +138,10 @@ public:
         m_interval_size = frames;
     }
 
+    RollingEA& Algorithm(){
+        return m_rolling_ga;
+    }
+
     // Settings for GA
     void SetPopulationSize(int population_size)
     {
@@ -153,7 +157,7 @@ public:
     }
 
     void SetSimLength(int sim_step_length){
-        m_rolling_ga.SetRunLength(sim_step_length);
+        m_rolling_ga.SetSimLength(sim_step_length);
     }
 
     void SetCommandLength(int command_length){

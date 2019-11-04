@@ -21,7 +21,7 @@ protected:
     // settings about game
     float m_attack_possibility = 0.7;
     int m_command_length = 8;
-    int m_run_length = 300;
+    int m_sim_length = 300;
     // methods
     ScatterRenderer2D m_objective_distribution;
     DebugRenderers m_debug_renderers;
@@ -45,7 +45,7 @@ public:
 
 public:
     // settings about the game
-    void SetRunLength(int run_length) { m_run_length = run_length; }
+    void SetSimLength(int sim_length) { m_sim_length = sim_length; }
     void SetCommandLength(int command_length) { m_command_length = command_length; }
     void SetAttackPossibility(float attack_possibility) { m_attack_possibility = attack_possibility; }
     void SetDebug(bool is_debug) { m_is_debug = is_debug; }
