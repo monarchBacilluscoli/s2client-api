@@ -66,7 +66,26 @@ void RollingEA::Evaluate(Population &pop)
         // set the 2 objectives
         pop[i].objectives[0] = enemy_loss;
         pop[i].objectives[1] = -self_loss;
+
+        if (i < m_population_size)
+        {
+            self_team_loss_total += self_loss;
+            enemy_team_loss_total += enemy_loss;
+            self_team_loss_best = self_team_loss_best < self_loss ? self_team_loss_best : self_loss;
+            enemy_team_loss_best = enemy_team_loss_best > enemy_loss ? enemy_team_loss_best : enemy_loss;
+        }
     }
+#if 0 //! output the evolve result, since I think here is something wrong in graph renderer
+    std::cout << "enemy aver: "
+              << "\t" << enemy_team_loss_total / sz << "\t";
+    std::cout << "enemy best: "
+              << "\t"
+              << enemy_team_loss_best << "\t";
+    std::cout << "self aver: "
+              << "\t" << self_team_loss_total / sz << "\t";
+    std::cout << "self best: "
+              << "\t" << self_team_loss_best << std::endl;
+#endif //! test code>
 }
 
 void RollingEA::Select()
@@ -177,6 +196,7 @@ void RollingEA::RecordObjectives()
         });
         EA::m_history_objs_worst[i].push_back(std::abs((*worst_iter_i)[i]));
     }
+    return;
 }
 
 } // namespace sc2

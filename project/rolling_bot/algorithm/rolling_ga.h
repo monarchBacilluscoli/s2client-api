@@ -35,7 +35,7 @@ public:
         int max_generation = 50,
         int population_size = 50,
         float crossover_rate = 1.f,
-        float mutation_rate = .3f,
+        float mutation_rate = 0.f,
         int random_seed = rand()) : EA(2, max_generation, population_size, random_seed, {"Enemy Loss", "My Team Loss"}), GA(2, max_generation, population_size, crossover_rate, mutation_rate, random_seed), RollingEA(net_address, port_start, process_path, map_path, max_generation, population_size, random_seed)
     {
     }

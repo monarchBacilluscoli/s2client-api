@@ -35,7 +35,8 @@ struct Solution
     }
 
     Solution<T>() = default;
-    Solution<T>(const Solution<T> &rhs) : variable(rhs.variable), objectives(rhs.objectives) {} //! attention
+    // Solution<T>(const Solution<T> &rhs) : variable(rhs.variable), objectives(rhs.objectives), rank(rhs.rank) {} //! attention
+    Solution<T>(const Solution<T> &rhs) = default;
     Solution<T>(const std::vector<T> &variable) : variable(variable) {}
     Solution<T>(int variable_size, int objective_size) : variable(variable_size), objectives(objective_size) {}
     Solution<T>(int variable_size) : variable(variable_size), objectives(1) {}
@@ -186,6 +187,7 @@ void Solution<T>::DominanceSort(Population &p)
         ++current_rank;
     }
     std::sort(p.begin(), p.end(), &Solution<T>::RankLess);
+    return;
 }
 
 #endif //SOLUTION_H

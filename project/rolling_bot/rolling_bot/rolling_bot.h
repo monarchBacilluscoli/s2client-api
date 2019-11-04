@@ -22,8 +22,8 @@ public:
     //! in remote client, especially the map_path (a lot of errors have happend
     //! to it)
     RollingBot(const std::string &net_address, int port_start,
-               const std::string &process_path, const std::string &map_path, int population_size = 50)
-        : m_rolling_ga(net_address, port_start, process_path, map_path, population_size) {}
+               const std::string &process_path, const std::string &map_path, int max_generation = 50, int population_size = 50)
+        : m_rolling_ga(net_address, port_start, process_path, map_path, max_generation, population_size) {}
     virtual void OnGameStart() override
     {
         // only after game starting I can initialize the ga, or the information
@@ -59,7 +59,7 @@ public:
                 if (u->orders.empty() || (is_cooling_down && (m_my_team_cooldown_last_frame[u->tag] < u->weapon_cooldown)) ||
                     (!is_cooling_down && u->weapon_cooldown > 0.0001f)) // 需要下一个动作
                 {
-                    if (m_selected_commands.find(u->tag) != m_selected_commands.end())
+                    if (m_selected_commands.find(u->tag) == m_selected_commands.end())
                     {
                         std::cout << "returned solution don't have this unit's commands@" + std::string(__FUNCTION__) << std::endl;
                     }
@@ -138,7 +138,7 @@ public:
         m_interval_size = frames;
     }
 
-    // // Settings for GA
+    // Settings for GA
     void SetPopulationSize(int population_size)
     {
         m_rolling_ga.SetPopulationSize(population_size);
@@ -152,48 +152,16 @@ public:
         m_rolling_ga.SetDebug(is_debug);
     }
 
-    // Settings for Sims
-    void SetSimStepSize(int steps);
+    void SetSimLength(int sim_step_length){
+        m_rolling_ga.SetRunLength(sim_step_length);
+    }
+
+    void SetCommandLength(int command_length){
+        m_rolling_ga.SetCommandLength(command_length);
+    }
 
 private:
-    //! the funciton to deploy the solution
-    // void DeploySolution(Solution<Command> sol)
-    // {
-    //     for (const Command &c : sol.variable)
-    //     {
-    //         // todo before deploying the first command this time, the command queue should be cleared
-    //         bool queued_command = true;
-    //         for (size_t i = 0; i < c.actions.size(); i++)
-    //         {
-    //             queued_command = (i == 0) ? false : true; // The first command should replace all the commands set to the unit before
-    //             switch (c.actions[i].target_type)
-    //             {
-    //             case ActionRaw::TargetType::TargetNone:
-    //                 Actions()->UnitCommand(
-    //                     Observation()->GetUnit(c.unit_tag),
-    //                     c.actions[i].ability_id, queued_command);
-    //                 break;
-    //             case ActionRaw::TargetType::TargetPosition:
-    //                 Actions()->UnitCommand(
-    //                     Observation()->GetUnit(c.unit_tag),
-    //                     c.actions[i].ability_id, c.actions[i].target_point,
-    //                     queued_command);
-    //                 break;
-    //             case ActionRaw::TargetType::TargetUnitTag:
-    //                 Actions()->UnitCommand(
-    //                     Observation()->GetUnit(c.unit_tag),
-    //                     c.actions[i].ability_id,
-    //                     Observation()->GetUnit(c.actions[i].TargetUnitTag),
-    //                     queued_command);
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
-
     int m_interval_size = 160; //! Number of frames for which the algorithm should run once // about 5 seconds
-    int m_population_size = 20;
-    int m_max_generation = 20;
 
     //! The algorithm object
     RollingGA m_rolling_ga;

@@ -111,6 +111,7 @@ void EvolutionaryAlgorithm<T>::InitBeforeRun()
 {
     m_population.clear();
     m_population.resize(m_population_size);
+    m_current_generation = 0;
     m_history_objs.clear();
     m_history_objs_ave.resize(m_objective_size);
     m_history_objs_best.resize(m_objective_size);
@@ -214,9 +215,12 @@ void EvolutionaryAlgorithm<T>::ShowOverallStatusGraphEachGeneration()
     for (size_t i = 0; i < m_objective_size; ++i)
     {
         line_names[0 + i] = m_objective_names[i] + " average";
+        std::cout << line_names[0 + i] << ": \t" << m_history_objs_ave[i].back() << "\t";
         line_names[m_objective_size + i] = m_objective_names[i] + " best";
+        std::cout << line_names[m_objective_size + i] << ": \t" << m_history_objs_best[i].back() << "\t";
         // line_names[m_objective_size * 2 + i] = m_objective_names[i] + " worst";
     }
+    std::cout << std::endl;
     m_overall_evolution_status_renderer.Show(data, generation_indices, line_names);
 }
 

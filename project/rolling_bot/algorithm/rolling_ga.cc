@@ -56,7 +56,6 @@ void RollingGA::Mutate_(Solution<Command> &s)
 	if (action.ability_id == ABILITY_ID::ATTACK)
 	{
 		// todo if the action is attack, move the target point to the mass center of the enemies / one weakest enemy / nearest enemy / one random unit
-		// action.target_point += SelectNearestUnitFromPoint(action.target_point, m_observation->GetUnits(Unit::Alliance::Enemy));
 		Vector2D from_p_to_e = GetRandomEntry(RollingEA::m_enemy_team)->pos - action.target_point;
 		action.target_point += from_p_to_e * GetRandomFraction();
 	}
