@@ -77,11 +77,11 @@ int main(int argc, char *argv[])
     // use this to control the cauculation times per second
     uint frames = 60;
     int population_size = 50;
-    int max_generations = 200;
+    int max_generations = 50;
     int ga_muatation_rate = 0.5;
     int command_length = 10;
     int sim_length = 400;
-    int interval_size = 350;
+    int interval_size = 400;
     int evaluation_multiplier = 1;
 
     DebugRenderer renderer;
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     rolling_bot.Algorithm().SetCommandLength(command_length);
     rolling_bot.Algorithm().SetEvaluationTimeMultiplier(evaluation_multiplier);
     rolling_bot.SetIntervalLength(interval_size);
-    rolling_bot.SetStyle(PLAY_STYLE::DEFENSIVE);
+    rolling_bot.SetStyle(PLAY_STYLE::NORMAL);
     // dynamic_cast<RollingGA&>(rolling_bot.Algorithm()).SetMutationRate(ga_muatation_rate);
 
     // RollingBot2 rolling_bot(net_address, port_start, starcraft_path, map_path);

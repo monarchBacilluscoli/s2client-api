@@ -35,7 +35,7 @@ void RollingEA::Generate()
             Command &cmd = commands.front();
             if (m_my_team.size() == 1)
             {
-                cmd.unit_tag == m_my_team.front()->tag;
+                cmd.unit_tag = m_my_team.front()->tag;
                 cmd.actions.resize(m_command_length);
                 RawActions &acts = cmd.actions;
                 int act_sz = acts.size();
@@ -43,13 +43,14 @@ void RollingEA::Generate()
                 {
                     acts[i].ability_id = ABILITY_ID::ATTACK;
                     acts[i].target_type = ActionRaw::TargetType::TargetPosition;
-                    acts[i].target_point = Point2D { 19, 19.5 };
+                    acts[i].target_point = Point2D{19, 19.5};
                 }
             }
             else
             {
                 throw("the map is not right, please change to another map with ...OptimizationTest@RollingEA" + std::string(__FUNCTION__));
             }
+            continue;
         }
         GenerateOne(m_population[i]);
     }
@@ -125,6 +126,7 @@ void RollingEA::Evaluate(Population &pop)
             // set the 2 objectives
             pop[i].objectives[0] = enemy_loss;
             pop[i].objectives[1] = -self_loss;
+            std::cout << -self_loss << "\t";
         }
     }
 }
@@ -238,6 +240,10 @@ void RollingEA::RecordObjectives()
         EA::m_history_objs_worst[i].push_back(std::abs((*worst_iter_i)[i]));
     }
     return;
+}
+
+void RollingEA::ActionAfterRun() {
+    Evaluate(m_population);
 }
 
 } // namespace sc2

@@ -52,7 +52,16 @@ public:
     size_t size() { return m_sol_sim_map.size(); };
 
     // for simple use
-    float GetTeamHealthLoss(int i, Unit::Alliance team) { return m_sol_sim_map[i]->sim.GetTeamHealthLoss(team); }
+    float GetTeamHealthLoss(int i, Unit::Alliance team)
+    {
+        // std::set<Simulation<std::thread::id> *> tset;
+        // for (const auto &item : m_sol_sim_map)
+        // {
+        //     tset.insert(item);
+        // }
+        // std::cout<<tset.size();
+        return m_sol_sim_map[i]->sim.GetTeamHealthLoss(team);
+    }
 
     ~SimulatorPool() = default;
 
@@ -89,7 +98,7 @@ private:
     int m_port_end = m_port_start;
     std::string m_process_path;
     std::string m_map_path;
-    std::chrono::milliseconds m_wait_duration{10000};
+    std::chrono::milliseconds m_wait_duration{100000};
 
     // observation interface to store the game state
     // used in RunSimsAsync() to recopy state to all the restarted sims
@@ -99,7 +108,7 @@ private:
     std::list<Simulation<std::thread::id>> m_simulations;
     // the solution-simulation map. Why don't I use map? Intger indices are enough and suitble
     std::vector<Simulation<std::thread::id> *> m_sol_sim_map;
-    // 
+    //
     std::set<int> m_timeout_index_set;
 };
 

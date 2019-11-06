@@ -95,6 +95,7 @@ protected:
     void InitFromObservation();
     void GenerateOne(Solution<Command> &sol);
     virtual void RecordObjectives() override;
+    virtual void ActionAfterRun() override;
 };
 
 } // namespace sc2

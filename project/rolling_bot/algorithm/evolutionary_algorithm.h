@@ -74,6 +74,8 @@ protected:
     virtual void RecordObjectives();
     virtual void ShowOverallStatusGraphEachGeneration();
     virtual void ShowSolutionDistribution(int showed_generations_count) = 0;
+
+    virtual void ActionAfterRun() = 0;
 };
 
 template <class T>
@@ -144,6 +146,7 @@ std::vector<Solution<T>> EvolutionaryAlgorithm<T>::Run()
         Select();
         ActionAfterEachGeneration();
     }
+    ActionAfterRun();
     //todo return rank 1 solutions
     typename std::vector<Solution<T>>::iterator end_it = m_population.begin();
     for (end_it = m_population.begin(); end_it != m_population.end(); ++end_it)
