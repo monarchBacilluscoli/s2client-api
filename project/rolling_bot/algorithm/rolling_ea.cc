@@ -126,9 +126,7 @@ void RollingEA::Evaluate(Population &pop)
             // set the 2 objectives
             pop[i].objectives[0] = enemy_loss;
             pop[i].objectives[1] = -self_loss;
-            std::cout << enemy_loss << ", " << -self_loss << "\t";
         }
-        std::cout << std::endl;
     }
 }
 
