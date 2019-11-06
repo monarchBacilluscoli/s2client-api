@@ -57,7 +57,7 @@ public:
     const Population &GetPopulation() const { return m_population; };
     int GetCurrentGeneration() const { return m_current_generation; };
 
-    virtual Population &Run();
+    virtual Population Run();
 
 protected:
     virtual void InitBeforeRun();
@@ -131,7 +131,7 @@ void EvolutionaryAlgorithm<T>::InitBeforeRun()
 }
 
 template <class T>
-std::vector<Solution<T>> &EvolutionaryAlgorithm<T>::Run()
+std::vector<Solution<T>> EvolutionaryAlgorithm<T>::Run()
 {
     InitBeforeRun();
     Generate();
@@ -144,7 +144,16 @@ std::vector<Solution<T>> &EvolutionaryAlgorithm<T>::Run()
         Select();
         ActionAfterEachGeneration();
     }
-    return m_population;
+    //todo return rank 1 solutions
+    typename std::vector<Solution<T>>::iterator end_it = m_population.begin();
+    for (end_it = m_population.begin(); end_it != m_population.end(); ++end_it)
+    {
+        if ((*end_it).rank > (*m_population.begin()).rank)
+        {
+            break;
+        }
+    }
+    return std::vector<Solution<T>>(m_population.begin(), end_it);
 }
 
 template <class T>

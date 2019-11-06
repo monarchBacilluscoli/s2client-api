@@ -22,6 +22,7 @@ protected:
     float m_attack_possibility = 0.7;
     int m_command_length = 8;
     int m_sim_length = 300;
+    int m_evaluation_time_multiplier = 1; // the evaluation times for each solution (to avoid randomness)
     // methods
     ScatterRenderer2D m_objective_distribution;
     DebugRenderers m_debug_renderers;
@@ -48,6 +49,7 @@ public:
     void SetSimLength(int sim_length) { m_sim_length = sim_length; }
     void SetCommandLength(int command_length) { m_command_length = command_length; }
     void SetAttackPossibility(float attack_possibility) { m_attack_possibility = attack_possibility; }
+    void SetEvaluationTimeMultiplier(int times) { m_evaluation_time_multiplier = times; }
     void SetDebug(bool is_debug) { m_is_debug = is_debug; }
 
 protected:

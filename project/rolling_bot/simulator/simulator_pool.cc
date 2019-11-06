@@ -4,13 +4,17 @@ namespace sc2
 {
 using Population = std::vector<Solution<Command>>;
 
-SimulatorPool::SimulatorPool(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path) : m_simulations(size),
-                                                                                                                                                       m_sol_sim_map(size),
-                                                                                                                                                       m_net_address(net_address),
-                                                                                                                                                       m_port_start(port_start),
-                                                                                                                                                       m_port_end(port_start),
-                                                                                                                                                       m_process_path(process_path),
-                                                                                                                                                       m_map_path(map_path)
+SimulatorPool::SimulatorPool(int size,
+                             const std::string &net_address,
+                             int port_start,
+                             const std::string &process_path,
+                             const std::string &map_path) : m_simulations(size),
+                                                            m_sol_sim_map(size),
+                                                            m_net_address(net_address),
+                                                            m_port_start(port_start),
+                                                            m_port_end(port_start),
+                                                            m_process_path(process_path),
+                                                            m_map_path(map_path)
 {
     int i = 0;
     for (Simulation<std::thread::id> &simulation : m_simulations)

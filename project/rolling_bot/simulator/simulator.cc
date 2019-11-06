@@ -92,6 +92,28 @@ void Executor::OnStep()
     }
 }
 
+void Executor::OnUnitDestroyed(const Unit *unit)
+{
+    switch (unit->alliance)
+    {
+    case Unit::Alliance::Ally:
+        m_dead_units.ally.push_back(*unit);
+        break;
+    case Unit::Alliance::Self:
+        m_dead_units.self.push_back(*unit);
+        break;
+    case Unit::Alliance::Enemy:
+        m_dead_units.enemy.push_back(*unit);
+        break;
+    case Unit::Alliance::Neutral:
+        m_dead_units.neutral.push_back(*unit);
+        break;
+    default:
+        throw("???@Executor::" + std::string(__FUNCTION__));
+        break;
+    }
+}
+
 void Executor::SetCommands(const std::vector<Command> &commands)
 {
     //todo copy the vector to queue member
@@ -104,6 +126,13 @@ void Executor::SetCommands(const std::vector<Command> &commands)
             target_command.push(action);
         }
     }
+}
+
+void Executor::Clear()
+{
+    ClearCommands();
+    ClearCooldownData();
+    ClearDeadUnits();
 }
 
 void Executor::ClearCommands()
@@ -121,10 +150,39 @@ void Executor::ClearCooldownData()
     m_cooldown_last_frame.clear();
 }
 
+void Executor::ClearDeadUnits()
+{
+    m_dead_units.self.clear();
+    m_dead_units.enemy.clear();
+    m_dead_units.ally.clear();
+    m_dead_units.neutral.clear();
+}
+
+const std::list<Unit> &Executor::GetDeadUnits(Unit::Alliance alliance) const
+{
+    switch (alliance)
+    {
+    case Unit::Alliance::Self:
+        return m_dead_units.self;
+        break;
+    case Unit::Alliance::Enemy:
+        return m_dead_units.enemy;
+        break;
+    case Unit::Alliance::Ally:
+        return m_dead_units.ally;
+        break;
+    case Unit::Alliance::Neutral:
+        return m_dead_units.neutral;
+        break;
+    default:
+        throw("???@Executor::" + std::string(__FUNCTION__));
+        break;
+    }
+}
+
 void Simulator::CopyAndSetState(const ObservationInterface *ob_source, DebugRenderer *debug_renderer)
 {
-    m_executor.ClearCooldownData();
-    m_executor.ClearCommands();
+    m_executor.Clear();
     m_executor.SetIsSetting(true);
     m_save = SaveMultiPlayerGame(ob_source);
     m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);
@@ -267,6 +325,11 @@ float Simulator::GetTeamHealthLoss(Unit::Alliance alliance) const
         }
     }
     return health_loss;
+}
+
+const std::list<Unit> &Simulator::GetTeamDeadUnits(Unit::Alliance alliance) const
+{
+    return m_executor.GetDeadUnits(alliance);
 }
 
 void Simulator::Load()

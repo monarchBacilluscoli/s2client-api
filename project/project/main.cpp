@@ -8,7 +8,6 @@
 //! test include files
 #include "../rolling_bot/rolling_bot/rolling_bot.h"
 #include "../rolling_bot/rolling_bot/rolling_bot2.h"
-#include <cmath>
 
 using namespace sc2;
 
@@ -25,19 +24,18 @@ public:
     virtual void OnUnitIdle(const Unit *unit) final
     {
         Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
+        Actions()->UnitCommand(unit, ABILITY_ID::ATTACK, GetRandomEntry(enemies));
+    }
+
+    virtual void OnUnitDestroyed(const Unit *unit) override
+    {
+        std::cout << "Player " << unit->owner << "'s unit "
+                  << unit->unit_type << " died" << std::endl;
     }
 
     virtual void OnStep() final
     {
-        if (Observation()->GetGameLoop() % 5 == 0)
-        {
-            Units us = Observation()->GetUnits();
-            std::for_each(us.begin(), us.end(), [](const Unit *u) { std::cout << u->tag << "\t" << std::flush; });
-            Debug()->DebugKillUnits(us);
-            Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_MARINE, Point2D(24, 24), 1U, 5U);
-            Debug()->SendDebug();
-            std::cout << std::endl;
-        }
+        std::cout << Observation()->GetUnits().size() << "\t";
     }
 
 private:
@@ -47,6 +45,10 @@ private:
 
 int main(int argc, char *argv[])
 {
+    // {
+    //     Bot bot;
+
+    // }
     // Before evething starts, kill all the superfluous processes started before.
     std::vector<std::string> process_names_to_be_killed({"SC2_x64", "gnuplot"});
     int kill_sz = process_names_to_be_killed.size();
@@ -61,8 +63,11 @@ int main(int argc, char *argv[])
     std::string net_address = "127.0.0.1";
     // std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
     // std::string map_path = "EnemyTower.SC2Map";
+    // std::string map_path = "EnemyTowerVSMarineMarauder.SC2Map";
+    // std::string map_path = "EnemyTowerVSThors.SC2Map";
+    std::string map_path = "EnemyTowerVSThorsOptimizationTest.SC2Map";
     // std::string map_path = "EnemyTowerVSThor.SC2Map";
-    std::string map_path = "EnemyTowerVSThorMarine.SC2Map";
+    // std::string map_path = "EnemyTowerVSThorMarine.SC2Map";
 
     std::string starcraft_path = "/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64";
     int port_start = 4000;
@@ -75,21 +80,9 @@ int main(int argc, char *argv[])
     int max_generations = 200;
     int ga_muatation_rate = 0.5;
     int command_length = 10;
-    int sim_length = 300;
-    int interval_size = 250;
-
-    //! multi-thread test bot
-    {
-        // std::string map_path = "OnlyFriends.SC2Map";
-        // TestMultiThreadBot mt_bot(100, net_address, port_start, starcraft_path, map_path);
-        // for (size_t i = 0; true ; i++)
-        // {
-        //     int unfinished_size = mt_bot.RandomActionsAllSims(std::chrono::milliseconds(10000));
-        //     std::cout << "run " << i << " finished" << std::endl
-        //               << "unfinished thread number: " << unfinished_size << std::endl;
-        //     // std::cout << "time: " << std::put_time(std::localtime(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())), "date: %X\ntime: %X\n") << std::endl;
-        // }
-    }
+    int sim_length = 400;
+    int interval_size = 350;
+    int evaluation_multiplier = 1;
 
     DebugRenderer renderer;
 
@@ -99,14 +92,15 @@ int main(int argc, char *argv[])
 
     //! Bots here
     Bot bot;
-    RollingBot2 rolling_bot(net_address, port_start, starcraft_path, map_path, max_generations, 50);
+    RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path, max_generations, 50);
 
     rolling_bot.Algorithm().SetDebug(is_debug);
     rolling_bot.Algorithm().SetSimLength(sim_length);
     rolling_bot.Algorithm().SetCommandLength(command_length);
+    rolling_bot.Algorithm().SetEvaluationTimeMultiplier(evaluation_multiplier);
     rolling_bot.SetIntervalLength(interval_size);
+    rolling_bot.SetStyle(PLAY_STYLE::DEFENSIVE);
     // dynamic_cast<RollingGA&>(rolling_bot.Algorithm()).SetMutationRate(ga_muatation_rate);
-    //rolling_bot.SetMaxGeneration(max_generations);
 
     // RollingBot2 rolling_bot(net_address, port_start, starcraft_path, map_path);
 
@@ -133,8 +127,7 @@ int main(int argc, char *argv[])
     {
         end = std::chrono::steady_clock::now();
         auto interval = end - start;
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / frames) -
-                                    interval);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / frames) - interval);
     }
 
     return 0;

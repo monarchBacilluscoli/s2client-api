@@ -28,6 +28,31 @@
             ],
             "preLaunchTask": "make the entire project",
             "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "sc2api-test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liuyongfeng/s2client-api-liu/s2client-api/build/bin/tutorial",
+            "args": [
+                // Remember to add the executable dir here, and pay attention to this form of args
+                "-e",
+                "${HOME}/StarCraftII/Versions/Base70154/SC2_x64"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "make the entire project",
+            "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
 }

@@ -46,46 +46,64 @@ void RollingEA::Evaluate()
 
 void RollingEA::Evaluate(Population &pop)
 {
-    m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, m_population);
-    if (m_is_debug)
+    if (m_evaluation_time_multiplier > 1)
     {
-        m_simulation_pool.RunSimsAsync(m_sim_length, m_debug_renderers);
+        // add multiple evaluation feature here
+        size_t pop_sz = pop.size();
+        std::vector<std::vector<std::vector<float>>> multi_runs_obj_recorder(pop_sz, std::vector<std::vector<float>>(m_objective_size, std::vector<float>(m_evaluation_time_multiplier, 0))); // whichL  [solution][objective][time]
+        for (size_t j = 0; j < m_evaluation_time_multiplier; ++j)
+        {
+            m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, m_population);
+            if (m_is_debug)
+            {
+                m_simulation_pool.RunSimsAsync(m_sim_length, m_debug_renderers);
+            }
+            else
+            {
+                m_simulation_pool.RunSimsAsync(m_sim_length);
+            }
+            float self_loss = 0.f, enemy_loss = 0.f;
+            size_t pop_sz = m_population.size();
+            for (size_t i = 0; i < pop_sz; i++)
+            {
+                enemy_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
+                self_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
+                // set the 2 objectives
+                multi_runs_obj_recorder[i][0][j] = enemy_loss;
+                multi_runs_obj_recorder[i][1][j] = -self_loss; // here, only 1 time
+            }
+        }
+        // write the real obj values to those solutions
+        for (size_t i = 0; i < pop_sz; i++)
+        {
+            pop[i].objectives.resize(m_objective_size);
+            pop[i].objectives[0] = std::accumulate(multi_runs_obj_recorder[i][0].begin(), multi_runs_obj_recorder[i][0].end(), 0.f) / m_evaluation_time_multiplier;
+            pop[i].objectives[1] = std::accumulate(multi_runs_obj_recorder[i][1].begin(), multi_runs_obj_recorder[i][1].end(), 0.f) / m_evaluation_time_multiplier; // transform it to maximum optimization
+        }
     }
     else
     {
-        m_simulation_pool.RunSimsAsync(m_sim_length);
-    }
-    float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
-    float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();
-    size_t sz = m_population.size();
-    for (size_t i = 0; i < sz; i++)
-    {
-        self_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
-        enemy_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
-        pop[i].objectives.resize(m_objective_size);
-        // set the 2 objectives
-        pop[i].objectives[0] = enemy_loss;
-        pop[i].objectives[1] = -self_loss;
-
-        if (i < m_population_size)
+        m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, m_population);
+        if (m_is_debug)
         {
-            self_team_loss_total += self_loss;
-            enemy_team_loss_total += enemy_loss;
-            self_team_loss_best = self_team_loss_best < self_loss ? self_team_loss_best : self_loss;
-            enemy_team_loss_best = enemy_team_loss_best > enemy_loss ? enemy_team_loss_best : enemy_loss;
+            m_simulation_pool.RunSimsAsync(m_sim_length, m_debug_renderers);
+        }
+        else
+        {
+            m_simulation_pool.RunSimsAsync(m_sim_length);
+        }
+        float self_loss = 0.f, enemy_loss = 0.f;
+        size_t sz = m_population.size();
+        for (size_t i = 0; i < sz; i++)
+        {
+            self_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
+            enemy_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
+            pop[i].objectives.resize(m_objective_size);
+            // set the 2 objectives
+            pop[i].objectives[0] = enemy_loss;
+            pop[i].objectives[1] = -self_loss;
         }
     }
-#if 0 //! output the evolve result, since I think here is something wrong in graph renderer
-    std::cout << "enemy aver: "
-              << "\t" << enemy_team_loss_total / sz << "\t";
-    std::cout << "enemy best: "
-              << "\t"
-              << enemy_team_loss_best << "\t";
-    std::cout << "self aver: "
-              << "\t" << self_team_loss_total / sz << "\t";
-    std::cout << "self best: "
-              << "\t" << self_team_loss_best << std::endl;
-#endif //! test code>
 }
 
 void RollingEA::Select()

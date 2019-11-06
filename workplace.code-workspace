@@ -67,7 +67,8 @@
 			"map": "cpp",
 			"memory_resource": "cpp",
 			"random": "cpp",
-			"set": "cpp"
+			"set": "cpp",
+			"queue": "cpp"
 		},
 		"files.exclude": {
 			"**.bat": true,
