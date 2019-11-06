@@ -77,7 +77,7 @@ void RollingEA::Evaluate(Population &pop)
         std::vector<std::vector<std::vector<float>>> multi_runs_obj_recorder(pop_sz, std::vector<std::vector<float>>(m_objective_size, std::vector<float>(m_evaluation_time_multiplier, 0))); // whichL  [solution][objective][time]
         for (size_t j = 0; j < m_evaluation_time_multiplier; ++j)
         {
-            m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, m_population);
+            m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, pop);
             if (m_is_debug)
             {
                 m_simulation_pool.RunSimsAsync(m_sim_length, m_debug_renderers);
@@ -87,7 +87,7 @@ void RollingEA::Evaluate(Population &pop)
                 m_simulation_pool.RunSimsAsync(m_sim_length);
             }
             float self_loss = 0.f, enemy_loss = 0.f;
-            size_t pop_sz = m_population.size();
+            size_t pop_sz = pop.size();
             for (size_t i = 0; i < pop_sz; i++)
             {
                 enemy_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
@@ -107,7 +107,7 @@ void RollingEA::Evaluate(Population &pop)
     }
     else
     {
-        m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, m_population);
+        m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, pop);
         if (m_is_debug)
         {
             m_simulation_pool.RunSimsAsync(m_sim_length, m_debug_renderers);
@@ -117,7 +117,7 @@ void RollingEA::Evaluate(Population &pop)
             m_simulation_pool.RunSimsAsync(m_sim_length);
         }
         float self_loss = 0.f, enemy_loss = 0.f;
-        size_t sz = m_population.size();
+        size_t sz = pop.size();
         for (size_t i = 0; i < sz; i++)
         {
             self_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
@@ -126,8 +126,9 @@ void RollingEA::Evaluate(Population &pop)
             // set the 2 objectives
             pop[i].objectives[0] = enemy_loss;
             pop[i].objectives[1] = -self_loss;
-            std::cout << -self_loss << "\t";
+            std::cout << enemy_loss << ", " << -self_loss << "\t";
         }
+        std::cout << std::endl;
     }
 }
 
@@ -242,7 +243,8 @@ void RollingEA::RecordObjectives()
     return;
 }
 
-void RollingEA::ActionAfterRun() {
+void RollingEA::ActionAfterRun()
+{
     Evaluate(m_population);
 }
 
