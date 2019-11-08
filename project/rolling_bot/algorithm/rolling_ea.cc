@@ -28,30 +28,6 @@ void RollingEA::Generate()
 {
     for (size_t i = 0; i < m_population_size; i++)
     {
-        if (i == 0)
-        {
-            std::vector<Command> &commands = m_population[i].variable;
-            commands.resize(1); // only one unit
-            Command &cmd = commands.front();
-            if (m_my_team.size() == 1)
-            {
-                cmd.unit_tag = m_my_team.front()->tag;
-                cmd.actions.resize(m_command_length);
-                RawActions &acts = cmd.actions;
-                int act_sz = acts.size();
-                for (size_t i = 0; i < act_sz; i++)
-                {
-                    acts[i].ability_id = ABILITY_ID::ATTACK;
-                    acts[i].target_type = ActionRaw::TargetType::TargetPosition;
-                    acts[i].target_point = Point2D{19, 19.5};
-                }
-            }
-            else
-            {
-                throw("the map is not right, please change to another map with ...OptimizationTest@RollingEA" + std::string(__FUNCTION__));
-            }
-            continue;
-        }
         GenerateOne(m_population[i]);
     }
 }
