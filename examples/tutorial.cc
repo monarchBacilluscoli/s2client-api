@@ -44,6 +44,15 @@ public:
     {
         Units units = Observation()->GetUnits();
         std::cout << units.size() << "\t" << std::flush;
+
+    }
+
+    virtual void OnGameEnd() final
+    {
+        std::cout<<"Game Ended!"<<std::endl;
+        std::string path = "replays/last_replay.SC2Replay";
+        Control()->SaveReplay(path);
+        AgentControl()->Restart();
     }
 
     std::list<Unit> m_self_dead_units;
@@ -62,10 +71,18 @@ int main(int argc, char *argv[])
                                  CreateComputer(Race::Terran)});
 
     coordinator.LaunchStarcraft();
-    coordinator.StartGame("EnemyTowerVSThors.SC2Map");
+    coordinator.StartGame("EnemyTowerVSThorsTestMechanism.SC2Map");
 
+    int current_loop = 0;
     while (coordinator.Update())
     {
+        ++current_loop;
+        if (current_loop == 10)
+        {
+            coordinator.LeaveGame();
+            bool ended = coordinator.AllGamesEnded();
+            continue;
+        }
     }
 
     return 0;

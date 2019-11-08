@@ -123,6 +123,12 @@ void RollingBot::OnUnitDestroyed(const Unit *u)
     }
 }
 
+void RollingBot::OnGameEnd()
+{
+    Control()->Save();
+    AgentControl()->Restart();
+}
+
 void RollingBot::SetIntervalLength(int frames)
 {
     m_interval_size = frames;

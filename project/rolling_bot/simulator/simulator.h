@@ -87,20 +87,11 @@ public:
     ActionInterface *Actions();
     // std::thread::id iddd;
 
-    //! Compares current state with the start point to get specific unit group
-    //! health loss
-    float GetTeamHealthLoss(Unit::Alliance alliance) const;
-    const std::list<Unit> &GetTeamDeadUnits(Unit::Alliance alliance) const;
+    float GetTeamHealthLoss(Unit::Alliance alliance) const;                 // get health loss result
+    const std::list<Unit> &GetTeamDeadUnits(Unit::Alliance alliance) const; // get dead units result
 
-    const std::map<Tag, const Unit *> &GetRelativeUnits()
-    {
-        return m_relative_units;
-    }
-
-    const State &GetSave()
-    {
-        return m_save;
-    }
+    const std::map<Tag, const Unit *> &GetRelativeUnits() { return m_relative_units; }
+    const State &GetSave() { return m_save; }
 
 private:
     //! set units relations

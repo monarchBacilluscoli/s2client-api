@@ -48,6 +48,7 @@ public:
     virtual void OnGameStart() override;
     virtual void OnStep() override;
     virtual void OnUnitDestroyed(const Unit *u) override;
+    virtual void OnGameEnd() override;
     // Settings for bot
     void SetIntervalLength(int frames);
     void SetStyle(PLAY_STYLE style);

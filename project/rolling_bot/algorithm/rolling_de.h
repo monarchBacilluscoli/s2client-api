@@ -2,9 +2,8 @@
 #define ROLLING_DE_H
 
 #include "differential_evolution.h"
-#include "gnuplot-iostream.h"
 #include "../simulator/simulator_pool.h"
-#include "../methods/graph_renderer.h"
+#include "gnuplot-iostream.h"
 #include "rolling_ea.h"
 
 namespace sc2
@@ -36,7 +35,6 @@ protected:
     void InitBeforeRun() override;
     virtual Solution<Command> Mutate(const Solution<Command> &base_sol, const Solution<Command> &material_sol1, const Solution<Command> &material_sol2) override;
     virtual void Crossover(const Solution<Command> &parent, Solution<Command> &child) override;
-    
 };
 } // namespace sc2
 

@@ -1,13 +1,10 @@
 #include <sc2api/sc2_api.h>
-#include <debug_renderer/debug_renderer.h>
 #include <string>
 #include <iostream>
 #include <chrono>
-#include <thread>
 
 //! test include files
 #include "../rolling_bot/rolling_bot/rolling_bot.h"
-#include "../rolling_bot/rolling_bot/rolling_bot2.h"
 
 using namespace sc2;
 
@@ -45,10 +42,6 @@ private:
 
 int main(int argc, char *argv[])
 {
-    // {
-    //     Bot bot;
-
-    // }
     // Before evething starts, kill all the superfluous processes started before.
     std::vector<std::string> process_names_to_be_killed({"SC2_x64", "gnuplot"});
     int kill_sz = process_names_to_be_killed.size();
