@@ -5,14 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch",
+            "name": "project",
             "type": "cppdbg",
             "request": "launch",
             "program": "/home/liuyongfeng/s2client-api-liu/s2client-api/build/bin/project",
             "args": [
                 // Remember to add the executable dir here, and pay attention to this form of args
                 "-e",
-                "${HOME}/StarCraftII/Versions/Base70154/SC2_x64"
+                "${HOME}/StarCraftII/Versions/Base70154/SC2_x64",
+                "-m",
+                "/home/liuyongfeng/StarCraftII/maps/EnemyTower.SC2Map"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -30,14 +32,14 @@
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
-            "name": "sc2api-test",
+            "name": "tutorial",
             "type": "cppdbg",
             "request": "launch",
             "program": "/home/liuyongfeng/s2client-api-liu/s2client-api/build/bin/tutorial",
             "args": [
                 // Remember to add the executable dir here, and pay attention to this form of args
                 "-e",
-                "${HOME}/StarCraftII/Versions/Base70154/SC2_x64"
+                "${HOME}/StarCraftII/Versions/Base70154/SC2_x64",
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

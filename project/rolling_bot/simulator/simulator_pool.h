@@ -31,9 +31,9 @@ class SimulatorPool
 public:
     SimulatorPool() = default;
     SimulatorPool(SimulatorPool &rhs) = delete;
-    SimulatorPool(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path);
+    SimulatorPool(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_filename);
     // if you use default constructor you must call this function to set the sims
-    void SetSims(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path);
+    void SetSims(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_filename);
     void StartSimsAsync();
     // copy the state from main game and set the orders to simulations
     void CopyStateAndSendOrdersAsync(const ObservationInterface *ob, const std::vector<std::vector<Command>> &orders);
@@ -68,14 +68,14 @@ public:
 private:
     // void SetAndStartSims(const std::list<Simulation<std::thread::id>>::iterator &begin,
     //                      const std::list<Simulation<std::thread::id>>::iterator &end,
-    //                      const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path)
+    //                      const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_filename)
     // {
-    //     SetSims(begin, end, net_address, port_start, process_path, map_path);
+    //     SetSims(begin, end, net_address, port_start, process_path, map_filename);
     //     StartSims(begin, end);
     // }
     // void SetSims(const std::list<Simulation<std::thread::id>>::iterator &begin,
     //              const std::list<Simulation<std::thread::id>>::iterator &end,
-    //              const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path)
+    //              const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_filename)
     // {
     //     for (auto it = begin; it != end; ++it)
     //     {
@@ -83,7 +83,7 @@ private:
     //         //sim.SetNetAddress(m_net_address);
     //         sim.SetPortStart(port_start);
     //         sim.SetProcessPath(process_path);
-    //         sim.SetMapPath(map_path);
+    //         sim.SetMapPath(map_filename);
     //         sim.SetStepSize(1);
     //         port_start += 2;
     //     }
@@ -97,7 +97,7 @@ private:
     int m_port_start;
     int m_port_end = m_port_start;
     std::string m_process_path;
-    std::string m_map_path;
+    std::string m_map_filename;
     std::chrono::milliseconds m_wait_duration{100000};
 
     // observation interface to store the game state

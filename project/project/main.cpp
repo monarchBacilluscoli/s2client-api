@@ -42,6 +42,11 @@ private:
 
 int main(int argc, char *argv[])
 {
+    for (size_t i = 0; i < argc; i++)
+    {
+        std::cout << argv[i] << std::endl;
+    }
+
     // Before evething starts, kill all the superfluous processes started before.
     std::vector<std::string> process_names_to_be_killed({"SC2_x64", "gnuplot"});
     int kill_sz = process_names_to_be_killed.size();
@@ -55,12 +60,12 @@ int main(int argc, char *argv[])
     bool is_debug = false;
     std::string net_address = "127.0.0.1";
     // std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
-    // std::string map_path = "EnemyTower.SC2Map";
+    std::string map_path = "EnemyTower.SC2Map";
     // std::string map_path = "EnemyTowerVSMarineMarauder.SC2Map";
     // std::string map_path = "EnemyTowerVSThors.SC2Map";
     // std::string map_path = "EnemyTowerVSThorsOptimizationTest.SC2Map";
     // std::string map_path = "EnemyTowerVSThor.SC2Map";
-    std::string map_path = "EnemyTowerVSThorMarine.SC2Map";
+    // std::string map_path = "EnemyTowerVSThorMarine.SC2Map";
 
     std::string starcraft_path = "/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64";
     int port_start = 4000;

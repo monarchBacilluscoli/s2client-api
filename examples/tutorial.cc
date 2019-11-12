@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
                                  CreateComputer(Race::Terran)});
 
     coordinator.LaunchStarcraft();
-    coordinator.StartGame("EnemyTowerVSThorsTestMechanism.SC2Map");
+    coordinator.StartGame("EnemyTowerVSThorsTestMechanismFake.SC2Map");
 
     int current_loop = 0;
     while (coordinator.Update())
