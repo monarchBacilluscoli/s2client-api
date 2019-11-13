@@ -12,6 +12,7 @@
 #include <string>
 #include "sc2api/sc2_game_settings.h"
 #include "sc2api/sc2_proto_interface.h"
+#include "sc2api/sc2_interfaces.h"
 
 namespace sc2 {
 
@@ -35,6 +36,9 @@ public:
     //! \param game_settings The name of the settings file.
     //! \return True if settings were found or discovered, false otherwise.
     bool LoadSettings(int argc, char** argv);
+
+    void SetBaseSettings(int port_start, const std::string& process_path, const std::string &map_path, int step_size = 1);
+
 
     //! Specifies whether bots or replays OnStep function should be run in parallel. If set to true make sure your bots are thread-safe
     //! if they reach into shared code.
@@ -106,6 +110,8 @@ public:
     // \sa ReplayObserver
     void AddReplayObserver(ReplayObserver* replay_observer);
 
+    void SetMapPath(const std::string& map_path);
+
     // Start-up.
 
     //! Uses settings gathered from LoadSettings, specifically the path to the executable, to run StarCraft II.
@@ -160,6 +166,8 @@ public:
 
     //! Returns true if all running games have ended.
     bool AllGamesEnded() const;
+    //! Returns true if running game is a multi-player game
+    bool IsMultiPlayerGame() const;
 
     // Replay specific.
     //! Sets the path for to a folder of replays to analyze.
@@ -189,7 +197,14 @@ public:
     //!< \return The game executable path.
     std::string GetExePath() const;
 
-private:
+    int GetStepSize();
+    int GetPortStart();
+    std::string GetNetAddress();
+    std::string GetMapPath();
+    //! Get no matter Observer or Game agent
+    std::vector<const ObservationInterface*> GetObservations();
+
+   private:
     CoordinatorImp* imp_;
 };
 

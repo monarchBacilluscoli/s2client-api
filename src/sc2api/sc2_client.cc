@@ -952,6 +952,7 @@ public:
     void DebugSphereOut(const Point3D& p, float r, Color color = Colors::White) override;
     void DebugCreateUnit(UnitTypeID unit_type, const Point2D& p, uint32_t player_id = 1, uint32_t count = 1) override;
     void DebugKillUnit(const Unit* unit) override;
+    void DebugKillUnits(const Units& units) override;
     void DebugShowMap() override;
     void DebugEnemyControl() override;
     void DebugIgnoreFood() override;
@@ -1141,6 +1142,17 @@ void DebugImp::DebugCreateUnit(UnitTypeID unit_type, const Point2D& p, uint32_t 
 void DebugImp::DebugKillUnit(const Unit* unit) {
     if (!unit) return;
     debug_kill_tag_.push_back(unit->tag);
+}
+
+void DebugImp::DebugKillUnits(const Units& units){
+    if (units.empty()) return;
+    int count = units.size();
+    std::vector<Tag> tags(count);
+    for (size_t i = 0; i < count; i++)
+    {
+        tags[i] = units[i]->tag;
+    }
+    debug_kill_tag_.insert(debug_kill_tag_.end(), tags.begin(), tags.end());
 }
 
 void DebugImp::DebugMoveCamera(const Point2D& pos) {

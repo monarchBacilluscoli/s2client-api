@@ -82,6 +82,61 @@ int LaunchProcess(ProcessSettings& process_settings, Client* client, int window_
     return pi.port;
 }
 
+// int LaunchProcessSilently(ProcessSettings& process_settings, Client* client,
+//                           int window_width, int window_height,
+//                           int window_start_x, int window_start_y, int port,
+//                           int client_num = 0);
+// {
+//     assert(client);
+//     process_settings.process_info.push_back(sc2::ProcessInfo());
+//     ProcessInfo& pi = process_settings.process_info.back();
+
+//     // Get the next port
+//     pi.port = port;
+
+//     // Command line arguments that will be passed to sc2.
+//     std::vector<std::string> cl = {
+//         "-listen", process_settings.net_address,
+// 		"-port", std::to_string(pi.port)
+//     };
+
+//     // DirectX will fail if multiple games try to launch in fullscreen mode. Force them into windowed mode.
+//     cl.push_back("-displayMode"); cl.push_back("0");
+
+//     if (process_settings.data_version.size() > 0) {
+//         cl.push_back("-dataVersion"); cl.push_back(process_settings.data_version);
+//     }
+
+//     for (const std::string& command : process_settings.extra_command_lines)
+//         cl.push_back(command);
+
+//     cl.push_back("-windowwidth"); cl.push_back(std::to_string(window_width));
+//     cl.push_back("-windowheight"); cl.push_back(std::to_string(window_height));
+
+//     if (client_num < 2) {
+//         cl.push_back("-windowx"); cl.push_back(std::to_string(window_start_x + window_width * client_num));
+//         cl.push_back("-windowy"); cl.push_back(std::to_string(window_start_y));
+//     }
+//     else if (client_num < 4) {
+//         cl.push_back("-windowx"); cl.push_back(std::to_string(window_start_x + window_width * (client_num - 2)));
+//         cl.push_back("-windowy"); cl.push_back(std::to_string(window_start_y + window_height));
+//     }
+
+//     pi.process_path = process_settings.process_path;
+//     pi.process_id = StartProcess(process_settings.process_path, cl);
+//     if (!pi.process_id) {
+//         std::cerr << "Unable to start sc2 executable with path: "
+//             << process_settings.process_path
+//             << std::endl;
+//     }
+//     else {
+//         std::cout << "Launched SC2 (" << process_settings.process_path << "), PID: " << std::to_string(pi.process_id) << std::endl;
+//     }
+
+//     client->Control()->SetProcessInfo(pi);
+//     return pi.port;
+// }
+
 bool AttachClients(ProcessSettings& process_settings, std::vector<Client*> clients) {
     bool connected = false;
 
@@ -710,6 +765,13 @@ bool Coordinator::LoadSettings(int argc, char** argv) {
     return ParseSettings(argc, argv, imp_->process_settings_, imp_->game_settings_);
 }
 
+void Coordinator::SetBaseSettings(int port_start, const std::string& process_path, const std::string &map_path, int step_size){
+    SetPortStart(port_start);
+    SetProcessPath(process_path);
+    SetMapPath(map_path);
+    SetStepSize(step_size);
+}
+
 void Coordinator::LaunchStarcraft() {
     if (!DoesFileExist(imp_->process_settings_.process_path)) {
         std::cerr << "Executable path can't be found, try running the StarCraft II executable first." << std::endl;
@@ -841,6 +903,8 @@ bool Coordinator::AllGamesEnded() const {
     return true;
 }
 
+bool Coordinator::IsMultiPlayerGame() const { return imp_->agents_.size() > 1; }
+
 void CoordinatorImp::AddAgent(Agent* agent) {
     assert(agent);
     agents_.push_back(agent);
@@ -940,6 +1004,10 @@ bool Coordinator::SetReplayPath(const std::string& path) {
     return !imp_->replay_settings_.replay_file.empty();
 }
 
+void Coordinator::SetMapPath(const std::string& map_path){
+    imp_->game_settings_.map_name = map_path;
+}
+
 bool Coordinator::LoadReplayList(const std::string& file_path) {
     if (!DoesFileExist(file_path))
         return false;
@@ -1005,5 +1073,22 @@ void Coordinator::SetupPorts(size_t num_agents, int port_start, bool check_singl
             imp_->game_settings_.ports.client_ports.push_back(port_set);
         }
     }
+}
+
+int Coordinator::GetStepSize() { return imp_->process_settings_.step_size; }
+int Coordinator::GetPortStart() { return imp_->process_settings_.port_start; }
+std::string Coordinator::GetNetAddress() { return imp_->process_settings_.net_address; }
+std::string Coordinator::GetMapPath() { return imp_->game_settings_.map_name; }
+std::vector<const ObservationInterface*> Coordinator::GetObservations(){
+    std::vector<const ObservationInterface*> observations;
+    // todo get all the observation and make them a vector
+    for (auto a:imp_->agents_)
+    {
+        observations.push_back(a->Observation());
+    }
+    for(auto ob: imp_->replay_observers_){
+        observations.push_back(ob->Observation());
+    }
+    return observations;
 }
 }
