@@ -147,7 +147,7 @@ std::vector<Solution<T>> EvolutionaryAlgorithm<T>::Run()
         ActionAfterEachGeneration();
     }
     ActionAfterRun();
-    //todo return rank 1 solutions
+    // return rank 1 solutions
     typename std::vector<Solution<T>>::iterator end_it = m_population.begin();
     for (end_it = m_population.begin(); end_it != m_population.end(); ++end_it)
     {
@@ -164,6 +164,7 @@ void EvolutionaryAlgorithm<T>::ActionAfterEachGeneration()
 {
     RecordRunningData();
     ShowGraphEachGeneration();
+    return;
 }
 
 template <class T>

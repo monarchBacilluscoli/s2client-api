@@ -30,6 +30,20 @@ void RollingEA::Generate()
     {
         GenerateOne(m_population[i]);
     }
+    //todo test, generate some solutions with priori knowledge
+    Solution<Command> &random_sol = GetRandomEntry(m_population);
+    Point2D target_position = GetRandomEntry(m_enemy_team)->pos;
+    int unit_sz = random_sol.variable.size();
+    for (size_t i = 0; i < unit_sz; i++)
+    {
+        const Unit *unit = m_observation->GetUnit(random_sol.variable[i].unit_tag);
+        RawActions &actions = random_sol.variable[i].actions;
+        int action_sz = actions.size();
+        for (size_t i = 0; i < action_sz; i++)
+        {
+            actions[i].target_point = unit->pos + GetRandomFraction() * (target_position - unit->pos);
+        }
+    }
 }
 
 void RollingEA::Evaluate()
@@ -109,8 +123,7 @@ void RollingEA::Evaluate(Population &pop)
 void RollingEA::Select()
 {
     m_population.insert(m_population.end(), m_offspring.begin(), m_offspring.end());
-    Solution<Command>::DominanceSort(m_population);
-    //! looks like m_population must have been sorted
+    // I need to add the 
     m_population.resize(m_population_size);
     return;
 }

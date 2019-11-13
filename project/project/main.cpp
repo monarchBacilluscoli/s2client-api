@@ -97,7 +97,8 @@ int main(int argc, char *argv[])
     rolling_bot.Algorithm().SetCommandLength(command_length);
     rolling_bot.Algorithm().SetEvaluationTimeMultiplier(evaluation_multiplier);
     rolling_bot.SetIntervalLength(interval_size);
-    rolling_bot.SetStyle(PLAY_STYLE::NORMAL);
+    rolling_bot.SetStyle(PLAY_STYLE::IRONHEAD);
+    rolling_bot.Algorithm().SetRandomEngineSeed(1);
     // dynamic_cast<RollingGA&>(rolling_bot.Algorithm()).SetMutationRate(ga_muatation_rate);
 
     // RollingBot2 rolling_bot(net_address, port_start, starcraft_path, map_path);

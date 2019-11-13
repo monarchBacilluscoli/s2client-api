@@ -21,9 +21,11 @@ struct Solution
 
     std::vector<float> objectives = std::vector<float>();
     std::vector<T> variable = std::vector<T>();
-    int rank = std::numeric_limits<int>::max(); // I haven't used it yet
+
+    int rank = std::numeric_limits<int>::max(); // used in multi-objective problem
     int dominated_count = 0;
     std::list<Solution<T> *> dominant_solutions;
+    float crowdedness = 0.f;
 
     bool operator==(const Solution &rhs) const
     {
@@ -48,6 +50,7 @@ struct Solution
     static bool RankLess(const Solution<T> &a, const Solution<T> &b); // looks like it should not be a member function of Solution. If so, it will not be used as a Compare, since it accept one more parameter - this pointer
     static DOMINANCE Dominate(const Solution<T> &a, const Solution<T> &b);
     static void DominanceSort(Population &pop);
+    static void CalculateCrowdedness(Population &pop);
 };
 
 template <class T>
@@ -124,7 +127,31 @@ DOMINANCE Solution<T>::Dominate(const Solution<T> &a, const Solution<T> &b)
 template <class T>
 bool Solution<T>::RankLess(const Solution<T> &l, const Solution<T> &r)
 {
-    return l.rank < r.rank;
+    if (l.rank != r.rank)
+    {
+        return l.rank < r.rank;
+    }
+    else
+    {
+        // Compare objectives
+        int l_obj_sz = l.objectives.size();
+        if (l_obj_sz != r.objectives.size())
+        {
+            throw("The obj sizes of the two solution are not the same @ Solution::" + std::string(__FUNCTION__));
+        }
+        else
+        {
+            for (size_t i = 0; i < l_obj_sz; ++i)
+            {
+                if (l.objectives[i] != r.objectives[i])
+                {
+                    return l.objectives[i] < r.objectives[i];
+                }
+            }
+            //If all the objectives are equal
+            return l.objectives.back() < r.objectives.back();
+        }
+    }
 }
 
 template <class T>
@@ -188,6 +215,28 @@ void Solution<T>::DominanceSort(Population &p)
     }
     std::sort(p.begin(), p.end(), &Solution<T>::RankLess);
     return;
+}
+
+template <class T>
+void Solution<T>::CalculateCrowdedness(Population& pop){
+    // Only after dominance sort, can it be called
+	int pop_sz = pop.size();
+	int obj_sz = pop.front().objectives.size();
+	for (int i = 0; i < pop_sz; ++i)
+	{
+		// check the last and next
+		if ((i - 1) < 0 || pop[i].rank != pop[(size_t)i - 1].rank ||
+			(i + 1) >= pop_sz || pop[i].rank != pop[(size_t)i + 1].rank) {
+			pop[i].crowdedness = numeric_limits<float>::max();
+		}
+		else {
+			pop[i].crowdedness = 0.f;
+			for (size_t j = 0; j < obj_sz; j++)
+			{
+				pop[i].crowdedness += std::abs(pop[(size_t)i - 1].objectives[j] - pop[(size_t)i + 1].objectives[j]);
+			}
+		}
+	}
 }
 
 #endif //SOLUTION_H
