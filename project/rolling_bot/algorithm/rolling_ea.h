@@ -18,6 +18,8 @@ protected:
     Units m_enemy_team;
     GameInfo m_game_info;
     Vector2D m_playable_dis;
+    UnitTypes m_unit_types; 
+    
     // settings about game
     float m_attack_possibility = 0.7;
     int m_command_length = 8;

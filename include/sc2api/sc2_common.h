@@ -73,6 +73,8 @@ struct Point2D {
 
     bool operator==(const Point2D& rhs);
     bool operator!=(const Point2D& rhs);
+
+    float modulus(); 
 };
 
 Point2D operator+(const Point2D& lhs, const Point2D& rhs);

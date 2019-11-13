@@ -30,9 +30,9 @@ protected:
 
     //! methods
     std::list<std::vector<std::vector<float>>> m_history_objs{}; // for debug or record use
-    std::vector<std::vector<float>> m_history_objs_ave{};        // one list one objective
-    std::vector<std::vector<float>> m_history_objs_best{};       // one list one objective
-    std::vector<std::vector<float>> m_history_objs_worst{};      // one list one objective
+    std::vector<std::vector<float>> m_history_objs_ave{};        // obj-generation
+    std::vector<std::vector<float>> m_history_objs_best{};       // obj-generation
+    std::vector<std::vector<float>> m_history_objs_worst{};      // obj-generation
     LineChartRenderer2D m_overall_evolution_status_renderer;
     std::mt19937 m_random_engine{0};
 

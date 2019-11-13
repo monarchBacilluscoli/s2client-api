@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     }
 
     // Some settings
-    bool is_debug = false;
+    bool is_debug = true;
     std::string net_address = "127.0.0.1";
     // std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
     std::string map_path = "EnemyTower.SC2Map";

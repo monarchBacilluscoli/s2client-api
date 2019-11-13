@@ -31,7 +31,7 @@ void RollingEA::Generate()
         GenerateOne(m_population[i]);
     }
     //todo test, generate some solutions with priori knowledge
-    Solution<Command> &random_sol = GetRandomEntry(m_population);
+    Solution<Command> &random_sol = m_population[0];
     Point2D target_position = GetRandomEntry(m_enemy_team)->pos;
     int unit_sz = random_sol.variable.size();
     for (size_t i = 0; i < unit_sz; i++)
@@ -41,7 +41,8 @@ void RollingEA::Generate()
         int action_sz = actions.size();
         for (size_t i = 0; i < action_sz; i++)
         {
-            actions[i].target_point = unit->pos + GetRandomFraction() * (target_position - unit->pos);
+            Vector2D u_to_e = target_position - unit->pos;
+            actions[i].target_point = unit->pos + u_to_e * ((u_to_e.modulus() - m_unit_types[unit->unit_type].weapons.front().range) / u_to_e.modulus());
         }
     }
 }
@@ -144,12 +145,13 @@ void RollingEA::InitFromObservation()
     m_my_team = m_observation->GetUnits(Unit::Alliance::Self);
     m_game_info = m_observation->GetGameInfo();
     m_playable_dis = Vector2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
+    m_unit_types = m_observation->GetUnitTypeData();
 }
 
 void RollingEA::ShowOverallStatusGraphEachGeneration()
 {
     EA::ShowOverallStatusGraphEachGeneration();
-    std::cout<< "diff of aves: " << m_history_objs_ave.front()[0]-m_history_objs_ave.front()[1]<<std::endl;
+    std::cout << "diff of aves: " << m_history_objs_ave[0].back() - m_history_objs_ave[1].back() << std::endl;
 }
 
 void RollingEA::ShowSolutionDistribution(int showed_generations_count)

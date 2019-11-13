@@ -128,6 +128,10 @@ Point2D operator/(float lhs, const Point2D& rhs) {
     return rhs / lhs;
 }
 
+float Point2D::modulus() {
+    return std::sqrt(x * x + y * y);
+}
+
 bool Point2DI::operator==(const Point2DI& rhs) const {
     return x == rhs.x && y == rhs.y;
 }
