@@ -227,7 +227,7 @@ void Solution<T>::CalculateCrowdedness(Population& pop){
 		// check the last and next
 		if ((i - 1) < 0 || pop[i].rank != pop[(size_t)i - 1].rank ||
 			(i + 1) >= pop_sz || pop[i].rank != pop[(size_t)i + 1].rank) {
-			pop[i].crowdedness = numeric_limits<float>::max();
+			pop[i].crowdedness = std::numeric_limits<float>::max();
 		}
 		else {
 			pop[i].crowdedness = 0.f;

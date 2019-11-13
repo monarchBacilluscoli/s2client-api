@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     // use this to control the cauculation times per second
     uint frames = 60;
     int population_size = 50;
-    int max_generations = 200;
+    int max_generations = 500;
     int ga_muatation_rate = 0.5;
     int command_length = 12;
     int sim_length = 400;

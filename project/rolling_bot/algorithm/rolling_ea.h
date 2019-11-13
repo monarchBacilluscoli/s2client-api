@@ -59,33 +59,11 @@ protected:
     void Generate() override;
     void Evaluate() override;
     void Select() override;
+    virtual void ShowOverallStatusGraphEachGeneration() override;
     virtual void ShowSolutionDistribution(int showed_generations_count) override;
     //! for test
     virtual void ActionAfterEachGeneration() override
     {
-        // float self_loss = 0, self_team_loss_total = 0, self_team_loss_best = std::numeric_limits<float>::max();
-        // float enemy_loss = 0, enemy_team_loss_total = 0, enemy_team_loss_best = std::numeric_limits<float>::lowest();
-        // for (size_t i = 0; i < EA::m_population_size; ++i)
-        // {
-        //     self_team_loss_total += self_loss;
-        //     enemy_team_loss_total += enemy_loss;
-        //     self_team_loss_best = self_team_loss_best < self_loss ? self_team_loss_best : self_loss;
-        //     enemy_team_loss_best = enemy_team_loss_best > enemy_loss ? enemy_team_loss_best : enemy_loss;
-        // }
-        // self_team_loss_total = std::accumulate(EA::m_population.begin(), EA::m_population.end(), 0,
-        //                                        [](float init, const Solution<Command> &s2) -> float {
-        //                                            return init + s2.objectives[0];
-        //                                        });
-        // std::cout
-        //     << "enemy aver: "
-        //     << "\t" << enemy_team_loss_total / EA::m_population_size << "\t";
-        // std::cout << "enemy best: "
-        //           << "\t"
-        //           << enemy_team_loss_best << "\t";
-        // std::cout << "self aver: "
-        //           << "\t" << self_team_loss_total / EA::m_population_size << "\t";
-        // std::cout << "self best: "
-        //           << "\t" << self_team_loss_best << std::endl;
         EA::ActionAfterEachGeneration();
     };
 

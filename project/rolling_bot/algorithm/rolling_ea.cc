@@ -123,7 +123,17 @@ void RollingEA::Evaluate(Population &pop)
 void RollingEA::Select()
 {
     m_population.insert(m_population.end(), m_offspring.begin(), m_offspring.end());
-    // I need to add the 
+    Solution<Command>::DominanceSort(m_population);
+    Solution<Command>::CalculateCrowdedness(m_population);
+    // choose solutions to be added to the next generation
+    int rank_need_resort = m_population[m_population_size - 1].rank;
+    if (m_population.size() > m_population_size && m_population[m_population_size].rank == rank_need_resort) // if next element is still of this rank, it means this rank can not be contained fully in current population, it needs selecting
+    {
+        // resort solutions of current rank
+        Population::iterator bg = std::find_if(m_population.begin(), m_population.end(), [rank_need_resort](const Solution<Command> &s) { return rank_need_resort == s.rank; });
+        Population::iterator ed = std::find_if(m_population.rbegin(), m_population.rend(), [rank_need_resort](const Solution<Command> &s) { return rank_need_resort == s.rank; }).base();
+        std::sort(bg, ed, [](const Solution<Command> &l, const Solution<Command> &r) { return l.crowdedness > r.crowdedness; });
+    }
     m_population.resize(m_population_size);
     return;
 }
@@ -134,6 +144,12 @@ void RollingEA::InitFromObservation()
     m_my_team = m_observation->GetUnits(Unit::Alliance::Self);
     m_game_info = m_observation->GetGameInfo();
     m_playable_dis = Vector2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
+}
+
+void RollingEA::ShowOverallStatusGraphEachGeneration()
+{
+    EA::ShowOverallStatusGraphEachGeneration();
+    std::cout<< "diff of aves: " << m_history_objs_ave.front()[0]-m_history_objs_ave.front()[1]<<std::endl;
 }
 
 void RollingEA::ShowSolutionDistribution(int showed_generations_count)
