@@ -49,9 +49,10 @@ public:
 
     virtual void OnGameEnd() final
     {
-        std::cout<<"Game Ended!"<<std::endl;
+        std::cout<<"Game ended!"<<std::endl;
         std::string path = "replays/last_replay.SC2Replay";
         Control()->SaveReplay(path);
+        std::cout << "Replay saved" << std::endl;
         AgentControl()->Restart();
     }
 

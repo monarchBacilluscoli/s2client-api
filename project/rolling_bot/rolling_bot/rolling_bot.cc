@@ -112,20 +112,19 @@ void RollingBot::OnUnitDestroyed(const Unit *u)
         std::cin >> c;
         //todo I should give control to the main()
     }
-    else
+    else if (Observation()->GetUnits(Unit::Alliance::Enemy).empty())
     {
-        if (Observation()->GetUnits(Unit::Alliance::Enemy).empty())
-        {
-            std::cout << "Looks that you have won? " << std::endl;
-            char c;
-            std::cin >> c;
-        }
+        std::cout << "Looks that you have won? " << std::endl;
+        char c;
+        std::cin >> c;
     }
 }
 
 void RollingBot::OnGameEnd()
 {
-    Control()->Save();
+    std::string path = "replays/last_replay.SC2Replay";
+    Control()->SaveReplay(path);
+    std::cout << "Replay saved!" << std::endl;
     AgentControl()->Restart();
 }
 

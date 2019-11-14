@@ -31,18 +31,22 @@ void RollingEA::Generate()
         GenerateOne(m_population[i]);
     }
     //todo test, generate some solutions with priori knowledge
-    Solution<Command> &random_sol = m_population[0];
-    Point2D target_position = GetRandomEntry(m_enemy_team)->pos;
-    int unit_sz = random_sol.variable.size();
-    for (size_t i = 0; i < unit_sz; i++)
+    int enemy_sz = std::min(m_enemy_team.size(), (size_t)m_population_size/5);
+    for (size_t i = 0; i < enemy_sz; ++i)
     {
-        const Unit *unit = m_observation->GetUnit(random_sol.variable[i].unit_tag);
-        RawActions &actions = random_sol.variable[i].actions;
-        int action_sz = actions.size();
-        for (size_t i = 0; i < action_sz; i++)
+        Solution<Command> &random_sol = m_population[i];
+        Point2D target_position = m_enemy_team[i]->pos;
+        int unit_sz = random_sol.variable.size();
+        for (size_t j = 0; j < unit_sz; ++j)
         {
-            Vector2D u_to_e = target_position - unit->pos;
-            actions[i].target_point = unit->pos + u_to_e * ((u_to_e.modulus() - m_unit_types[unit->unit_type].weapons.front().range) / u_to_e.modulus());
+            const Unit *unit = m_observation->GetUnit(random_sol.variable[j].unit_tag);
+            RawActions &actions = random_sol.variable[j].actions;
+            int action_sz = actions.size();
+            for (size_t k = 0; k < action_sz; k++)
+            {
+                Vector2D u_to_e = target_position - unit->pos;
+                actions[k].target_point = unit->pos + u_to_e * ((u_to_e.modulus() - m_unit_types[unit->unit_type].weapons.front().range) / u_to_e.modulus());
+            }
         }
     }
 }

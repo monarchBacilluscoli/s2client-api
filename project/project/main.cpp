@@ -60,7 +60,10 @@ int main(int argc, char *argv[])
     bool is_debug = true;
     std::string net_address = "127.0.0.1";
     // std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
-    std::string map_path = "EnemyTower.SC2Map";
+    // std::string map_path = "EnemyTower.SC2Map";
+    // std::string map_path = "EnemyTowerVSMarauder.SC2Map";
+    std::string map_path = "EnemyTowerVSMarine.SC2Map";
+    // std::string map_path = "3speed_distant_vs_1melee.SC2Map";
     // std::string map_path = "EnemyTowerVSMarineMarauder.SC2Map";
     // std::string map_path = "EnemyTowerVSThors.SC2Map";
     // std::string map_path = "EnemyTowerVSThorsOptimizationTest.SC2Map";
@@ -75,9 +78,9 @@ int main(int argc, char *argv[])
     // use this to control the cauculation times per second
     uint frames = 60;
     int population_size = 50;
-    int max_generations = 500;
+    int max_generations = 200;
     int ga_muatation_rate = 0.5;
-    int command_length = 12;
+    int command_length = 30;
     int sim_length = 400;
     int interval_size = 400;
     int evaluation_multiplier = 1;
