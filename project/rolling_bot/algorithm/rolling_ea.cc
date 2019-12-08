@@ -30,8 +30,8 @@ void RollingEA::Generate()
     {
         GenerateOne(m_population[i]);
     }
-    //todo test, generate some solutions with priori knowledge
-    int enemy_sz = std::min(m_enemy_team.size(), (size_t)m_population_size/5);
+    // generate some solutions with priori knowledge
+    int enemy_sz = std::min(m_enemy_team.size(), (size_t)m_population_size / 5);
     for (size_t i = 0; i < enemy_sz; ++i)
     {
         Solution<Command> &random_sol = m_population[i];
@@ -177,10 +177,9 @@ void RollingEA::GenerateOne(Solution<Command> &sol)
     for (size_t i = 0; i < team_size; i++)
     {
         sol.variable[i].unit_tag = m_my_team[i]->tag;
-        // float move_dis_per_run = MoveDistance(m_my_team[i], m_sim_length, m_unit_type);
-        float move_dis_per_run = m_playable_dis.y / 3;
+        float move_dis_per_command = m_playable_dis.y / 3;
         float longest_map_bound = std::max(m_playable_dis.x, m_playable_dis.y);
-        float moveable_radius = std::min(longest_map_bound, move_dis_per_run); //todo Think about the boundaries of the map!
+        float moveable_radius = std::min(longest_map_bound, move_dis_per_command); //todo Think about the boundaries of the map!
         Point2D current_location = m_my_team[i]->pos;
         sol.variable[i].actions.resize(m_command_length);
         for (size_t j = 0; j < m_command_length; j++)
@@ -201,7 +200,6 @@ void RollingEA::GenerateOne(Solution<Command> &sol)
                     // hope the last target point is a move position
                     action_raw.target_point = sol.variable[i].actions[j - 1].target_point + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
                 }
-                action_raw.target_point = FixOutsidePointIntoMap(action_raw.target_point, m_game_info.playable_min, m_game_info.playable_max);
             }
             else
             {
@@ -216,8 +214,8 @@ void RollingEA::GenerateOne(Solution<Command> &sol)
                 {
                     action_raw.target_point = sol.variable[i].actions[j - 1].target_point + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
                 }
-                action_raw.target_point = FixOutsidePointIntoMap(action_raw.target_point, m_game_info.playable_min, m_game_info.playable_max);
             }
+            action_raw.target_point = FixOutsidePointIntoMap(action_raw.target_point, m_game_info.playable_min, m_game_info.playable_max); // fix the target point outside the playable area back in range
         }
     }
 }
