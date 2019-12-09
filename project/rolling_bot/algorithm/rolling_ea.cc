@@ -215,7 +215,19 @@ void RollingEA::GenerateOne(Solution<Command> &sol)
                     action_raw.target_point = sol.variable[i].actions[j - 1].target_point + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
                 }
             }
-            action_raw.target_point = FixOutsidePointIntoMap(action_raw.target_point, m_game_info.playable_min, m_game_info.playable_max); // fix the target point outside the playable area back in range
+            action_raw.target_point = FixOutsidePointIntoMap(action_raw.target_point, m_game_info.playable_min, m_game_info.playable_max); // fix the target point outside the
+            Point2D nearest_enemy_pos_to_target_point = SelectNearestUnitFromPoint(action_raw.target_point, m_enemy_team)->pos;
+            float dis = (nearest_enemy_pos_to_target_point - action_raw.target_point).modulus();
+            float self_unit_weapon_range = m_unit_types[m_my_team[i]->unit_type].weapons.front().range;
+            float effective_range = 2 * self_unit_weapon_range;
+            if (dis > effective_range) // If it is out of a predefined range.
+            {
+                action_raw.target_point = (action_raw.target_point - nearest_enemy_pos_to_target_point) * effective_range / dis + nearest_enemy_pos_to_target_point;
+            }
+            else
+            {
+                ; // do nothing
+            }
         }
     }
 }

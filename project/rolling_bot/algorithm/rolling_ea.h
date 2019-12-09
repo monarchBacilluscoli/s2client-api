@@ -15,10 +15,10 @@ protected:
     // game data
     const ObservationInterface *m_observation;
     Units m_my_team;
-    Units m_enemy_team;
+    Units m_enemy_team; // updated at the beginning of each run
     GameInfo m_game_info;
     Vector2D m_playable_dis;
-    UnitTypes m_unit_types; 
+    UnitTypes m_unit_types; // metadata of units. Array can be indexed directly by UnitID (Unit->unit_type).
     
     // settings about game
     float m_attack_possibility = 0.7;
