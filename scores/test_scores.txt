@@ -2,3 +2,4 @@ total_damage_dealt.life	total_damage_dealt.shields	total_damage_taken.life	total
 144	0	360	0	0	0	2019-12-1202:40:43
 169	0	360	0	0	0	2019-12-1210:11:08
 165	0	360	0	0	0	2019-12-1210:11:31
+160	0	360	0	0	0	2019-12-1210:13:14
