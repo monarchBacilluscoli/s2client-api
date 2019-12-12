@@ -136,11 +136,7 @@ void OutputGameResultData(const ObservationInterface *ob, const std::string file
     }
     else
     {
-        //todo calculate total health of each player and record them into the output file with timestamp
-        //! here, only two camps : my team and the enemy
-        //? a problem, I can not use current observation to get the initial state of the game
-        // float total_health_my =
-        //     float total_health_enemy =
+        //todo use the score and output the valueable info into the output file.
     }
 }
 
