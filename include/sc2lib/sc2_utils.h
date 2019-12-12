@@ -23,5 +23,5 @@ float GetTotalShieldMax(const Units &us); // return the total max shield of some
 float GetTotalHealthLoss(const Units &us); // return the total health loss of some units compared with their total max_health
 float GetTotalShieldLoss(const Units &us); // return the total health loss of some units compared with their total max_shield
 
-void OutputGameResultData(const ObservationInterface *ob, const std::string file_path);
+void OutputGameScore(const Score& score, const std::string& file_path);
 } // namespace sc2

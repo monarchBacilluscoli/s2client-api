@@ -1,8 +1,11 @@
 #include "sc2api/sc2_api.h"
 #include "sc2lib/sc2_utils.h"
+#include "sc2api/sc2_score.h"
 #include <numeric>
 #include <fstream>
 #include <iostream>
+#include <chrono>
+#include <iomanip>
 
 namespace sc2
 {
@@ -126,17 +129,32 @@ float GetTotalShieldLoss(const Units &us)
     return total_shield_loss;
 }
 
-void OutputGameResultData(const ObservationInterface *ob, const std::string file_path)
+void OutputGameScore(const Score &score, const std::string &file_path)
 {
-    std::ofstream file(file_path, std::ios::app | std::ios::out);
-    if (!file.is_open()) // if this obj is not good ()
+    std::fstream file;
+    file.open(file_path, std::ios::app | std::ios::out); // open or create a file then append data
+    if (!file.is_open())
     {
-        std::cerr << "failed to open the file!" << std::endl;
+        //todo check if the folder is existing, if not, create it, Attention: different system may need different method to do it
+        #ifdef _WIN32
+
+        #elif __linux__
+
+        #endif
+        std::cerr << "failed to open or create the file! Check if the folder is existing." << std::endl;
         throw("failed to open the file!@" + std::string(__FUNCTION__));
     }
     else
     {
-        //todo use the score and output the valueable info into the output file.
+        //todo maybe I need to write a data header if the file is created just now
+        std::streampos fp = file.tellp();
+        if(static_cast<int>(fp)==0){
+            //todo write the header
+            file << "total_damage_dealt.life" << "\t" << "total_damage_dealt.shields" << "\t" << "total_damage_taken.life" << "\t" << "total_damage_taken.shields" << "\t" << "total_healed.life" << "\t" << "total_healed.shields" << "\t" << "record time" << std::endl;
+        }
+        time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        const ScoreDetails &score_details = score.score_details;
+        file << score_details.total_damage_dealt.life << "\t" << score_details.total_damage_dealt.shields << "\t" << score_details.total_damage_taken.life << "\t" << score_details.total_damage_taken.shields << "\t" << score_details.total_healed.life << "\t" << score_details.total_healed.shields << "\t" << std::put_time(gmtime(&tt), "%F%T") << std::endl;
     }
 }
 

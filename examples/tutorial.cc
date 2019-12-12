@@ -106,8 +106,9 @@ public:
         std::cout << "Replay saved" << std::endl;
         std::vector<PlayerResult> game_result = Observation()->GetResults(); // get player result to see if this method is valid
         Score score = Observation()->GetScore();
-
-        AgentControl()->Restart();
+        OutputGameScore(score, "scores/test_scores.txt");
+        // AgentControl()->Restart(); // it only works in single player game
+        return;
     }
 };
 
@@ -129,8 +130,8 @@ int main(int argc, char *argv[])
     // coordinator.SetMultithreaded(true);
     coordinator.SetParticipants({
         CreateParticipant(Race::Terran, &bot),
-        CreateParticipant(Race::Terran, &enemy_bot),
-        // CreateComputer(Race::Terran)
+        // CreateParticipant(Race::Terran, &enemy_bot),
+        CreateComputer(Race::Terran)
     });
 
     const ObservationInterface *ob = coordinator.GetObservations().front();
