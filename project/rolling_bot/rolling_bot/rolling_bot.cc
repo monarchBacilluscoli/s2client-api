@@ -1,4 +1,5 @@
 #include "rolling_bot.h"
+#include "sc2api/sc2_score.h"
 
 namespace sc2
 {
@@ -125,7 +126,14 @@ void RollingBot::OnGameEnd()
     std::string path = "replays/last_replay.SC2Replay";
     Control()->SaveReplay(path);
     std::cout << "Replay saved!" << std::endl;
-    AgentControl()->Restart();
+    Score score = Observation()->GetScore();
+    OutputGameScore(score, "scores/test_scores.txt", m_remark);
+    if (m_current_round < m_game_round)
+    {
+        std::cout << __FUNCTION__ << std::endl;
+        ++m_current_round;
+        AgentControl()->Restart(); // It doesn't work in multi-player game
+    }
 }
 
 void RollingBot::SetIntervalLength(int frames)
@@ -150,6 +158,16 @@ void RollingBot::SetStyle(PLAY_STYLE style)
         m_solution_selector = &RollingBot::SelectMostOKSolution;
         break;
     }
+}
+
+void RollingBot::SetGameRound(int round)
+{
+    m_game_round = round;
+}
+
+void RollingBot::SetRemark(const std::string &remark)
+{
+    m_remark = remark;
 }
 
 RollingEA &RollingBot::Algorithm()

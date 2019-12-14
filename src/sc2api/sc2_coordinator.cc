@@ -354,17 +354,17 @@ void CoordinatorImp::StepAgents() {
         }
 
         control->Step(process_settings_.step_size);
-        control->WaitStep();
+        control->WaitStep();                        //1. from here we know the game has been end.
         if (process_settings_.multi_threaded) {
-            CallOnStep(a);
+            CallOnStep(a);                          //2. The first chance to call the CallOnStep() is missing (This function will call OnGameEnd() based on whether the Agent is in game or not) since it is not a multi_threaded game according to my settings.
         }
     };
 
     if (agents_.size() == 1) {
-        step_agent(agents_.front());
+        step_agent(agents_.front()); 
     }
     else {
-        RunParallel(step_agent, agents_);
+        RunParallel(step_agent, agents_);           // 0. Normal opeartion as usual
     }
 
     if (!process_settings_.multi_threaded) {
@@ -374,11 +374,11 @@ void CoordinatorImp::StepAgents() {
             }
 
             // It is possible to have a pending leave game request here.
-            if (a->Control()->PollLeaveGame()) {
+            if (a->Control()->PollLeaveGame()) {    // 3. In PollLeaveGame() it checks if the Agent is in game, is not, return true and continue
                 continue;
             }
 
-            CallOnStep(a);
+            CallOnStep(a);                          // 4. Because of step 3, the last precious call of CallOnStep (that is, the call of OnGameEnd() as I have mentioned in step 2) is missing again
         }
     }
 
@@ -883,7 +883,9 @@ bool Coordinator::Update() {
     if (error_occurred) {
         return false;
     }
-
+    if(AllGamesEnded()){
+        std::cout << __FUNCTION__ << std::endl;
+    }
     return !AllGamesEnded() || relaunched;
 }
 

@@ -62,3 +62,4 @@ doxygen.log
 .vscode/ipch
 *.bin
 *.SC2Replay
+scores/

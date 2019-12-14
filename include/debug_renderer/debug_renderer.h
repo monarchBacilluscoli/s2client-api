@@ -138,22 +138,4 @@ struct CandidateColor
     Uint8 a;
 };
 
-// class LineChartRenderer
-// {
-// private:
-//     SDL_Window *m_window = nullptr;
-//     SDL_Renderer *m_renderer = nullptr;
-
-//     static std::vector<CandidateColor> candidate_colors;
-
-// public:
-//     LineChartRenderer(/* args */);
-//     ~LineChartRenderer();
-//     void DrawLines(std::vector<std::list<float>> data_batch);
-//     // void DrawLine(std::vector<std::list<float>> data);
-
-//     void ClearRenderer();
-//     void Present();
-// };
-
 #endif //DEBUG_RENDERER_H
