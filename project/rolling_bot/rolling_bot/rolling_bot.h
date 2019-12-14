@@ -36,6 +36,11 @@ private:
     std::map<Tag, float> m_my_team_cooldown_last_frame;
     Units m_my_team;
 
+    // mics
+    int m_game_round = 10;
+    int m_current_round = 1;
+    std::string m_remark;
+
 public:
     RollingBot() = delete;
     //! the only thing this constructor needs to do is to provid all parameters
@@ -52,6 +57,9 @@ public:
     // Settings for bot
     void SetIntervalLength(int frames);
     void SetStyle(PLAY_STYLE style);
+    
+    void SetGameRound(int round);
+    void SetRemark(const std::string& remark);
 
 public:
     RollingEA &Algorithm(); // return the reference of algo obj of base class

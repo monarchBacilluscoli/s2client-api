@@ -1,5 +1,32 @@
-total_damage_dealt.life	total_damage_dealt.shields	total_damage_taken.life	total_damage_taken.shields	total_healed.life	total_healed.shields	record time
-144	0	360	0	0	0	2019-12-1202:40:43
-169	0	360	0	0	0	2019-12-1210:11:08
-165	0	360	0	0	0	2019-12-1210:11:31
-160	0	360	0	0	0	2019-12-1210:13:14
+total_damage_dealt.life	total_damage_dealt.shields	total_damage_taken.life	total_damage_taken.shields	total_healed.life	total_healed.shields	record time	remark
+140	0	360	0	0	0	2019-12-1301:24:55	
+135	0	360	0	0	0	2019-12-1302:38:50	
+110	0	360	0	0	0	2019-12-1302:40:37	
+130	0	360	0	0	0	2019-12-13 08:36:51	
+270	0	360	0	0	0	2019-12-14 00:50:19	test_remark
+144	0	360	0	0	0	2019-12-14 00:51:05	test_remark
+130	0	360	0	0	0	2019-12-14 00:59:35	
+158	0	360	0	0	0	2019-12-14 01:07:23	with priori solution, , population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+130	0	360	0	0	0	2019-12-14 01:09:13	with priori solution, , population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+105	0	360	0	0	0	2019-12-14 01:12:09	with priori solution, , population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+150	0	360	0	0	0	2019-12-14 01:13:40	with priori solution, , population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+165	0	360	0	0	0	2019-12-14 01:19:17	with priori solution, , population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+163	0	360	0	0	0	2019-12-14 01:20:23	with priori solution, , population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+130	0	360	0	0	0	2019-12-14 01:34:53	with priori solution, , population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+140	0	360	0	0	0	2019-12-14 01:36:20	with priori solution, , population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+152	0	360	0	0	0	2019-12-14 01:40:22	with priori solution, , population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+125	0	360	0	0	0	2019-12-14 01:47:04	with priori solution, , population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+130	0	360	0	0	0	2019-12-14 01:48:09	with priori solution, , population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+146	0	360	0	0	0	2019-12-14 02:03:10	test_remark
+140	0	360	0	0	0	2019-12-14 02:04:28	with priori solution, population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+75	0	360	0	0	0	2019-12-14 02:07:10	with priori solution, population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+120	0	360	0	0	0	2019-12-14 02:11:00	with priori solution, population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+135	0	360	0	0	0	2019-12-14 02:11:39	with priori solution, population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+105	0	360	0	0	0	2019-12-14 02:12:19	with priori solution, population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+125	0	360	0	0	0	2019-12-14 02:12:59	with priori solution, population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+130	0	360	0	0	0	2019-12-14 02:13:39	with priori solution, population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+145	0	360	0	0	0	2019-12-14 02:14:43	with priori solution, population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+125	0	360	0	0	0	2019-12-14 02:15:26	with priori solution, population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+115	0	360	0	0	0	2019-12-14 02:16:06	with priori solution, population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+155	0	360	0	0	0	2019-12-14 02:17:12	with priori solution, population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 
+135	0	360	0	0	0	2019-12-14 02:17:54	with priori solution, population_size: 50, max_generations: 50, command_length: 30, sim_length: 400, interval_size: 400, evaluation_multiplier: 1, 

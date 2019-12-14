@@ -883,7 +883,9 @@ bool Coordinator::Update() {
     if (error_occurred) {
         return false;
     }
-
+    if(AllGamesEnded()){
+        std::cout << __FUNCTION__ << std::endl;
+    }
     return !AllGamesEnded() || relaunched;
 }
 

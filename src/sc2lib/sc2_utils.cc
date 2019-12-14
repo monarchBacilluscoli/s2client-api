@@ -129,18 +129,18 @@ float GetTotalShieldLoss(const Units &us)
     return total_shield_loss;
 }
 
-void OutputGameScore(const Score &score, const std::string &file_path)
+void OutputGameScore(const Score &score, const std::string &file_path, const std::string &remark)
 {
     std::fstream file;
     file.open(file_path, std::ios::app | std::ios::out); // open or create a file then append data
     if (!file.is_open())
     {
-        //todo check if the folder is existing, if not, create it, Attention: different system may need different method to do it
-        #ifdef _WIN32
+//todo check if the folder is existing, if not, create it, Attention: different system may need different method to do it
+#ifdef _WIN32
 
-        #elif __linux__
+#elif __linux__
 
-        #endif
+#endif
         std::cerr << "failed to open or create the file! Check if the folder is existing." << std::endl;
         throw("failed to open the file!@" + std::string(__FUNCTION__));
     }
@@ -148,13 +148,18 @@ void OutputGameScore(const Score &score, const std::string &file_path)
     {
         //todo maybe I need to write a data header if the file is created just now
         std::streampos fp = file.tellp();
-        if(static_cast<int>(fp)==0){
+        if (static_cast<int>(fp) == 0)
+        {
             //todo write the header
-            file << "total_damage_dealt.life" << "\t" << "total_damage_dealt.shields" << "\t" << "total_damage_taken.life" << "\t" << "total_damage_taken.shields" << "\t" << "total_healed.life" << "\t" << "total_healed.shields" << "\t" << "record time" << std::endl;
+            file << "total_damage_dealt.life"
+                 << "\t"
+                 << "total_damage_dealt.shields"
+                 << "\t"
+                 << "total_damage_taken.life" << '\t' << "total_damage_taken.shields" << '\t' << "total_healed.life" << '\t' << "total_healed.shields" << '\t' << "record time" << '\t' << "remark" << std::endl;
         }
         time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         const ScoreDetails &score_details = score.score_details;
-        file << score_details.total_damage_dealt.life << "\t" << score_details.total_damage_dealt.shields << "\t" << score_details.total_damage_taken.life << "\t" << score_details.total_damage_taken.shields << "\t" << score_details.total_healed.life << "\t" << score_details.total_healed.shields << "\t" << std::put_time(gmtime(&tt), "%F%T") << std::endl;
+        file << score_details.total_damage_dealt.life << "\t" << score_details.total_damage_dealt.shields << "\t" << score_details.total_damage_taken.life << "\t" << score_details.total_damage_taken.shields << "\t" << score_details.total_healed.life << "\t" << score_details.total_healed.shields << "\t" << std::put_time(gmtime(&tt), "%F %T") << '\t' << remark << std::endl;
     }
 }
 

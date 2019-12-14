@@ -2,9 +2,9 @@
 #include <string>
 #include <iostream>
 #include <chrono>
-
-//! test include files
 #include "../rolling_bot/rolling_bot/rolling_bot.h"
+
+#define var2str(name) std::string((#name)) // convert a variable's name to string
 
 using namespace sc2;
 
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     for (size_t i = 0; i < argc; i++)
     {
         std::cout << argv[i] << std::endl;
-    }   
+    }
     // Before evething starts, kill all the superfluous processes started before.
     std::vector<std::string> process_names_to_be_killed({"SC2_x64", "gnuplot"});
     int kill_sz = process_names_to_be_killed.size();
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     }
 
     // Some settings
-    bool is_debug = true;
+    bool is_debug = false;
     std::string net_address = "127.0.0.1";
     // std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
     // std::string map_path = "EnemyTower.SC2Map";
@@ -76,12 +76,32 @@ int main(int argc, char *argv[])
     // use this to control the cauculation times per second
     uint frames = 60;
     int population_size = 50;
-    int max_generations = 200;
+    int max_generations = 50;
     int ga_muatation_rate = 0.5;
     int command_length = 30;
     int sim_length = 400;
     int interval_size = 400;
     int evaluation_multiplier = 1;
+
+    std::string point_of_expriment = "with priori solution";
+    int game_round = 10;
+    std::vector<std::string> record_remark_vec = {
+        point_of_expriment + ", ",
+        var2str(population_size) + ": ",
+        std::to_string(population_size) + ", ",
+        var2str(max_generations) + ": ",
+        std::to_string(max_generations) + ", ",
+        var2str(command_length) + ": ",
+        std::to_string(command_length) + ", ",
+        var2str(sim_length) + ": ",
+        std::to_string(sim_length) + ", ",
+        var2str(interval_size) + ": ",
+        std::to_string(interval_size) + ", ",
+        var2str(evaluation_multiplier) + ": ",
+        std::to_string(evaluation_multiplier) + ", ",
+    };
+    std::string record_remark = std::accumulate(record_remark_vec.begin(), record_remark_vec.end(), std::string());
+    
 
     DebugRenderer renderer;
 
@@ -100,13 +120,14 @@ int main(int argc, char *argv[])
     rolling_bot.SetIntervalLength(interval_size);
     rolling_bot.SetStyle(PLAY_STYLE::IRONHEAD);
     rolling_bot.Algorithm().SetRandomEngineSeed(1);
+    rolling_bot.SetRemark(record_remark);
     // dynamic_cast<RollingGA&>(rolling_bot.Algorithm()).SetMutationRate(ga_muatation_rate);
 
     // RollingBot2 rolling_bot(net_address, port_start, starcraft_path, map_path);
 
     //! participants settings here
     coordinator.SetParticipants({CreateParticipant(Race::Terran, &rolling_bot),
-                                 CreateComputer(Race::Zerg)});
+                                 CreateComputer(Race::Terran)});
     coordinator.SetPortStart(main_process_port);
     coordinator.SetRealtime(real_time);
     coordinator.SetMultithreaded(multi_threaded);
