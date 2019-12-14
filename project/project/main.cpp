@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     int interval_size = 400;
     int evaluation_multiplier = 1;
 
-    std::string point_of_expriment = "with priori solution";
+    std::string point_of_expriment = "priori solution + fix solution around enemy";
     int game_round = 10;
     std::vector<std::string> record_remark_vec = {
         point_of_expriment + ", ",
