@@ -129,7 +129,7 @@ float GetTotalShieldLoss(const Units &us)
     return total_shield_loss;
 }
 
-void OutputGameScore(const Score &score, const std::string &file_path, const std::string &remark)
+time_t OutputGameScore(const Score &score, const std::string &file_path, const std::string &remark)
 {
     std::fstream file;
     file.open(file_path, std::ios::app | std::ios::out); // open or create a file then append data
@@ -143,6 +143,7 @@ void OutputGameScore(const Score &score, const std::string &file_path, const std
 #endif
         std::cerr << "failed to open or create the file! Check if the folder is existing." << std::endl;
         throw("failed to open the file!@" + std::string(__FUNCTION__));
+        return time_t(0);
     }
     else
     {
@@ -150,7 +151,6 @@ void OutputGameScore(const Score &score, const std::string &file_path, const std
         std::streampos fp = file.tellp();
         if (static_cast<int>(fp) == 0)
         {
-            //todo write the header
             file << "total_damage_dealt.life"
                  << "\t"
                  << "total_damage_dealt.shields"
@@ -160,6 +160,7 @@ void OutputGameScore(const Score &score, const std::string &file_path, const std
         time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         const ScoreDetails &score_details = score.score_details;
         file << score_details.total_damage_dealt.life << "\t" << score_details.total_damage_dealt.shields << "\t" << score_details.total_damage_taken.life << "\t" << score_details.total_damage_taken.shields << "\t" << score_details.total_healed.life << "\t" << score_details.total_healed.shields << "\t" << std::put_time(gmtime(&tt), "%F %T") << '\t' << remark << std::endl;
+        return tt;
     }
 }
 

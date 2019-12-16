@@ -1,6 +1,8 @@
 #ifndef ROLLING_EA_H
 #define ROLLING_EA_H
 
+#include "global_defines.h"
+
 #include "evolutionary_algorithm.h"
 #include "../simulator/simulator_pool.h"
 
@@ -18,28 +20,40 @@ protected:
     Units m_enemy_team;
     GameInfo m_game_info;
     Vector2D m_playable_dis;
-    UnitTypes m_unit_types; 
-    
+    UnitTypes m_unit_types;
+
     // settings about game
     float m_attack_possibility = 0.7;
     int m_command_length = 8;
     int m_sim_length = 300;
     int m_evaluation_time_multiplier = 1; // the evaluation times for each solution (to avoid randomness)
     // methods
+#ifdef USE_GRAPHICS
     ScatterRenderer2D m_objective_distribution;
     DebugRenderers m_debug_renderers;
+#endif //USE_GRAPHICS
     bool m_is_debug = true;
     // simulators
     SimulatorPool m_simulation_pool;
 
 public:
     RollingEA() = delete;
-    RollingEA(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation, int population_size, int random_seed = 0) : EvolutionaryAlgorithm(2, max_generation, population_size, random_seed, {std::string("enemy loss"), std::string("my team loss")}), m_debug_renderers(population_size), m_simulation_pool(population_size, net_address, port_start, process_path, map_path)
+    RollingEA(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation, int population_size, int random_seed = 0) : EvolutionaryAlgorithm(2, max_generation, population_size, random_seed, {std::string("enemy loss"), std::string("my team loss")}),
+#ifdef USE_GRAPHICS
+                                                                                                                                                                                            m_debug_renderers(population_size),
+#endif //USE_GRAPHICS
+                                                                                                                                                                                            m_simulation_pool(population_size,
+                                                                                                                                                                                                              net_address,
+                                                                                                                                                                                                              port_start,
+                                                                                                                                                                                                              process_path,
+                                                                                                                                                                                                              map_path)
     {
         m_simulation_pool.StartSimsAsync();
+#ifdef USE_GRAPHICS
         m_objective_distribution.SetTitle("Objectives Distribution");
         m_objective_distribution.SetXLabel("total damage to enemy");
         m_objective_distribution.SetYLabel("total damage to me");
+#endif
         SetObjectiveNames({"Enemy Loss", "My Team Loss"});
     }
     virtual ~RollingEA() = default;
@@ -61,8 +75,10 @@ protected:
     void Generate() override;
     void Evaluate() override;
     void Select() override;
+#ifdef USE_GRAPHICS
     virtual void ShowOverallStatusGraphEachGeneration() override;
     virtual void ShowSolutionDistribution(int showed_generations_count) override;
+#endif //USE_GRAPHICS
     //! for test
     virtual void ActionAfterEachGeneration() override
     {

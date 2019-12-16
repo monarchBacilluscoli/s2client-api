@@ -1,3 +1,5 @@
+#include "../project/global_defines.h"
+
 #include <sc2api/sc2_api.h>
 #include <sc2api/sc2_score.h>
 #include <sc2lib/sc2_utils.h>
@@ -5,10 +7,7 @@
 #include <list>
 #include <chrono>
 #include <thread>
-
 #include "debug_renderer/debug_renderer.h"
-
-// // #define USE_GRAPHICS
 
 using namespace sc2;
 
@@ -39,7 +38,7 @@ public:
     Bot() = default;
     virtual void OnGameStart() final
     {
-        std::cout<<__FUNCTION__<<std::endl;
+        std::cout << __FUNCTION__ << std::endl;
         // m_all_units = Observation()->GetUnits();
         // std::cout << m_all_units.size() << '\t' << std::flush;
         std::cout << Observation()->GetGameLoop() << '\t' << std::flush;
@@ -114,9 +113,10 @@ public:
 
 int main(int argc, char *argv[])
 {
-    // kill all the previous sc2 processes
-    // KillProcess("SC2_x64");
-
+#ifdef USE_SYSTEM_COMMAND
+    //kill all the previous sc2 processes
+    KillProcess("SC2_x64");
+#endif
     Coordinator coordinator;
     coordinator.LoadSettings(argc, argv);
 
@@ -128,11 +128,9 @@ int main(int argc, char *argv[])
     Bot bot;
     EnemyBot enemy_bot;
     // coordinator.SetMultithreaded(true);
-    coordinator.SetParticipants({
-        CreateParticipant(Race::Terran, &bot),
-        // CreateParticipant(Race::Terran, &enemy_bot),
-        CreateComputer(Race::Terran)
-    });
+    coordinator.SetParticipants({CreateParticipant(Race::Terran, &bot),
+                                 // CreateParticipant(Race::Terran, &enemy_bot),
+                                 CreateComputer(Race::Terran)});
 
     const ObservationInterface *ob = coordinator.GetObservations().front();
 

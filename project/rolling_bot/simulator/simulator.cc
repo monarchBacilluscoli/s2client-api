@@ -180,23 +180,17 @@ const std::list<Unit> &Executor::GetDeadUnits(Unit::Alliance alliance) const
     }
 }
 
-void Simulator::CopyAndSetState(const ObservationInterface *ob_source, DebugRenderer *debug_renderer)
+void Simulator::CopyAndSetState(const ObservationInterface *ob_source
+#ifdef USE_GRAPHICS
+                                ,
+                                DebugRenderer *debug_renderer
+#endif //USE_GRAPHICS
+)
 {
     m_executor.Clear();
     m_executor.SetIsSetting(true);
     m_save = SaveMultiPlayerGame(ob_source);
     m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);
-    //! for test
-    //todo check the save and relative_units
-    // for (const auto& unit_state : m_save.unit_states) {
-    //     int count = 0;
-    //     if (m_relative_units.find(unit_state.unit_tag) == m_relative_units.end()) {
-    //         count++;
-    //     }
-    //     if (count > 0) {
-    //         std::cout << "relationship mistake: " << count << std::endl;
-    //     }
-    // }
     //! check the crush of unit relationship
     std::set<const Unit *> check_set;
     for (const auto &item : m_relative_units)
@@ -212,6 +206,7 @@ void Simulator::CopyAndSetState(const ObservationInterface *ob_source, DebugRend
     {
         m_executor.Control()->Save();
     }
+#ifdef USE_GRAPHICS
     if (debug_renderer)
     {
         // Maybe I only need to display the result
@@ -220,32 +215,21 @@ void Simulator::CopyAndSetState(const ObservationInterface *ob_source, DebugRend
         debug_renderer->DrawObservation(m_executor.Observation());
         debug_renderer->Present();
     }
+#endif // USE_GRAPHICS
     m_executor.SetIsSetting(false);
 }
 
-void Simulator::SetUnitsRelations(State state, Units us_copied)
-{
-    // since state object is static once it is saved, so it just needs to get
-    // the relations between units in state and units in simulator
-    for (const UnitState &state_u : state.unit_states)
-    {
-        m_relative_units[state_u.unit_tag] =
-            SelectNearestUnitFromPoint(state_u.pos, us_copied);
-    }
-}
-
-void Simulator::SetStartPoint(const std::vector<Command> &commands,
-                              const ObservationInterface *ob)
-{
-    CopyAndSetState(ob);
-    SetOrders(commands);
-}
-
-std::thread::id Simulator::Run(int steps, DebugRenderer *debug_renderer)
+std::thread::id Simulator::Run(int steps
+#ifdef USE_GRAPHICS
+                               ,
+                               DebugRenderer *debug_renderer
+#endif // USE_GRAPHICS
+)
 {
     // set false to let simu bot to use the normal mode to call the OnStep
     m_executor.SetIsSetting(false);
     int game_loop = (size_t)ceil(steps / GetStepSize());
+#ifdef USE_GRAPHICS
     if (debug_renderer)
     {
         const ObservationInterface *ob = GetObservations().front();
@@ -265,8 +249,95 @@ std::thread::id Simulator::Run(int steps, DebugRenderer *debug_renderer)
             Update();
         }
     }
+#else
+    for (size_t i = 0; i < game_loop; i++)
+    {
+        Update();
+    }
+#endif // USE_GRAPHICS
     m_executor.SetIsSetting(true);
     return std::this_thread::get_id();
+}
+
+void Simulator::SetOrders(const std::vector<Command> &commands
+#ifdef USE_GRAPHICS
+                          ,
+                          DebugRenderer *debug_renderer
+#endif // USE_GRAPHICS
+)
+{
+    // Just simply press those actions in every unit
+    //? Note that the orders can be stored into units or somewhere else is limited in StarCraft II, I need to figure out it
+    m_original_commands = commands;
+    m_commands = commands;
+    m_executor.SetIsSetting(true);
+    // std::cout << "original commands size: " << commands.size()<<std::endl;
+    // translate the command into local tag command
+    for (Command &cmd : m_commands)
+    {
+        cmd.unit_tag = m_relative_units.at(cmd.unit_tag)->tag;
+        for (ActionRaw &act : cmd.actions)
+        {
+            if (act.target_type == ActionRaw::TargetUnitTag)
+            {
+                act.target_tag = m_relative_units.at(cmd.unit_tag)->tag;
+            }
+        }
+    }
+    m_executor.SetCommands(m_commands);
+//todo need to translate the command, I mean the tags of units from the original process to simulation process
+#ifdef USE_GRAPHICS
+    if (debug_renderer)
+    {
+        // Maybe I only need to display the result
+        debug_renderer->ClearRenderer();
+        debug_renderer->DrawOrders(m_commands, m_executor.Observation());
+        debug_renderer->DrawObservation(m_executor.Observation());
+        debug_renderer->Present();
+    }
+#endif // USE_GRAPHICS
+    m_executor.SetIsSetting(false);
+}
+
+void Simulator::SetDirectOrders(const std::vector<Command> &commands
+#ifdef USE_GRAPHICS
+                                ,
+                                DebugRenderer *debug_renderer
+#endif // USE_GRAPHICS
+)
+{
+    m_commands = commands;
+    m_executor.SetIsSetting(true);
+    m_executor.SetCommands(m_commands);
+#ifdef USE_GRAPHICS
+    if (debug_renderer)
+    {
+        // Maybe I only need to display the result
+        debug_renderer->ClearRenderer();
+        debug_renderer->DrawOrders(m_commands, m_executor.Observation());
+        debug_renderer->DrawObservation(m_executor.Observation());
+        debug_renderer->Present();
+    }
+#endif // USE_GRAPHICS
+    m_executor.SetIsSetting(false);
+}
+
+void Simulator::SetUnitsRelations(State state, Units us_copied)
+{
+    // since state object is static once it is saved, so it just needs to get
+    // the relations between units in state and units in simulator
+    for (const UnitState &state_u : state.unit_states)
+    {
+        m_relative_units[state_u.unit_tag] =
+            SelectNearestUnitFromPoint(state_u.pos, us_copied);
+    }
+}
+
+void Simulator::SetStartPoint(const std::vector<Command> &commands,
+                              const ObservationInterface *ob)
+{
+    CopyAndSetState(ob);
+    SetOrders(commands);
 }
 
 const ObservationInterface *Simulator::Observation() const
@@ -345,55 +416,6 @@ void Simulator::Load()
         // I don't have to rebuild the relationships, the tags will keep
         // unchanged after Save() and Load()
     }
-}
-
-void Simulator::SetOrders(const std::vector<Command> &commands, DebugRenderer *debug_renderer)
-{
-    // Just simply press those actions in every unit
-    //? Note that the orders can be stored into units or somewhere else is limited in StarCraft II, I need to figure out it
-    m_original_commands = commands;
-    m_commands = commands;
-    m_executor.SetIsSetting(true);
-    // std::cout << "original commands size: " << commands.size()<<std::endl;
-    // translate the command into local tag command
-    for (Command &cmd : m_commands)
-    {
-        cmd.unit_tag = m_relative_units.at(cmd.unit_tag)->tag;
-        for (ActionRaw &act : cmd.actions)
-        {
-            if (act.target_type == ActionRaw::TargetUnitTag)
-            {
-                act.target_tag = m_relative_units.at(cmd.unit_tag)->tag;
-            }
-        }
-    }
-    m_executor.SetCommands(m_commands);
-    //todo need to translate the command, I mean the tags of units from the original process to simulation process
-    if (debug_renderer)
-    {
-        // Maybe I only need to display the result
-        debug_renderer->ClearRenderer();
-        debug_renderer->DrawOrders(m_commands, m_executor.Observation());
-        debug_renderer->DrawObservation(m_executor.Observation());
-        debug_renderer->Present();
-    }
-    m_executor.SetIsSetting(false);
-}
-
-void Simulator::SetDirectOrders(const std::vector<Command> &commands, DebugRenderer *debug_renderer)
-{
-    m_commands = commands;
-    m_executor.SetIsSetting(true);
-    m_executor.SetCommands(m_commands);
-    if (debug_renderer)
-    {
-        // Maybe I only need to display the result
-        debug_renderer->ClearRenderer();
-        debug_renderer->DrawOrders(m_commands, m_executor.Observation());
-        debug_renderer->DrawObservation(m_executor.Observation());
-        debug_renderer->Present();
-    }
-    m_executor.SetIsSetting(false);
 }
 
 void Simulator::SetOpponent(Agent *agent)

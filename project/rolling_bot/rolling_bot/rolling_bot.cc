@@ -1,5 +1,6 @@
 #include "rolling_bot.h"
 #include "sc2api/sc2_score.h"
+#include <sstream>
 
 namespace sc2
 {
@@ -123,11 +124,13 @@ void RollingBot::OnUnitDestroyed(const Unit *u)
 
 void RollingBot::OnGameEnd()
 {
-    std::string path = "replays/last_replay.SC2Replay";
+    Score score = Observation()->GetScore();
+    time_t recording_time = OutputGameScore(score, "scores/test_scores.txt", m_remark);
+    std::stringstream ss;
+    ss << std::put_time(gmtime(&recording_time), "%Y_%m_%d_%H_%M_%S");
+    std::string path = std::string("replays/") + ss.str() + ".SC2Replay";
     Control()->SaveReplay(path);
     std::cout << "Replay saved!" << std::endl;
-    Score score = Observation()->GetScore();
-    OutputGameScore(score, "scores/test_scores.txt", m_remark);
     if (m_current_round < m_game_round)
     {
         std::cout << __FUNCTION__ << std::endl;

@@ -1,11 +1,15 @@
 #ifndef EVOLUTIONARY_ALGORITHM_H
 #define EVOLUTIONARY_ALGORITHM_H
 
+#include "global_defines.h"
+
 #include <vector>
 #include <list>
 #include <random>
 #include "solution.h"
+#ifdef USE_GRAPHICS
 #include "../methods/graph_renderer.h"
+#endif // USE_GRAPHICS
 
 namespace sc2
 {
@@ -33,7 +37,9 @@ protected:
     std::vector<std::vector<float>> m_history_objs_ave{};        // obj-generation
     std::vector<std::vector<float>> m_history_objs_best{};       // obj-generation
     std::vector<std::vector<float>> m_history_objs_worst{};      // obj-generation
+#ifdef USE_GRAPHICS
     LineChartRenderer2D m_overall_evolution_status_renderer;
+#endif //USE_GRAPHICS
     std::mt19937 m_random_engine{0};
 
 public:
@@ -41,7 +47,9 @@ public:
     //todo a constructor with all parameters
     EvolutionaryAlgorithm(int objective_size, int max_generation, int population_size, int random_seed = 0, std::vector<std::string> objective_names = std::vector<std::string>()) : m_max_generation(max_generation), m_population_size(population_size), m_objective_size(objective_size), m_random_engine{random_seed}, m_history_objs_ave(objective_size), m_history_objs_best(objective_size), m_history_objs_worst(objective_size), m_objective_names(objective_size)
     {
+#ifdef USE_GRAPHICS
         m_overall_evolution_status_renderer.SetTitle("Evolution Status");
+#endif //USE_GRAPHICS
     };
     virtual ~EvolutionaryAlgorithm() = default;
 
@@ -69,11 +77,13 @@ protected:
     //todo maybe I need a ActionAfterEachGeneration() to store all the objs or somthing else
     virtual void ActionAfterEachGeneration();
     virtual void RecordRunningData();
-    virtual void ShowGraphEachGeneration(); //todo show the overall status
-
     virtual void RecordObjectives();
+
+#ifdef USE_GRAPHICS
+    virtual void ShowGraphEachGeneration(); //todo show the overall status
     virtual void ShowOverallStatusGraphEachGeneration();
     virtual void ShowSolutionDistribution(int showed_generations_count) = 0;
+#endif //USE_GRAPHICS
 
     virtual void ActionAfterRun() = 0;
 };
@@ -129,7 +139,9 @@ void EvolutionaryAlgorithm<T>::InitBeforeRun()
     {
         sol.objectives.resize(m_objective_size);
     }
+#ifdef USE_GRAPHICS
     m_overall_evolution_status_renderer.SetXRange(0, m_max_generation);
+#endif // USE_GRAPHICS
 }
 
 template <class T>
@@ -147,7 +159,7 @@ std::vector<Solution<T>> EvolutionaryAlgorithm<T>::Run()
         ActionAfterEachGeneration();
     }
     ActionAfterRun();
-    // return rank 1 solutions
+    // todo:only multi-objective problem need this. return rank 1 solutions
     typename std::vector<Solution<T>>::iterator end_it = m_population.begin();
     for (end_it = m_population.begin(); end_it != m_population.end(); ++end_it)
     {
@@ -156,6 +168,7 @@ std::vector<Solution<T>> EvolutionaryAlgorithm<T>::Run()
             break;
         }
     }
+    std::cout << "Finish run!@" << __FUNCTION__ << std::endl;
     return std::vector<Solution<T>>(m_population.begin(), end_it);
 }
 
@@ -163,7 +176,9 @@ template <class T>
 void EvolutionaryAlgorithm<T>::ActionAfterEachGeneration()
 {
     RecordRunningData();
+#ifdef USE_GRAPHICS
     ShowGraphEachGeneration();
+#endif // USE_GRAPHICS
     return;
 }
 
@@ -204,6 +219,7 @@ void EvolutionaryAlgorithm<T>::RecordObjectives()
     }
 }
 
+#ifdef USE_GRAPHICS
 template <class T>
 void EvolutionaryAlgorithm<T>::ShowGraphEachGeneration()
 {
@@ -236,6 +252,7 @@ void EvolutionaryAlgorithm<T>::ShowOverallStatusGraphEachGeneration()
     std::cout << std::endl;
     m_overall_evolution_status_renderer.Show(data, generation_indices, line_names);
 }
+#endif // USE_GRAPHICS
 
 } // namespace sc2
 

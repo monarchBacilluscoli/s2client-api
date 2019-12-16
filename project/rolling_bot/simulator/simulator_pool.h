@@ -1,6 +1,8 @@
 #ifndef SIMULATOR_POOL_H
 #define SIMULATOR_POOL_H
 
+#include "global_defines.h"
+
 #include <future>
 #include <chrono>
 #include <string>
@@ -22,8 +24,10 @@ struct Simulation
     Simulator sim;
     // T is used to hold result type, but for now, void is enough
     std::future<T> result_holder;
+#ifdef USE_GRAPHICS
     // useful?
     DebugRenderer *debug_renderer{nullptr};
+#endif // USE_GRAPHICS
 };
 
 class SimulatorPool
@@ -40,9 +44,12 @@ public:
     // for easy use
     void CopyStateAndSendOrdersAsync(const ObservationInterface *ob, const Population &pop);
     // Run all the simulations for specific number of steps
-    void RunSimsAsync(int steps, DebugRenderers &debug_renderers); // concurrency version
     void RunSimsAsync(int steps);
+    void RunSimsOneByOne(int steps);
+#ifdef USE_GRAPHICS
+    void RunSimsAsync(int steps, DebugRenderers &debug_renderers);    // concurrency version
     void RunSimsOneByOne(int steps, DebugRenderers &debug_renderers); // single-thread version
+#endif                                                                // USE_GRAPHICS
     // get the observation interface to get the result of the simulation
     const ObservationInterface *GetObservation(int i) const
     {
@@ -54,44 +61,12 @@ public:
     // for simple use
     float GetTeamHealthLoss(int i, Unit::Alliance team)
     {
-        // std::set<Simulation<std::thread::id> *> tset;
-        // for (const auto &item : m_sol_sim_map)
-        // {
-        //     tset.insert(item);
-        // }
-        // std::cout<<tset.size();
         return m_sol_sim_map[i]->sim.GetTeamHealthLoss(team);
     }
 
     ~SimulatorPool() = default;
 
 private:
-    // void SetAndStartSims(const std::list<Simulation<std::thread::id>>::iterator &begin,
-    //                      const std::list<Simulation<std::thread::id>>::iterator &end,
-    //                      const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_filename)
-    // {
-    //     SetSims(begin, end, net_address, port_start, process_path, map_filename);
-    //     StartSims(begin, end);
-    // }
-    // void SetSims(const std::list<Simulation<std::thread::id>>::iterator &begin,
-    //              const std::list<Simulation<std::thread::id>>::iterator &end,
-    //              const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_filename)
-    // {
-    //     for (auto it = begin; it != end; ++it)
-    //     {
-    //         Simulator &sim = (*it).sim;
-    //         //sim.SetNetAddress(m_net_address);
-    //         sim.SetPortStart(port_start);
-    //         sim.SetProcessPath(process_path);
-    //         sim.SetMapPath(map_filename);
-    //         sim.SetStepSize(1);
-    //         port_start += 2;
-    //     }
-    //     if (port_start > m_port_end)
-    //     {
-    //         m_port_end = port_start;
-    //     }
-    // }
     // settings to be stored
     std::string m_net_address = "0.0.0.0";
     int m_port_start;

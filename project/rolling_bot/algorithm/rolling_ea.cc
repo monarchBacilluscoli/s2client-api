@@ -1,3 +1,5 @@
+#include "global_defines.h"
+
 #include "rolling_ea.h"
 #include <sc2lib/sc2_utils.h>
 
@@ -75,7 +77,11 @@ void RollingEA::Evaluate(Population &pop)
             m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, pop);
             if (m_is_debug)
             {
+#ifdef USE_GRAPHICS
                 m_simulation_pool.RunSimsAsync(m_sim_length, m_debug_renderers);
+#else
+                m_simulation_pool.RunSimsAsync(m_sim_length);
+#endif //USE_GRAPHICS
             }
             else
             {
@@ -105,7 +111,11 @@ void RollingEA::Evaluate(Population &pop)
         m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, pop);
         if (m_is_debug)
         {
+#ifdef USE_GRAPHICS
             m_simulation_pool.RunSimsAsync(m_sim_length, m_debug_renderers);
+#else
+            m_simulation_pool.RunSimsAsync(m_sim_length);
+#endif
         }
         else
         {
@@ -151,7 +161,7 @@ void RollingEA::InitFromObservation()
     m_playable_dis = Vector2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
     m_unit_types = m_observation->GetUnitTypeData();
 }
-
+#ifdef USE_GRAPHICS
 void RollingEA::ShowOverallStatusGraphEachGeneration()
 {
     EA::ShowOverallStatusGraphEachGeneration();
@@ -170,6 +180,7 @@ void RollingEA::ShowSolutionDistribution(int showed_generations_count)
     }
     m_objective_distribution.Show(begin, end, group_names);
 }
+#endif //USE_GRAPHICS
 
 void RollingEA::GenerateOne(Solution<Command> &sol)
 {

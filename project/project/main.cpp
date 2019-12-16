@@ -1,10 +1,10 @@
+#include "global_defines.h"
+
 #include <sc2api/sc2_api.h>
 #include <string>
 #include <iostream>
 #include <chrono>
 #include "../rolling_bot/rolling_bot/rolling_bot.h"
-
-#define var2str(name) std::string((#name)) // convert a variable's name to string
 
 using namespace sc2;
 
@@ -14,7 +14,9 @@ class Bot : public Agent
 public:
     Bot()
     {
+#ifdef USE_GRAPHICS
         m_renderer.SetIsDisplay(false);
+#endif // USE_GRAPHICS
     }
     virtual void OnGameStart() final {}
 
@@ -36,7 +38,9 @@ public:
     }
 
 private:
+#ifdef USE_GRAPHICS
     DebugRenderer m_renderer;
+#endif // USE_GRAPHICS
     RawActions m_stored_actions;
 };
 
@@ -46,13 +50,14 @@ int main(int argc, char *argv[])
     {
         std::cout << argv[i] << std::endl;
     }
-    // Before evething starts, kill all the superfluous processes started before.
-    std::vector<std::string> process_names_to_be_killed({"SC2_x64", "gnuplot"});
+#ifdef USE_SYSTEM_COMMAND // without automatically kill the sc2 processs, you need to kill them manually
+    std::vector<std::string> process_names_to_be_killed({"SC2_x64", "gnuplot"}); // Before evething starts, kill all the superfluous processes started before.
     int kill_sz = process_names_to_be_killed.size();
     for (size_t i = 0; i < kill_sz; i++)
     {
         KillProcess(process_names_to_be_killed[i]);
     }
+#endif //USE_SYSTEM_COMMAND
 
     // Some settings
     bool is_debug = false;
@@ -101,9 +106,10 @@ int main(int argc, char *argv[])
         std::to_string(evaluation_multiplier) + ", ",
     };
     std::string record_remark = std::accumulate(record_remark_vec.begin(), record_remark_vec.end(), std::string());
-    
 
+#ifdef USE_GRAPHICS
     DebugRenderer renderer;
+#endif //USE_GRAPHICS
 
     Coordinator coordinator;
     coordinator.SetProcessPath(starcraft_path);
@@ -141,9 +147,11 @@ int main(int argc, char *argv[])
     auto start = std::chrono::steady_clock::now();
     auto end = std::chrono::steady_clock::now();
     while (start = std::chrono::steady_clock::now(),
+#ifdef USE_GRAPHICS
            renderer.ClearRenderer(),
            renderer.DrawObservation(ob), // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
            renderer.Present(),
+#endif //USE_GRAPHICS
            coordinator.Update())
     {
         end = std::chrono::steady_clock::now();
