@@ -6,6 +6,7 @@
 #include <vector>
 #include <list>
 #include <random>
+#include <iostream>
 #include "solution.h"
 #ifdef USE_GRAPHICS
 #include "../methods/graph_renderer.h"
