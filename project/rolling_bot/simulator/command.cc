@@ -2,7 +2,7 @@
 
 namespace sc2
 {
-std::map<Tag, std::deque<ActionRaw>> Command::ParseCommands(const std::vector<Command> &commands)
+std::map<Tag, std::deque<ActionRaw>> Command::ConmmandsVecToDeque(const std::vector<Command> &commands) // 使用deque，方便进行取放操作
 {
     std::map<Tag, std::deque<ActionRaw>> command_map;
     for (const Command &c : commands)

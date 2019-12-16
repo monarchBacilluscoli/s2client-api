@@ -25,14 +25,15 @@ SimulatorPool::SimulatorPool(int size,
         sim.SetProcessPath(process_path);
         std::string map_dir = GetGameMapsDirectory(process_path);
         std::string map_path = map_dir + map_filename;
-        std::string sim_map_path = map_dir+ map_filename;
+        std::string sim_map_path = map_dir + map_filename;
         size_t insert_index = sim_map_path.rfind(".SC2Map");
         sim_map_path.insert(insert_index, "Sim");
         if (DoesFileExist(sim_map_path))
         {
             sim.SetMapPath(sim_map_path);
         }
-        else{
+        else
+        {
             sim.SetMapPath(map_path);
         }
         sim.SetStepSize(1);
@@ -176,20 +177,16 @@ void SimulatorPool::CopyStateAndSendOrdersAsync(const ObservationInterface *ob, 
     // }
 }
 
+#ifdef USE_GRAPHICS
 void SimulatorPool::RunSimsAsync(int steps, DebugRenderers &debug_renderers)
 {
-#if 0  //! test code
-    if (!m_timeout_index_set.empty())
-    {
-        RunSimsOneByOne(steps, debug_renderers);
-        return;
-    }
-#endif //! test code>
     // check the debug renderer size and sims' size
+
     if (debug_renderers.size() < m_sol_sim_map.size())
     {
         throw("debug_renderers are fewer than simulations size@" + std::string(__FUNCTION__));
     }
+
     // run all the sims synchronously
     size_t sz = m_sol_sim_map.size();
     for (size_t i = 0; i < sz; i++)
@@ -235,15 +232,6 @@ void SimulatorPool::RunSimsAsync(int steps, DebugRenderers &debug_renderers)
             new_sim.sim.SetOrders(m_sol_sim_map[i]->sim.GetOriginalOrders()); //! this is not the source of the problem
             // }});
             m_sol_sim_map[i] = &new_sim;
-            //reset the debug_renderer
-            // debug_renderers[i].Reconstruct();
-
-            // destroy and reconstruct the renderer obj, since it seems the problem of the timeout
-            // debug_renderers.ReconstructAll();
-
-            //? test if I set the timeout renderer pointer to nullptr...
-
-            //? test if I set the timeout renderer pointer to nullptr.../
             break;
         }
         default:
@@ -252,11 +240,33 @@ void SimulatorPool::RunSimsAsync(int steps, DebugRenderers &debug_renderers)
             break;
         }
         }
-        // for (auto &item : thread_list)
-        // {
-        //     item.join();
-        // }
         //? Do I need to run it?
+    }
+}
+
+void SimulatorPool::RunSimsOneByOne(int steps, DebugRenderers &debug_renderers)
+{
+    if (debug_renderers.size() < m_sol_sim_map.size())
+    {
+        throw("debug_renderers are fewer than simulations size@" + std::string(__FUNCTION__));
+    }
+    size_t sz = m_sol_sim_map.size();
+    for (size_t i = 0; i < sz; i++)
+    {
+        Simulation<std::thread::id> &simulation = *m_sol_sim_map[i];
+        simulation.sim.Run(steps, m_timeout_index_set.find(i) != m_timeout_index_set.end() ? nullptr : &debug_renderers[i]);
+    }
+    // todo there is no problem handling code
+}
+#endif // USE_GRAPHICS
+
+void SimulatorPool::RunSimsOneByOne(int steps)
+{
+    size_t sz = m_sol_sim_map.size();
+    for (size_t i = 0; i < sz; i++)
+    {
+        Simulation<std::thread::id> &simulation = *m_sol_sim_map[i];
+        simulation.sim.Run(steps);
     }
 }
 
@@ -267,7 +277,12 @@ void SimulatorPool::RunSimsAsync(int steps)
     for (size_t i = 0; i < sz; i++)
     {
         Simulation<std::thread::id> &simulation = *m_sol_sim_map[i];
-        simulation.result_holder = std::async(std::launch::async, &Simulator::Run, &(m_sol_sim_map[i]->sim), steps, nullptr);
+        simulation.result_holder = std::async(std::launch::async, &Simulator::Run, &(m_sol_sim_map[i]->sim), steps
+#ifdef USE_GRAPHICS
+                                              ,
+                                              nullptr
+#endif // USE_GRAPHICS
+        );
     }
     // if there is any thread get stuck (timeout), throw it away and create a new one
     std::chrono::time_point<std::chrono::steady_clock> deadline = std::chrono::steady_clock::now() + m_wait_duration;
@@ -307,21 +322,6 @@ void SimulatorPool::RunSimsAsync(int steps)
         }
         //? Do I need to run it?
     }
-}
-
-void SimulatorPool::RunSimsOneByOne(int steps, DebugRenderers &debug_renderers)
-{
-    if (debug_renderers.size() < m_sol_sim_map.size())
-    {
-        throw("debug_renderers are fewer than simulations size@" + std::string(__FUNCTION__));
-    }
-    size_t sz = m_sol_sim_map.size();
-    for (size_t i = 0; i < sz; i++)
-    {
-        Simulation<std::thread::id> &simulation = *m_sol_sim_map[i];
-        simulation.sim.Run(steps, m_timeout_index_set.find(i) != m_timeout_index_set.end() ? nullptr : &debug_renderers[i]);
-    }
-    // todo there is no problem handling code
 }
 
 } // namespace sc2

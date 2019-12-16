@@ -1,13 +1,15 @@
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 
+#include "global_defines.h"
+
+#include "debug_renderer/debug_renderer.h"
+#include "state.h"
+#include "command.h"
 #include <sc2api/sc2_api.h>
 #include <map>
 #include <string>
-#include "debug_renderer/debug_renderer.h"
-#include "state.h"
 #include <thread>
-#include "command.h"
 #include <queue>
 #include <list>
 #include <iostream>
@@ -60,22 +62,38 @@ public:
     //! set your opponent as a built-in bot - a computer
     void SetOpponent(Difficulty difficulty);
 
-    //! direct send the orders to units
-    void SetOrders(const std::vector<Command> &commands, DebugRenderer *debug_renderer = nullptr);
-    //! get the stored orders (tag-translated)
-    std::vector<Command> GetOrders() { return m_commands; }
-    //! get the original orders (sent and stored, raw orders)
-    std::vector<Command> GetOriginalOrders() { return m_original_commands; }
-    //! no unit tag translation, use the local unit tags
-    void SetDirectOrders(const std::vector<Command> &commands, DebugRenderer *debug_renderer = nullptr);
-    //! copy the game state from a specific game observation.
-    // the debug_renderer was only used to debug this function when I worte it.
-    void CopyAndSetState(const ObservationInterface *ob, DebugRenderer *debug_renderer = nullptr);
     //! copys state and sets orders for preparation to run
-    void SetStartPoint(const std::vector<Command> &commands,
-                       const ObservationInterface *ob);
+    void SetStartPoint(const std::vector<Command> &commands, const ObservationInterface *ob);
+    //! direct send the orders to units
+    void SetOrders(const std::vector<Command> &commands
+#ifdef USE_GRAPHICS
+                   ,
+                   DebugRenderer *debug_renderer = nullptr
+#endif // USE_GRAPHICS
+    );
+    //! get the stored orders (tag-translated)
+    //! no unit tag translation, use the local unit tags
+    void SetDirectOrders(const std::vector<Command> &commands
+#ifdef USE_GRAPHICS
+                         ,
+                         DebugRenderer *debug_renderer = nullptr
+#endif // USE_GRAPHICS
+    );
+    //! copy the game state from a specific game observation.
+    void CopyAndSetState(const ObservationInterface *ob
+#ifdef USE_GRAPHICS
+                         ,
+                         DebugRenderer *debug_renderer = nullptr
+#endif // USE_GRAPHICS
+    ); // the debug_renderer was only used to debug this function when I worte it.
     //! runs for specific number of steps which can be set by user
-    std::thread::id Run(int steps, DebugRenderer *debug_renderer = nullptr);
+    std::thread::id Run(int steps
+#ifdef USE_GRAPHICS
+                        ,
+                        DebugRenderer *debug_renderer = nullptr
+#endif // USE_GRAPHICS
+    );
+
     //! load the copied state
     void Load();
     //? is anyone really needs a Run() which runs the game until gameover
@@ -87,8 +105,10 @@ public:
     ActionInterface *Actions();
     // std::thread::id iddd;
 
-    float GetTeamHealthLoss(Unit::Alliance alliance) const;                 // get health loss result
-    const std::list<Unit> &GetTeamDeadUnits(Unit::Alliance alliance) const; // get dead units result
+    std::vector<Command> GetOrders() { return m_commands; }
+    std::vector<Command> GetOriginalOrders() { return m_original_commands; } // get the original orders (sent and stored, raw orders)
+    float GetTeamHealthLoss(Unit::Alliance alliance) const;                  // get health loss result
+    const std::list<Unit> &GetTeamDeadUnits(Unit::Alliance alliance) const;  // get dead units result
 
     const std::map<Tag, const Unit *> &GetRelativeUnits() { return m_relative_units; }
     const State &GetSave() { return m_save; }

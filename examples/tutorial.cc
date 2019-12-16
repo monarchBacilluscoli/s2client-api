@@ -1,3 +1,5 @@
+#include "../project/global_defines.h"
+
 #include <sc2api/sc2_api.h>
 #include <sc2api/sc2_score.h>
 #include <sc2lib/sc2_utils.h>
@@ -5,10 +7,7 @@
 #include <list>
 #include <chrono>
 #include <thread>
-
 #include "debug_renderer/debug_renderer.h"
-
-// // #define USE_GRAPHICS
 
 using namespace sc2;
 
@@ -39,10 +38,10 @@ public:
     Bot() = default;
     virtual void OnGameStart() final
     {
-        std::cout<<__FUNCTION__<<std::endl;
-        // m_all_units = Observation()->GetUnits();
-        // std::cout << m_all_units.size() << '\t' << std::flush;
-        std::cout << Observation()->GetGameLoop() << '\t' << std::flush;
+        // std::cout << __FUNCTION__ << std::endl;
+        m_all_units = Observation()->GetUnits();
+        std::cout << __FUNCTION__ << ": " << m_all_units.size() << '\t' << std::flush;
+        std::cout << Observation()->GetGameLoop() << '\t' << std::endl;
         // Debug()->DebugKillUnits(Observation()->GetUnits());
         // Debug()->SendDebug();
     }
@@ -86,15 +85,14 @@ public:
 
     virtual void OnStep() final
     {
-        // m_all_units = Observation()->GetUnits();
-        // std::cout << m_all_units.size() << '\t' << std::flush;
+        m_all_units = Observation()->GetUnits();
+        std::cout << __FUNCTION__ << ": " << m_all_units.size() << '\t' << std::flush;
         // Debug()->DebugKillUnits(m_all_units);
-        m_all_units.size();
-        std::cout << Observation()->GetGameLoop() << '\t' << std::flush;
-        if (Observation()->GetUnits(Unit::Alliance::Self).size() <= 1 || Observation()->GetUnits(Unit::Alliance::Enemy).size() <= 1)
-        {
-            std::cout << "ready to end!" << std::endl;
-        }
+        std::cout << Observation()->GetGameLoop() << '\t' << std::endl;
+        // if (Observation()->GetUnits(Unit::Alliance::Self).size() <= 1 || Observation()->GetUnits(Unit::Alliance::Enemy).size() <= 1)
+        // {
+        //     std::cout << "ready to end!" << std::endl;
+        // }
         return;
     }
 
@@ -106,17 +104,18 @@ public:
         std::cout << "Replay saved" << std::endl;
         std::vector<PlayerResult> game_result = Observation()->GetResults(); // get player result to see if this method is valid
         Score score = Observation()->GetScore();
-        OutputGameScore(score, "scores/test_scores.txt", "test_remark");
-        // AgentControl()->Restart(); // it only works in single player game
+        OutputGameScore(score, "scores/tutorial_test_scores.txt", "test_remark");
+        AgentControl()->Restart(); // it only works in single player game
         return;
     }
 };
 
 int main(int argc, char *argv[])
 {
-    // kill all the previous sc2 processes
-    // KillProcess("SC2_x64");
-
+#ifdef USE_SYSTEM_COMMAND
+    //kill all the previous sc2 processes
+    KillProcess("SC2_x64");
+#endif
     Coordinator coordinator;
     coordinator.LoadSettings(argc, argv);
 
@@ -128,11 +127,9 @@ int main(int argc, char *argv[])
     Bot bot;
     EnemyBot enemy_bot;
     // coordinator.SetMultithreaded(true);
-    coordinator.SetParticipants({
-        CreateParticipant(Race::Terran, &bot),
-        // CreateParticipant(Race::Terran, &enemy_bot),
-        CreateComputer(Race::Terran)
-    });
+    coordinator.SetParticipants({CreateParticipant(Race::Terran, &bot),
+                                 // CreateParticipant(Race::Terran, &enemy_bot),
+                                 CreateComputer(Race::Terran)});
 
     const ObservationInterface *ob = coordinator.GetObservations().front();
 

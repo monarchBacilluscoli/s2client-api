@@ -44,7 +44,7 @@ struct Command
         return actions[index];
     }
 
-    static std::map<Tag, std::deque<ActionRaw>> ParseCommands(const std::vector<Command> &commands);
+    static std::map<Tag, std::deque<ActionRaw>> ConmmandsVecToDeque(const std::vector<Command> &commands); // 将算法返回的动作vector转换为deque
 };
 
 } // namespace sc2
