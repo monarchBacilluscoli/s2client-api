@@ -51,12 +51,12 @@ void RollingBot::OnStep()
             if (u->orders.empty() || (is_cooling_down && (m_my_team_cooldown_last_frame[u->tag] < u->weapon_cooldown)) ||
                 (!is_cooling_down && u->weapon_cooldown > 0.0001f)) // 需要下一个动作
             {
-                if (m_selected_commands.find(u->tag) == m_selected_commands.end()) // 寻找当前地图游戏中的单位在命令序列中的对应命令
+                if (m_selected_commands.find(u->tag) == m_selected_commands.end()) // 当前地图游戏中的单位在命令序列中的对应命令如果不存在
                 {
                     std::cout << "returned solution don't have this unit's commands@" + std::string(__FUNCTION__) << std::endl;
                 }
                 std::deque<ActionRaw> &unit_commands = m_selected_commands[u->tag];
-                if (!m_selected_commands.at(u->tag).empty())
+                if (!m_selected_commands.at(u->tag).empty()) // 如果当前单位的动作队列不为空
                 {
                     const ActionRaw &action = unit_commands.front();
                     //todo 注入并执行
@@ -110,6 +110,7 @@ void RollingBot::OnStep()
                     unit_commands.pop_front();
                 }
             }
+            m_my_team_cooldown_last_frame[u->tag] = u->weapon_cooldown;
         }
     }
 }

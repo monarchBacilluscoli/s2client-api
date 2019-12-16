@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     int population_size = 50;
     int max_generations = 2;
     int ga_muatation_rate = 0.5;
-    int command_length = 50;
+    int command_length = 300;
     int sim_length = 400;
     int interval_size = 300;
     int evaluation_multiplier = 1;
@@ -146,17 +146,24 @@ int main(int argc, char *argv[])
     // A fixed time update mechanism
     auto start = std::chrono::steady_clock::now();
     auto end = std::chrono::steady_clock::now();
-    while (start = std::chrono::steady_clock::now(),
+    while (
+#ifdef REAL_TIME_UPDATE
+        start = std::chrono::steady_clock::now(),
+#endif // REAL_TIME_UPDATE
 #ifdef USE_GRAPHICS
-           renderer.ClearRenderer(),
-           renderer.DrawObservation(ob), // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
-           renderer.Present(),
+        renderer.ClearRenderer(),
+        renderer.DrawObservation(ob), // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
+        renderer.Present(),
 #endif //USE_GRAPHICS
-           coordinator.Update())
+        coordinator.Update())
     {
+#ifdef REAL_TIME_UPDATE
         end = std::chrono::steady_clock::now();
         auto interval = end - start;
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / frames) - interval);
+#endif  // REAL_TIME_UPDATE
+        //! get idle units
+        std::cout << coordinator.GetObservations().front()->GetUnits([](const Unit &unit) -> bool { return unit.orders.empty() && unit.alliance == Unit::Alliance::Self; }).size() << std::endl;
     }
 
     return 0;
