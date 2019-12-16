@@ -83,12 +83,12 @@ int main(int argc, char *argv[])
     int population_size = 50;
     int max_generations = 2;
     int ga_muatation_rate = 0.5;
-    int command_length = 30;
+    int command_length = 50;
     int sim_length = 400;
-    int interval_size = 400;
+    int interval_size = 300;
     int evaluation_multiplier = 1;
 
-    std::string point_of_expriment = "priori solution + fix solution around enemy";
+    std::string point_of_expriment = "priori solution";
     int game_round = 10;
     std::vector<std::string> record_remark_vec = {
         point_of_expriment + ", ",
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     rolling_bot.Algorithm().SetCommandLength(command_length);
     rolling_bot.Algorithm().SetEvaluationTimeMultiplier(evaluation_multiplier);
     rolling_bot.SetIntervalLength(interval_size);
-    rolling_bot.SetStyle(PLAY_STYLE::IRONHEAD);
+    rolling_bot.SetStyle(PLAY_STYLE::NORMAL);
     rolling_bot.Algorithm().SetRandomEngineSeed(1);
     rolling_bot.SetRemark(record_remark);
     // dynamic_cast<RollingGA&>(rolling_bot.Algorithm()).SetMutationRate(ga_muatation_rate);
