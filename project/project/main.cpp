@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     {
         std::cout << argv[i] << std::endl;
     }
-#ifdef USE_SYSTEM_COMMAND // without automatically kill the sc2 processs, you need to kill them manually
+#ifdef USE_SYSTEM_COMMAND                                                        // without automatically kill the sc2 processs, you need to kill them manually
     std::vector<std::string> process_names_to_be_killed({"SC2_x64", "gnuplot"}); // Before evething starts, kill all the superfluous processes started before.
     int kill_sz = process_names_to_be_killed.size();
     for (size_t i = 0; i < kill_sz; i++)
