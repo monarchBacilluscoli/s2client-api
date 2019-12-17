@@ -65,10 +65,10 @@ int main(int argc, char *argv[])
     // std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
     // std::string map_path = "EnemyTower.SC2Map";
     // std::string map_path = "EnemyTowerVSMarauder.SC2Map";
-    std::string map_path = "EnemyTowerVSMarine.SC2Map";
+    // std::string map_path = "EnemyTowerVSMarine.SC2Map";
     // std::string map_path = "3speed_distant_vs_1melee.SC2Map";
     // std::string map_path = "EnemyTowerVSMarineMarauder.SC2Map";
-    // std::string map_path = "EnemyTowerVSThors.SC2Map";
+    std::string map_path = "EnemyTowerVSThors.SC2Map";
     // std::string map_path = "EnemyTowerVSThorsOptimizationTest.SC2Map";
     // std::string map_path = "EnemyTowerVSThor.SC2Map";
     // std::string map_path = "EnemyTowerVSThorMarine.SC2Map";
@@ -81,17 +81,20 @@ int main(int argc, char *argv[])
     // use this to control the cauculation times per second
     uint frames = 60;
     int population_size = 50;
-    int max_generations = 2;
+    int max_generations = 20;
     int ga_muatation_rate = 0.5;
-    int command_length = 300;
+    int command_length = 50;
     int sim_length = 400;
     int interval_size = 300;
     int evaluation_multiplier = 1;
+    PLAY_STYLE play_style = PLAY_STYLE::NORMAL;
 
-    std::string point_of_expriment = "priori solution";
+    std::string point_of_expriment = "priori + fix";
     int game_round = 10;
     std::vector<std::string> record_remark_vec = {
         point_of_expriment + ", ",
+        var2str(play_style) + ": ",
+        g_play_style_names[static_cast<int>(play_style)] + ", ",
         var2str(population_size) + ": ",
         std::to_string(population_size) + ", ",
         var2str(max_generations) + ": ",
@@ -124,7 +127,7 @@ int main(int argc, char *argv[])
     rolling_bot.Algorithm().SetCommandLength(command_length);
     rolling_bot.Algorithm().SetEvaluationTimeMultiplier(evaluation_multiplier);
     rolling_bot.SetIntervalLength(interval_size);
-    rolling_bot.SetStyle(PLAY_STYLE::NORMAL);
+    rolling_bot.SetStyle(play_style);
     rolling_bot.Algorithm().SetRandomEngineSeed(1);
     rolling_bot.SetRemark(record_remark);
     // dynamic_cast<RollingGA&>(rolling_bot.Algorithm()).SetMutationRate(ga_muatation_rate);
@@ -161,9 +164,9 @@ int main(int argc, char *argv[])
         end = std::chrono::steady_clock::now();
         auto interval = end - start;
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / frames) - interval);
-#endif  // REAL_TIME_UPDATE
-        //! get idle units
-        std::cout << coordinator.GetObservations().front()->GetUnits([](const Unit &unit) -> bool { return unit.orders.empty() && unit.alliance == Unit::Alliance::Self; }).size() << std::endl;
+#endif // REAL_TIME_UPDATE \
+    //! get idle units \
+    // std::cout << coordinator.GetObservations().front()->GetUnits([](const Unit &unit) -> bool { return unit.orders.empty() && unit.alliance == Unit::Alliance::Self; }).size() << std::endl;
     }
 
     return 0;

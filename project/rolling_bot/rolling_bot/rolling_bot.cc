@@ -4,6 +4,14 @@
 
 namespace sc2
 {
+
+const std::vector<std::string> g_play_style_names = {
+    "NORMAL",
+    "IRONHEAD",
+    "AGGRESSIVE",
+    "DEFENSIVE",
+    "RUNAWAY"};
+
 void RollingBot::OnGameStart()
 {
     // only after game starting I can initialize the ga, or the information
@@ -47,9 +55,9 @@ void RollingBot::OnStep()
         Units m_my_team = Observation()->GetUnits(Unit::Alliance::Self);
         for (const Unit *u : m_my_team)
         {
-            bool is_cooling_down = (m_my_team_cooldown_last_frame.find(u->tag) != m_my_team_cooldown_last_frame.end() && std::abs(m_my_team_cooldown_last_frame[u->tag]) < 0.0001f);
+            bool is_cooling_down = (m_my_team_cooldown_last_frame.find(u->tag) != m_my_team_cooldown_last_frame.end() && std::abs(m_my_team_cooldown_last_frame[u->tag]) > 0.01f);
             if (u->orders.empty() || (is_cooling_down && (m_my_team_cooldown_last_frame[u->tag] < u->weapon_cooldown)) ||
-                (!is_cooling_down && u->weapon_cooldown > 0.0001f)) // 需要下一个动作
+                (!is_cooling_down && u->weapon_cooldown > 0.01f)) // 需要下一个动作
             {
                 if (m_selected_commands.find(u->tag) == m_selected_commands.end()) // 当前地图游戏中的单位在命令序列中的对应命令如果不存在
                 {
@@ -134,8 +142,7 @@ void RollingBot::OnUnitDestroyed(const Unit *u)
 
 void RollingBot::OnGameEnd()
 {
-    Score score = Observation()->GetScore();
-    time_t recording_time = OutputGameScore(score, "scores/test_scores.txt", m_remark);
+    time_t recording_time = OutputGameResult(Observation(), "scores/test_scores.txt", m_remark);
     std::stringstream ss;
     ss << std::put_time(gmtime(&recording_time), "%Y_%m_%d_%H_%M_%S");
     std::string path = std::string("replays/") + ss.str() + ".SC2Replay";

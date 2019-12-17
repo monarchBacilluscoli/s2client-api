@@ -18,11 +18,11 @@ void Executor::OnStep()
     Units us = Observation()->GetUnits(Unit::Alliance::Self);
     for (const Unit *u : us)
     {
-        bool has_cooldown_time = (m_cooldown_last_frame.find(u->tag) != m_cooldown_last_frame.end() && std::abs(m_cooldown_last_frame[u->tag]) < 0.0001f);
+        bool has_cooldown_time = (m_cooldown_last_frame.find(u->tag) != m_cooldown_last_frame.end() && std::abs(m_cooldown_last_frame[u->tag]) > 0.01f);
         // check if the current has been finished
         if (u->orders.empty() ||                                                           // no order now
             (has_cooldown_time && (m_cooldown_last_frame[u->tag] < u->weapon_cooldown)) || // this unit has executed a new attack just now
-            (!has_cooldown_time && u->weapon_cooldown > 0.f))                              // the first time this unit attack (I think it can not happen)
+            (!has_cooldown_time && u->weapon_cooldown > 0.01f))                              // the first time this unit attack (I think it can not happen)
         {
             // execute the next action
             if (m_commands.find(u->tag) == m_commands.end())

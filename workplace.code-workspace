@@ -68,7 +68,10 @@
 			"memory_resource": "cpp",
 			"random": "cpp",
 			"set": "cpp",
-			"queue": "cpp"
+			"queue": "cpp",
+			"*.ipp": "cpp",
+			"hash_map": "cpp",
+			"hash_set": "cpp"
 		},
 		"files.exclude": {
 			"**.bat": true,

@@ -22,6 +22,8 @@ enum class PLAY_STYLE
     RUNAWAY = 4 // most defensive
 };
 
+extern const std::vector<std::string> g_play_style_names; // a vector used for transforming enum to string
+
 class RollingBot : public Agent
 {
 private:

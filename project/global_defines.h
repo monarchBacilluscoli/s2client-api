@@ -9,4 +9,4 @@
 #define USE_SYSTEM_COMMAND
 #endif
 
-#define var2str(name) std::string((#name)) // convert a variable's name to string
+#define var2str(name) std::string((#name)) // convert a expr (variable, class...anything you write in these parentheses) to string

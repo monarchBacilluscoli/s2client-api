@@ -170,11 +170,6 @@ void SimulatorPool::CopyStateAndSendOrdersAsync(const ObservationInterface *ob, 
             sim.SetOrders(order);
         });
     }
-    // for (size_t i = 0; i < pop_size; ++i)
-    // {
-    //     copy_holders[i].wait(); // must ensure all the thread finished, then you can do the next things
-    //     // std::cout << i << "copied!" << std::endl;
-    // }
 }
 
 #ifdef USE_GRAPHICS
@@ -209,7 +204,7 @@ void SimulatorPool::RunSimsAsync(int steps, DebugRenderers &debug_renderers)
         }
         case std::future_status::timeout:
         { // add a new simulation and reset the map... but how to handle the result?
-            std::cout << "sim " << i << " timeout..." << std::endl;
+            std::cout << "sim " << i << " timeout" << std::endl;
             m_timeout_index_set.insert(i);
 
             /* restart a new simulation and add it into my simulation pool. 
