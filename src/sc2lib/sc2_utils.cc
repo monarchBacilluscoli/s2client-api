@@ -151,12 +151,12 @@ time_t OutputGameResult(const ObservationInterface *ob, const std::string &file_
         std::streampos fp = file.tellp();
         if (static_cast<int>(fp) == 0)
         {
-            file << "total_damage_dealt.life" << '\t' << "total_damage_dealt.shields" << '\t' << "total_damage_taken.life" << '\t' << "total_damage_taken.shields" << '\t' << "total_healed.life" << '\t' << "total_healed.shields" << '\t' << "map name" << '\t' << "record time" << '\t' << "remark" << std::endl;
+            file << "total_damage_dealt.life" << '\t' << "total_damage_dealt.shields" << '\t' << "total_damage_taken.life" << '\t' << "total_damage_taken.shields" << '\t' << "total_healed.life" << '\t' << "total_healed.shields" << '\t' << "game loop" << '\t' << "map name" << '\t' << "record time" << '\t' << "remark" << std::endl;
         }
         time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         const ScoreDetails &score_details = ob->GetScore().score_details;
         std::string map_name = ob->GetGameInfo().map_name;
-        file << score_details.total_damage_dealt.life << '\t' << score_details.total_damage_dealt.shields << '\t' << score_details.total_damage_taken.life << '\t' << score_details.total_damage_taken.shields << '\t' << score_details.total_healed.life << '\t' << score_details.total_healed.shields << '\t' << map_name << '\t' << std::put_time(gmtime(&tt), "%F %T") << '\t' << remark << std::endl;
+        file << score_details.total_damage_dealt.life << '\t' << score_details.total_damage_dealt.shields << '\t' << score_details.total_damage_taken.life << '\t' << score_details.total_damage_taken.shields << '\t' << score_details.total_healed.life << '\t' << score_details.total_healed.shields << '\t' << ob->GetGameLoop() << '\t' << map_name << '\t' << std::put_time(gmtime(&tt), "%F %T") << '\t' << remark << std::endl;
         return tt;
     }
 }
