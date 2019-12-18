@@ -68,7 +68,9 @@ int main(int argc, char *argv[])
     // std::string map_path = "EnemyTowerVSMarine.SC2Map";
     // std::string map_path = "3speed_distant_vs_1melee.SC2Map";
     // std::string map_path = "EnemyTowerVSMarineMarauder.SC2Map";
-    std::string map_path = "EnemyTowerVSThors.SC2Map";
+    // std::string map_path = "EnemyTowerVSThors.SC2Map";
+    // std::string map_path = "Maze.SC2Map";
+    std::string map_path = "Maze2.SC2Map";
     // std::string map_path = "EnemyTowerVSThorsOptimizationTest.SC2Map";
     // std::string map_path = "EnemyTowerVSThor.SC2Map";
     // std::string map_path = "EnemyTowerVSThorMarine.SC2Map";
@@ -89,7 +91,7 @@ int main(int argc, char *argv[])
     int evaluation_multiplier = 1;
     PLAY_STYLE play_style = PLAY_STYLE::NORMAL;
 
-    std::string point_of_expriment = "priori + fix";
+    std::string point_of_expriment = "nothing";
     int game_round = 10;
     std::vector<std::string> record_remark_vec = {
         point_of_expriment + ", ",

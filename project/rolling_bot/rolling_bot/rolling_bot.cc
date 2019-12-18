@@ -128,15 +128,10 @@ void RollingBot::OnUnitDestroyed(const Unit *u)
     if (Observation()->GetUnits(Unit::Alliance::Self).empty())
     {
         std::cout << "No unit to use!" << std::endl;
-        char c;
-        std::cin >> c;
-        //todo I should give control to the main()
     }
     else if (Observation()->GetUnits(Unit::Alliance::Enemy).empty())
     {
         std::cout << "Looks that you have won? " << std::endl;
-        char c;
-        std::cin >> c;
     }
 }
 

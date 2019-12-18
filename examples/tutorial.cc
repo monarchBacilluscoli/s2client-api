@@ -135,6 +135,7 @@ int main(int argc, char *argv[])
 
     coordinator.LaunchStarcraft();
     coordinator.StartGame("EnemyTowerVSMarine.SC2Map");
+    // coordinator.StartGame("Maze2.SC2Map");
 
     auto start = std::chrono::steady_clock::now();
     auto end = std::chrono::steady_clock::now();

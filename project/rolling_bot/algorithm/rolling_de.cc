@@ -48,18 +48,18 @@ Solution<Command> RollingDE::Mutate(const Solution<Command> &base_sol, const Sol
                     Vector2D difference = action_m1.target_point - action_m2.target_point;
                     action_p.target_point = action_p.target_point + m_scale_factor * (difference);
                     action_p.target_point = FixOutsidePointIntoMap(action_p.target_point, m_game_info.playable_min, m_game_info.playable_max);
-                    Point2D nearest_enemy_pos_to_target_point = SelectNearestUnitFromPoint(action_p.target_point, m_enemy_team)->pos;
-                    float dis = (nearest_enemy_pos_to_target_point - action_p.target_point).modulus();
-                    float self_unit_weapon_range = m_unit_types[m_my_team[i]->unit_type].weapons.front().range;
-                    float effective_range = 2 * self_unit_weapon_range;
-                    if (dis > effective_range) // If it is out of a predefined range.
-                    {
-                        action_p.target_point = (action_p.target_point - nearest_enemy_pos_to_target_point) * effective_range / dis + nearest_enemy_pos_to_target_point;
-                    }
-                    else
-                    {
-                        ; // do nothing
-                    }
+                    // Point2D nearest_enemy_pos_to_target_point = SelectNearestUnitFromPoint(action_p.target_point, m_enemy_team)->pos;
+                    // float dis = (nearest_enemy_pos_to_target_point - action_p.target_point).modulus();
+                    // float self_unit_weapon_range = m_unit_types[m_my_team[i]->unit_type].weapons.front().range;
+                    // float effective_range = 2 * self_unit_weapon_range;
+                    // if (dis > effective_range) // If it is out of a predefined range.
+                    // {
+                    //     action_p.target_point = (action_p.target_point - nearest_enemy_pos_to_target_point) * effective_range / dis + nearest_enemy_pos_to_target_point;
+                    // }
+                    // else
+                    // {
+                    //     ; // do nothing
+                    // }
                 }
             }
         }
