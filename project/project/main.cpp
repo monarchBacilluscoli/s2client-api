@@ -69,8 +69,9 @@ int main(int argc, char *argv[])
     // std::string map_path = "3speed_distant_vs_1melee.SC2Map";
     // std::string map_path = "EnemyTowerVSMarineMarauder.SC2Map";
     // std::string map_path = "EnemyTowerVSThors.SC2Map";
-    // std::string map_path = "Maze.SC2Map";
-    std::string map_path = "Maze2.SC2Map";
+    std::string map_path = "Maze.SC2Map";
+    // std::string map_path = "Maze2.SC2Map";
+    // std::string map_path = "MazeEnemyTowerVSThors.SC2Map";
     // std::string map_path = "EnemyTowerVSThorsOptimizationTest.SC2Map";
     // std::string map_path = "EnemyTowerVSThor.SC2Map";
     // std::string map_path = "EnemyTowerVSThorMarine.SC2Map";
@@ -132,9 +133,6 @@ int main(int argc, char *argv[])
     rolling_bot.SetStyle(play_style);
     rolling_bot.Algorithm().SetRandomEngineSeed(1);
     rolling_bot.SetRemark(record_remark);
-    // dynamic_cast<RollingGA&>(rolling_bot.Algorithm()).SetMutationRate(ga_muatation_rate);
-
-    // RollingBot2 rolling_bot(net_address, port_start, starcraft_path, map_path);
 
     //! participants settings here
     coordinator.SetParticipants({CreateParticipant(Race::Terran, &rolling_bot),
