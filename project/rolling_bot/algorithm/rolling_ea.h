@@ -21,7 +21,7 @@ protected:
     GameInfo m_game_info;
     Vector2D m_playable_dis;
     UnitTypes m_unit_types; // metadata of units. Array can be indexed directly by UnitID (Unit->unit_type).
-    
+
     // settings about game
     float m_attack_possibility = 0.7;
     int m_command_length = 8;
@@ -32,6 +32,8 @@ protected:
     ScatterRenderer2D m_objective_distribution;
     DebugRenderers m_debug_renderers;
 #endif //USE_GRAPHICS
+    bool m_use_fix = false;
+    bool m_use_priori = false;
     bool m_is_debug = true;
     // simulators
     SimulatorPool m_simulation_pool;
@@ -66,6 +68,8 @@ public:
     void SetCommandLength(int command_length) { m_command_length = command_length; }
     void SetAttackPossibility(float attack_possibility) { m_attack_possibility = attack_possibility; }
     void SetEvaluationTimeMultiplier(int times) { m_evaluation_time_multiplier = times; }
+    void SetUseFix(bool use_fix) { m_use_fix = use_fix; };
+    void SetUsePriori(bool use_priori) { m_use_priori = use_priori; };
     void SetDebug(bool is_debug) { m_is_debug = is_debug; }
 
 protected:

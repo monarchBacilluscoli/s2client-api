@@ -22,7 +22,7 @@ void Executor::OnStep()
         // check if the current has been finished
         if (u->orders.empty() ||                                                           // no order now
             (has_cooldown_time && (m_cooldown_last_frame[u->tag] < u->weapon_cooldown)) || // this unit has executed a new attack just now
-            (!has_cooldown_time && u->weapon_cooldown > 0.01f))                              // the first time this unit attack (I think it can not happen)
+            (!has_cooldown_time && u->weapon_cooldown > 0.01f))                            // the first time this unit attack (I think it can not happen)
         {
             // execute the next action
             if (m_commands.find(u->tag) == m_commands.end())
@@ -428,4 +428,12 @@ void Simulator::SetOpponent(Difficulty difficulty)
 {
     SetParticipants({CreateParticipant(Race::Terran, &m_executor),
                      CreateComputer(Race::Terran, difficulty)});
+}
+
+std::string Simulator::GetSimMapPath(const std::string &map_path)
+{
+    std::string sim_map_path = map_path;
+    size_t insert_index = sim_map_path.rfind(".SC2Map");
+    sim_map_path.insert(std::min(sim_map_path.size(), insert_index), "Sim");
+    return sim_map_path;
 }

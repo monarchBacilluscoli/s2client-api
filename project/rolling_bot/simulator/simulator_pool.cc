@@ -8,29 +8,15 @@ SimulatorPool::SimulatorPool(int size,
                              const std::string &net_address,
                              int port_start,
                              const std::string &process_path,
-                             const std::string &map_filename) : m_simulations(size),
+                             const std::string &map_path) : m_simulations(size),
                                                                 m_sol_sim_map(size),
                                                                 m_net_address(net_address),
                                                                 m_port_start(port_start),
                                                                 m_port_end(port_start),
                                                                 m_process_path(process_path),
-                                                                m_map_filename(map_filename)
+                                                                m_map_path(map_path)
 {
-    std::string map_path;
-    std::string map_path_lib_sim = GetLibraryMapsDirectory() + map_filename;
-    size_t insert_index = map_path_lib_sim.rfind(".SC2Map");
-    map_path_lib_sim.insert(insert_index, "Sim");
-    std::string map_path_game_sim = GetGameMapsDirectory(process_path) + map_filename;
-    insert_index = map_path_game_sim.rfind(".SC2Map");
-    map_path_game_sim.insert(insert_index, "Sim");
-    if (DoesFileExist(map_path_lib_sim))
-    {
-        map_path = map_path_lib_sim;
-    }
-    else if (DoesFileExist(map_path_game_sim))
-    {
-        map_path = map_path_game_sim;
-    }
+    std::string sim_map_path = Simulator::GetSimMapPath(map_path);
     int i = 0;
     for (Simulation<std::thread::id> &simulation : m_simulations)
     {
@@ -38,7 +24,7 @@ SimulatorPool::SimulatorPool(int size,
         //sim.SetNetAddress(m_net_address);
         sim.SetPortStart(port_start);
         sim.SetProcessPath(process_path);
-        sim.SetMapPath(map_path);
+        sim.SetMapPath(sim_map_path);
         sim.SetStepSize(1);
         port_start += 2;
         m_sol_sim_map[i++] = &simulation; // don't forget to set the map
@@ -46,10 +32,11 @@ SimulatorPool::SimulatorPool(int size,
     m_port_end = port_start;
 };
 
-void SimulatorPool::SetSims(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_filename)
+void SimulatorPool::SetSims(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path)
 {
     m_simulations.resize(size);
     m_sol_sim_map.resize(size);
+    std::string sim_map_path = Simulator::GetSimMapPath(map_path);
     int i = 0;
     for (Simulation<std::thread::id> &simulation : m_simulations)
     {
@@ -57,7 +44,7 @@ void SimulatorPool::SetSims(int size, const std::string &net_address, int port_s
         //sim.SetNetAddress(m_net_address);
         sim.SetPortStart(port_start);
         sim.SetProcessPath(process_path);
-        sim.SetMapPath(map_filename);
+        sim.SetMapPath(sim_map_path);
         sim.SetStepSize(1);
         port_start += 2;
         m_sol_sim_map[i++] = &simulation; // don't forget to set the map
@@ -77,7 +64,16 @@ void SimulatorPool::StartSimsAsync()
         // std::cout << i++ << std::endl;
         simulation->result_holder = std::async(std::launch::async, [sim = simulation] { //note sim is a pointer
             sim->sim.LaunchStarcraft();
-            sim->sim.StartGame();
+            try
+            {
+                sim->sim.StartGame();
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << e.what() << '\n';
+                std::cerr << "Another map without endgame trigger named in this form \"<thismapname>+Sim.SC2Map\" is needed, or the simulator can not run properly, go checking it@" << __FUNCTION__;
+                exit(-1);
+            }
             return std::this_thread::get_id();
         });
     }
@@ -103,7 +99,7 @@ void SimulatorPool::CopyStateAndSendOrdersAsync(const ObservationInterface *ob, 
         {
             m_simulations.emplace_back(Simulation<std::thread::id>());
             Simulator &sim = m_simulations.back().sim;
-            sim.SetBaseSettings(m_port_end, m_process_path, m_map_filename, 1);
+            sim.SetBaseSettings(m_port_end, m_process_path, m_map_path, 1);
 
             m_simulations.back().result_holder = std::async(std::launch::async, [&] {
                 sim.LaunchStarcraft();
@@ -148,7 +144,7 @@ void SimulatorPool::CopyStateAndSendOrdersAsync(const ObservationInterface *ob, 
         {
             m_simulations.emplace_back(Simulation<std::thread::id>());
             Simulator &sim = m_simulations.back().sim;
-            sim.SetBaseSettings(m_port_end, m_process_path, m_map_filename, 1);
+            sim.SetBaseSettings(m_port_end, m_process_path, m_map_path, 1);
 
             m_simulations.back().result_holder = std::async(std::launch::async, [&] {
                 sim.LaunchStarcraft();
@@ -303,7 +299,7 @@ void SimulatorPool::RunSimsAsync(int steps)
             Simulation<std::thread::id> sim = Simulation<std::thread::id>();
             m_simulations.emplace_back();
             Simulation<std::thread::id> &new_sim = m_simulations.back();
-            new_sim.sim.SetBaseSettings(m_port_end, m_process_path, m_map_filename);
+            new_sim.sim.SetBaseSettings(m_port_end, m_process_path, m_map_path);
             m_port_end += 2;
             new_sim.sim.LaunchStarcraft();
             new_sim.sim.StartGame();

@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
     // Some settings
     bool is_debug = false;
     std::string net_address = "127.0.0.1";
+    std::string map_path; // you can set it here, but it looks like setting it in the form of debug param is better
     // std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
     // std::string map_path = "EnemyTower.SC2Map";
     // std::string map_path = "EnemyTowerVSMarauder.SC2Map";
@@ -69,7 +70,7 @@ int main(int argc, char *argv[])
     // std::string map_path = "3speed_distant_vs_1melee.SC2Map";
     // std::string map_path = "EnemyTowerVSMarineMarauder.SC2Map";
     // std::string map_path = "EnemyTowerVSThors.SC2Map";
-    std::string map_path = "Maze.SC2Map";
+    // std::string map_path = "Maze.SC2Map";
     // std::string map_path = "Maze2.SC2Map";
     // std::string map_path = "MazeEnemyTowerVSThors.SC2Map";
     // std::string map_path = "EnemyTowerVSThorsOptimizationTest.SC2Map";
@@ -84,15 +85,17 @@ int main(int argc, char *argv[])
     // use this to control the cauculation times per second
     uint frames = 60;
     int population_size = 50;
-    int max_generations = 20;
+    int max_generations = 50;
     int ga_muatation_rate = 0.5;
     int command_length = 50;
     int sim_length = 400;
     int interval_size = 300;
     int evaluation_multiplier = 1;
     PLAY_STYLE play_style = PLAY_STYLE::NORMAL;
+    bool use_fix = false;
+    bool use_priori = true;
 
-    std::string point_of_expriment = "nothing";
+    std::string point_of_expriment = std::string(use_priori ? "priori " : "") + (use_fix ? "fix" : "");
     int game_round = 10;
     std::vector<std::string> record_remark_vec = {
         point_of_expriment + ", ",
@@ -118,8 +121,9 @@ int main(int argc, char *argv[])
 #endif //USE_GRAPHICS
 
     Coordinator coordinator;
-    coordinator.SetProcessPath(starcraft_path);
     coordinator.LoadSettings(argc, argv);
+    coordinator.SetProcessPath(starcraft_path);
+    map_path = coordinator.GetMapPath(); // you can set your own map_path here
 
     //! Bots here
     Bot bot;
@@ -129,9 +133,11 @@ int main(int argc, char *argv[])
     rolling_bot.Algorithm().SetSimLength(sim_length);
     rolling_bot.Algorithm().SetCommandLength(command_length);
     rolling_bot.Algorithm().SetEvaluationTimeMultiplier(evaluation_multiplier);
+    rolling_bot.Algorithm().SetRandomEngineSeed(1);
+    rolling_bot.Algorithm().SetUseFix(use_fix);
+    rolling_bot.Algorithm().SetUsePriori(use_priori);
     rolling_bot.SetIntervalLength(interval_size);
     rolling_bot.SetStyle(play_style);
-    rolling_bot.Algorithm().SetRandomEngineSeed(1);
     rolling_bot.SetRemark(record_remark);
 
     //! participants settings here

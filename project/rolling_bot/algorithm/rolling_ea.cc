@@ -32,25 +32,27 @@ void RollingEA::Generate()
     {
         GenerateOne(m_population[i]);
     }
-    // generate some solutions with priori knowledge
-    // int enemy_sz = std::min(m_enemy_team.size(), (size_t)m_population_size / 5);
-    // for (size_t i = 0; i < enemy_sz; ++i)
-    // {
-    //     Solution<Command> &random_sol = m_population[i];
-    //     Point2D target_position = m_enemy_team[i]->pos;
-    //     int unit_sz = random_sol.variable.size();
-    //     for (size_t j = 0; j < unit_sz; ++j)
-    //     {
-    //         const Unit *unit = m_observation->GetUnit(random_sol.variable[j].unit_tag);
-    //         RawActions &actions = random_sol.variable[j].actions;
-    //         int action_sz = actions.size();
-    //         for (size_t k = 0; k < action_sz; k++)
-    //         {
-    //             Vector2D u_to_e = target_position - unit->pos;
-    //             actions[k].target_point = unit->pos + u_to_e * ((u_to_e.modulus() - m_unit_types[unit->unit_type].weapons.front().range) / u_to_e.modulus());
-    //         }
-    //     }
-    // }
+    if (m_use_priori)   // generate some solutions with priori knowledge
+    {
+        int enemy_sz = std::min(m_enemy_team.size(), (size_t)m_population_size / 5);
+        for (size_t i = 0; i < enemy_sz; ++i)
+        {
+            Solution<Command> &random_sol = m_population[i];
+            Point2D target_position = m_enemy_team[i]->pos;
+            int unit_sz = random_sol.variable.size();
+            for (size_t j = 0; j < unit_sz; ++j)
+            {
+                const Unit *unit = m_observation->GetUnit(random_sol.variable[j].unit_tag);
+                RawActions &actions = random_sol.variable[j].actions;
+                int action_sz = actions.size();
+                for (size_t k = 0; k < action_sz; k++)
+                {
+                    Vector2D u_to_e = target_position - unit->pos;
+                    actions[k].target_point = unit->pos + u_to_e * ((u_to_e.modulus() - m_unit_types[unit->unit_type].weapons.front().range) / u_to_e.modulus());
+                }
+            }
+        }
+    }
 }
 
 void RollingEA::Evaluate()
@@ -227,18 +229,21 @@ void RollingEA::GenerateOne(Solution<Command> &sol)
                 }
             }
             action_raw.target_point = FixOutsidePointIntoMap(action_raw.target_point, m_game_info.playable_min, m_game_info.playable_max); // fix the target point outside the
-            // Point2D nearest_enemy_pos_to_target_point = SelectNearestUnitFromPoint(action_raw.target_point, m_enemy_team)->pos;
-            // float dis = (nearest_enemy_pos_to_target_point - action_raw.target_point).modulus();
-            // float self_unit_weapon_range = m_unit_types[m_my_team[i]->unit_type].weapons.front().range;
-            // float effective_range = 2 * self_unit_weapon_range;
-            // if (dis > effective_range) // If it is out of a predefined range.
-            // {
-            //     action_raw.target_point = (action_raw.target_point - nearest_enemy_pos_to_target_point) * effective_range / dis + nearest_enemy_pos_to_target_point;
-            // }
-            // else
-            // {
-            //     ; // do nothing
-            // }
+            if (m_use_fix)
+            {
+                Point2D nearest_enemy_pos_to_target_point = SelectNearestUnitFromPoint(action_raw.target_point, m_enemy_team)->pos;
+                float dis = (nearest_enemy_pos_to_target_point - action_raw.target_point).modulus();
+                float self_unit_weapon_range = m_unit_types[m_my_team[i]->unit_type].weapons.front().range;
+                float effective_range = 2 * self_unit_weapon_range;
+                if (dis > effective_range) // If it is out of a predefined range.
+                {
+                    action_raw.target_point = (action_raw.target_point - nearest_enemy_pos_to_target_point) * effective_range / dis + nearest_enemy_pos_to_target_point;
+                }
+                else
+                {
+                    ; // do nothing
+                }
+            }
         }
     }
 }

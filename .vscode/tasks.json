@@ -26,6 +26,15 @@
         },
         {
             "type": "shell",
+            "label": "kill previous SC2 processes",
+            "command": "ps -aux| grep SC2_x64 | grep -v grep |awk '{print $2}' | xargs kill",
+            "args": [],
+            "options": {
+                "cwd": "${cwd}/"
+            }
+        },
+        {
+            "type": "shell",
             "label": "g++ build active file",
             "command": "/usr/bin/g++",
             "args": [

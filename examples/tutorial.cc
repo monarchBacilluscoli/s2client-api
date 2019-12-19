@@ -38,7 +38,6 @@ public:
     Bot() = default;
     virtual void OnGameStart() final
     {
-        // std::cout << __FUNCTION__ << std::endl;
         m_all_units = Observation()->GetUnits();
         std::cout << __FUNCTION__ << ": " << m_all_units.size() << '\t' << std::flush;
         std::cout << Observation()->GetGameLoop() << '\t' << std::endl;
@@ -99,7 +98,7 @@ public:
     virtual void OnGameEnd() final
     {
         std::cout << "Game ended!" << std::endl;
-        std::string path = "replays/last_replay.SC2Replay";
+        std::string path = "replays/last_tutorial.SC2Replay";
         Control()->SaveReplay(path);
         std::cout << "Replay saved" << std::endl;
         std::vector<PlayerResult> game_result = Observation()->GetResults(); // get player result to see if this method is valid
@@ -134,22 +133,28 @@ int main(int argc, char *argv[])
     const ObservationInterface *ob = coordinator.GetObservations().front();
 
     coordinator.LaunchStarcraft();
-    coordinator.StartGame("EnemyTowerVSMarine.SC2Map");
+    coordinator.StartGame("MazeEnemyTowerVSThors.SC2Map");
     // coordinator.StartGame("Maze2.SC2Map");
-
+#ifdef REAL_TIME_UPDATE
     auto start = std::chrono::steady_clock::now();
     auto end = std::chrono::steady_clock::now();
-    while (start = std::chrono::steady_clock::now(),
+#endif //REAL_TIME_UPDATE
+    while (
+#ifdef REAL_TIME_UPDATE
+        start = std::chrono::steady_clock::now(),
+#endif //REAL_TIME_UPDATE
 #ifdef USE_GRAPHICS
-           renderer.ClearRenderer(),
-           renderer.DrawObservation(ob), // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
-           renderer.Present(),
+        renderer.ClearRenderer(),
+        renderer.DrawObservation(ob), // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
+        renderer.Present(),
 #endif // USE_GRAPHICS
-           coordinator.Update())
+        coordinator.Update())
     {
+#ifdef REAL_TIME_UPDATE
         end = std::chrono::steady_clock::now();
         auto interval = end - start;
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / frames) - interval);
+#endif // REAL_TIME_UPDATE
     }
 
     return 0;

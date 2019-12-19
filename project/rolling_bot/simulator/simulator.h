@@ -49,6 +49,7 @@ private:
 
 class Simulator : public Coordinator
 {
+
 public:
     Simulator()
     {
@@ -97,11 +98,11 @@ public:
     //! load the copied state
     void Load();
     //? is anyone really needs a Run() which runs the game until gameover
-    //! exposes the whole ObservationInterface to user
+    //! exposes ObservationInterface of the executor
     const ObservationInterface *Observation() const;
-    //! exposes DebugInterface
+    //! exposes DebugInterface of the executor
     DebugInterface *Debug();
-    //! exposes ActionInterface
+    //! exposes ActionInterface of the executor
     ActionInterface *Actions();
     // std::thread::id iddd;
 
@@ -132,6 +133,9 @@ private:
 
     //! form resource tag to target unit
     std::map<Tag, const Unit *> m_relative_units;
+
+public:
+    static std::string GetSimMapPath(const std::string &map_path);
 };
 
 } // namespace sc2

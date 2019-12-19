@@ -72,7 +72,7 @@ private:
     int m_port_start;
     int m_port_end = m_port_start;
     std::string m_process_path;
-    std::string m_map_filename;
+    std::string m_map_path;
     std::chrono::milliseconds m_wait_duration{100000};
 
     // observation interface to store the game state
