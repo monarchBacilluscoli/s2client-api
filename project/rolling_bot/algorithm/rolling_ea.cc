@@ -52,6 +52,7 @@ void RollingEA::InitBeforeRun()
 void RollingEA::InitOnlySelfMembersBeforeRun()
 {                          // doesn't call the base class's Init function
     InitFromObservation(); // set the m_my_team and some other things
+    m_convergence_termination_manager.clear(); // must refresh the state of it
     for (Solution<Command> &sol : m_population)
     {
         sol.variable.resize(m_my_team.size());

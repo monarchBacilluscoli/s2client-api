@@ -87,9 +87,9 @@ public:
     TERMINATION_CONDITION GetTerminationCondition() const { return m_termination_condition; };
     int GetCurrentGeneration() const { return m_current_generation; };
     int GetMaxGeneration() const { return m_max_generation; };
-    std::vector<float> GetLastObjsAverage() const { return m_history_objs_ave.back(); };
-    std::vector<float> GetLastObjsBest() const { return m_history_objs_best.back(); };
-    std::vector<float> GetLastObjsWorst() const { return m_history_objs_worst.back(); };
+    std::vector<float> GetLastObjsAverage() const;
+    std::vector<float> GetLastObjsBest() const;
+    std::vector<float> GetLastObjsWorst() const;
 
     virtual Population Run();
 
@@ -146,6 +146,39 @@ void EvolutionaryAlgorithm<T>::SetObjectiveNames(const std::vector<std::string> 
 }
 
 template <class T>
+std::vector<float> EvolutionaryAlgorithm<T>::GetLastObjsAverage() const
+{
+    std::vector<float> last_obj_aver(m_objective_size);
+    for (int i = 0; i < m_objective_size; ++i)
+    {
+        last_obj_aver[i] = m_history_objs_ave[i].back();
+    }
+    return last_obj_aver;
+}
+
+template <class T>
+std::vector<float> EvolutionaryAlgorithm<T>::GetLastObjsBest() const
+{
+    std::vector<float> last_obj_best(m_objective_size);
+    for (int i = 0; i < m_objective_size; ++i)
+    {
+        last_obj_best[i] = m_history_objs_best[i].back();
+    }
+    return last_obj_best;
+}
+
+template <class T>
+std::vector<float> EvolutionaryAlgorithm<T>::GetLastObjsWorst() const
+{
+    std::vector<float> last_obj_worst(m_objective_size);
+    for (int i = 0; i < m_objective_size; ++i)
+    {
+        last_obj_worst[i] = m_history_objs_worst[i].back();
+    }
+    return last_obj_worst;
+}
+
+template <class T>
 void EvolutionaryAlgorithm<T>::InitBeforeRun()
 {
     m_population.clear();
@@ -178,7 +211,7 @@ std::vector<Solution<T>> EvolutionaryAlgorithm<T>::Run()
     Generate();
     Evaluate();
     ActionAfterEachGeneration(); // you need to run it after the first generation
-    for (m_current_generation = 1; m_current_generation <= m_max_generation; ++m_current_generation)
+    for (m_current_generation = 1; !m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE](); ++m_current_generation)
     {
         Breed();
         Evaluate();
@@ -194,7 +227,7 @@ std::vector<Solution<T>> EvolutionaryAlgorithm<T>::Run()
             break;
         }
     }
-    std::cout << "Finish run!@" << __FUNCTION__ << std::endl;
+    std::cout << "Finish run after " << m_current_generation - 1 << " generation!@" << __FUNCTION__ << std::endl;
     return std::vector<Solution<T>>(m_population.begin(), end_it);
 }
 

@@ -19,8 +19,8 @@ public:
     private:
         // settings
         const RollingEA &m_algo;
-        float m_no_improve_tolerance = 10.f;
-        int m_max_no_impreve_generation = 5;
+        float m_no_improve_tolerance = .2f;
+        int m_max_no_impreve_generation = 20;
         // data
         int m_current_no_improve_generation = 0;
         std::vector<float> m_last_record_obj_average;
@@ -60,7 +60,7 @@ protected:
     // simulators
     SimulatorPool m_simulation_pool;
     // methods
-    ConvergenceTermination m_convergence_termination_checker{*this};
+    ConvergenceTermination m_convergence_termination_manager{*this};
 
 public:
     RollingEA() = delete;
@@ -74,7 +74,7 @@ public:
                                                                                                                                                                                                               process_path,
                                                                                                                                                                                                               map_path)
     {
-        m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE] = std::ref(m_convergence_termination_checker);
+        m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE] = std::ref(m_convergence_termination_manager);
         m_simulation_pool.StartSimsAsync();
 #ifdef USE_GRAPHICS
         m_objective_distribution.SetTitle("Objectives Distribution");
