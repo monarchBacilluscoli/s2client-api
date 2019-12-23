@@ -14,7 +14,7 @@ public:
     using EA = EvolutionaryAlgorithm<Command>;
 
 public:
-    class ConvergenceTermination
+    class ConvergenceTermination // convergence termination condition checker for this class
     {
     private:
         // settings
@@ -29,6 +29,11 @@ public:
         ConvergenceTermination(const RollingEA &algo, int max_no_improve_generation = 5, float no_improve_tolerance = 10.f) : m_algo(algo), m_max_no_impreve_generation(max_no_improve_generation), m_no_improve_tolerance(no_improve_tolerance){};
         ~ConvergenceTermination() = default;
         bool operator()();
+
+        float GetNoImproveTolerance() { return m_no_improve_tolerance; };
+        int GetMaxNoImproveGeneration() { return m_max_no_impreve_generation; };
+        void SetNoImproveTolerance(float no_improve_tolerance) { m_no_improve_tolerance = no_improve_tolerance; };
+        void SetMaxNoInproveGeneration(int max_no_improve_generation) { m_max_no_impreve_generation = max_no_improve_generation; };
         void clear(); // for the use of next run
     };
 
@@ -40,14 +45,11 @@ protected:
     GameInfo m_game_info;
     Vector2D m_playable_dis;
     UnitTypes m_unit_types; // metadata of units. Array can be indexed directly by UnitID (Unit->unit_type).
-
     // settings about game
     float m_attack_possibility = 0.7;
     int m_command_length = 8;
     int m_sim_length = 300;
     int m_evaluation_time_multiplier = 1; // the evaluation times for each solution (to avoid randomness)
-    // methods
-    std::function<bool()> convergence_termination = [&]() -> bool {};
 #ifdef USE_GRAPHICS
     ScatterRenderer2D m_objective_distribution;
     DebugRenderers m_debug_renderers;
@@ -57,6 +59,8 @@ protected:
     bool m_is_debug = true;
     // simulators
     SimulatorPool m_simulation_pool;
+    // methods
+    ConvergenceTermination m_convergence_termination_checker(*this);
 
 public:
     RollingEA() = delete;
@@ -70,7 +74,8 @@ public:
                                                                                                                                                                                                               process_path,
                                                                                                                                                                                                               map_path)
     {
-        // m_termination_condition[TERMINATION_CONDITION::CONVERGENCE] =
+        m_convergence_termination_checker
+            termination_conditions[TERMINATION_CONDITION::CONVERGENCE] = ConvergenceTermination(*this);
         m_simulation_pool.StartSimsAsync();
 #ifdef USE_GRAPHICS
         m_objective_distribution.SetTitle("Objectives Distribution");

@@ -8,24 +8,28 @@ namespace sc2
 
 bool RollingEA::ConvergenceTermination::operator()()
 {
-    //todo compare the last two averages
     std::vector<float> current_averages = m_algo.GetLastObjsAverage();
-    if (m_last_record_obj_average.empty())
-    { // check for the first time
+    if (m_last_record_obj_average.empty()) // the first time to check
+    {
+        m_last_record_obj_average = current_averages;
         return false;
     }
     float current_difference = current_averages[0] - current_averages[1];
     float last_difference = m_last_record_obj_average[0] - m_last_record_obj_average[1];
-    if (std::abs(current_difference - last_difference) > m_no_improve_tolerance)
+    m_last_record_obj_average = current_averages;
+    if (std::abs(current_difference - last_difference) > m_no_improve_tolerance) // improve from last generation
     {
         m_current_no_improve_generation = 0;
         return false;
     }
-    else if (++m_current_no_improve_generation > m_max_no_impreve_generation)
+    else if (++m_current_no_improve_generation < m_max_no_impreve_generation) // no improvement from last generation
+    {
+        return false;
+    }
+    else
     {
         return true;
     }
-    m_last_record_obj_average = current_averages;
 }
 
 void RollingEA::ConvergenceTermination::clear()

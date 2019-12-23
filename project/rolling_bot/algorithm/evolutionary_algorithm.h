@@ -41,13 +41,13 @@ protected:
     std::vector<std::string> m_objective_names{std::vector<std::string>(m_objective_size)};
     std::map<TERMINATION_CONDITION, std::function<bool()>> termination_conditions = {
         // if true, stop loop
-        {TERMINATION_CONDITION::MAX_GENERATION, std::function<bool()>> ([&]() -> bool {
-                                                    m_current_generation > m_max_generation;
-                                                })},
-        {TERMINATION_CONDITION::CONVERGENCE, std::function<bool()>> ()}, /* add it by yourself */
-        {TERMINATION_CONDITION::MAX_EVALUATION, std::function<bool()>> ([&]() -> bool {
-                                                    m_current_evaluation > m_max_evaluation;
-                                                })},
+        {TERMINATION_CONDITION::MAX_GENERATION, std::function<bool()>([&]() -> bool {
+             return m_current_generation > m_max_generation;
+         })},
+        {TERMINATION_CONDITION::CONVERGENCE, std::function<bool()>()}, /* add it by yourself */
+        {TERMINATION_CONDITION::MAX_EVALUATION, std::function<bool()>([&]() -> bool {
+             return m_current_evaluation > m_max_evaluation;
+         })},
     };
     //! data
     Population m_population{};
@@ -79,7 +79,7 @@ public:
     void SetObjectiveNames(const std::vector<std::string> &objective_names);
     void SetRandomEngineSeed(int seed) { m_random_engine.seed(seed); };
     void SetTerminationCondition(TERMINATION_CONDITION termination_condition) { m_termination_condition = termination_condition; };
-    void SetMaxGeneration(int max_generation){m_max_generation = max_generation};
+    void SetMaxGeneration(int max_generation) { m_max_generation = max_generation; };
 
     int GetPopulationSize() const { return m_population_size; };
     int GetObjectiveSize() const { return m_objective_size; };
@@ -87,9 +87,9 @@ public:
     TERMINATION_CONDITION GetTerminationCondition() const { return m_termination_condition; };
     int GetCurrentGeneration() const { return m_current_generation; };
     int GetMaxGeneration() const { return m_max_generation; };
-    std::vector<float> GetLastObjsAverage() const {return m_history_objs_ave.back()};
-    std::vector<float> GetLastObjsBest() const {return m_history_objs_best.back()};
-    std::vector<float> GetLastObjsWorst() const {return m_history_objs_worst.back()};
+    std::vector<float> GetLastObjsAverage() const { return m_history_objs_ave.back(); };
+    std::vector<float> GetLastObjsBest() const { return m_history_objs_best.back(); };
+    std::vector<float> GetLastObjsWorst() const { return m_history_objs_worst.back(); };
 
     virtual Population Run();
 
@@ -119,7 +119,7 @@ void EvolutionaryAlgorithm<T>::SetObjectiveSize(int obj_size)
 {
     if (m_objective_names.size() != 0 && m_objective_names.size() != obj_size)
     {
-        throw("objnames_size you have set should be equal to obj_size sent in@"__FUNCTION__);
+        throw("objnames_size you have set should be equal to obj_size sent in@" + __FUNCTION__);
     }
     else
     {
@@ -141,7 +141,7 @@ void EvolutionaryAlgorithm<T>::SetObjectiveNames(const std::vector<std::string> 
     }
     else
     {
-        throw("objs_size you have set should be equal to objective_names.size() sent in@"__FUNCTION__);
+        throw(std::string("objs_size you have set should be equal to objective_names.size() sent in@") + __FUNCTION__);
     }
 }
 
