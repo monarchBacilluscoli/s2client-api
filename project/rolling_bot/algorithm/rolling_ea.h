@@ -60,7 +60,7 @@ protected:
     // simulators
     SimulatorPool m_simulation_pool;
     // methods
-    ConvergenceTermination m_convergence_termination_checker(*this);
+    ConvergenceTermination m_convergence_termination_checker{*this};
 
 public:
     RollingEA() = delete;
@@ -74,8 +74,7 @@ public:
                                                                                                                                                                                                               process_path,
                                                                                                                                                                                                               map_path)
     {
-        m_convergence_termination_checker
-            termination_conditions[TERMINATION_CONDITION::CONVERGENCE] = ConvergenceTermination(*this);
+        m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE] = std::ref(m_convergence_termination_checker);
         m_simulation_pool.StartSimsAsync();
 #ifdef USE_GRAPHICS
         m_objective_distribution.SetTitle("Objectives Distribution");

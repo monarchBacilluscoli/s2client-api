@@ -39,7 +39,7 @@ protected:
     TERMINATION_CONDITION m_termination_condition = TERMINATION_CONDITION::CONVERGENCE;
     int m_max_generation = 10;
     std::vector<std::string> m_objective_names{std::vector<std::string>(m_objective_size)};
-    std::map<TERMINATION_CONDITION, std::function<bool()>> termination_conditions = {
+    std::map<TERMINATION_CONDITION, std::function<bool()>> m_termination_conditions = {
         // if true, stop loop
         {TERMINATION_CONDITION::MAX_GENERATION, std::function<bool()>([&]() -> bool {
              return m_current_generation > m_max_generation;
