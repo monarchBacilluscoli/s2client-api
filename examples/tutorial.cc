@@ -92,6 +92,10 @@ public:
         // {
         //     std::cout << "ready to end!" << std::endl;
         // }
+        if (Observation()->GetGameLoop() > 100)
+        {
+            Actions()->UnitCommand(Observation()->GetUnits(Unit::Alliance::Self), ABILITY_ID::STOP_STOP);
+        }
         return;
     }
 
@@ -111,6 +115,8 @@ public:
 
 int main(int argc, char *argv[])
 {
+    Point2D new_p = FixOutsidePointIntoCircle(Point2D(1, -2), Point2D(0, 0), 3);
+
 #ifdef USE_SYSTEM_COMMAND
     //kill all the previous sc2 processes
     KillProcess("SC2_x64");

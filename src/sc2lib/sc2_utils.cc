@@ -60,11 +60,11 @@ float MoveDistance(const Unit *u, int frames, const UnitTypes &uts)
 }
 
 // move the invalid point2D into playable area
-Point2D FixOutsidePointIntoMap(const Point2D &pos, const Point2D &min, const Point2D &max)
+Point2D FixOutsidePointIntoRectangle(const Point2D &pos, const Point2D &min, const Point2D &max)
 {
+    assert(min.x < max.x && min.y < max.y);
     Point2D ret = pos;
     // check all the directions and fix them
-
     if (ret.x < min.x)
     {
         ret.x = min.x + 4.f;
@@ -83,6 +83,17 @@ Point2D FixOutsidePointIntoMap(const Point2D &pos, const Point2D &min, const Poi
         ret.y = max.y - 4.f;
     }
     return ret;
+}
+
+Point2D FixOutsidePointIntoCircle(const Point2D &pos, const Point2D &center, float radius)
+{
+    assert(radius > 0.f);
+    float dis = (pos - center).modulus();
+    if (dis < radius)
+    {
+        return pos;
+    }
+    return (pos - center) / dis * radius + center;
 }
 
 float GetTotalHealth(const Units &us)

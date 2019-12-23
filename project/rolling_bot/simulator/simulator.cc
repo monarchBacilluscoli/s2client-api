@@ -432,6 +432,10 @@ void Simulator::SetOpponent(Difficulty difficulty)
 
 std::string Simulator::GetSimMapPath(const std::string &map_path)
 {
+    if (map_path.rfind("Sim.SC2Map") != std::string::npos)
+    {
+        return map_path;
+    }
     std::string sim_map_path = map_path;
     size_t insert_index = sim_map_path.rfind(".SC2Map");
     sim_map_path.insert(std::min(sim_map_path.size(), insert_index), "Sim");

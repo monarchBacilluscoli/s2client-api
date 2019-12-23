@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     int interval_size = 300;
     int evaluation_multiplier = 1;
     PLAY_STYLE play_style = PLAY_STYLE::NORMAL;
-    bool use_fix = false;
+    bool use_fix = true;
     bool use_priori = true;
 
     std::string point_of_expriment = std::string(use_priori ? "priori " : "") + (use_fix ? "fix" : "");
@@ -174,6 +174,5 @@ int main(int argc, char *argv[])
     //! get idle units \
     // std::cout << coordinator.GetObservations().front()->GetUnits([](const Unit &unit) -> bool { return unit.orders.empty() && unit.alliance == Unit::Alliance::Self; }).size() << std::endl;
     }
-
     return 0;
 }

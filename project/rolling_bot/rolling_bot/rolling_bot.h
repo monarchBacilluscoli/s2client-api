@@ -36,7 +36,7 @@ private:
     // data
     std::map<Tag, std::deque<ActionRaw>> m_selected_commands;
     std::map<Tag, float> m_my_team_cooldown_last_frame;
-    Units m_my_team;
+    Units m_my_initial_team;
 
     // mics
     int m_game_round = 10;

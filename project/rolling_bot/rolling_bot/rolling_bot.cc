@@ -17,8 +17,8 @@ void RollingBot::OnGameStart()
     // only after game starting I can initialize the ga, or the information
     // will not be passed to it
     m_rolling_ea.Initialize(Observation());
-    m_my_team = Observation()->GetUnits(Unit::Alliance::Self);
-    for (const Unit *u : m_my_team)
+    m_my_initial_team = Observation()->GetUnits(Unit::Alliance::Self);
+    for (const Unit *u : m_my_initial_team)
     {
         m_my_team_cooldown_last_frame[u->tag] = u->weapon_cooldown;
     }
@@ -39,6 +39,11 @@ void RollingBot::OnStep()
     // after a specific interval, run the algorithm and get the final orders to be given
     if (Observation()->GetGameLoop() % m_interval_size == 0 && Observation()->GetGameLoop() != 0 && !Observation()->GetUnits(Unit::Alliance::Enemy).empty() && !Observation()->GetUnits(Unit::Alliance::Self).empty())
     {
+        { // stop all the units first, or it may cause some problem since the simulation starts from the condition where all units are still
+            Units my_team = Observation()->GetUnits(Unit::Alliance::Self);
+            Actions()->UnitCommand(my_team, ABILITY_ID::STOP_STOP);
+        }
+        Actions()->SendChat(std::string("Run algorithm in game loop ") + std::to_string(Observation()->GetGameLoop()));
         // select the solution whose difference between the two objs is the biggest
         std::vector<Command> selected_solution;
         int n = Observation()->GetUnits().size();
@@ -52,8 +57,8 @@ void RollingBot::OnStep()
     // if it is not the gameloop to run the algorithm, deploy the command
     else
     {
-        Units m_my_team = Observation()->GetUnits(Unit::Alliance::Self);
-        for (const Unit *u : m_my_team)
+        Units my_team = Observation()->GetUnits(Unit::Alliance::Self);
+        for (const Unit *u : my_team)
         {
             bool is_cooling_down = (m_my_team_cooldown_last_frame.find(u->tag) != m_my_team_cooldown_last_frame.end() && std::abs(m_my_team_cooldown_last_frame[u->tag]) > 0.01f);
             if (u->orders.empty() || (is_cooling_down && (m_my_team_cooldown_last_frame[u->tag] < u->weapon_cooldown)) ||

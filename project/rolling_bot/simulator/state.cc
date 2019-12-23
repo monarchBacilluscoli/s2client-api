@@ -37,27 +37,24 @@ std::map<Tag, const Unit *> sc2::LoadMultiPlayerGame(State save, Client &current
     Units us = current_client.Observation()->GetUnits();
     current_client.Debug()->DebugKillUnits(us);
     current_client.Debug()->SendDebug();
-    // the wrekages need about 20 game loops to be cleaned
     int step_size = current_coordinator.GetStepSize();
-    int count = ceil(20/step_size);
+    int count = ceil(20 / step_size); // the wrekages need about 20 game loops to be cleaned
     for (size_t i = 0; i < count; i++)
     {
         current_coordinator.Update();
     }
-    // creates units from save
-    for (UnitState state_u : save.unit_states)
+    for (UnitState state_u : save.unit_states) // creates units from save
     {
         current_client.Debug()->DebugCreateUnit(state_u.unit_type, state_u.pos, state_u.player_id);
     }
     current_client.Debug()->SendDebug();
-    count = count = ceil(2 / step_size);
+    count = ceil(2 / step_size);
     for (size_t i = 0; i < count; i++)
     {
         current_coordinator.Update();
     }
-    // just copys the units in save
     const Unit *u_copied;
-    Units us_copied = current_client.Observation()->GetUnits();
+    Units us_copied = current_client.Observation()->GetUnits(); // just copys the units status in save
     for (const UnitState &state_u : save.unit_states)
     {
         unit_map[state_u.unit_tag] = u_copied = SelectNearestUnitFromPoint(state_u.pos, us_copied);
@@ -65,8 +62,6 @@ std::map<Tag, const Unit *> sc2::LoadMultiPlayerGame(State save, Client &current
         current_client.Debug()->DebugSetLife(state_u.life, u_copied);
         current_client.Debug()->DebugSetEnergy(state_u.energy, u_copied);
     }
-    //! check the load results
-    //todo get all the remaining units in save and unit_map, to see if the map is ok
     std::set<const Unit *> unit_set_of_map;
     for (std::pair<Tag, const Unit *> u : unit_map)
     {
@@ -77,7 +72,7 @@ std::map<Tag, const Unit *> sc2::LoadMultiPlayerGame(State save, Client &current
         std::cout << "load mistake!" << std::endl;
     }
     current_client.Debug()->SendDebug();
-    count = count = ceil(2 / step_size);
+    count = ceil(2 / step_size);
     for (size_t i = 0; i < count; i++)
     {
         current_coordinator.Update();

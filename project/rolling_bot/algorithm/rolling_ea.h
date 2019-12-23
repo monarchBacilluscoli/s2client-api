@@ -13,6 +13,25 @@ class RollingEA : virtual public EvolutionaryAlgorithm<Command> //! because of v
 public:
     using EA = EvolutionaryAlgorithm<Command>;
 
+public:
+    class ConvergenceTermination
+    {
+    private:
+        // settings
+        const RollingEA &m_algo;
+        float m_no_improve_tolerance = 10.f;
+        int m_max_no_impreve_generation = 5;
+        // data
+        int m_current_no_improve_generation = 0;
+        std::vector<float> m_last_record_obj_average;
+
+    public:
+        ConvergenceTermination(const RollingEA &algo, int max_no_improve_generation = 5, float no_improve_tolerance = 10.f) : m_algo(algo), m_max_no_impreve_generation(max_no_improve_generation), m_no_improve_tolerance(no_improve_tolerance){};
+        ~ConvergenceTermination() = default;
+        bool operator()();
+        void clear(); // for the use of next run
+    };
+
 protected:
     // game data
     const ObservationInterface *m_observation;
@@ -28,6 +47,7 @@ protected:
     int m_sim_length = 300;
     int m_evaluation_time_multiplier = 1; // the evaluation times for each solution (to avoid randomness)
     // methods
+    std::function<bool()> convergence_termination = [&]() -> bool {};
 #ifdef USE_GRAPHICS
     ScatterRenderer2D m_objective_distribution;
     DebugRenderers m_debug_renderers;
@@ -50,6 +70,7 @@ public:
                                                                                                                                                                                                               process_path,
                                                                                                                                                                                                               map_path)
     {
+        // m_termination_condition[TERMINATION_CONDITION::CONVERGENCE] =
         m_simulation_pool.StartSimsAsync();
 #ifdef USE_GRAPHICS
         m_objective_distribution.SetTitle("Objectives Distribution");
@@ -96,6 +117,9 @@ protected:
     void GenerateOne(Solution<Command> &sol);
     virtual void RecordObjectives() override;
     virtual void ActionAfterRun() override;
+
+protected: // some utilities
+    Point2D FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float this_unit_weapon_range, const Units &enemy_team);
 };
 
 } // namespace sc2

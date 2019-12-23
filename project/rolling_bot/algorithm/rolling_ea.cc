@@ -5,6 +5,35 @@
 
 namespace sc2
 {
+
+bool RollingEA::ConvergenceTermination::operator()()
+{
+    //todo compare the last two averages
+    std::vector<float> current_averages = m_algo.GetLastObjsAverage();
+    if (m_last_record_obj_average.empty())
+    { // check for the first time
+        return false;
+    }
+    float current_difference = current_averages[0] - current_averages[1];
+    float last_difference = m_last_record_obj_average[0] - m_last_record_obj_average[1];
+    if (std::abs(current_difference - last_difference) > m_no_improve_tolerance)
+    {
+        m_current_no_improve_generation = 0;
+        return false;
+    }
+    else if (++m_current_no_improve_generation > m_max_no_impreve_generation)
+    {
+        return true;
+    }
+    m_last_record_obj_average = current_averages;
+}
+
+void RollingEA::ConvergenceTermination::clear()
+{
+    m_current_no_improve_generation = 0;
+    m_last_record_obj_average.clear();
+}
+
 void RollingEA::Initialize(const ObservationInterface *observation)
 {
     m_observation = observation;
@@ -32,7 +61,7 @@ void RollingEA::Generate()
     {
         GenerateOne(m_population[i]);
     }
-    if (m_use_priori)   // generate some solutions with priori knowledge
+    if (m_use_priori) // generate some solutions with priori knowledge
     {
         int enemy_sz = std::min(m_enemy_team.size(), (size_t)m_population_size / 5);
         for (size_t i = 0; i < enemy_sz; ++i)
@@ -228,20 +257,12 @@ void RollingEA::GenerateOne(Solution<Command> &sol)
                     action_raw.target_point = sol.variable[i].actions[j - 1].target_point + Point2DP(GetRandomFraction() * moveable_radius, GetRandomFraction() * 2 * PI).toPoint2D();
                 }
             }
-            action_raw.target_point = FixOutsidePointIntoMap(action_raw.target_point, m_game_info.playable_min, m_game_info.playable_max); // fix the target point outside the
+            action_raw.target_point = FixOutsidePointIntoRectangle(action_raw.target_point, m_game_info.playable_min, m_game_info.playable_max); // fix the target point outside the
             if (m_use_fix)
             {
-                Point2D nearest_enemy_pos_to_target_point = SelectNearestUnitFromPoint(action_raw.target_point, m_enemy_team)->pos;
-                float dis = (nearest_enemy_pos_to_target_point - action_raw.target_point).modulus();
-                float self_unit_weapon_range = m_unit_types[m_my_team[i]->unit_type].weapons.front().range;
-                float effective_range = 2 * self_unit_weapon_range;
-                if (dis > effective_range) // If it is out of a predefined range.
+                if (GetRandomFraction() < 0.7)
                 {
-                    action_raw.target_point = (action_raw.target_point - nearest_enemy_pos_to_target_point) * effective_range / dis + nearest_enemy_pos_to_target_point;
-                }
-                else
-                {
-                    ; // do nothing
+                    action_raw.target_point = FixActionPosIntoEffectiveRangeToNearestEnemy(action_raw.target_point, m_unit_types[m_my_team[i]->unit_type].weapons.front().range, m_enemy_team);
                 }
             }
         }
@@ -257,11 +278,11 @@ void RollingEA::RecordObjectives()
     {
         current_generation_objs[i] = m_population[i].objectives;
     }
-    for (size_t i = 0; i < m_objective_size; ++i)
+    for (size_t i = 0; i < m_objective_size; ++i) // the ith objective
     {
         // ave
-        EA::m_history_objs_ave[i].push_back(std::abs(std::accumulate(current_generation_objs.begin(), current_generation_objs.end(), 0.f, [i](float initial_value, const std::vector<float> &so2) -> float {
-            return initial_value + so2[i];
+        EA::m_history_objs_ave[i].push_back(std::abs(std::accumulate(current_generation_objs.begin(), current_generation_objs.end(), 0.f, [i](float initial_value, const std::vector<float> &so) -> float {
+            return initial_value + so[i];
         })));
         EA::m_history_objs_ave[i].back() /= pop_sz;
         // best
@@ -281,6 +302,13 @@ void RollingEA::RecordObjectives()
 void RollingEA::ActionAfterRun()
 {
     Evaluate(m_population);
+}
+
+Point2D RollingEA::FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float this_unit_weapon_range, const Units &enemy_team)
+{
+    Point2D nearest_enemy_pos_to_target_point = SelectNearestUnitFromPoint(action_target_pos, enemy_team)->pos;
+    float effective_range = 2 * this_unit_weapon_range;
+    return FixOutsidePointIntoCircle(action_target_pos, nearest_enemy_pos_to_target_point, effective_range);
 }
 
 } // namespace sc2

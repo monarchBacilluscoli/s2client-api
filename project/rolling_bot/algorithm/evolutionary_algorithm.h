@@ -5,6 +5,8 @@
 
 #include <vector>
 #include <list>
+#include <map>
+#include <functional>
 #include <random>
 #include <iostream>
 #include "solution.h"
@@ -14,21 +16,39 @@
 
 namespace sc2
 {
-
 template <class T>
 class EvolutionaryAlgorithm
 {
+
 public:
     using Population = std::vector<Solution<T>>;
+    enum class TERMINATION_CONDITION
+    {
+        MAX_GENERATION = 0,
+        CONVERGENCE = 1,
+        MAX_EVALUATION = 2,
+    };
 
 protected:
     //! some settings
     int m_objective_size = 1;
-    int m_max_generation = 10;
     int m_population_size = 50;
     int m_current_generation = 0;
+    int m_current_evaluation = 0;
+    int m_max_evaluation = 0;
+    TERMINATION_CONDITION m_termination_condition = TERMINATION_CONDITION::CONVERGENCE;
+    int m_max_generation = 10;
     std::vector<std::string> m_objective_names{std::vector<std::string>(m_objective_size)};
-
+    std::map<TERMINATION_CONDITION, std::function<bool()>> termination_conditions = {
+        // if true, stop loop
+        {TERMINATION_CONDITION::MAX_GENERATION, std::function<bool()>> ([&]() -> bool {
+                                                    m_current_generation > m_max_generation;
+                                                })},
+        {TERMINATION_CONDITION::CONVERGENCE, std::function<bool()>> ()}, /* add it by yourself */
+        {TERMINATION_CONDITION::MAX_EVALUATION, std::function<bool()>> ([&]() -> bool {
+                                                    m_current_evaluation > m_max_evaluation;
+                                                })},
+    };
     //! data
     Population m_population{};
     Population m_offspring{};
@@ -54,17 +74,22 @@ public:
     };
     virtual ~EvolutionaryAlgorithm() = default;
 
-    void SetMaxGeneration(int max_ge);
-    void SetPopulationSize(int pop_size);
+    void SetPopulationSize(int pop_size) { m_population_size = pop_size; };
     void SetObjectiveSize(int obj_size);
-    void SetRandomEngineSeed(int seed);
     void SetObjectiveNames(const std::vector<std::string> &objective_names);
+    void SetRandomEngineSeed(int seed) { m_random_engine.seed(seed); };
+    void SetTerminationCondition(TERMINATION_CONDITION termination_condition) { m_termination_condition = termination_condition; };
+    void SetMaxGeneration(int max_generation){m_max_generation = max_generation};
 
-    int GetMaxGeneration() const { return m_max_generation; };
     int GetPopulationSize() const { return m_population_size; };
     int GetObjectiveSize() const { return m_objective_size; };
     const Population &GetPopulation() const { return m_population; };
+    TERMINATION_CONDITION GetTerminationCondition() const { return m_termination_condition; };
     int GetCurrentGeneration() const { return m_current_generation; };
+    int GetMaxGeneration() const { return m_max_generation; };
+    std::vector<float> GetLastObjsAverage() const {return m_history_objs_ave.back()};
+    std::vector<float> GetLastObjsBest() const {return m_history_objs_best.back()};
+    std::vector<float> GetLastObjsWorst() const {return m_history_objs_worst.back()};
 
     virtual Population Run();
 
@@ -90,33 +115,34 @@ protected:
 };
 
 template <class T>
-void EvolutionaryAlgorithm<T>::SetMaxGeneration(int max_ge)
-{
-    m_max_generation = max_ge;
-}
-
-template <class T>
-void EvolutionaryAlgorithm<T>::SetPopulationSize(int pop_size)
-{
-    m_population_size = pop_size;
-}
-
-template <class T>
 void EvolutionaryAlgorithm<T>::SetObjectiveSize(int obj_size)
 {
-    m_objective_size = obj_size;
-}
-
-template <class T>
-void EvolutionaryAlgorithm<T>::SetRandomEngineSeed(int seed)
-{
-    m_random_engine.seed(seed);
+    if (m_objective_names.size() != 0 && m_objective_names.size() != obj_size)
+    {
+        throw("objnames_size you have set should be equal to obj_size sent in@"__FUNCTION__);
+    }
+    else
+    {
+        m_objective_size = obj_size;
+    }
 }
 
 template <class T>
 void EvolutionaryAlgorithm<T>::SetObjectiveNames(const std::vector<std::string> &objective_names)
 {
-    m_objective_names = objective_names;
+    if (m_objective_size == 0)
+    {
+        m_objective_names = objective_names;
+        m_objective_size = objective_names.size();
+    }
+    else if (m_objective_names.size() == m_objective_size)
+    {
+        m_objective_names = objective_names;
+    }
+    else
+    {
+        throw("objs_size you have set should be equal to objective_names.size() sent in@"__FUNCTION__);
+    }
 }
 
 template <class T>
@@ -151,7 +177,7 @@ std::vector<Solution<T>> EvolutionaryAlgorithm<T>::Run()
     InitBeforeRun();
     Generate();
     Evaluate();
-    ActionAfterEachGeneration();
+    ActionAfterEachGeneration(); // you need to run it after the first generation
     for (m_current_generation = 1; m_current_generation <= m_max_generation; ++m_current_generation)
     {
         Breed();
@@ -160,7 +186,6 @@ std::vector<Solution<T>> EvolutionaryAlgorithm<T>::Run()
         ActionAfterEachGeneration();
     }
     ActionAfterRun();
-    // todo:only multi-objective problem need this. return rank 1 solutions
     typename std::vector<Solution<T>>::iterator end_it = m_population.begin();
     for (end_it = m_population.begin(); end_it != m_population.end(); ++end_it)
     {

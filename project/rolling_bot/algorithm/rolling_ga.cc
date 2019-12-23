@@ -64,7 +64,7 @@ void RollingGA::Mutate_(Solution<Command> &s)
 		// todo if the action is move
 		action.target_point += Point2D(GetRandomInteger(-1, 1) * m_playable_dis.x, GetRandomInteger(-1, 1) * m_playable_dis.y) / m_mutate_step;
 	}
-	action.target_point = FixOutsidePointIntoMap(action.target_point, m_game_info.playable_min, m_game_info.playable_max);
+	action.target_point = FixOutsidePointIntoRectangle(action.target_point, m_game_info.playable_min, m_game_info.playable_max);
 }
 
 Population RollingGA::Crossover_(const Solution<Command> &a, const Solution<Command> &b)

@@ -9,12 +9,12 @@ SimulatorPool::SimulatorPool(int size,
                              int port_start,
                              const std::string &process_path,
                              const std::string &map_path) : m_simulations(size),
-                                                                m_sol_sim_map(size),
-                                                                m_net_address(net_address),
-                                                                m_port_start(port_start),
-                                                                m_port_end(port_start),
-                                                                m_process_path(process_path),
-                                                                m_map_path(map_path)
+                                                            m_sol_sim_map(size),
+                                                            m_net_address(net_address),
+                                                            m_port_start(port_start),
+                                                            m_port_end(port_start),
+                                                            m_process_path(process_path),
+                                                            m_map_path(map_path)
 {
     std::string sim_map_path = Simulator::GetSimMapPath(map_path);
     int i = 0;
@@ -169,6 +169,29 @@ void SimulatorPool::CopyStateAndSendOrdersAsync(const ObservationInterface *ob, 
             sim.SetOrders(order);
         });
     }
+    std::chrono::time_point<std::chrono::steady_clock> deadline = std::chrono::steady_clock::now() + m_wait_duration;
+    for (size_t i = 0; i < pop_size; ++i)
+    {
+        std::future_status result_status = copy_holders[i].wait_until(deadline);
+        switch (result_status)
+        {
+        case std::future_status::ready:
+        {
+            // ok
+            break;
+        }
+        case std::future_status::timeout:
+        { // add a new simulation and reset the map... but how to handle the result?
+            std::cout << "sim " << i << " timeout in " << __FUNCTION__ << std::endl;
+            break;
+        }
+        default:
+        {
+            throw("how can this async task be deffered?@" + std::string(__FUNCTION__));
+            break;
+        }
+        }
+    }
 }
 
 #ifdef USE_GRAPHICS
@@ -203,7 +226,7 @@ void SimulatorPool::RunSimsAsync(int steps, DebugRenderers &debug_renderers)
         }
         case std::future_status::timeout:
         { // add a new simulation and reset the map... but how to handle the result?
-            std::cout << "sim " << i << " timeout" << std::endl;
+            std::cout << "sim " << i << " timeout in " << __FUNCTION__ << std::endl;
             m_timeout_index_set.insert(i);
 
             /* restart a new simulation and add it into my simulation pool. 
@@ -217,7 +240,7 @@ void SimulatorPool::RunSimsAsync(int steps, DebugRenderers &debug_renderers)
             Simulation<std::thread::id> sim = Simulation<std::thread::id>();
             m_simulations.emplace_back();
             Simulation<std::thread::id> &new_sim = m_simulations.back();
-            new_sim.sim.SetBaseSettings(m_port_end, m_process_path, m_map_filename);
+            new_sim.sim.SetBaseSettings(m_port_end, m_process_path, Simulator::GetSimMapPath(m_map_path));
             m_port_end += 2;
             // thread_list.push_back(std::thread{[&new_sim, &observation = m_observation, orders = m_sol_sim_map[i]->sim.GetOrders()]() -> void {
             new_sim.sim.LaunchStarcraft();
@@ -271,12 +294,7 @@ void SimulatorPool::RunSimsAsync(int steps)
     for (size_t i = 0; i < sz; i++)
     {
         Simulation<std::thread::id> &simulation = *m_sol_sim_map[i];
-        simulation.result_holder = std::async(std::launch::async, &Simulator::Run, &(m_sol_sim_map[i]->sim), steps
-#ifdef USE_GRAPHICS
-                                              ,
-                                              nullptr
-#endif // USE_GRAPHICS
-        );
+        simulation.result_holder = std::async(std::launch::async, &Simulator::Run, &(m_sol_sim_map[i]->sim), steps);
     }
     // if there is any thread get stuck (timeout), throw it away and create a new one
     std::chrono::time_point<std::chrono::steady_clock> deadline = std::chrono::steady_clock::now() + m_wait_duration;
@@ -299,7 +317,7 @@ void SimulatorPool::RunSimsAsync(int steps)
             Simulation<std::thread::id> sim = Simulation<std::thread::id>();
             m_simulations.emplace_back();
             Simulation<std::thread::id> &new_sim = m_simulations.back();
-            new_sim.sim.SetBaseSettings(m_port_end, m_process_path, m_map_path);
+            new_sim.sim.SetBaseSettings(m_port_end, m_process_path, Simulator::GetSimMapPath(m_map_path));
             m_port_end += 2;
             new_sim.sim.LaunchStarcraft();
             new_sim.sim.StartGame();
