@@ -24,13 +24,7 @@ void RollingBot::OnGameStart()
     }
     {
         //Run algorithm once
-        std::vector<Command> selected_solution;
-        int n = Observation()->GetUnits().size();
-        m_rolling_ea.Initialize(Observation());
-        RollingEA::Population pop = m_rolling_ea.Run();
-        selected_solution = m_solution_selector(pop).variable;
-        m_selected_commands = Command::ConmmandsVecToDeque(selected_solution); // 将算法返回的动作vector转换为deque
-        std::cout << "deploy!" << std::endl;
+        SetCommandFromAlgorithm();
     }
 }
 
@@ -43,16 +37,7 @@ void RollingBot::OnStep()
             Units my_team = Observation()->GetUnits(Unit::Alliance::Self);
             Actions()->UnitCommand(my_team, ABILITY_ID::STOP_STOP);
         }
-        Actions()->SendChat(std::string("Run algorithm in game loop ") + std::to_string(Observation()->GetGameLoop()));
-        // select the solution whose difference between the two objs is the biggest
-        std::vector<Command> selected_solution;
-        int n = Observation()->GetUnits().size();
-        m_rolling_ea.Initialize(Observation());
-        RollingEA::Population pop = m_rolling_ea.Run();
-        selected_solution = m_solution_selector(pop).variable;
-        m_selected_commands = Command::ConmmandsVecToDeque(selected_solution); // 将算法返回的动作vector转换为deque
-        //? for test
-        std::cout << "deploy!" << std::endl;
+        SetCommandFromAlgorithm();
     }
     // if it is not the gameloop to run the algorithm, deploy the command
     else
@@ -193,6 +178,21 @@ void RollingBot::SetRemark(const std::string &remark)
 RollingEA &RollingBot::Algorithm()
 {
     return m_rolling_ea;
+}
+
+void RollingBot::SetCommandFromAlgorithm()
+{
+    Solution<Command> selected_solution;
+    Actions()->SendChat(std::string("Run algorithm in game loop ") + std::to_string(Observation()->GetGameLoop()));
+    std::cout << std::string("Run algorithm in game loop ") + std::to_string(Observation()->GetGameLoop()) << std::endl;
+    m_rolling_ea.Initialize(Observation());
+    RollingEA::Population pop = m_rolling_ea.Run();
+    selected_solution = m_solution_selector(pop);
+    m_selected_commands = Command::ConmmandsVecToDeque(selected_solution.variable); // transfor command vector to deque for easy to use
+    Actions()->SendChat("Number of enemies: " + std::to_string(Observation()->GetUnits(Unit::Alliance::Enemy).size()));
+    std::string objs_str = std::string("deploy, objs: ") + std::move(ContainerToStringWithSeparator(selected_solution.objectives));
+    Actions()->SendChat(objs_str);
+    std::cout << objs_str << std::endl;
 }
 
 const Solution<Command> &RollingBot::SelectMostIronHeadSolution(const Population &pop)

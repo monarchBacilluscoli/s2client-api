@@ -59,12 +59,14 @@ public:
     // Settings for bot
     void SetIntervalLength(int frames);
     void SetStyle(PLAY_STYLE style);
-    
+
     void SetGameRound(int round);
-    void SetRemark(const std::string& remark);
+    void SetRemark(const std::string &remark);
 
 public:
     RollingEA &Algorithm(); // return the reference of algo obj of base class
+protected:
+    void SetCommandFromAlgorithm();
 protected:
     static const Solution<Command> &SelectMostIronHeadSolution(const Population &pop);
     static const Solution<Command> &SelectMostRunAwaySolution(const Population &pop);

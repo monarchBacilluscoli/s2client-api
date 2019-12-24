@@ -19,20 +19,21 @@ public:
     private:
         // settings
         const RollingEA &m_algo;
-        float m_no_improve_tolerance = .2f;
+        float m_no_improve_threshold = .01f; // 
         int m_max_no_impreve_generation = 20;
         // data
         int m_current_no_improve_generation = 0;
         std::vector<float> m_last_record_obj_average;
 
     public:
-        ConvergenceTermination(const RollingEA &algo, int max_no_improve_generation = 5, float no_improve_tolerance = 10.f) : m_algo(algo), m_max_no_impreve_generation(max_no_improve_generation), m_no_improve_tolerance(no_improve_tolerance){};
+        ConvergenceTermination(const RollingEA &algo) : m_algo(algo){};
+        ConvergenceTermination(const RollingEA &algo, int max_no_improve_generation, float no_improve_tolerance) : m_algo(algo), m_max_no_impreve_generation(max_no_improve_generation), m_no_improve_threshold(no_improve_tolerance){};
         ~ConvergenceTermination() = default;
         bool operator()();
 
-        float GetNoImproveTolerance() { return m_no_improve_tolerance; };
+        float GetNoImproveTolerance() { return m_no_improve_threshold; };
         int GetMaxNoImproveGeneration() { return m_max_no_impreve_generation; };
-        void SetNoImproveTolerance(float no_improve_tolerance) { m_no_improve_tolerance = no_improve_tolerance; };
+        void SetNoImproveTolerance(float no_improve_tolerance) { m_no_improve_threshold = no_improve_tolerance; };
         void SetMaxNoInproveGeneration(int max_no_improve_generation) { m_max_no_impreve_generation = max_no_improve_generation; };
         void clear(); // for the use of next run
     };

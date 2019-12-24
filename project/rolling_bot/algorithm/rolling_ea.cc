@@ -17,7 +17,7 @@ bool RollingEA::ConvergenceTermination::operator()()
     float current_difference = current_averages[0] - current_averages[1];
     float last_difference = m_last_record_obj_average[0] - m_last_record_obj_average[1];
     m_last_record_obj_average = current_averages;
-    if (std::abs(current_difference - last_difference) > m_no_improve_tolerance) // improve from last generation
+    if (std::abs(current_difference - last_difference) > m_no_improve_threshold) // improve from last generation
     {
         m_current_no_improve_generation = 0;
         return false;

@@ -211,7 +211,7 @@ std::vector<Solution<T>> EvolutionaryAlgorithm<T>::Run()
     Generate();
     Evaluate();
     ActionAfterEachGeneration(); // you need to run it after the first generation
-    for (m_current_generation = 1; !m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE](); ++m_current_generation)
+    for (m_current_generation = 1; !m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE]() && !m_termination_conditions[TERMINATION_CONDITION::MAX_GENERATION](); ++m_current_generation)
     {
         Breed();
         Evaluate();
