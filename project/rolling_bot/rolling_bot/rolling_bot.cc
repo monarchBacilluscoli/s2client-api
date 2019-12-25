@@ -190,6 +190,7 @@ void RollingBot::SetCommandFromAlgorithm()
     selected_solution = m_solution_selector(pop);
     m_selected_commands = Command::ConmmandsVecToDeque(selected_solution.variable); // transfor command vector to deque for easy to use
     Actions()->SendChat("Number of enemies: " + std::to_string(Observation()->GetUnits(Unit::Alliance::Enemy).size()));
+    Actions()->SendChat("Algorithm finished run after " + std::to_string(m_rolling_ea.GetCurrentGeneration()) + "generations");
     std::string objs_str = std::string("deploy, objs: ") + std::move(ContainerToStringWithSeparator(selected_solution.objectives));
     Actions()->SendChat(objs_str);
     std::cout << objs_str << std::endl;

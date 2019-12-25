@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     int ga_muatation_rate = 0.5;
     int command_length = 50;
     int sim_length = 400;
-    int interval_size = 300;
+    int interval_size = 400;
     int evaluation_multiplier = 1;
     PLAY_STYLE play_style = PLAY_STYLE::NORMAL;
     bool use_fix = true;

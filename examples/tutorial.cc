@@ -55,7 +55,7 @@ public:
     {
         Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
         // Actions()->UnitCommand(unit, ABILITY_ID::ATTACK, GetRandomEntry(enemies));
-        Actions()->UnitCommand(unit, ABILITY_ID::ATTACK, enemies.front());
+        Actions()->UnitCommand(unit, ABILITY_ID::ATTACK_ATTACK, enemies.front());
     }
 
     virtual void OnUnitDestroyed(const Unit *unit) override
@@ -96,6 +96,23 @@ public:
         {
             Actions()->UnitCommand(Observation()->GetUnits(Unit::Alliance::Self), ABILITY_ID::STOP_STOP);
         }
+        Units team = Observation()->GetUnits(Unit::Alliance::Self);
+        for (const auto u : team)
+        {
+            if (!u->orders.empty())
+            {
+                std::cout << u->orders.size() << std::endl;
+            }
+        }
+        Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
+        for (const auto u : enemies)
+        {
+            if (!u->orders.empty())
+            {
+                std::cout << u->orders.size() << std::endl;
+            }
+        }
+
         return;
     }
 
@@ -109,6 +126,89 @@ public:
         Score score = Observation()->GetScore();
         OutputGameResult(Observation(), "scores/tutorial_test_scores.txt", "test_remark");
         AgentControl()->Restart(); // it only works in single player game
+        return;
+    }
+};
+
+class DebugTestBot : public Agent
+{
+private:
+    Units m_units;
+    int m_kill_loop = 1000;
+    int m_last_kill_loop;
+    std::vector<Point2D> m_pos_set;
+
+private:
+    void OnGameEnd() final
+    {
+        // AgentControl()->Restart();
+    }
+
+    void OnUnitIdle(const Unit *u) final
+    {
+        auto enemies = Observation()->GetUnits();
+        Actions()->UnitCommand(u, ABILITY_ID::ATTACK_ATTACK, GetRandomEntry(enemies));
+    }
+
+    void OnGameStart() final
+    {
+        m_units = Observation()->GetUnits(Unit::Alliance::Self);
+        Debug()->DebugEnemyControl();
+        Debug()->SendDebug();
+    }
+
+    void OnStep()
+    {
+        int loop = Observation()->GetGameLoop();
+        Units units = Observation()->GetUnits();
+        if (Observation()->GetGameLoop() % m_kill_loop == 0)
+        {
+            Debug()->DebugKillUnits(Observation()->GetUnits());
+            m_last_kill_loop = loop;
+        }
+        else if (Observation()->GetGameLoop() == m_last_kill_loop + 10)
+        {
+            for (const Unit *unit : m_units)
+            {
+                Debug()->DebugCreateUnit(unit->unit_type, unit->pos, unit->owner);
+            }
+        }
+        Debug()->SendDebug();
+        //todo see after how many loops the unis number can be zero
+        if (Observation()->GetUnits().size() == 0)
+        {
+            std::cout << "Unit number is 0 at " << Observation()->GetGameLoop() << std::endl;
+        }
+        else
+        {
+            std::cout << units.size() << std::endl;
+            for (const auto &u : units)
+            {
+                if (std::find(m_pos_set.begin(), m_pos_set.end(), u->pos) == m_pos_set.end())
+                {
+                    m_pos_set.push_back(u->pos);
+                }
+            }
+        }
+        if (Observation()->GetGameLoop() % 200 == 0)
+        {
+            std::cout << m_pos_set.size() << std::endl;
+            Control()->SaveReplay("./test.SC2Replay");
+        }
+        Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
+        if (enemies.size() > 0)
+        {
+            auto seesee = enemies.front()->orders;
+            if (!seesee.empty())
+            {
+                std::cout << "I can get it" << std::endl;
+            }
+            auto seesee2 = m_units.front()->orders;
+            if (!seesee2.empty())
+            {
+                std::cout << "get it" << std::endl;
+            }
+        }
         return;
     }
 };
@@ -131,6 +231,7 @@ int main(int argc, char *argv[])
 
     Bot bot;
     EnemyBot enemy_bot;
+    DebugTestBot debug_test_bot;
     // coordinator.SetMultithreaded(true);
     coordinator.SetParticipants({CreateParticipant(Race::Terran, &bot),
                                  // CreateParticipant(Race::Terran, &enemy_bot),
@@ -139,7 +240,7 @@ int main(int argc, char *argv[])
     const ObservationInterface *ob = coordinator.GetObservations().front();
 
     coordinator.LaunchStarcraft();
-    coordinator.StartGame("MazeEnemyTowerVSThors.SC2Map");
+    coordinator.StartGame("PCEnemyZealotVSMarinesSim.SC2Map");
     // coordinator.StartGame("Maze2.SC2Map");
 #ifdef REAL_TIME_UPDATE
     auto start = std::chrono::steady_clock::now();
