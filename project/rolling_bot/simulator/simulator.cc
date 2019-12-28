@@ -15,8 +15,8 @@ void Executor::OnStep()
         return;
     }
     // std::cout << m_commands.size() << "\t" << std::flush;
-    Units us = Observation()->GetUnits(Unit::Alliance::Self);
-    for (const Unit *u : us)
+    Units my_team = Observation()->GetUnits(Unit::Alliance::Self);
+    for (const Unit *u : my_team)
     {
         bool has_cooldown_time = (m_cooldown_last_frame.find(u->tag) != m_cooldown_last_frame.end() && std::abs(m_cooldown_last_frame[u->tag]) > 0.01f);
         // check if the current has been finished
@@ -28,7 +28,7 @@ void Executor::OnStep()
             if (m_commands.find(u->tag) == m_commands.end())
             {
                 // std::cout << m_commands.size() << "\t" << std::flush;
-                std::cout << "mistake" << std::endl;
+                std::cout << "mistake, no commands for this unit@" << __FUNCTION__ << std::endl;
             }
             if (!m_commands.at(u->tag).empty())
             {
@@ -353,6 +353,11 @@ DebugInterface *Simulator::Debug()
 ActionInterface *Simulator::Actions()
 {
     return m_executor.Actions();
+}
+
+ControlInterface *Simulator::Control()
+{
+    return m_executor.Control();
 }
 
 float Simulator::GetTeamHealthLoss(Unit::Alliance alliance) const

@@ -336,4 +336,31 @@ void SimulatorPool::RunSimsAsync(int steps)
     }
 }
 
+void SimulatorPool::SaveReplays(const std::string &folder, const std::string &file_name_prefix)
+{
+
+    if (folder.back() == '/')
+    {
+        for (size_t i = 0; i < m_sol_sim_map.size(); ++i)
+        {
+            SaveReplay(i, folder + file_name_prefix + std::to_string(i) + ".SC2Replay");
+        }
+    }
+    else
+    {
+        for (size_t i = 0; i < m_sol_sim_map.size(); ++i)
+        {
+            SaveReplay(i, folder + '/' + file_name_prefix + std::to_string(i) + ".SC2Replay");
+        }
+    }
+}
+
+void SimulatorPool::SaveReplay(int sim_index, const std::string &path)
+{
+    if (!m_sol_sim_map[sim_index]->sim.Control()->SaveReplay(path))
+    {
+        throw(std::string("no folder here, please create folder first@") + __FUNCTION__);
+    }
+}
+
 } // namespace sc2

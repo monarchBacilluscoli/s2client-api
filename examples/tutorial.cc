@@ -137,6 +137,7 @@ private:
     int m_kill_loop = 1000;
     int m_last_kill_loop;
     std::vector<Point2D> m_pos_set;
+    bool m_last_change_dim = false;
 
 private:
     void OnGameEnd() final
@@ -146,8 +147,8 @@ private:
 
     void OnUnitIdle(const Unit *u) final
     {
-        auto enemies = Observation()->GetUnits();
-        Actions()->UnitCommand(u, ABILITY_ID::ATTACK_ATTACK, GetRandomEntry(enemies));
+        Point2D target_pos = FindRandomLocation(Observation()->GetGameInfo());
+        Actions()->UnitCommand(m_units.front(), ABILITY_ID::MOVE, target_pos);
     }
 
     void OnGameStart() final
@@ -159,57 +160,62 @@ private:
 
     void OnStep()
     {
-        int loop = Observation()->GetGameLoop();
-        Units units = Observation()->GetUnits();
-        if (Observation()->GetGameLoop() % m_kill_loop == 0)
+        std::cout << m_units.front()->facing << std::endl;
+        if (Observation()->GetGameLoop() % 20 == 0)
         {
-            Debug()->DebugKillUnits(Observation()->GetUnits());
-            m_last_kill_loop = loop;
+            Actions()->SendChat(std::to_string(m_units.front()->facing));
         }
-        else if (Observation()->GetGameLoop() == m_last_kill_loop + 10)
-        {
-            for (const Unit *unit : m_units)
-            {
-                Debug()->DebugCreateUnit(unit->unit_type, unit->pos, unit->owner);
-            }
-        }
-        Debug()->SendDebug();
-        //todo see after how many loops the unis number can be zero
-        if (Observation()->GetUnits().size() == 0)
-        {
-            std::cout << "Unit number is 0 at " << Observation()->GetGameLoop() << std::endl;
-        }
-        else
-        {
-            std::cout << units.size() << std::endl;
-            for (const auto &u : units)
-            {
-                if (std::find(m_pos_set.begin(), m_pos_set.end(), u->pos) == m_pos_set.end())
-                {
-                    m_pos_set.push_back(u->pos);
-                }
-            }
-        }
-        if (Observation()->GetGameLoop() % 200 == 0)
+        //     int loop = Observation()->GetGameLoop();
+        //     Units units = Observation()->GetUnits();
+        //     if (Observation()->GetGameLoop() % m_kill_loop == 0)
+        //     {
+        //         Debug()->DebugKillUnits(Observation()->GetUnits());
+        //         m_last_kill_loop = loop;
+        //     }
+        //     else if (Observation()->GetGameLoop() == m_last_kill_loop + 10)
+        //     {
+        //         for (const Unit *unit : m_units)
+        //         {
+        //             Debug()->DebugCreateUnit(unit->unit_type, unit->pos, unit->owner);
+        //         }
+        //     }
+        //     Debug()->SendDebug();
+        //     //todo see after how many loops the unis number can be zero
+        //     if (Observation()->GetUnits().size() == 0)
+        //     {
+        //         std::cout << "Unit number is 0 at " << Observation()->GetGameLoop() << std::endl;
+        //     }
+        //     else
+        //     {
+        //         std::cout << units.size() << std::endl;
+        //         for (const auto &u : units)
+        //         {
+        //             if (std::find(m_pos_set.begin(), m_pos_set.end(), u->pos) == m_pos_set.end())
+        //             {
+        //                 m_pos_set.push_back(u->pos);
+        //             }
+        //         }
+        //     }
+        if (Observation()->GetGameLoop() % 1000 == 0)
         {
             std::cout << m_pos_set.size() << std::endl;
             Control()->SaveReplay("./test.SC2Replay");
         }
-        Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
-        if (enemies.size() > 0)
-        {
-            auto seesee = enemies.front()->orders;
-            if (!seesee.empty())
-            {
-                std::cout << "I can get it" << std::endl;
-            }
-            auto seesee2 = m_units.front()->orders;
-            if (!seesee2.empty())
-            {
-                std::cout << "get it" << std::endl;
-            }
-        }
-        return;
+        //     Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
+        //     if (enemies.size() > 0)
+        //     {
+        //         auto seesee = enemies.front()->orders;
+        //         if (!seesee.empty())
+        //         {
+        //             std::cout << "I can get it" << std::endl;
+        //         }
+        //         auto seesee2 = m_units.front()->orders;
+        //         if (!seesee2.empty())
+        //         {
+        //             std::cout << "get it" << std::endl;
+        //         }
+        //     }
+        //     return;
     }
 };
 
@@ -233,15 +239,17 @@ int main(int argc, char *argv[])
     EnemyBot enemy_bot;
     DebugTestBot debug_test_bot;
     // coordinator.SetMultithreaded(true);
-    coordinator.SetParticipants({CreateParticipant(Race::Terran, &bot),
+    coordinator.SetParticipants({CreateParticipant(Race::Terran, &debug_test_bot),
                                  // CreateParticipant(Race::Terran, &enemy_bot),
                                  CreateComputer(Race::Terran)});
 
     const ObservationInterface *ob = coordinator.GetObservations().front();
 
     coordinator.LaunchStarcraft();
-    coordinator.StartGame("PCEnemyZealotVSMarinesSim.SC2Map");
+    coordinator.StartGame("Test.SC2Map");
+    // coordinator.StartGame("PCEnemyZealotVSMarinesSim.SC2Map");
     // coordinator.StartGame("Maze2.SC2Map");
+
 #ifdef REAL_TIME_UPDATE
     auto start = std::chrono::steady_clock::now();
     auto end = std::chrono::steady_clock::now();

@@ -64,6 +64,10 @@ public:
         return m_sol_sim_map[i]->sim.GetTeamHealthLoss(team);
     }
 
+    // methods for debug
+    void SaveReplays(const std::string& folder, const std::string& file_name_prefix = "sim"); // save the replay up to now
+    void SaveReplay(int sim_index, const std::string& path);
+
     ~SimulatorPool() = default;
 
 private:

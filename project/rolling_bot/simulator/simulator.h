@@ -1,7 +1,7 @@
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 
-#include "global_defines.h"
+#include "../../global_defines.h"
 
 #include "debug_renderer/debug_renderer.h"
 #include "state.h"
@@ -104,7 +104,7 @@ public:
     DebugInterface *Debug();
     //! exposes ActionInterface of the executor
     ActionInterface *Actions();
-    // std::thread::id iddd;
+    ControlInterface *Control();
 
     std::vector<Command> GetOrders() { return m_commands; }
     std::vector<Command> GetOriginalOrders() { return m_original_commands; } // get the original orders (sent and stored, raw orders)

@@ -50,8 +50,8 @@ void RollingEA::InitBeforeRun()
 }
 
 void RollingEA::InitOnlySelfMembersBeforeRun()
-{                          // doesn't call the base class's Init function
-    InitFromObservation(); // set the m_my_team and some other things
+{                                              // doesn't call the base class's Init function
+    InitFromObservation();                     // set the m_my_team and some other things
     m_convergence_termination_manager.clear(); // must refresh the state of it
     for (Solution<Command> &sol : m_population)
     {
@@ -267,7 +267,7 @@ void RollingEA::GenerateOne(Solution<Command> &sol)
             {
                 if (GetRandomFraction() < 0.7)
                 {
-                    action_raw.target_point = FixActionPosIntoEffectiveRangeToNearestEnemy(action_raw.target_point, m_unit_types[m_my_team[i]->unit_type].weapons.front().range, m_enemy_team);
+                    action_raw.target_point = FixActionPosIntoEffectiveRangeToNearestEnemy(action_raw.target_point, m_unit_types[m_my_team[i]->unit_type].weapons.front().range * m_log_dis(m_random_engine), m_enemy_team);
                 }
             }
         }
@@ -309,10 +309,13 @@ void RollingEA::ActionAfterRun()
     Evaluate(m_population);
 }
 
-Point2D RollingEA::FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float this_unit_weapon_range, const Units &enemy_team)
+Point2D RollingEA::FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float effective_range, const Units &enemy_team)
 {
     Point2D nearest_enemy_pos_to_target_point = SelectNearestUnitFromPoint(action_target_pos, enemy_team)->pos;
-    float effective_range = 2 * this_unit_weapon_range;
+    if (Distance2D(action_target_pos, nearest_enemy_pos_to_target_point) < 2 * effective_range)
+    {
+        return action_target_pos;
+    }
     return FixOutsidePointIntoCircle(action_target_pos, nearest_enemy_pos_to_target_point, effective_range);
 }
 

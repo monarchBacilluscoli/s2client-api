@@ -19,7 +19,7 @@ public:
     private:
         // settings
         const RollingEA &m_algo;
-        float m_no_improve_threshold = .01f; // 
+        float m_no_improve_threshold = .01f; //
         int m_max_no_impreve_generation = 20;
         // data
         int m_current_no_improve_generation = 0;
@@ -62,6 +62,7 @@ protected:
     SimulatorPool m_simulation_pool;
     // methods
     ConvergenceTermination m_convergence_termination_manager{*this};
+    std::lognormal_distribution<float> m_log_dis{0, 0.5};
 
 public:
     RollingEA() = delete;

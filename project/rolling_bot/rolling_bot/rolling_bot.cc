@@ -186,7 +186,7 @@ void RollingBot::SetCommandFromAlgorithm()
     Actions()->SendChat(std::string("Run algorithm in game loop ") + std::to_string(Observation()->GetGameLoop()));
     std::cout << std::string("Run algorithm in game loop ") + std::to_string(Observation()->GetGameLoop()) << std::endl;
     m_rolling_ea.Initialize(Observation());
-    RollingEA::Population pop = m_rolling_ea.Run();
+    RollingEA::Population pop = m_rolling_ea.Run(); // Run the algorithm
     selected_solution = m_solution_selector(pop);
     m_selected_commands = Command::ConmmandsVecToDeque(selected_solution.variable); // transfor command vector to deque for easy to use
     Actions()->SendChat("Number of enemies: " + std::to_string(Observation()->GetUnits(Unit::Alliance::Enemy).size()));
@@ -215,7 +215,7 @@ const Solution<Command> &RollingBot::SelectMostRunAwaySolution(const Population 
         throw("The pop passed here is an empty pop.@RollingBot::" + std::string(__FUNCTION__));
     }
     Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const Solution<Command> &largetest, const Solution<Command> &first) {
-        return largetest.objectives[1] < first.objectives[1];
+        return largetest.objectives[1] < first.objectives[1]; // the maximum of loss (negetive)
     });
     return *it;
 }
@@ -226,8 +226,8 @@ const Solution<Command> &RollingBot::SelectMostOKSolution(const Population &pop)
     {
         throw("The pop passed here is an empty pop.@RollingBot::" + std::string(__FUNCTION__));
     }
-    Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const Solution<Command> &largetest, const Solution<Command> &first) {
-        return (std::abs(largetest.objectives[0]) - std::abs(largetest.objectives[1])) < (std::abs(first.objectives[0]) - std::abs(first.objectives[1]));
+    Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const Solution<Command> &current_largetest, const Solution<Command> &first) {
+        return (std::abs(current_largetest.objectives[0]) - std::abs(current_largetest.objectives[1])) < (std::abs(first.objectives[0]) - std::abs(first.objectives[1])); // the first obj is gain, the second obj is loss
     });
     return *it;
 }

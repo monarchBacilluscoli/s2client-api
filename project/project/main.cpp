@@ -46,6 +46,7 @@ private:
 
 int main(int argc, char *argv[])
 {
+    system("pause");
     for (size_t i = 0; i < argc; i++)
     {
         std::cout << argv[i] << std::endl;
@@ -62,20 +63,6 @@ int main(int argc, char *argv[])
     // Some settings
     bool is_debug = false;
     std::string net_address = "127.0.0.1";
-    std::string map_path; // you can set it here, but it looks like setting it in the form of debug param is better
-    // std::string map_path = "testBattle_distant_vs_melee_debug.SC2Map";
-    // std::string map_path = "EnemyTower.SC2Map";
-    // std::string map_path = "EnemyTowerVSMarauder.SC2Map";
-    // std::string map_path = "EnemyTowerVSMarine.SC2Map";
-    // std::string map_path = "3speed_distant_vs_1melee.SC2Map";
-    // std::string map_path = "EnemyTowerVSMarineMarauder.SC2Map";
-    // std::string map_path = "EnemyTowerVSThors.SC2Map";
-    // std::string map_path = "Maze.SC2Map";
-    // std::string map_path = "Maze2.SC2Map";
-    // std::string map_path = "MazeEnemyTowerVSThors.SC2Map";
-    // std::string map_path = "EnemyTowerVSThorsOptimizationTest.SC2Map";
-    // std::string map_path = "EnemyTowerVSThor.SC2Map";
-    // std::string map_path = "EnemyTowerVSThorMarine.SC2Map";
 
     std::string starcraft_path = "/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64";
     int port_start = 4000;
@@ -85,7 +72,7 @@ int main(int argc, char *argv[])
     // use this to control the cauculation times per second
     uint frames = 60;
     int population_size = 50;
-    int max_generations = 100;
+    int max_generations = 200;
     int ga_muatation_rate = 0.5;
     int command_length = 50;
     int sim_length = 400;
@@ -123,7 +110,7 @@ int main(int argc, char *argv[])
     Coordinator coordinator;
     coordinator.LoadSettings(argc, argv);
     coordinator.SetProcessPath(starcraft_path);
-    map_path = coordinator.GetMapPath(); // you can set your own map_path here
+    std::string map_path = coordinator.GetMapPath(); // you can set your own map_path here
 
     //! Bots here
     Bot bot;
@@ -150,7 +137,7 @@ int main(int argc, char *argv[])
     const ObservationInterface *ob = coordinator.GetObservations().front();
 
     coordinator.LaunchStarcraft();
-    coordinator.StartGame(map_path);
+    coordinator.StartGame();
 
     // A fixed time update mechanism
     auto start = std::chrono::steady_clock::now();
