@@ -17,8 +17,6 @@ enum class DOMINANCE
 template <class T>
 struct Solution
 {
-    using Population = std::vector<Solution<T>>;
-
     std::vector<float> objectives = std::vector<float>();
     std::vector<T> variable = std::vector<T>();
 
@@ -36,12 +34,10 @@ struct Solution
         return !(*this == rhs);
     }
 
-    Solution<T>() = default;
-    // Solution<T>(const Solution<T> &rhs) : variable(rhs.variable), objectives(rhs.objectives), rank(rhs.rank) {} //! attention
-    Solution<T>(const Solution<T> &rhs) = default;
-    Solution<T>(const std::vector<T> &variable) : variable(variable) {}
-    Solution<T>(int variable_size, int objective_size) : variable(variable_size), objectives(objective_size) {}
-    Solution<T>(int variable_size) : variable(variable_size), objectives(1) {}
+    Solution() = default;
+    Solution(const Solution<T> &rhs) = default;
+    Solution(const std::vector<T> &variable) : variable(variable) {}
+    Solution(int variable_size, int objective_size = 1) : variable(variable_size), objectives(objective_size) {}
 
     //! two compares for the use of sort(), descending order
     // return true means the orders of the two items keep unchanged
@@ -49,8 +45,13 @@ struct Solution
     static bool sum_greater(const Solution<T> &a, const Solution<T> &b);
     static bool RankLess(const Solution<T> &a, const Solution<T> &b); // looks like it should not be a member function of Solution. If so, it will not be used as a Compare, since it accept one more parameter - this pointer
     static DOMINANCE Dominate(const Solution<T> &a, const Solution<T> &b);
-    static void DominanceSort(Population &pop);
-    static void CalculateCrowdedness(Population &pop);
+
+    template <template <typename> class TSolution> // 只有使用模板，vector之中的派生类才能被传进来进行排序
+    using Population = std::vector<TSolution<T>>;
+    template <template <typename> class TSolution>
+    static void DominanceSort(Population<TSolution> &pop);
+    template <template <typename> class TSolution>
+    static void CalculateCrowdedness(Population<TSolution> &pop);
 };
 
 template <class T>
@@ -155,7 +156,8 @@ bool Solution<T>::RankLess(const Solution<T> &l, const Solution<T> &r)
 }
 
 template <class T>
-void Solution<T>::DominanceSort(Population &p)
+template <template <typename> class TSolution>
+void Solution<T>::DominanceSort(Population<TSolution> &p)
 {
     // make sure all the rank is set right
     for (auto &item : p)
@@ -168,7 +170,7 @@ void Solution<T>::DominanceSort(Population &p)
     {
         for (size_t j = i + 1; j < pop_sz; j++)
         {
-            switch (Solution<T>::Dominate(p[i], p[j]))
+            switch (TSolution<T>::Dominate(p[i], p[j])) //! 如果遵照TSolution是此处Solution的派生类的原则的话，此处使用Solution也没有问题（搁置），不过可能会重载静态函数？嗯，TSolution就用TSolution的支配排序方法吧
             {
             case DOMINANCE::BETTER:
                 p[i].dominant_solutions.push_back(&p[j]);
@@ -213,30 +215,34 @@ void Solution<T>::DominanceSort(Population &p)
         current_set_count += current_layer_sz;
         ++current_rank;
     }
-    std::sort(p.begin(), p.end(), &Solution<T>::RankLess);
+    std::sort(p.begin(), p.end(), &TSolution<T>::RankLess);
     return;
 }
 
 template <class T>
-void Solution<T>::CalculateCrowdedness(Population& pop){
+template <template <typename> class TSolution>
+void Solution<T>::CalculateCrowdedness(Population<TSolution> &pop)
+{
     // Only after dominance sort, can it be called
-	int pop_sz = pop.size();
-	int obj_sz = pop.front().objectives.size();
-	for (int i = 0; i < pop_sz; ++i)
-	{
-		// check the last and next
-		if ((i - 1) < 0 || pop[i].rank != pop[(size_t)i - 1].rank ||
-			(i + 1) >= pop_sz || pop[i].rank != pop[(size_t)i + 1].rank) {
-			pop[i].crowdedness = std::numeric_limits<float>::max();
-		}
-		else {
-			pop[i].crowdedness = 0.f;
-			for (size_t j = 0; j < obj_sz; j++)
-			{
-				pop[i].crowdedness += std::abs(pop[(size_t)i - 1].objectives[j] - pop[(size_t)i + 1].objectives[j]);
-			}
-		}
-	}
+    int pop_sz = pop.size();
+    int obj_sz = pop.front().objectives.size();
+    for (int i = 0; i < pop_sz; ++i)
+    {
+        // check the last and next
+        if ((i - 1) < 0 || pop[i].rank != pop[(size_t)i - 1].rank ||
+            (i + 1) >= pop_sz || pop[i].rank != pop[(size_t)i + 1].rank)
+        {
+            pop[i].crowdedness = std::numeric_limits<float>::max();
+        }
+        else
+        {
+            pop[i].crowdedness = 0.f;
+            for (size_t j = 0; j < obj_sz; j++)
+            {
+                pop[i].crowdedness += std::abs(pop[(size_t)i - 1].objectives[j] - pop[(size_t)i + 1].objectives[j]);
+            }
+        }
+    }
 }
 
 #endif //SOLUTION_H

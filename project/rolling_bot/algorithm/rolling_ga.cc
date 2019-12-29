@@ -11,7 +11,7 @@
 
 using namespace sc2;
 
-using Population = std::vector<Solution<Command>>;
+using Population = std::vector<RollingSolution<Command>>;
 
 void RollingGA::InitBeforeRun()
 {
@@ -29,7 +29,7 @@ void RollingGA::InitOnlySelfMemeberBeforeRun()
 void RollingGA::Mutate()
 {
 	int children_sz = m_offspring.size();
-	for (Solution<Command>& sol:m_population)
+	for (RollingSolution<Command>& sol:m_population)
 	{
 		if (GetRandomFraction() < GA::m_mutation_rate)
 		{
@@ -49,7 +49,7 @@ void RollingGA::Crossover()
 	}
 }
 
-void RollingGA::Mutate_(Solution<Command> &s)
+void RollingGA::Mutate_(RollingSolution<Command> &s)
 {
 	// the user must ensure that the actions is not empty
 	ActionRaw &action = GetRandomEntry(GetRandomEntry(s.variable).actions);
@@ -67,7 +67,7 @@ void RollingGA::Mutate_(Solution<Command> &s)
 	action.target_point = FixOutsidePointIntoRectangle(action.target_point, m_game_info.playable_min, m_game_info.playable_max);
 }
 
-Population RollingGA::Crossover_(const Solution<Command> &a, const Solution<Command> &b)
+Population RollingGA::Crossover_(const RollingSolution<Command> &a, const RollingSolution<Command> &b)
 {
 	// random select one unit
 	int unit_index = GetRandomInteger(0, a.variable.size() - 1);

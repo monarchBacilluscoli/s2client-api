@@ -8,10 +8,11 @@
 #include <sc2lib/sc2_utils.h>
 #include "rolling_ea.h"
 #include "genetic_algorithm.h"
+#include "rolling_solution.h"
 
 namespace sc2
 {
-class RollingGA : public RollingEA, public GeneticAlgorithm<Command>
+class RollingGA : public RollingEA, public GeneticAlgorithm<Command, RollingSolution>
 {
 protected:
     int m_mutate_step = 100; //?
@@ -20,9 +21,9 @@ protected:
     const double PI = atan(1.) * 4.;
 
 public:
-    using Population = std::vector<Solution<Command>>;
-    using GA = GeneticAlgorithm<Command>;
-    using EA = EvolutionaryAlgorithm<Command>;
+    using Population = std::vector<RollingSolution<Command>>;
+    using GA = GeneticAlgorithm<Command, RollingSolution>;
+    using EA = EvolutionaryAlgorithm<Command, RollingSolution>;
 
 public:
     RollingGA() = delete;
@@ -48,8 +49,8 @@ protected:
     virtual void Mutate() override;
     virtual void Crossover() override;
 
-    Population Crossover_(const Solution<Command> &a, const Solution<Command> &b);
-    void Mutate_(Solution<Command> &a);
+    Population Crossover_(const RollingSolution<Command> &a, const RollingSolution<Command> &b);
+    void Mutate_(RollingSolution<Command> &a);
 };
 } // namespace sc2
 

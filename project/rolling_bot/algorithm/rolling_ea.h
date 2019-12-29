@@ -5,13 +5,14 @@
 
 #include "evolutionary_algorithm.h"
 #include "../simulator/simulator_pool.h"
+#include "rolling_solution.h"
 
 namespace sc2
 {
-class RollingEA : virtual public EvolutionaryAlgorithm<Command> //! because of virtual inheritance, the base class's constructor is invalid
+class RollingEA : virtual public EvolutionaryAlgorithm<Command, RollingSolution> //! because of virtual inheritance, the base class's constructor is invalid
 {
 public:
-    using EA = EvolutionaryAlgorithm<Command>;
+    using EA = EvolutionaryAlgorithm<Command ,RollingSolution>;
 
 public:
     class ConvergenceTermination // convergence termination condition checker for this class
@@ -36,6 +37,13 @@ public:
         void SetNoImproveTolerance(float no_improve_tolerance) { m_no_improve_threshold = no_improve_tolerance; };
         void SetMaxNoInproveGeneration(int max_no_improve_generation) { m_max_no_impreve_generation = max_no_improve_generation; };
         void clear(); // for the use of next run
+    };
+
+    struct memory
+    {
+        std::map<Tag, Command> best_iron_commands;
+        std::map<Tag, Command> best_normal_commands;
+        std::map<Tag, Command> best_run_commands;
     };
 
 protected:

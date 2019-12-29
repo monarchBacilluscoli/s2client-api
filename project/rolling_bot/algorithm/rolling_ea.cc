@@ -174,8 +174,8 @@ void RollingEA::Evaluate(Population &pop)
 void RollingEA::Select()
 {
     m_population.insert(m_population.end(), m_offspring.begin(), m_offspring.end());
-    Solution<Command>::DominanceSort(m_population);
-    Solution<Command>::CalculateCrowdedness(m_population);
+    RollingSolution<Command>::DominanceSort(m_population);
+    RollingSolution<Command>::CalculateCrowdedness(m_population);
     // choose solutions to be added to the next generation
     int rank_need_resort = m_population[m_population_size - 1].rank;
     if (m_population.size() > m_population_size && m_population[m_population_size].rank == rank_need_resort) // if next element is still of this rank, it means this rank can not be contained fully in current population, it needs selecting

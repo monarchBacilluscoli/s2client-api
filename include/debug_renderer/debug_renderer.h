@@ -7,7 +7,7 @@
 #include <sc2api/sc2_api.h>
 #include <string>
 #include <vector>
-#include "../project/rolling_bot/algorithm/solution.h"
+#include"../project/rolling_bot/algorithm/rolling_solution.h"
 #include "../project/rolling_bot/simulator/command.h"
 #include <list>
 
@@ -87,7 +87,7 @@ public:
 
     void ClearRenderer();
 
-    void DrawSolution(const Solution<Command> &solution, const ObservationInterface *observation, const std::map<Tag, const Unit *> &units_map);
+    void DrawSolution(const RollingSolution<Command> &solution, const ObservationInterface *observation, const std::map<Tag, const Unit *> &units_map);
     void DrawOrders(const std::vector<Command> &orders, const ObservationInterface *observation, const std::map<Tag, const Unit *> &units_map);
     void DrawOrders(const std::vector<Command> &orders, const ObservationInterface *observation);
 

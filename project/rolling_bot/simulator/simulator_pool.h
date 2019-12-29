@@ -14,7 +14,7 @@
 namespace sc2
 {
 
-using Population = std::vector<Solution<Command>>;
+using Population = std::vector<RollingSolution<Command>>;
 
 // I must lay aside all things about a thread, that is the thread result holder and simulator obj, so I'd better putting them into one class
 template <typename T>

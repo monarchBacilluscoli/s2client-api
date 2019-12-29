@@ -2,7 +2,7 @@
 #include "sc2utils/sc2_manage_process.h"
 namespace sc2
 {
-using Population = std::vector<Solution<Command>>;
+using Population = std::vector<RollingSolution<Command>>;
 
 SimulatorPool::SimulatorPool(int size,
                              const std::string &net_address,
