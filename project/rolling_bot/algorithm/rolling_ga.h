@@ -21,7 +21,6 @@ protected:
     const double PI = atan(1.) * 4.;
 
 public:
-    using Population = std::vector<RollingSolution<Command>>;
     using GA = GeneticAlgorithm<Command, RollingSolution>;
     using EA = EvolutionaryAlgorithm<Command, RollingSolution>;
 

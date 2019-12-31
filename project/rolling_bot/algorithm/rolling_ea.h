@@ -12,7 +12,7 @@ namespace sc2
 class RollingEA : virtual public EvolutionaryAlgorithm<Command, RollingSolution> //! because of virtual inheritance, the base class's constructor is invalid
 {
 public:
-    using EA = EvolutionaryAlgorithm<Command ,RollingSolution>;
+    using EA = EvolutionaryAlgorithm<Command, RollingSolution>;
 
 public:
     class ConvergenceTermination // convergence termination condition checker for this class
@@ -56,9 +56,9 @@ protected:
     UnitTypes m_unit_types; // metadata of units. Array can be indexed directly by UnitID (Unit->unit_type).
     // settings about game
     float m_attack_possibility = 0.7;
-    int m_command_length = 8;
-    int m_sim_length = 300;
-    int m_evaluation_time_multiplier = 1; // the evaluation times for each solution (to avoid randomness)
+    unsigned int m_command_length = 8;
+    unsigned int m_sim_length = 300;
+    unsigned int m_evaluation_time_multiplier = 1; // the evaluation times for each solution (to avoid randomness)
 #ifdef USE_GRAPHICS
     ScatterRenderer2D m_objective_distribution;
     DebugRenderers m_debug_renderers;
@@ -74,15 +74,16 @@ protected:
 
 public:
     RollingEA() = delete;
-    RollingEA(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation, int population_size, int random_seed = 0) : EvolutionaryAlgorithm(2, max_generation, population_size, random_seed, {std::string("enemy loss"), std::string("my team loss")}),
+    RollingEA(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation, int population_size, int random_seed = 0, unsigned int evaluation_time_multiplier = 1) : EvolutionaryAlgorithm(2, max_generation, population_size, random_seed, {std::string("enemy loss"), std::string("my team loss")}),
 #ifdef USE_GRAPHICS
-                                                                                                                                                                                            m_debug_renderers(population_size),
+                                                                                                                                                                                                                                         m_debug_renderers(population_size),
 #endif //USE_GRAPHICS
-                                                                                                                                                                                            m_simulation_pool(population_size,
-                                                                                                                                                                                                              net_address,
-                                                                                                                                                                                                              port_start,
-                                                                                                                                                                                                              process_path,
-                                                                                                                                                                                                              map_path)
+                                                                                                                                                                                                                                         m_simulation_pool(population_size,
+                                                                                                                                                                                                                                                           net_address,
+                                                                                                                                                                                                                                                           port_start,
+                                                                                                                                                                                                                                                           process_path,
+                                                                                                                                                                                                                                                           map_path),
+                                                                                                                                                                                                                                         m_evaluation_time_multiplier(evaluation_time_multiplier)
     {
         m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE] = std::ref(m_convergence_termination_manager);
         m_simulation_pool.StartSimsAsync();
@@ -92,6 +93,10 @@ public:
         m_objective_distribution.SetYLabel("total damage to me");
 #endif
         SetObjectiveNames({"Enemy Loss", "My Team Loss"});
+        for (auto &sol : m_population)
+        {
+            sol.results.resize(evaluation_time_multiplier);
+        }
     }
     virtual ~RollingEA() = default;
 
@@ -99,10 +104,17 @@ public:
 
 public:
     // settings about the game
-    void SetSimLength(int sim_length) { m_sim_length = sim_length; }
-    void SetCommandLength(int command_length) { m_command_length = command_length; }
+    void SetSimLength(unsigned int sim_length) { m_sim_length = sim_length; }
+    void SetCommandLength(unsigned int command_length) { m_command_length = command_length; }
     void SetAttackPossibility(float attack_possibility) { m_attack_possibility = attack_possibility; }
-    void SetEvaluationTimeMultiplier(int times) { m_evaluation_time_multiplier = times; }
+    void SetEvaluationTimeMultiplier(unsigned int times)
+    {
+        m_evaluation_time_multiplier = times;
+        for (auto &sol : m_population)
+        {
+            sol.results.resize(m_evaluation_time_multiplier);
+        }
+    }
     void SetUseFix(bool use_fix) { m_use_fix = use_fix; };
     void SetUsePriori(bool use_priori) { m_use_priori = use_priori; };
     void SetDebug(bool is_debug) { m_is_debug = is_debug; }
@@ -113,7 +125,7 @@ protected:
     void InitOnlySelfMembersBeforeRun();
     void Generate() override;
     void Evaluate() override;
-    void Select() override;
+    void Select() override; // sort and keep only the good solutions
 #ifdef USE_GRAPHICS
     virtual void ShowOverallStatusGraphEachGeneration() override;
     virtual void ShowSolutionDistribution(int showed_generations_count) override;
@@ -122,6 +134,7 @@ protected:
     virtual void ActionAfterEachGeneration() override
     {
         EA::ActionAfterEachGeneration();
+        //todo compound some solutions -> evaluate them -> sort -> put them into solutions
     };
 
 protected:

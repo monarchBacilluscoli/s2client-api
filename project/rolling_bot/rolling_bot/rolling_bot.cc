@@ -45,9 +45,10 @@ void RollingBot::OnStep()
         Units my_team = Observation()->GetUnits(Unit::Alliance::Self);
         for (const Unit *u : my_team)
         {
-            bool is_cooling_down = (m_my_team_cooldown_last_frame.find(u->tag) != m_my_team_cooldown_last_frame.end() && std::abs(m_my_team_cooldown_last_frame[u->tag]) > 0.01f);
-            if (u->orders.empty() || (is_cooling_down && (m_my_team_cooldown_last_frame[u->tag] < u->weapon_cooldown)) ||
-                (!is_cooling_down && u->weapon_cooldown > 0.01f)) // 需要下一个动作
+            bool has_cooldown_record = (m_my_team_cooldown_last_frame.find(u->tag) != m_my_team_cooldown_last_frame.end() /*&& std::abs(m_my_team_cooldown_last_frame[u->tag]) > 1.f*/);
+            if (u->orders.empty() ||
+                (has_cooldown_record && (m_my_team_cooldown_last_frame[u->tag] < u->weapon_cooldown)) ||
+                (!has_cooldown_record && u->weapon_cooldown > 0.f)) // 需要下一个动作
             {
                 if (m_selected_commands.find(u->tag) == m_selected_commands.end()) // 当前地图游戏中的单位在命令序列中的对应命令如果不存在
                 {

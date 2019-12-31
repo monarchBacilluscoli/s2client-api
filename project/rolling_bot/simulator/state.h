@@ -28,7 +28,7 @@ namespace sc2 {
     //! \param save The State object which save the game status which needs to be loaded
     //! \param client It is used to set units, so it must be the current client
     //! \param coordinator It is used to set units, too, so it should also be the coordinator of the current game 
-    //! \return returns the relationship between created units and original units
+    //! \return returns the map from original units to created units
     std::map<Tag, const Unit*> LoadMultiPlayerGame(State save, Client& current_client, Coordinator& current_coordinator);
 }
 

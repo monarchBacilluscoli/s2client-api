@@ -3,50 +3,15 @@
 
 #include "../../global_defines.h"
 
-#include "debug_renderer/debug_renderer.h"
-#include "state.h"
-#include "command.h"
 #include <sc2api/sc2_api.h>
-#include <map>
 #include <string>
 #include <thread>
-#include <queue>
-#include <list>
-#include <iostream>
+#include "debug_renderer/debug_renderer.h"
+#include "state.h"
+#include "executor.h"
 
 namespace sc2
 {
-struct UnitsByAlliance
-{
-    std::list<Unit> self{}, ally{}, enemy{}, neutral{};
-};
-
-class Executor : public Agent
-{
-private:
-    std::map<Tag, std::queue<ActionRaw>> m_commands;
-    std::map<Tag, float> m_cooldown_last_frame;
-    bool m_is_setting = true; // if in setting state, do not call any of the client event here
-    UnitsByAlliance m_dead_units;
-
-public:
-    // transform vector commands to map+queue commands for easy use
-    void SetCommands(const std::vector<Command> &commands);
-    void Initialize();
-    void Clear();
-    void SetIsSetting(bool is_setting);
-
-    void OnStep() override;
-    void OnUnitDestroyed(const Unit *unit) override;
-
-    const std::list<Unit> &GetDeadUnits(Unit::Alliance alliance) const;
-
-private:
-    void ClearCooldownData();
-    void ClearCommands();
-    void ClearDeadUnits();
-};
-
 class Simulator : public Coordinator
 {
 
@@ -111,8 +76,13 @@ public:
     float GetTeamHealthLoss(Unit::Alliance alliance) const;                  // get health loss result
     const std::list<Unit> &GetTeamDeadUnits(Unit::Alliance alliance) const;  // get dead units result
 
-    const std::map<Tag, const Unit *> &GetRelativeUnits() { return m_relative_units; }
-    const State &GetSave() { return m_save; }
+    const std::map<Tag, const Unit *> &GetRelativeUnits() const { return m_relative_units; }
+    const State &GetSave() const { return m_save; }
+
+    // get some statistical data
+    std::map<Tag, UnitStatisticalData> GetUnitsStatistics(); //todo transform the local statistics to global statistics
+    const UnitStatisticalData &GetUnitStatistics(Tag tag);
+    GameResult CheckGameResult() const;
 
 private:
     //! set units relations
@@ -122,8 +92,6 @@ private:
 
     //! the bot to be called outside to send orders or get observations
     Executor m_executor;
-    //! save of the caller' state when calls it
-    State m_initial_save;
     //! save of state
     State m_save;
     //! orders sent in
@@ -131,8 +99,9 @@ private:
     //! translated orders by local unit tags rather than original tags
     std::vector<Command> m_commands;
 
-    //! form resource tag to target unit
-    std::map<Tag, const Unit *> m_relative_units;
+    void SetReversedUnitRelation(std::map<Tag, Tag> &target_to_source_units, const std::map<Tag, const Unit *> &relative_units);
+    std::map<Tag, const Unit *> m_relative_units;    //! form source tag to target unit
+    std::map<Tag, Tag> m_target_to_source_unit_tags; //! from target to source unit tags
 
 public:
     static std::string GetSimMapPath(const std::string &map_path);

@@ -47,7 +47,7 @@ public:
 protected:
     virtual void InitBeforeRun() override;
     void InitOnlySelfMembersBeforeRun();
-    virtual void Breed() override;
+    virtual void Breed() override; // random select
 
     virtual TSolution<T> Mutate(const TSolution<T> &base_sol, const TSolution<T> &material_sol1, const TSolution<T> &material_sol2) = 0;
     virtual void Crossover(const TSolution<T> &parent, TSolution<T> &child) = 0; // can not be implemented, since there are so many solution types
