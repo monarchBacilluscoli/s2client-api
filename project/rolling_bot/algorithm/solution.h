@@ -6,6 +6,7 @@
 #include <vector>
 #include <numeric>
 #include <algorithm>
+#include <string>
 
 enum class DOMINANCE
 {

@@ -134,12 +134,19 @@ void RollingEA::Evaluate(Population &pop)
         {
             { // record game results
                 const std::map<Tag, const Unit *> &units_correspondence = m_simulation_pool[i].GetRelativeUnits(); // Units final state in simulation
+#ifdef DEBUG
+                if (i + 1 < pop_sz && m_simulation_pool[i].GetRelativeUnits().size() != m_simulation_pool[i + 1].GetRelativeUnits().size())
+                {
+                    std::cout << "some mistake in return units map" << std::endl;
+                }
+#endif // DEBUG
                 for (const auto &unit : units_correspondence)
                 {
                     pop[i].results[j].units[unit.first].final_state = *(unit.second);
                     pop[i].results[j].units[unit.first].statistics = m_simulation_pool[i].GetUnitStatistics(unit.first);
                     pop[i].results[j].game.result = m_simulation_pool[i].CheckGameResult();
                 }
+                // pop[i].CalculateAver(); // based on the recorded statistics, calculate the average results
             }
             { // set the objectives
                 pop[i].objectives[0] += m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
@@ -291,6 +298,36 @@ void RollingEA::RecordObjectives()
 void RollingEA::ActionAfterRun()
 {
     Evaluate(m_population);
+}
+
+RollingSolution<Command> RollingEA::AssembleASolutionFromGoodUnits(const Population &evaluated_pop)
+{
+    RollingSolution<Command> assembled_solution(m_my_team.size(), m_objective_size);
+    AssembleASolutionFromGoodUnits(assembled_solution, evaluated_pop);
+    return assembled_solution;
+}
+
+void RollingEA::AssembleASolutionFromGoodUnits(RollingSolution<Command> &modified_solution, const Population &evaluated_pop)
+{
+    size_t pop_sz = evaluated_pop.size();
+    for (size_t i = 0; i < m_my_team.size(); i++)
+    {
+        // todo search the pop to find the unit with greatest performence
+        Population::const_iterator it_s = std::max_element(evaluated_pop.begin(), evaluated_pop.end(), [u_tag = m_my_team[i]->tag](const RollingSolution<Command> &first, const RollingSolution<Command> &second) -> bool {
+            return first.aver_result.units_statistics.at(u_tag).attack_number < second.aver_result.units_statistics.at(u_tag).attack_number;
+        });
+        // use its command as a part of this solution
+        //! in generating function, the order of variables in solution is set according to m_my_team's order
+        std::vector<Command>::const_iterator it_c = std::find_if(it_s->variable.begin(), it_s->variable.end(), [u_tag = m_my_team[i]->tag](const Command &cmd) -> bool { return u_tag == cmd.unit_tag; }); // find the command of this unit in this solution
+        if (it_c != it_s->variable.end())
+        {
+            modified_solution.variable[i] = *it_c; // the order is equal to my_team's order
+        }
+        else
+        {
+            throw(std::string("somethind wrong@") + __FUNCTION__);
+        }
+    }
 }
 
 Point2D RollingEA::FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float effective_range, const Units &enemy_team)

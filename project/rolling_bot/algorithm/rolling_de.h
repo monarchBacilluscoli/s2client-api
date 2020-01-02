@@ -33,6 +33,7 @@ public:
 
 protected:
     void InitBeforeRun() override;
+    void Breed() override;
     virtual RollingSolution<Command> Mutate(const RollingSolution<Command> &base_sol, const RollingSolution<Command> &material_sol1, const RollingSolution<Command> &material_sol2) override;
     virtual void Crossover(const RollingSolution<Command> &parent, RollingSolution<Command> &child) override;
 };

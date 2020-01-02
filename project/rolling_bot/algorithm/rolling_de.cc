@@ -11,6 +11,12 @@ void RollingDE::InitBeforeRun()
     //todo Initialization only for this class
 }
 
+void RollingDE::Breed()
+{
+    DifferentialEvolution<Command, RollingSolution>::Breed();
+    RollingEA::AssembleASolutionFromGoodUnits(GetRandomEntry(m_offspring), m_population);
+}
+
 RollingSolution<Command> RollingDE::Mutate(const RollingSolution<Command> &base_sol, const RollingSolution<Command> &material_sol1, const RollingSolution<Command> &material_sol2)
 {
     RollingSolution<Command> product(base_sol.variable);

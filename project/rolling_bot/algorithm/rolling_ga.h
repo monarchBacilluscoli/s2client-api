@@ -8,7 +8,6 @@
 #include <sc2lib/sc2_utils.h>
 #include "rolling_ea.h"
 #include "genetic_algorithm.h"
-#include "rolling_solution.h"
 
 namespace sc2
 {

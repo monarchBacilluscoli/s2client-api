@@ -1,10 +1,10 @@
 #include "global_defines.h"
 
+#include "../rolling_bot/rolling_bot/rolling_bot.h"
 #include <sc2api/sc2_api.h>
 #include <string>
 #include <iostream>
 #include <chrono>
-#include "../rolling_bot/rolling_bot/rolling_bot.h"
 
 using namespace sc2;
 
@@ -46,7 +46,9 @@ private:
 
 int main(int argc, char *argv[])
 {
-    system("pause");
+    RollingSolution<Command> ro;
+    ro.ClearSimData();
+
     for (size_t i = 0; i < argc; i++)
     {
         std::cout << argv[i] << std::endl;

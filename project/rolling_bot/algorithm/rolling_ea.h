@@ -49,8 +49,8 @@ public:
 protected:
     // game data
     const ObservationInterface *m_observation;
-    Units m_my_team;
-    Units m_enemy_team; // updated at the beginning of each run
+    Units m_my_team; // updated at the beginning of each algorithm run
+    Units m_enemy_team; // updated at the beginning of each algorithm run
     GameInfo m_game_info;
     Vector2D m_playable_dis;
     UnitTypes m_unit_types; // metadata of units. Array can be indexed directly by UnitID (Unit->unit_type).
@@ -134,7 +134,7 @@ protected:
     virtual void ActionAfterEachGeneration() override
     {
         EA::ActionAfterEachGeneration();
-        //todo compound some solutions -> evaluate them -> sort -> put them into solutions
+        //todo another implementation: compound some solutions -> evaluate them -> sort -> put them into solutions
     };
 
 protected:
@@ -144,6 +144,9 @@ protected:
     void GenerateOne(Solution<Command> &sol);
     virtual void RecordObjectives() override;
     virtual void ActionAfterRun() override;
+    RollingSolution<Command> AssembleASolutionFromGoodUnits(const Population& evaluated_pop); // Assemble a priori solution based on the evaluated population.
+    void AssembleASolutionFromGoodUnits(RollingSolution<Command>& modified_solution ,const Population &evaluated_pop); //! the param must be an evaluated population
+    RollingSolution<Command> AssembleASolutionFromGoodUnits(const std::vector<RollingSolution<Command>*>& evaluated_pop); // Assemble a priori solution based on the evaluated population. //! the param must be an evaluated population
 
 protected: // some utilities
     Point2D FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float this_unit_weapon_range, const Units &enemy_team);

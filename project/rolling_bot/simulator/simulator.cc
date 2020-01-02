@@ -309,5 +309,5 @@ const UnitStatisticalData& Simulator::GetUnitStatistics(Tag tag)
 
 GameResult Simulator::CheckGameResult() const
 {
-    m_executor.CheckGameResult();
+    return m_executor.CheckGameResult();
 }

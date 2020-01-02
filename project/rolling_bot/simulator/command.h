@@ -10,6 +10,7 @@
 #include <deque>
 #include <sc2api/sc2_action.h>
 #include <sc2api/sc2_gametypes.h>
+#include "../../global_defines.h"
 
 namespace sc2
 {
