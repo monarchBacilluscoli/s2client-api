@@ -248,7 +248,7 @@ void DebugRenderer::Present()
     SDL_RenderPresent(m_renderer);
 }
 
-void DebugRenderer::DrawSolution(const RollingSolution<Command> &solution, const ObservationInterface *observation, const std::map<Tag, const Unit *> &units_map)
+void DebugRenderer::DrawSolution(const Solution<Command> &solution, const ObservationInterface *observation, const std::map<Tag, const Unit *> &units_map)
 {
     int w, h;
     SDL_GetWindowSize(m_window, &w, &h);

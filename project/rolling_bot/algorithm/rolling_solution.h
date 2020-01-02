@@ -42,7 +42,7 @@ struct RollingSolution : public Solution<T>
     RollingSolution(const RollingSolution<T> &rhs) = default;
     RollingSolution(const std::vector<T> &variable) : Solution<T>(variable){};
     RollingSolution(int variable_size, int objective_size) : Solution<T>(variable_size, objective_size){};
-    ~RollingSolution() = default;
+    virtual ~RollingSolution() = default;
 
     void ClearSimData();
     void CalculateAver();
@@ -51,6 +51,34 @@ struct RollingSolution : public Solution<T>
     static bool HealthChangeLess(const RollingSolution<T> &first, const RollingSolution<T> &second);
     //todo DifferenceLess
 };
+
+template <class T>
+void RollingSolution<T>::ClearSimData()
+{
+    aver_result.units_statistics.clear();
+    aver_result.win_rate = 0.f;
+    results.clear();
+}
+
+template <class T>
+void RollingSolution<T>::CalculateAver()
+{
+#ifdef DEBUG
+    int sim_sz = results.size();
+    if (sim_sz > 1)
+    {
+        for (size_t i = 0; i + 1 < sim_sz; ++i) // to check if all the results have the same size of units statistical data
+        {
+            if (results[i].units.size() != results[i + 1].units.size())
+            {
+                throw(std::string("there is something wrong in recording game result@") + __FUNCTION__);
+            }
+        }
+    }
+#endif // DEBUG
+    aver_result.units_statistics = AverageSimData::CalculateAverUnitStatistics(results);
+    aver_result.win_rate = AverageSimData::CalculateWinRate(results);
+}
 
 } // namespace sc2
 

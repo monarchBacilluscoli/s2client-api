@@ -39,6 +39,7 @@ struct Solution
     Solution(const Solution<T> &rhs) = default;
     Solution(const std::vector<T> &variable) : variable(variable) {}
     Solution(int variable_size, int objective_size = 1) : variable(variable_size), objectives(objective_size) {}
+    virtual ~Solution() = default;
 
     //! two compares for the use of sort(), descending order
     // return true means the orders of the two items keep unchanged

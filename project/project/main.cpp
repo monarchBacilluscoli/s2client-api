@@ -46,9 +46,6 @@ private:
 
 int main(int argc, char *argv[])
 {
-    RollingSolution<Command> ro;
-    ro.ClearSimData();
-
     for (size_t i = 0; i < argc; i++)
     {
         std::cout << argv[i] << std::endl;

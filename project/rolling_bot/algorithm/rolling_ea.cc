@@ -146,7 +146,7 @@ void RollingEA::Evaluate(Population &pop)
                     pop[i].results[j].units[unit.first].statistics = m_simulation_pool[i].GetUnitStatistics(unit.first);
                     pop[i].results[j].game.result = m_simulation_pool[i].CheckGameResult();
                 }
-                // pop[i].CalculateAver(); // based on the recorded statistics, calculate the average results
+                pop[i].CalculateAver(); // based on the recorded statistics, calculate the average results
             }
             { // set the objectives
                 pop[i].objectives[0] += m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);

@@ -14,7 +14,7 @@ void RollingDE::InitBeforeRun()
 void RollingDE::Breed()
 {
     DifferentialEvolution<Command, RollingSolution>::Breed();
-    RollingEA::AssembleASolutionFromGoodUnits(GetRandomEntry(m_offspring), m_population);
+    RollingEA::AssembleASolutionFromGoodUnits(GetRandomEntry(m_offspring), m_population); // randomly exchange 1 solution with a new assemble solution
 }
 
 RollingSolution<Command> RollingDE::Mutate(const RollingSolution<Command> &base_sol, const RollingSolution<Command> &material_sol1, const RollingSolution<Command> &material_sol2)

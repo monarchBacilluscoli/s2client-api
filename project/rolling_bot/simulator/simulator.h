@@ -7,6 +7,7 @@
 #include <string>
 #include <thread>
 #include "debug_renderer/debug_renderer.h"
+#include "../algorithm/rolling_solution.h"
 #include "state.h"
 #include "executor.h"
 
