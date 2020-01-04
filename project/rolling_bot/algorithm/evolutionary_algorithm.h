@@ -13,10 +13,13 @@
 #ifdef USE_GRAPHICS
 #include "../methods/graph_renderer.h"
 #endif // USE_GRAPHICS
+#ifdef DEBUG
+#include "../simulator/command.h"
+#endif // DEBUG
 
 namespace sc2
 {
-template <class T, template<typename> class TSolution> // T is the variable type and TSolution is the solution type
+template <class T, template <typename> class TSolution> // T is the variable type and TSolution is the solution type
 class EvolutionaryAlgorithm
 {
 
@@ -114,7 +117,7 @@ protected:
     virtual void ActionAfterRun() = 0;
 };
 
-template <class T, template<typename> class TSolution>
+template <class T, template <typename> class TSolution>
 void EvolutionaryAlgorithm<T, TSolution>::SetObjectiveSize(int obj_size)
 {
     if (m_objective_names.size() != 0 && m_objective_names.size() != obj_size)
@@ -127,7 +130,7 @@ void EvolutionaryAlgorithm<T, TSolution>::SetObjectiveSize(int obj_size)
     }
 }
 
-template <class T, template<typename> class TSolution>
+template <class T, template <typename> class TSolution>
 void EvolutionaryAlgorithm<T, TSolution>::SetObjectiveNames(const std::vector<std::string> &objective_names)
 {
     if (m_objective_size == 0)
@@ -145,7 +148,7 @@ void EvolutionaryAlgorithm<T, TSolution>::SetObjectiveNames(const std::vector<st
     }
 }
 
-template <class T, template<typename> class TSolution>
+template <class T, template <typename> class TSolution>
 std::vector<float> EvolutionaryAlgorithm<T, TSolution>::GetLastObjsAverage() const
 {
     std::vector<float> last_obj_aver(m_objective_size);
@@ -156,7 +159,7 @@ std::vector<float> EvolutionaryAlgorithm<T, TSolution>::GetLastObjsAverage() con
     return last_obj_aver;
 }
 
-template <class T, template<typename> class TSolution>
+template <class T, template <typename> class TSolution>
 std::vector<float> EvolutionaryAlgorithm<T, TSolution>::GetLastObjsBest() const
 {
     std::vector<float> last_obj_best(m_objective_size);
@@ -167,7 +170,7 @@ std::vector<float> EvolutionaryAlgorithm<T, TSolution>::GetLastObjsBest() const
     return last_obj_best;
 }
 
-template <class T, template<typename> class TSolution>
+template <class T, template <typename> class TSolution>
 std::vector<float> EvolutionaryAlgorithm<T, TSolution>::GetLastObjsWorst() const
 {
     std::vector<float> last_obj_worst(m_objective_size);
@@ -178,12 +181,12 @@ std::vector<float> EvolutionaryAlgorithm<T, TSolution>::GetLastObjsWorst() const
     return last_obj_worst;
 }
 
-template <class T, template<typename> class TSolution>
+template <class T, template <typename> class TSolution>
 void EvolutionaryAlgorithm<T, TSolution>::InitBeforeRun()
 {
     m_population.clear();
-    m_population.resize(m_population_size);
     m_current_generation = 0;
+    m_population.resize(m_population_size);
     m_history_objs.clear();
     m_history_objs_ave.resize(m_objective_size);
     m_history_objs_best.resize(m_objective_size);
@@ -204,7 +207,7 @@ void EvolutionaryAlgorithm<T, TSolution>::InitBeforeRun()
 #endif // USE_GRAPHICS
 }
 
-template <class T, template<typename> class TSolution>
+template <class T, template <typename> class TSolution>
 std::vector<TSolution<T>> EvolutionaryAlgorithm<T, TSolution>::Run()
 {
     InitBeforeRun();
@@ -219,7 +222,7 @@ std::vector<TSolution<T>> EvolutionaryAlgorithm<T, TSolution>::Run()
         ActionAfterEachGeneration();
     }
     ActionAfterRun();
-    typename std::vector<TSolution<T>>::iterator end_it = m_population.begin();
+    typename std::vector<TSolution<T>>::iterator end_it = m_population.begin(); // 显式指明这是一个类型
     for (end_it = m_population.begin(); end_it != m_population.end(); ++end_it)
     {
         if ((*end_it).rank > (*m_population.begin()).rank)
@@ -228,10 +231,13 @@ std::vector<TSolution<T>> EvolutionaryAlgorithm<T, TSolution>::Run()
         }
     }
     std::cout << "Finish run after " << m_current_generation - 1 << " generation!@" << __FUNCTION__ << std::endl;
+#ifdef DEBUG
+    std::cout << "Here is still " << std::count_if(m_population.begin(), m_population.end(), [](const TSolution<T> &s) -> bool { return s.is_priori; }) << "priori solutions.";
+#endif // DEBUG
     return std::vector<TSolution<T>>(m_population.begin(), end_it);
 }
 
-template <class T, template<typename> class TSolution>
+template <class T, template <typename> class TSolution>
 void EvolutionaryAlgorithm<T, TSolution>::ActionAfterEachGeneration()
 {
     RecordRunningData();
@@ -241,13 +247,13 @@ void EvolutionaryAlgorithm<T, TSolution>::ActionAfterEachGeneration()
     return;
 }
 
-template <class T, template<typename> class TSolution>
+template <class T, template <typename> class TSolution>
 void EvolutionaryAlgorithm<T, TSolution>::RecordRunningData()
 {
     RecordObjectives();
 }
 
-template <class T, template<typename> class TSolution>
+template <class T, template <typename> class TSolution>
 void EvolutionaryAlgorithm<T, TSolution>::RecordObjectives()
 {
     // all the objs
@@ -279,7 +285,7 @@ void EvolutionaryAlgorithm<T, TSolution>::RecordObjectives()
 }
 
 #ifdef USE_GRAPHICS
-template <class T, template<typename> class TSolution>
+template <class T, template <typename> class TSolution>
 void EvolutionaryAlgorithm<T, TSolution>::ShowGraphEachGeneration()
 {
     //todo show the evolution status of the algorithm
@@ -287,7 +293,7 @@ void EvolutionaryAlgorithm<T, TSolution>::ShowGraphEachGeneration()
     ShowSolutionDistribution(3); // show the last generations objs distribution
 }
 
-template <class T, template<typename> class TSolution>
+template <class T, template <typename> class TSolution>
 void EvolutionaryAlgorithm<T, TSolution>::ShowOverallStatusGraphEachGeneration()
 {
     std::vector<std::vector<float>> data;

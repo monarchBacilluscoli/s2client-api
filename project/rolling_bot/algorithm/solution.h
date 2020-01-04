@@ -41,6 +41,8 @@ struct Solution
     Solution(int variable_size, int objective_size = 1) : variable(variable_size), objectives(objective_size) {}
     virtual ~Solution() = default;
 
+    virtual void Clear();
+
     //! two compares for the use of sort(), descending order
     // return true means the orders of the two items keep unchanged
     static bool multi_greater(const Solution<T> &a, const Solution<T> &b);
@@ -55,6 +57,16 @@ struct Solution
     template <template <typename> class TSolution>
     static void CalculateCrowdedness(Population<TSolution> &pop);
 };
+
+template <class T>
+void Solution<T>::Clear()
+{
+    objectives.clear();
+    variable.clear();
+    dominated_count = 0;
+    dominant_solutions.clear();
+    crowdedness = 0.f;
+}
 
 template <class T>
 bool Solution<T>::multi_greater(const Solution<T> &a, const Solution<T> &b)

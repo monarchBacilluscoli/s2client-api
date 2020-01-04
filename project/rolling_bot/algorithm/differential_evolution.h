@@ -3,6 +3,9 @@
 
 #include <algorithm>
 #include "evolutionary_algorithm.h"
+#ifdef DEBUG
+#include "../simulator/command.h"
+#endif
 
 namespace sc2
 {
@@ -75,9 +78,7 @@ void DifferentialEvolution<T, TSolution>::Breed()
         //? Here I can not ensure the 3 random numbers are not the same. Should I ensure it?
         int index_a = random_dis(EA::m_random_engine);
         int index_b = random_dis(EA::m_random_engine);
-        TSolution<T> &material_a = EA::m_population[index_a];
-        TSolution<T> &material_b = EA::m_population[index_b];
-        EA::m_offspring[i] = Mutate(EA::m_population[i], material_a, material_b);
+        EA::m_offspring[i] = Mutate(EA::m_population[i], EA::m_population[index_a], EA::m_population[index_b]);
         Crossover(EA::m_population[i], EA::m_offspring[i]);
     }
 }

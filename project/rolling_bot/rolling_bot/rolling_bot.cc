@@ -54,6 +54,9 @@ void RollingBot::OnStep()
                 {
                     std::cout << "returned solution don't have this unit's commands@" + std::string(__FUNCTION__) << std::endl;
                 }
+#ifdef DEBUG
+                Actions()->SendChat("one action!");
+#endif // DEBUG
                 std::deque<ActionRaw> &unit_commands = m_selected_commands[u->tag];
                 if (!m_selected_commands.at(u->tag).empty()) // 如果当前单位的动作队列不为空
                 {
@@ -183,7 +186,7 @@ RollingEA &RollingBot::Algorithm()
 
 void RollingBot::SetCommandFromAlgorithm()
 {
-    Solution<Command> selected_solution;
+    RollingSolution<Command> selected_solution;
     Actions()->SendChat(std::string("Run algorithm in game loop ") + std::to_string(Observation()->GetGameLoop()));
     std::cout << std::string("Run algorithm in game loop ") + std::to_string(Observation()->GetGameLoop()) << std::endl;
     m_rolling_ea.Initialize(Observation());
@@ -197,37 +200,37 @@ void RollingBot::SetCommandFromAlgorithm()
     std::cout << objs_str << std::endl;
 }
 
-const Solution<Command> &RollingBot::SelectMostIronHeadSolution(const Population &pop)
+const RollingSolution<Command> &RollingBot::SelectMostIronHeadSolution(const Population &pop)
 {
     if (pop.empty())
     {
         throw("The pop passed here is an empty pop.@RollingBot::" + std::string(__FUNCTION__));
     }
-    Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const Solution<Command> &largetest, const Solution<Command> &first) {
+    Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const RollingSolution<Command> &largetest, const RollingSolution<Command> &first) {
         return largetest.objectives[0] < first.objectives[0];
     });
     return *it;
 }
 
-const Solution<Command> &RollingBot::SelectMostRunAwaySolution(const Population &pop)
+const RollingSolution<Command> &RollingBot::SelectMostRunAwaySolution(const Population &pop)
 {
     if (pop.empty())
     {
         throw("The pop passed here is an empty pop.@RollingBot::" + std::string(__FUNCTION__));
     }
-    Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const Solution<Command> &largetest, const Solution<Command> &first) {
+    Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const RollingSolution<Command> &largetest, const RollingSolution<Command> &first) {
         return largetest.objectives[1] < first.objectives[1]; // the maximum of loss (negetive)
     });
     return *it;
 }
 
-const Solution<Command> &RollingBot::SelectMostOKSolution(const Population &pop)
+const RollingSolution<Command> &RollingBot::SelectMostOKSolution(const Population &pop)
 {
     if (pop.empty())
     {
         throw("The pop passed here is an empty pop.@RollingBot::" + std::string(__FUNCTION__));
     }
-    Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const Solution<Command> &current_largetest, const Solution<Command> &first) {
+    Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const RollingSolution<Command> &current_largetest, const RollingSolution<Command> &first) {
         return (std::abs(current_largetest.objectives[0]) - std::abs(current_largetest.objectives[1])) < (std::abs(first.objectives[0]) - std::abs(first.objectives[1])); // the first obj is gain, the second obj is loss
     });
     return *it;

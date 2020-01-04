@@ -70,7 +70,7 @@ protected:
     SimulatorPool m_simulation_pool;
     // methods
     ConvergenceTermination m_convergence_termination_manager{*this};
-    std::lognormal_distribution<float> m_log_dis{0, 0.5};
+    std::lognormal_distribution<float> m_log_dis{0, 0.6};
 
 public:
     RollingEA() = delete;
@@ -141,7 +141,7 @@ protected:
     // only belong to this class
     void Evaluate(Population &pop);
     void InitFromObservation();
-    void GenerateOne(Solution<Command> &sol);
+    void GenerateOne(RollingSolution<Command> &sol);
     virtual void RecordObjectives() override;
     virtual void ActionAfterRun() override;
     RollingSolution<Command> AssembleASolutionFromGoodUnits(const Population& evaluated_pop); // Assemble a priori solution based on the evaluated population.

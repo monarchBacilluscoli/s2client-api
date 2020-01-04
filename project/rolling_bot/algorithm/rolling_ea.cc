@@ -53,7 +53,7 @@ void RollingEA::InitOnlySelfMembersBeforeRun()
 {                                              // doesn't call the base class's Init function
     InitFromObservation();                     // set the m_my_team and some other things
     m_convergence_termination_manager.clear(); // must refresh the state of it
-    for (Solution<Command> &sol : m_population)
+    for (RollingSolution<Command> &sol : m_population)
     {
         sol.variable.resize(m_my_team.size());
         sol.objectives.resize(m_objective_size);
@@ -71,12 +71,12 @@ void RollingEA::Generate()
         int enemy_sz = std::min(m_enemy_team.size(), (size_t)m_population_size / 5);
         for (size_t i = 0; i < enemy_sz; ++i)
         {
-            Solution<Command> &random_sol = m_population[i];
+            RollingSolution<Command> &random_sol = m_population[i];
             Point2D target_position = m_enemy_team[i]->pos;
             int unit_sz = random_sol.variable.size();
             for (size_t j = 0; j < unit_sz; ++j)
             {
-                const Unit *unit = m_observation->GetUnit(random_sol.variable[j].unit_tag);
+                const Unit *unit = m_observation->GetUnit(random_sol.variable[j].unit_tag); //todo m_enemy_team needed, I should try my best not to use m_observation during algorithm run
                 RawActions &actions = random_sol.variable[j].actions;
                 int action_sz = actions.size();
                 for (size_t k = 0; k < action_sz; k++)
@@ -85,6 +85,7 @@ void RollingEA::Generate()
                     actions[k].target_point = unit->pos + u_to_e * ((u_to_e.modulus() - m_unit_types[unit->unit_type].weapons.front().range) / u_to_e.modulus());
                 }
             }
+            random_sol.is_priori = true;
         }
     }
 }
@@ -132,7 +133,7 @@ void RollingEA::Evaluate(Population &pop)
         size_t pop_sz = pop.size();
         for (size_t i = 0; i < pop_sz; i++)
         {
-            { // record game results
+            {                                                                                                      // record game results
                 const std::map<Tag, const Unit *> &units_correspondence = m_simulation_pool[i].GetRelativeUnits(); // Units final state in simulation
 #ifdef DEBUG
                 if (i + 1 < pop_sz && m_simulation_pool[i].GetRelativeUnits().size() != m_simulation_pool[i + 1].GetRelativeUnits().size())
@@ -142,6 +143,7 @@ void RollingEA::Evaluate(Population &pop)
 #endif // DEBUG
                 for (const auto &unit : units_correspondence)
                 {
+                    pop[i].results[j].units[unit.first];
                     pop[i].results[j].units[unit.first].final_state = *(unit.second);
                     pop[i].results[j].units[unit.first].statistics = m_simulation_pool[i].GetUnitStatistics(unit.first);
                     pop[i].results[j].game.result = m_simulation_pool[i].CheckGameResult();
@@ -168,15 +170,15 @@ void RollingEA::Select()
     RollingSolution<Command>::DominanceSort(m_population);
     RollingSolution<Command>::CalculateCrowdedness(m_population);
     // choose solutions to be added to the next generation
-    int rank_need_resort = m_population[m_population_size - 1].rank;
+    int rank_need_resort = m_population[m_population_size - 1].rank;                                         // DEBUG
     if (m_population.size() > m_population_size && m_population[m_population_size].rank == rank_need_resort) // if next element is still of this rank, it means this rank can not be contained fully in current population, it needs selecting
     {
         // resort solutions of current rank
-        Population::iterator bg = std::find_if(m_population.begin(), m_population.end(), [rank_need_resort](const Solution<Command> &s) { return rank_need_resort == s.rank; });
-        Population::iterator ed = std::find_if(m_population.rbegin(), m_population.rend(), [rank_need_resort](const Solution<Command> &s) { return rank_need_resort == s.rank; }).base();
-        std::sort(bg, ed, [](const Solution<Command> &l, const Solution<Command> &r) { return l.crowdedness > r.crowdedness; });
+        Population::iterator bg = std::find_if(m_population.begin(), m_population.end(), [rank_need_resort](const RollingSolution<Command> &s) { return rank_need_resort == s.rank; });
+        Population::iterator ed = std::find_if(m_population.rbegin(), m_population.rend(), [rank_need_resort](const RollingSolution<Command> &s) { return rank_need_resort == s.rank; }).base();
+        std::sort(bg, ed, [](const RollingSolution<Command> &l, const RollingSolution<Command> &r) { return l.crowdedness > r.crowdedness; });
     }
-    m_population.resize(m_population_size);
+    m_population.resize(EA::m_population_size);
     return;
 }
 
@@ -209,7 +211,7 @@ void RollingEA::ShowSolutionDistribution(int showed_generations_count)
 }
 #endif //USE_GRAPHICS
 
-void RollingEA::GenerateOne(Solution<Command> &sol)
+void RollingEA::GenerateOne(RollingSolution<Command> &sol)
 {
     size_t team_size = m_my_team.size();
     for (size_t i = 0; i < team_size; i++)
@@ -297,7 +299,7 @@ void RollingEA::RecordObjectives()
 
 void RollingEA::ActionAfterRun()
 {
-    Evaluate(m_population);
+    // Evaluate(m_population);
 }
 
 RollingSolution<Command> RollingEA::AssembleASolutionFromGoodUnits(const Population &evaluated_pop)
@@ -309,25 +311,43 @@ RollingSolution<Command> RollingEA::AssembleASolutionFromGoodUnits(const Populat
 
 void RollingEA::AssembleASolutionFromGoodUnits(RollingSolution<Command> &modified_solution, const Population &evaluated_pop)
 {
+    if (m_my_team.size() == 1) // no use
+    {
+        return;
+    }
+    modified_solution.ClearSimData();
+    modified_solution.variable.clear();
+    modified_solution.variable.resize(m_my_team.size());
+    modified_solution.objectives.clear();
     size_t pop_sz = evaluated_pop.size();
     for (size_t i = 0; i < m_my_team.size(); i++)
     {
         // todo search the pop to find the unit with greatest performence
         Population::const_iterator it_s = std::max_element(evaluated_pop.begin(), evaluated_pop.end(), [u_tag = m_my_team[i]->tag](const RollingSolution<Command> &first, const RollingSolution<Command> &second) -> bool {
-            return first.aver_result.units_statistics.at(u_tag).attack_number < second.aver_result.units_statistics.at(u_tag).attack_number;
+            const UnitStatisticalData &first_data = first.aver_result.units_statistics.at(u_tag), second_data = second.aver_result.units_statistics.at(u_tag);
+            if (first_data.attack_number < second_data.attack_number ||
+                (first_data.attack_number == second_data.attack_number && first_data.health_change < second_data.health_change))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         });
         // use its command as a part of this solution
         //! in generating function, the order of variables in solution is set according to m_my_team's order
         std::vector<Command>::const_iterator it_c = std::find_if(it_s->variable.begin(), it_s->variable.end(), [u_tag = m_my_team[i]->tag](const Command &cmd) -> bool { return u_tag == cmd.unit_tag; }); // find the command of this unit in this solution
         if (it_c != it_s->variable.end())
         {
-            modified_solution.variable[i] = *it_c; // the order is equal to my_team's order
+            modified_solution.variable[i] = *it_c; // the order is equal to my_team's order //? why it can not be copied?
         }
         else
         {
             throw(std::string("somethind wrong@") + __FUNCTION__);
         }
     }
+    modified_solution.is_priori = true;
 }
 
 Point2D RollingEA::FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float effective_range, const Units &enemy_team)

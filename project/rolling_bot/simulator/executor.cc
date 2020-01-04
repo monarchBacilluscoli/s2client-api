@@ -24,7 +24,7 @@ void Executor::OnStep()
             {
                 ++m_units_statistics[u->tag].attack_number;
             }
-            // execute the next action
+            // check if the command for this unit existed
             if (m_commands.find(u->tag) == m_commands.end())
             {
                 // std::cout << m_commands.size() << "\t" << std::flush;
@@ -182,11 +182,11 @@ float Executor::CalculateHealthChange(Tag tag) const
     float change;
     if (m_initial_units.at(tag)->is_alive)
     {
-        change = m_initial_units_states.at(tag).health - m_initial_units.at(tag)->health;
+        change = m_initial_units.at(tag)->health - m_initial_units_states.at(tag).health;
     }
     else
     {
-        change = m_initial_units_states.at(tag).health;
+        change = - m_initial_units_states.at(tag).health;
     }
     return change;
 }
@@ -251,6 +251,7 @@ void Executor::ClearDeadUnits()
 
 void Executor::Initialize()
 {
+    Clear();
     InitUnitStatistics(Observation()->GetUnits());
     RecordInitialUnitsStates(Observation()->GetUnits());
 }

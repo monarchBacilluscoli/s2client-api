@@ -28,7 +28,7 @@ class RollingBot : public Agent
 {
 private:
     int m_interval_size = 160; //! Number of frames for which the algorithm should run once // about 5 seconds
-    std::function<const Solution<Command> &(const Population &)> m_solution_selector = &RollingBot::SelectMostOKSolution;
+    std::function<const RollingSolution<Command> &(const Population &)> m_solution_selector = &RollingBot::SelectMostOKSolution;
 
     //! The algorithm object
     RollingDE m_rolling_ea;
@@ -68,9 +68,9 @@ public:
 protected:
     void SetCommandFromAlgorithm();
 protected:
-    static const Solution<Command> &SelectMostIronHeadSolution(const Population &pop);
-    static const Solution<Command> &SelectMostRunAwaySolution(const Population &pop);
-    static const Solution<Command> &SelectMostOKSolution(const Population &pop); // forgive my small vocabulary...I mean I can get a more moderate solution that can be used at most conditions
+    static const RollingSolution<Command> &SelectMostIronHeadSolution(const Population &pop);
+    static const RollingSolution<Command> &SelectMostRunAwaySolution(const Population &pop);
+    static const RollingSolution<Command> &SelectMostOKSolution(const Population &pop); // forgive my small vocabulary...I mean I can get a more moderate solution that can be used at most conditions
 };
 } // namespace sc2
 

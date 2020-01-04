@@ -37,6 +37,7 @@ struct RollingSolution : public Solution<T>
 {
     std::vector<SimData> results; // results of multiple times of simulations
     AverageSimData aver_result;   // must be calculated by calling CalculateAver() before being used
+    bool is_priori = false;
 
     RollingSolution() : Solution<T>(){};
     RollingSolution(const RollingSolution<T> &rhs) = default;

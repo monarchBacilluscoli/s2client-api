@@ -1,6 +1,6 @@
 #include "global_defines.h"
 
-#include "../rolling_bot/rolling_bot/rolling_bot.h"
+#include "./rolling_bot/rolling_bot/rolling_bot.h"
 #include <sc2api/sc2_api.h>
 #include <string>
 #include <iostream>
