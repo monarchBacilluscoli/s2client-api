@@ -80,8 +80,9 @@ int main(int argc, char *argv[])
     PLAY_STYLE play_style = PLAY_STYLE::NORMAL;
     bool use_fix = true;
     bool use_priori = true;
+    bool use_assembled = true;
 
-    std::string point_of_expriment = std::string(use_priori ? "priori " : "") + (use_fix ? "fix" : "");
+    std::string point_of_expriment = std::string(use_priori ? "priori " : "") + (use_fix ? "fix " : "") + (use_assembled ? "assemble " : "");
     int game_round = 10;
     std::vector<std::string> record_remark_vec = {
         point_of_expriment + ", ",
@@ -122,6 +123,7 @@ int main(int argc, char *argv[])
     rolling_bot.Algorithm().SetRandomEngineSeed(1);
     rolling_bot.Algorithm().SetUseFix(use_fix);
     rolling_bot.Algorithm().SetUsePriori(use_priori);
+    rolling_bot.Algorithm().SetUseAssemble(use_assembled);
     rolling_bot.SetIntervalLength(interval_size);
     rolling_bot.SetStyle(play_style);
     rolling_bot.SetRemark(record_remark);

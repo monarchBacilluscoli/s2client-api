@@ -65,6 +65,7 @@ protected:
 #endif //USE_GRAPHICS
     bool m_use_fix = false;
     bool m_use_priori = false;
+    bool m_use_assemble = false;
     bool m_is_debug = true;
     // simulators
     SimulatorPool m_simulation_pool;
@@ -117,6 +118,7 @@ public:
     }
     void SetUseFix(bool use_fix) { m_use_fix = use_fix; };
     void SetUsePriori(bool use_priori) { m_use_priori = use_priori; };
+    void SetUseAssemble(bool use_assemble) {m_use_assemble = use_assemble;};
     void SetDebug(bool is_debug) { m_is_debug = is_debug; }
 
 protected:
