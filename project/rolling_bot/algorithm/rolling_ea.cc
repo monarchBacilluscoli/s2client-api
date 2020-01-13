@@ -352,7 +352,7 @@ void RollingEA::AssembleASolutionFromGoodUnits(RollingSolution<Command> &modifie
 
 Point2D RollingEA::FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float effective_range, const Units &enemy_team)
 {
-    Point2D nearest_enemy_pos_to_target_point = SelectNearestUnitFromPoint(action_target_pos, enemy_team)->pos;
+    Point2D nearest_enemy_pos_to_target_point = FindNearestUnitFromPoint(action_target_pos, enemy_team)->pos;
     if (Distance2D(action_target_pos, nearest_enemy_pos_to_target_point) < 2 * effective_range)
     {
         return action_target_pos;

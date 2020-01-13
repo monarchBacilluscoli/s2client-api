@@ -16,7 +16,7 @@ SimulatorPool::SimulatorPool(int size,
                                                             m_process_path(process_path),
                                                             m_map_path(map_path)
 {
-    std::string sim_map_path = Simulator::GetSimMapPath(map_path);
+    std::string sim_map_path = Simulator::GenerateSimMapPath(map_path);
     int i = 0;
     for (Simulation<std::thread::id> &simulation : m_simulations)
     {
@@ -36,7 +36,7 @@ void SimulatorPool::SetSims(int size, const std::string &net_address, int port_s
 {
     m_simulations.resize(size);
     m_sol_sim_map.resize(size);
-    std::string sim_map_path = Simulator::GetSimMapPath(map_path);
+    std::string sim_map_path = Simulator::GenerateSimMapPath(map_path);
     int i = 0;
     for (Simulation<std::thread::id> &simulation : m_simulations)
     {
@@ -63,9 +63,9 @@ void SimulatorPool::StartSimsAsync()
     {
         // std::cout << i++ << std::endl;
         simulation->result_holder = std::async(std::launch::async, [sim = simulation] { //note sim is a pointer
-            sim->sim.LaunchStarcraft();
             try
             {
+                sim->sim.LaunchStarcraft();
                 sim->sim.StartGame();
             }
             catch (const std::exception &e)
@@ -317,7 +317,7 @@ void SimulatorPool::RunSimsAsync(int steps)
             Simulation<std::thread::id> sim = Simulation<std::thread::id>();
             m_simulations.emplace_back();
             Simulation<std::thread::id> &new_sim = m_simulations.back();
-            new_sim.sim.SetBaseSettings(m_port_end, m_process_path, Simulator::GetSimMapPath(m_map_path));
+            new_sim.sim.SetBaseSettings(m_port_end, m_process_path, Simulator::GenerateSimMapPath(m_map_path));
             m_port_end += 2;
             new_sim.sim.LaunchStarcraft();
             new_sim.sim.StartGame();

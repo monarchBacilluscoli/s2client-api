@@ -57,7 +57,7 @@ std::map<Tag, const Unit *> sc2::LoadMultiPlayerGame(State save, Client &current
     Units us_copied = current_client.Observation()->GetUnits(); // just copys the units status in save
     for (const UnitState &state_u : save.unit_states)
     {
-        unit_map[state_u.unit_tag] = u_copied = SelectNearestUnitFromPoint(state_u.pos, us_copied);
+        unit_map[state_u.unit_tag] = u_copied = FindNearestUnitFromPoint(state_u.pos, us_copied);
         current_client.Debug()->DebugSetShields(state_u.shields + 0.1f, u_copied); // WTF, shield cannot be set to 0, if you set 0, you will find it is full in game, but if you set it as 0.1f, the data in game will be 0, fuck again.
         current_client.Debug()->DebugSetLife(state_u.life, u_copied);
         current_client.Debug()->DebugSetEnergy(state_u.energy, u_copied);

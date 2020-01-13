@@ -1,6 +1,8 @@
 #ifndef EXECUTOR_H
 #define EXECUTOR_H
 
+#include "../../global_defines.h"
+
 #include <sc2api/sc2_api.h>
 #include <iostream>
 #include <list>
@@ -43,7 +45,7 @@ public:
 
     const std::list<Unit> &GetDeadUnits(Unit::Alliance alliance) const;
     const std::map<Tag, UnitStatisticalData> &GetUnitsStatistics();
-    const UnitStatisticalData& GetUnitStatistics(Tag tag);
+    const UnitStatisticalData &GetUnitStatistics(Tag tag);
     GameResult CheckGameResult() const; // it may not be usefun when war fog existing
 
 private:

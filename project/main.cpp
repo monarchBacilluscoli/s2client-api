@@ -11,37 +11,62 @@ using namespace sc2;
 //! for test use
 class Bot : public Agent
 {
+private:
+    Simulator sim;
+
 public:
-    Bot()
+    Bot(const std::string &ps_path, const std::string &map)
     {
-#ifdef USE_GRAPHICS
-        m_renderer.SetIsDisplay(false);
-#endif // USE_GRAPHICS
+        sim.SetProcessPath(ps_path);
+        sim.SetMapPath(Simulator::GenerateSimMapPath(map));
     }
-    virtual void OnGameStart() final {}
+    virtual void OnGameStart() final
+    {
+        // sim.LaunchStarcraft();
+        // sim.StartGame();
+        // for (size_t i = 0; i < 100000; i++)
+        // {
+        //     sim.CopyAndSetState(Observation());
+        //     //todo compare the copied unit positions
+        //     Units original_units = Observation()->GetUnits();
+        //     Units copied_units = sim.Observation()->GetUnits();
+        //     for (size_t i = 0; i < original_units.size(); i++)
+        //     {
+        //         Point2D copied = SelectNearestUnitFromPoint(original_units[i]->pos, copied_units)->pos;
+        //         Point2D origin = original_units[i]->pos;
+        //         float difference = (copied - origin).modulus();
+        //         if (difference > 0.001f)
+        //         {
+        //             std::cout << origin.x << ", " << origin.y << " " << copied.x << ", " << copied.y << "\t" << std::flush;
+        //         }
+        //     }
+        //     sim.Run(400);
+        // }
+        // Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {2, 2});
+        Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {1, 1});
+        Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {80, 80});
+        Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {80, 1});
+        // Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {78, 78});
+        Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {80, 80});
+        Debug()->SendDebug();
+    }
 
     virtual void OnUnitIdle(const Unit *unit) final
     {
-        Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
-        Actions()->UnitCommand(unit, ABILITY_ID::ATTACK, GetRandomEntry(enemies));
     }
 
     virtual void OnUnitDestroyed(const Unit *unit) override
     {
-        std::cout << "Player " << unit->owner << "'s unit "
-                  << unit->unit_type << " died" << std::endl;
     }
 
     virtual void OnStep() final
     {
-        std::cout << Observation()->GetUnits().size() << "\t";
+        Units units = Observation()->GetUnits();
+        for (size_t i = 0; i < units.size(); i++)
+        {
+            std::cout << units[i]->pos.x << ", " << units[i]->pos.y << std::endl;
+        }
     }
-
-private:
-#ifdef USE_GRAPHICS
-    DebugRenderer m_renderer;
-#endif // USE_GRAPHICS
-    RawActions m_stored_actions;
 };
 
 int main(int argc, char *argv[])
@@ -113,7 +138,7 @@ int main(int argc, char *argv[])
     std::string map_path = coordinator.GetMapPath(); // you can set your own map_path here
 
     //! Bots here
-    Bot bot;
+    Bot bot(coordinator.GetExePath(), map_path);
     RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path, max_generations, 50);
 
     rolling_bot.Algorithm().SetDebug(is_debug);

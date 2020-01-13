@@ -1,7 +1,7 @@
 #ifndef SIMULATOR_POOL_H
 #define SIMULATOR_POOL_H
 
-#include "global_defines.h"
+#include "../../global_defines.h"
 
 #include <future>
 #include <chrono>

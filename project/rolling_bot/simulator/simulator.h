@@ -105,7 +105,7 @@ private:
     std::map<Tag, Tag> m_target_to_source_unit_tags; //! from target to source unit tags
 
 public:
-    static std::string GetSimMapPath(const std::string &map_path);
+    static std::string GenerateSimMapPath(const std::string &map_path);
 };
 
 } // namespace sc2

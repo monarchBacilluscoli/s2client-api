@@ -159,7 +159,7 @@ void Simulator::SetUnitsRelations(State state, Units us_copied)
     for (const UnitState &state_u : state.unit_states)
     {
         m_relative_units[state_u.unit_tag] =
-            SelectNearestUnitFromPoint(state_u.pos, us_copied);
+            FindNearestUnitFromPoint(state_u.pos, us_copied);
     }
 }
 
@@ -265,7 +265,7 @@ void Simulator::SetOpponent(Difficulty difficulty)
                      CreateComputer(Race::Terran, difficulty)});
 }
 
-std::string Simulator::GetSimMapPath(const std::string &map_path)
+std::string Simulator::GenerateSimMapPath(const std::string &map_path)
 {
     if (map_path.rfind("Sim.SC2Map") != std::string::npos)
     {

@@ -1,7 +1,7 @@
 #ifndef ROLLING_EA_H
 #define ROLLING_EA_H
 
-#include "global_defines.h"
+#include "../../global_defines.h"
 
 #include "evolutionary_algorithm.h"
 #include "../simulator/simulator_pool.h"

@@ -1,7 +1,7 @@
 #ifndef EVOLUTIONARY_ALGORITHM_H
 #define EVOLUTIONARY_ALGORITHM_H
 
-#include "global_defines.h"
+#include "../../global_defines.h"
 
 #include <vector>
 #include <list>
