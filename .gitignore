@@ -64,3 +64,4 @@ doxygen.log
 *.SC2Replay
 scores/
 sim_replays/
+core
