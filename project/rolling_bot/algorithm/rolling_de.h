@@ -9,7 +9,7 @@
 namespace sc2
 {
 
-class RollingDE : public DifferentialEvolution<Command>, public RollingEA
+class RollingDE : public DifferentialEvolution<Command, RollingSolution>, public RollingEA
 {
 protected:
 public:
@@ -33,8 +33,9 @@ public:
 
 protected:
     void InitBeforeRun() override;
-    virtual Solution<Command> Mutate(const Solution<Command> &base_sol, const Solution<Command> &material_sol1, const Solution<Command> &material_sol2) override;
-    virtual void Crossover(const Solution<Command> &parent, Solution<Command> &child) override;
+    void Breed() override;
+    virtual RollingSolution<Command> Mutate(const RollingSolution<Command> &base_sol, const RollingSolution<Command> &material_sol1, const RollingSolution<Command> &material_sol2) override;
+    virtual void Crossover(const RollingSolution<Command> &parent, RollingSolution<Command> &child) override;
 };
 } // namespace sc2
 

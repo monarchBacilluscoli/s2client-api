@@ -37,7 +37,7 @@ Point2D FindCenterOfMap(const GameInfo &game_info)
     return target_pos;
 }
 
-const Unit *SelectNearestUnitFromPoint(const Point2D &p, const Units &us)
+const Unit *FindNearestUnitFromPoint(const Point2D &p, const Units &us)
 {
     float min_distance = std::numeric_limits<float>::max();
     const Unit *selected_unit = nullptr;

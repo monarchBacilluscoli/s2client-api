@@ -6,10 +6,9 @@
 #include <SDL2/SDL_ttf.h>
 #include <sc2api/sc2_api.h>
 #include <string>
-#include <vector>
-#include "../project/rolling_bot/algorithm/solution.h"
-#include "../project/rolling_bot/simulator/command.h"
 #include <list>
+#include "../../project/rolling_bot/algorithm/solution.h"
+#include "../../project/rolling_bot/simulator/command.h"
 
 namespace sc2
 {

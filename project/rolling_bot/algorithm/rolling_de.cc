@@ -6,20 +6,29 @@ namespace sc2
 void RollingDE::InitBeforeRun()
 {
     EvolutionaryAlgorithm::InitBeforeRun();
-    DifferentialEvolution<Command>::InitOnlySelfMembersBeforeRun(); // I think it is ok to call the EvolutionaryAlgorithm::InitBeforeRun() twice
+    DifferentialEvolution<Command, RollingSolution>::InitOnlySelfMembersBeforeRun(); // I think it is ok to call the EvolutionaryAlgorithm::InitBeforeRun() twice
     RollingEA::InitOnlySelfMembersBeforeRun();
     //todo Initialization only for this class
 }
 
-Solution<Command> RollingDE::Mutate(const Solution<Command> &base_sol, const Solution<Command> &material_sol1, const Solution<Command> &material_sol2)
+void RollingDE::Breed()
 {
-    Solution<Command> product(base_sol.variable);
+    DifferentialEvolution<Command, RollingSolution>::Breed();
+    if (m_use_assemble)
+    {
+        RollingEA::AssembleASolutionFromGoodUnits(GetRandomEntry(m_offspring), m_population); // randomly exchange 1 solution with a new assemble solution
+    }
+}
+
+RollingSolution<Command> RollingDE::Mutate(const RollingSolution<Command> &base_sol, const RollingSolution<Command> &material_sol1, const RollingSolution<Command> &material_sol2)
+{
+    RollingSolution<Command> product(base_sol.variable);
     // generally all the solution's varible sizes are the same, perhaps I can omit the assertion
     int variable_size = std::min({product.variable.size(),
                                   material_sol1.variable.size(), material_sol2.variable.size()});
     if (variable_size == 0)
     {
-        return Solution<Command>();
+        return RollingSolution<Command>();
     }
     for (size_t i = 0; i < variable_size; ++i) // for each unit
     {
@@ -62,7 +71,7 @@ Solution<Command> RollingDE::Mutate(const Solution<Command> &base_sol, const Sol
     return product;
 }
 
-void RollingDE::Crossover(const Solution<Command> &parent, Solution<Command> &child)
+void RollingDE::Crossover(const RollingSolution<Command> &parent, RollingSolution<Command> &child)
 {
     //? I can not come up with a way to generate the 'must inheritate' index
     int variable_size = std::min(parent.variable.size(), child.variable.size());

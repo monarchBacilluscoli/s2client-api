@@ -142,13 +142,10 @@ private:
 private:
     void OnGameEnd() final
     {
-        // AgentControl()->Restart();
     }
 
     void OnUnitIdle(const Unit *u) final
     {
-        Point2D target_pos = FindRandomLocation(Observation()->GetGameInfo());
-        Actions()->UnitCommand(m_units.front(), ABILITY_ID::MOVE, target_pos);
     }
 
     void OnGameStart() final
@@ -160,68 +157,12 @@ private:
 
     void OnStep()
     {
-        std::cout << m_units.front()->facing << std::endl;
-        if (Observation()->GetGameLoop() % 20 == 0)
-        {
-            Actions()->SendChat(std::to_string(m_units.front()->facing));
-        }
-        //     int loop = Observation()->GetGameLoop();
-        //     Units units = Observation()->GetUnits();
-        //     if (Observation()->GetGameLoop() % m_kill_loop == 0)
-        //     {
-        //         Debug()->DebugKillUnits(Observation()->GetUnits());
-        //         m_last_kill_loop = loop;
-        //     }
-        //     else if (Observation()->GetGameLoop() == m_last_kill_loop + 10)
-        //     {
-        //         for (const Unit *unit : m_units)
-        //         {
-        //             Debug()->DebugCreateUnit(unit->unit_type, unit->pos, unit->owner);
-        //         }
-        //     }
-        //     Debug()->SendDebug();
-        //     //todo see after how many loops the unis number can be zero
-        //     if (Observation()->GetUnits().size() == 0)
-        //     {
-        //         std::cout << "Unit number is 0 at " << Observation()->GetGameLoop() << std::endl;
-        //     }
-        //     else
-        //     {
-        //         std::cout << units.size() << std::endl;
-        //         for (const auto &u : units)
-        //         {
-        //             if (std::find(m_pos_set.begin(), m_pos_set.end(), u->pos) == m_pos_set.end())
-        //             {
-        //                 m_pos_set.push_back(u->pos);
-        //             }
-        //         }
-        //     }
-        if (Observation()->GetGameLoop() % 1000 == 0)
-        {
-            std::cout << m_pos_set.size() << std::endl;
-            Control()->SaveReplay("./test.SC2Replay");
-        }
-        //     Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
-        //     if (enemies.size() > 0)
-        //     {
-        //         auto seesee = enemies.front()->orders;
-        //         if (!seesee.empty())
-        //         {
-        //             std::cout << "I can get it" << std::endl;
-        //         }
-        //         auto seesee2 = m_units.front()->orders;
-        //         if (!seesee2.empty())
-        //         {
-        //             std::cout << "get it" << std::endl;
-        //         }
-        //     }
-        //     return;
     }
 };
 
 int main(int argc, char *argv[])
 {
-    Point2D new_p = FixOutsidePointIntoCircle(Point2D(1, -2), Point2D(0, 0), 3);
+    // Simulator sim;
 
 #ifdef USE_SYSTEM_COMMAND
     //kill all the previous sc2 processes

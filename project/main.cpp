@@ -1,52 +1,54 @@
 #include "global_defines.h"
 
+#include "./rolling_bot/rolling_bot/rolling_bot.h"
 #include <sc2api/sc2_api.h>
 #include <string>
 #include <iostream>
 #include <chrono>
-#include "../rolling_bot/rolling_bot/rolling_bot.h"
 
 using namespace sc2;
 
 //! for test use
 class Bot : public Agent
 {
+private:
+    Simulator sim;
+
 public:
-    Bot()
+    Bot(const std::string &ps_path, const std::string &map)
     {
-#ifdef USE_GRAPHICS
-        m_renderer.SetIsDisplay(false);
-#endif // USE_GRAPHICS
+        sim.SetProcessPath(ps_path);
+        sim.SetMapPath(Simulator::GenerateSimMapPath(map));
     }
-    virtual void OnGameStart() final {}
+    virtual void OnGameStart() final
+    {
+        Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {1, 1});
+        Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {80, 80});
+        Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {80, 1});
+        Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {80, 80});
+        Debug()->SendDebug();
+    }
 
     virtual void OnUnitIdle(const Unit *unit) final
     {
-        Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
-        Actions()->UnitCommand(unit, ABILITY_ID::ATTACK, GetRandomEntry(enemies));
     }
 
     virtual void OnUnitDestroyed(const Unit *unit) override
     {
-        std::cout << "Player " << unit->owner << "'s unit "
-                  << unit->unit_type << " died" << std::endl;
     }
 
     virtual void OnStep() final
     {
-        std::cout << Observation()->GetUnits().size() << "\t";
+        Units units = Observation()->GetUnits();
+        for (size_t i = 0; i < units.size(); i++)
+        {
+            std::cout << units[i]->pos.x << ", " << units[i]->pos.y << std::endl;
+        }
     }
-
-private:
-#ifdef USE_GRAPHICS
-    DebugRenderer m_renderer;
-#endif // USE_GRAPHICS
-    RawActions m_stored_actions;
 };
 
 int main(int argc, char *argv[])
 {
-    system("pause");
     for (size_t i = 0; i < argc; i++)
     {
         std::cout << argv[i] << std::endl;
@@ -75,14 +77,15 @@ int main(int argc, char *argv[])
     int max_generations = 200;
     int ga_muatation_rate = 0.5;
     int command_length = 50;
-    int sim_length = 400;
-    int interval_size = 400;
+    int sim_length = 200;
+    int interval_size = 200;
     int evaluation_multiplier = 1;
     PLAY_STYLE play_style = PLAY_STYLE::NORMAL;
     bool use_fix = true;
     bool use_priori = true;
+    bool use_assembled = true;
 
-    std::string point_of_expriment = std::string(use_priori ? "priori " : "") + (use_fix ? "fix" : "");
+    std::string point_of_expriment = std::string(use_priori ? "priori " : "") + (use_fix ? "fix " : "") + (use_assembled ? "assemble " : "");
     int game_round = 10;
     std::vector<std::string> record_remark_vec = {
         point_of_expriment + ", ",
@@ -113,7 +116,7 @@ int main(int argc, char *argv[])
     std::string map_path = coordinator.GetMapPath(); // you can set your own map_path here
 
     //! Bots here
-    Bot bot;
+    Bot bot(coordinator.GetExePath(), map_path);
     RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path, max_generations, 50);
 
     rolling_bot.Algorithm().SetDebug(is_debug);
@@ -123,6 +126,7 @@ int main(int argc, char *argv[])
     rolling_bot.Algorithm().SetRandomEngineSeed(1);
     rolling_bot.Algorithm().SetUseFix(use_fix);
     rolling_bot.Algorithm().SetUsePriori(use_priori);
+    rolling_bot.Algorithm().SetUseAssemble(use_assembled);
     rolling_bot.SetIntervalLength(interval_size);
     rolling_bot.SetStyle(play_style);
     rolling_bot.SetRemark(record_remark);
@@ -157,9 +161,7 @@ int main(int argc, char *argv[])
         end = std::chrono::steady_clock::now();
         auto interval = end - start;
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / frames) - interval);
-#endif // REAL_TIME_UPDATE \
-    //! get idle units \
-    // std::cout << coordinator.GetObservations().front()->GetUnits([](const Unit &unit) -> bool { return unit.orders.empty() && unit.alliance == Unit::Alliance::Self; }).size() << std::endl;
+#endif // REAL_TIME_UPDATE
     }
     return 0;
 }

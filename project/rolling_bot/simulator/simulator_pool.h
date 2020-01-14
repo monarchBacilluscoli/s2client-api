@@ -1,7 +1,7 @@
 #ifndef SIMULATOR_POOL_H
 #define SIMULATOR_POOL_H
 
-#include "global_defines.h"
+#include "../../global_defines.h"
 
 #include <future>
 #include <chrono>
@@ -14,7 +14,7 @@
 namespace sc2
 {
 
-using Population = std::vector<Solution<Command>>;
+using Population = std::vector<RollingSolution<Command>>;
 
 // I must lay aside all things about a thread, that is the thread result holder and simulator obj, so I'd better putting them into one class
 template <typename T>
@@ -50,6 +50,16 @@ public:
     void RunSimsAsync(int steps, DebugRenderers &debug_renderers);    // concurrency version
     void RunSimsOneByOne(int steps, DebugRenderers &debug_renderers); // single-thread version
 #endif                                                                // USE_GRAPHICS
+    Simulator &operator[](int i)
+    {
+        return m_sol_sim_map[i]->sim;
+    }
+
+    const Simulator &at(int i) const
+    {
+        return m_sol_sim_map.at(i)->sim;
+    }
+
     // get the observation interface to get the result of the simulation
     const ObservationInterface *GetObservation(int i) const
     {
@@ -65,8 +75,8 @@ public:
     }
 
     // methods for debug
-    void SaveReplays(const std::string& folder, const std::string& file_name_prefix = "sim"); // save the replay up to now
-    void SaveReplay(int sim_index, const std::string& path);
+    void SaveReplays(const std::string &folder, const std::string &file_name_prefix = "sim"); // save the replay up to now
+    void SaveReplay(int sim_index, const std::string &path);
 
     ~SimulatorPool() = default;
 

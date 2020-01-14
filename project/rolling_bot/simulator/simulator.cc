@@ -7,179 +7,6 @@
 
 using namespace sc2;
 
-void Executor::OnStep()
-{
-    // on each step, check if each unit has finished its current command, if so, set the next order for it
-    if (m_is_setting || m_commands.empty())
-    {
-        return;
-    }
-    // std::cout << m_commands.size() << "\t" << std::flush;
-    Units my_team = Observation()->GetUnits(Unit::Alliance::Self);
-    for (const Unit *u : my_team)
-    {
-        bool has_cooldown_time = (m_cooldown_last_frame.find(u->tag) != m_cooldown_last_frame.end() && std::abs(m_cooldown_last_frame[u->tag]) > 0.01f);
-        // check if the current has been finished
-        if (u->orders.empty() ||                                                           // no order now
-            (has_cooldown_time && (m_cooldown_last_frame[u->tag] < u->weapon_cooldown)) || // this unit has executed a new attack just now
-            (!has_cooldown_time && u->weapon_cooldown > 0.01f))                            // the first time this unit attack (I think it can not happen)
-        {
-            // execute the next action
-            if (m_commands.find(u->tag) == m_commands.end())
-            {
-                // std::cout << m_commands.size() << "\t" << std::flush;
-                std::cout << "mistake, no commands for this unit@" << __FUNCTION__ << std::endl;
-            }
-            if (!m_commands.at(u->tag).empty())
-            {
-                ActionRaw action = m_commands.at(u->tag).front();
-                //todo distinguish the attack action and move action
-                if (action.ability_id == ABILITY_ID::ATTACK)
-                {
-                    switch (action.target_type)
-                    {
-                    case ActionRaw::TargetType::TargetNone:
-                    {
-                        Actions()->UnitCommand(u, action.ability_id);
-                    }
-                    break;
-                    case ActionRaw::TargetType::TargetPosition:
-                    {
-                        //move threr then attack automatically according to the game AI
-                        Actions()->UnitCommand(u, ABILITY_ID::MOVE, action.target_point);
-                        Actions()->UnitCommand(u, action.ability_id, action.target_point, true);
-                    }
-                    break;
-                    case ActionRaw::TargetType::TargetUnitTag:
-                    {
-                        // directly deploy
-                        Actions()->UnitCommand(u, action.ability_id, action.target_tag);
-                    }
-                    default:
-                        break;
-                    }
-                }
-                else //! for now, "else" means move action
-                {
-                    switch (action.target_type)
-                    {
-                    case ActionRaw::TargetType::TargetNone:
-                    {
-                        Actions()->UnitCommand(u, action.ability_id);
-                    }
-                    break;
-                    case ActionRaw::TargetType::TargetPosition:
-                    {
-                        Actions()->UnitCommand(u, action.ability_id, action.target_point);
-                    }
-                    break;
-                    case ActionRaw::TargetType::TargetUnitTag:
-                    {
-                        Actions()->UnitCommand(u, action.ability_id, action.target_tag);
-                    }
-                    default:
-                        break;
-                    }
-                }
-                m_commands.at(u->tag).pop();
-            }
-            else
-            {
-                //todo if no actions available, what can I do?
-            }
-        }
-        m_cooldown_last_frame[u->tag] = u->weapon_cooldown;
-    }
-}
-
-void Executor::OnUnitDestroyed(const Unit *unit)
-{
-    switch (unit->alliance)
-    {
-    case Unit::Alliance::Ally:
-        m_dead_units.ally.push_back(*unit);
-        break;
-    case Unit::Alliance::Self:
-        m_dead_units.self.push_back(*unit);
-        break;
-    case Unit::Alliance::Enemy:
-        m_dead_units.enemy.push_back(*unit);
-        break;
-    case Unit::Alliance::Neutral:
-        m_dead_units.neutral.push_back(*unit);
-        break;
-    default:
-        throw("???@Executor::" + std::string(__FUNCTION__));
-        break;
-    }
-}
-
-void Executor::SetCommands(const std::vector<Command> &commands)
-{
-    //todo copy the vector to queue member
-    m_commands.clear();
-    for (const Command &command : commands)
-    {
-        std::queue<ActionRaw> &target_command = m_commands[command.unit_tag] = std::queue<ActionRaw>();
-        for (const ActionRaw &action : command.actions)
-        {
-            target_command.push(action);
-        }
-    }
-}
-
-void Executor::Clear()
-{
-    ClearCommands();
-    ClearCooldownData();
-    ClearDeadUnits();
-}
-
-void Executor::ClearCommands()
-{
-    m_commands.clear();
-}
-
-void Executor::SetIsSetting(bool is_setting)
-{
-    m_is_setting = is_setting;
-}
-
-void Executor::ClearCooldownData()
-{
-    m_cooldown_last_frame.clear();
-}
-
-void Executor::ClearDeadUnits()
-{
-    m_dead_units.self.clear();
-    m_dead_units.enemy.clear();
-    m_dead_units.ally.clear();
-    m_dead_units.neutral.clear();
-}
-
-const std::list<Unit> &Executor::GetDeadUnits(Unit::Alliance alliance) const
-{
-    switch (alliance)
-    {
-    case Unit::Alliance::Self:
-        return m_dead_units.self;
-        break;
-    case Unit::Alliance::Enemy:
-        return m_dead_units.enemy;
-        break;
-    case Unit::Alliance::Ally:
-        return m_dead_units.ally;
-        break;
-    case Unit::Alliance::Neutral:
-        return m_dead_units.neutral;
-        break;
-    default:
-        throw("???@Executor::" + std::string(__FUNCTION__));
-        break;
-    }
-}
-
 void Simulator::CopyAndSetState(const ObservationInterface *ob_source
 #ifdef USE_GRAPHICS
                                 ,
@@ -191,16 +18,19 @@ void Simulator::CopyAndSetState(const ObservationInterface *ob_source
     m_executor.SetIsSetting(true);
     m_save = SaveMultiPlayerGame(ob_source);
     m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);
-    //! check the crush of unit relationship
-    std::set<const Unit *> check_set;
-    for (const auto &item : m_relative_units)
-    {
-        check_set.insert(item.second);
-    }
-    if (check_set.size() != m_relative_units.size() || m_relative_units.size() != Observation()->GetUnits().size())
-    {
-        std::cout << "mistake in copy: " << m_relative_units.size() - check_set.size() << std::endl;                                           // it means that some units were mistaken to be seen as the same one
-        std::cout << "difference between save and current units: " << m_relative_units.size() - Observation()->GetUnits().size() << std::endl; // it can mean that some units has been dead
+    SetReversedUnitRelation(m_target_to_source_unit_tags, m_relative_units);
+    m_executor.Initialize();
+    { //! check the crush of unit relationship
+        std::set<const Unit *> check_set;
+        for (const auto &item : m_relative_units)
+        {
+            check_set.insert(item.second);
+        }
+        if (check_set.size() != m_relative_units.size() || m_relative_units.size() != Observation()->GetUnits().size())
+        {
+            std::cout << "mistake in copy: " << m_relative_units.size() - check_set.size() << std::endl;                                           // it means that some units were mistaken to be seen as the same one
+            std::cout << "difference between save and current units: " << m_relative_units.size() - Observation()->GetUnits().size() << std::endl; // it can mean that some units has been dead
+        }
     }
     if (!IsMultiPlayerGame())
     {
@@ -329,7 +159,7 @@ void Simulator::SetUnitsRelations(State state, Units us_copied)
     for (const UnitState &state_u : state.unit_states)
     {
         m_relative_units[state_u.unit_tag] =
-            SelectNearestUnitFromPoint(state_u.pos, us_copied);
+            FindNearestUnitFromPoint(state_u.pos, us_copied);
     }
 }
 
@@ -435,7 +265,7 @@ void Simulator::SetOpponent(Difficulty difficulty)
                      CreateComputer(Race::Terran, difficulty)});
 }
 
-std::string Simulator::GetSimMapPath(const std::string &map_path)
+std::string Simulator::GenerateSimMapPath(const std::string &map_path)
 {
     if (map_path.rfind("Sim.SC2Map") != std::string::npos)
     {
@@ -445,4 +275,39 @@ std::string Simulator::GetSimMapPath(const std::string &map_path)
     size_t insert_index = sim_map_path.rfind(".SC2Map");
     sim_map_path.insert(std::min(sim_map_path.size(), insert_index), "Sim");
     return sim_map_path;
+}
+
+void Simulator::SetReversedUnitRelation(std::map<Tag, Tag> &target_to_source_units, const std::map<Tag, const Unit *> &relative_units)
+{
+    target_to_source_units.clear();
+    for (const auto &pair : relative_units)
+    {
+        target_to_source_units[pair.second->tag] = pair.first;
+    }
+    if (target_to_source_units.size() != relative_units.size())
+    {
+        std::cerr << "copy mistake!@" << __FUNCTION__ << std::endl;
+    }
+    return;
+}
+
+std::map<Tag, UnitStatisticalData> Simulator::GetUnitsStatistics()
+{
+    std::map<Tag, UnitStatisticalData> units_statistics;
+    const std::map<Tag, UnitStatisticalData> &raw_statistics = m_executor.GetUnitsStatistics();
+    for (const auto &u : m_save.unit_states) // tag from main process
+    {
+        units_statistics[u.unit_tag] = raw_statistics.at(m_relative_units[u.unit_tag]->tag);
+    }
+    return units_statistics;
+}
+
+const UnitStatisticalData& Simulator::GetUnitStatistics(Tag tag)
+{
+    return m_executor.GetUnitStatistics(m_relative_units[tag]->tag);
+}
+
+GameResult Simulator::CheckGameResult() const
+{
+    return m_executor.CheckGameResult();
 }

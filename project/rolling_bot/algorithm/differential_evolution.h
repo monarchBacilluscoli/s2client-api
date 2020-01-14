@@ -3,13 +3,17 @@
 
 #include <algorithm>
 #include "evolutionary_algorithm.h"
+#ifdef DEBUG
+#include "../simulator/command.h"
+#endif
 
 namespace sc2
 {
-template <class T>
-class DifferentialEvolution : virtual public EvolutionaryAlgorithm<T>
+template <class T, template <typename> class TSolution>
+class DifferentialEvolution : virtual public EvolutionaryAlgorithm<T, TSolution>
 {
-    using EA = EvolutionaryAlgorithm<T>;
+public:
+    using EA = EvolutionaryAlgorithm<T, TSolution>;
 
 protected:
     // settings
@@ -17,7 +21,7 @@ protected:
     float m_crossover_rate = .5f;
 
 public:
-    DifferentialEvolution() : EvolutionaryAlgorithm<T>(){};
+    DifferentialEvolution() : EA(){};
     //todo constructor with all parameters
     DifferentialEvolution(int objective_size,
                           int max_generation,
@@ -46,37 +50,35 @@ public:
 protected:
     virtual void InitBeforeRun() override;
     void InitOnlySelfMembersBeforeRun();
-    virtual void Breed() override;
+    virtual void Breed() override; // random select
 
-    virtual Solution<T> Mutate(const Solution<T> &base_sol, const Solution<T> &material_sol1, const Solution<T> &material_sol2) = 0;
-    virtual void Crossover(const Solution<T> &parent, Solution<T> &child) = 0; // can not be implemented, since there are so many solution types
+    virtual TSolution<T> Mutate(const TSolution<T> &base_sol, const TSolution<T> &material_sol1, const TSolution<T> &material_sol2) = 0;
+    virtual void Crossover(const TSolution<T> &parent, TSolution<T> &child) = 0; // can not be implemented, since there are so many solution types
 };
 
-template <class T>
-void DifferentialEvolution<T>::InitBeforeRun()
+template <class T, template <typename> class TSolution>
+void DifferentialEvolution<T, TSolution>::InitBeforeRun()
 {
-    EvolutionaryAlgorithm<T>::InitBeforeRun();
+    EA::InitBeforeRun();
     //todo the code only belonging to DE<T>
 }
 
-template <class T>
-void DifferentialEvolution<T>::InitOnlySelfMembersBeforeRun() {}
+template <class T, template <typename> class TSolution>
+void DifferentialEvolution<T, TSolution>::InitOnlySelfMembersBeforeRun() {}
 
-template <class T>
-void DifferentialEvolution<T>::Breed()
+template <class T, template <typename> class TSolution>
+void DifferentialEvolution<T, TSolution>::Breed()
 {
     // mutate each? solution in population, get the transition solution
     int sz = EA::m_population.size();
-    EA::m_offspring.resize(sz, Solution<T>(0, EA::m_objective_size));
+    EA::m_offspring.resize(sz, TSolution<T>(0, EA::m_objective_size));
     std::uniform_int_distribution<int> random_dis(0, sz - 1);
     for (size_t i = 0; i < sz; ++i)
     {
         //? Here I can not ensure the 3 random numbers are not the same. Should I ensure it?
         int index_a = random_dis(EA::m_random_engine);
         int index_b = random_dis(EA::m_random_engine);
-        Solution<T> &material_a = EA::m_population[index_a];
-        Solution<T> &material_b = EA::m_population[index_b];
-        EA::m_offspring[i] = Mutate(EA::m_population[i], material_a, material_b);
+        EA::m_offspring[i] = Mutate(EA::m_population[i], EA::m_population[index_a], EA::m_population[index_b]);
         Crossover(EA::m_population[i], EA::m_offspring[i]);
     }
 }

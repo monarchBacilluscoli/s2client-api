@@ -24,14 +24,18 @@ void RollingBot::OnGameStart()
     }
     {
         //Run algorithm once
-        SetCommandFromAlgorithm();
+        SetCommandFromAlgorithm(); // The first run of algorithm on game start
     }
 }
 
 void RollingBot::OnStep()
 {
+    if (Observation()->GetGameLoop() == 0) //! gameloop 0 should be skipped since 1. OnGameStart() has done the thing 2. OnStep is called twice on loop 0
+    {
+        return;
+    }
     // after a specific interval, run the algorithm and get the final orders to be given
-    if (Observation()->GetGameLoop() % m_interval_size == 0 && Observation()->GetGameLoop() != 0 && !Observation()->GetUnits(Unit::Alliance::Enemy).empty() && !Observation()->GetUnits(Unit::Alliance::Self).empty())
+    if (Observation()->GetGameLoop() % m_interval_size == 0 && !Observation()->GetUnits(Unit::Alliance::Enemy).empty() && !Observation()->GetUnits(Unit::Alliance::Self).empty())
     {
         { // stop all the units first, or it may cause some problem since the simulation starts from the condition where all units are still
             Units my_team = Observation()->GetUnits(Unit::Alliance::Self);
@@ -45,20 +49,24 @@ void RollingBot::OnStep()
         Units my_team = Observation()->GetUnits(Unit::Alliance::Self);
         for (const Unit *u : my_team)
         {
-            bool is_cooling_down = (m_my_team_cooldown_last_frame.find(u->tag) != m_my_team_cooldown_last_frame.end() && std::abs(m_my_team_cooldown_last_frame[u->tag]) > 0.01f);
-            if (u->orders.empty() || (is_cooling_down && (m_my_team_cooldown_last_frame[u->tag] < u->weapon_cooldown)) ||
-                (!is_cooling_down && u->weapon_cooldown > 0.01f)) // 需要下一个动作
+            bool has_cooldown_record = (m_my_team_cooldown_last_frame.find(u->tag) != m_my_team_cooldown_last_frame.end() /*&& std::abs(m_my_team_cooldown_last_frame[u->tag]) > 1.f*/);
+            if (u->orders.empty() ||
+                (has_cooldown_record && (m_my_team_cooldown_last_frame[u->tag] - u->weapon_cooldown) < -1e-7) ||
+                (!has_cooldown_record && u->weapon_cooldown > 0.f)) // 需要下一个动作
             {
                 if (m_selected_commands.find(u->tag) == m_selected_commands.end()) // 当前地图游戏中的单位在命令序列中的对应命令如果不存在
                 {
                     std::cout << "returned solution don't have this unit's commands@" + std::string(__FUNCTION__) << std::endl;
                 }
+#ifdef DEBUG
+                Actions()->SendChat("one action!");
+#endif // DEBUG
                 std::deque<ActionRaw> &unit_commands = m_selected_commands[u->tag];
-                if (!m_selected_commands.at(u->tag).empty()) // 如果当前单位的动作队列不为空
+                if (!unit_commands.empty()) // 如果当前单位的动作队列不为空
                 {
                     const ActionRaw &action = unit_commands.front();
                     //todo 注入并执行
-                    if (action.ability_id == ABILITY_ID::ATTACK)
+                    if (action.ability_id == ABILITY_ID::ATTACK_ATTACK)
                     {
                         switch (action.target_type)
                         {
@@ -182,7 +190,7 @@ RollingEA &RollingBot::Algorithm()
 
 void RollingBot::SetCommandFromAlgorithm()
 {
-    Solution<Command> selected_solution;
+    RollingSolution<Command> selected_solution;
     Actions()->SendChat(std::string("Run algorithm in game loop ") + std::to_string(Observation()->GetGameLoop()));
     std::cout << std::string("Run algorithm in game loop ") + std::to_string(Observation()->GetGameLoop()) << std::endl;
     m_rolling_ea.Initialize(Observation());
@@ -196,37 +204,37 @@ void RollingBot::SetCommandFromAlgorithm()
     std::cout << objs_str << std::endl;
 }
 
-const Solution<Command> &RollingBot::SelectMostIronHeadSolution(const Population &pop)
+const RollingSolution<Command> &RollingBot::SelectMostIronHeadSolution(const Population &pop)
 {
     if (pop.empty())
     {
         throw("The pop passed here is an empty pop.@RollingBot::" + std::string(__FUNCTION__));
     }
-    Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const Solution<Command> &largetest, const Solution<Command> &first) {
+    Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const RollingSolution<Command> &largetest, const RollingSolution<Command> &first) {
         return largetest.objectives[0] < first.objectives[0];
     });
     return *it;
 }
 
-const Solution<Command> &RollingBot::SelectMostRunAwaySolution(const Population &pop)
+const RollingSolution<Command> &RollingBot::SelectMostRunAwaySolution(const Population &pop)
 {
     if (pop.empty())
     {
         throw("The pop passed here is an empty pop.@RollingBot::" + std::string(__FUNCTION__));
     }
-    Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const Solution<Command> &largetest, const Solution<Command> &first) {
+    Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const RollingSolution<Command> &largetest, const RollingSolution<Command> &first) {
         return largetest.objectives[1] < first.objectives[1]; // the maximum of loss (negetive)
     });
     return *it;
 }
 
-const Solution<Command> &RollingBot::SelectMostOKSolution(const Population &pop)
+const RollingSolution<Command> &RollingBot::SelectMostOKSolution(const Population &pop)
 {
     if (pop.empty())
     {
         throw("The pop passed here is an empty pop.@RollingBot::" + std::string(__FUNCTION__));
     }
-    Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const Solution<Command> &current_largetest, const Solution<Command> &first) {
+    Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const RollingSolution<Command> &current_largetest, const RollingSolution<Command> &first) {
         return (std::abs(current_largetest.objectives[0]) - std::abs(current_largetest.objectives[1])) < (std::abs(first.objectives[0]) - std::abs(first.objectives[1])); // the first obj is gain, the second obj is loss
     });
     return *it;

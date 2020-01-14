@@ -5,10 +5,10 @@
 
 namespace sc2
 {
-template <typename T>
-class GeneticAlgorithm : virtual public EvolutionaryAlgorithm<T>
+template <typename T, template <typename> typename TSolution>
+class GeneticAlgorithm : virtual public EvolutionaryAlgorithm<T, TSolution>
 {
-    using EA = EvolutionaryAlgorithm<T>;
+    using EA = EvolutionaryAlgorithm<T, TSolution>;
 
 protected:
     //settings
@@ -16,7 +16,7 @@ protected:
     float m_mutation_rate = .3f;
 
 public:
-    GeneticAlgorithm() : EvolutionaryAlgorithm<T>(){};
+    GeneticAlgorithm() : EvolutionaryAlgorithm<T, TSolution>(){};
     GeneticAlgorithm(int objective_size,
                      int max_generation,
                      int population_size, float crossover_rate = 1.f, float mutation_rate = .3f, int random_seed = 0, std::vector<std::string> objective_names = std::vector<std::string>()) : EA(objective_size, max_generation, population_size, random_seed, objective_names), m_crossover_rate(crossover_rate), m_mutation_rate(mutation_rate){};
@@ -48,23 +48,23 @@ protected:
     virtual void Mutate() = 0;
 };
 
-template <typename T>
-void GeneticAlgorithm<T>::InitBeforeRun()
+template <typename T, template <typename> class TSolution>
+void GeneticAlgorithm<T, TSolution>::InitBeforeRun()
 {
     EA::InitBeforeRun();
     InitOnlySelfMemeberBeforeRun();
     //todo something else?
 }
 
-template <typename T>
-void GeneticAlgorithm<T>::Breed()
+template <typename T, template <typename> class TSolution>
+void GeneticAlgorithm<T, TSolution>::Breed()
 {
     Crossover();
     Mutate();
 }
 
-template <typename T>
-void GeneticAlgorithm<T>::InitOnlySelfMemeberBeforeRun()
+template <typename T, template <typename> class TSolution>
+void GeneticAlgorithm<T, TSolution>::InitOnlySelfMemeberBeforeRun()
 {
     //nothing
 }
