@@ -53,7 +53,7 @@ void RollingGA::Mutate_(RollingSolution<Command> &s)
 {
 	// the user must ensure that the actions is not empty
 	ActionRaw &action = GetRandomEntry(GetRandomEntry(s.variable).actions);
-	if (action.ability_id == ABILITY_ID::ATTACK)
+	if (action.ability_id == ABILITY_ID::ATTACK_ATTACK)
 	{
 		// todo if the action is attack, move the target point to the mass center of the enemies / one weakest enemy / nearest enemy / one random unit
 		Vector2D from_p_to_e = GetRandomEntry(RollingEA::m_enemy_team)->pos - action.target_point;

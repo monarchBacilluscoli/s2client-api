@@ -229,7 +229,7 @@ void RollingEA::GenerateOne(RollingSolution<Command> &sol)
             if (GetRandomFraction() < m_attack_possibility)
             {
                 // randomly choose a location to attack...
-                action_raw.ability_id = ABILITY_ID::ATTACK;
+                action_raw.ability_id = ABILITY_ID::ATTACK_ATTACK;
                 action_raw.target_type = ActionRaw::TargetType::TargetPosition; //? pay attention here is my test code which need to changes
                 if (j == 0)
                 {

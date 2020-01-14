@@ -22,31 +22,9 @@ public:
     }
     virtual void OnGameStart() final
     {
-        // sim.LaunchStarcraft();
-        // sim.StartGame();
-        // for (size_t i = 0; i < 100000; i++)
-        // {
-        //     sim.CopyAndSetState(Observation());
-        //     //todo compare the copied unit positions
-        //     Units original_units = Observation()->GetUnits();
-        //     Units copied_units = sim.Observation()->GetUnits();
-        //     for (size_t i = 0; i < original_units.size(); i++)
-        //     {
-        //         Point2D copied = SelectNearestUnitFromPoint(original_units[i]->pos, copied_units)->pos;
-        //         Point2D origin = original_units[i]->pos;
-        //         float difference = (copied - origin).modulus();
-        //         if (difference > 0.001f)
-        //         {
-        //             std::cout << origin.x << ", " << origin.y << " " << copied.x << ", " << copied.y << "\t" << std::flush;
-        //         }
-        //     }
-        //     sim.Run(400);
-        // }
-        // Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {2, 2});
         Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {1, 1});
         Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {80, 80});
         Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {80, 1});
-        // Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {78, 78});
         Debug()->DebugCreateUnit(UNIT_TYPEID::TERRAN_AUTOTURRET, {80, 80});
         Debug()->SendDebug();
     }
@@ -99,8 +77,8 @@ int main(int argc, char *argv[])
     int max_generations = 200;
     int ga_muatation_rate = 0.5;
     int command_length = 50;
-    int sim_length = 400;
-    int interval_size = 400;
+    int sim_length = 200;
+    int interval_size = 200;
     int evaluation_multiplier = 1;
     PLAY_STYLE play_style = PLAY_STYLE::NORMAL;
     bool use_fix = true;
@@ -183,9 +161,7 @@ int main(int argc, char *argv[])
         end = std::chrono::steady_clock::now();
         auto interval = end - start;
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / frames) - interval);
-#endif // REAL_TIME_UPDATE \
-    //! get idle units \
-    // std::cout << coordinator.GetObservations().front()->GetUnits([](const Unit &unit) -> bool { return unit.orders.empty() && unit.alliance == Unit::Alliance::Self; }).size() << std::endl;
+#endif // REAL_TIME_UPDATE
     }
     return 0;
 }

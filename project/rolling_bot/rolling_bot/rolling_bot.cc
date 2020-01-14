@@ -24,14 +24,18 @@ void RollingBot::OnGameStart()
     }
     {
         //Run algorithm once
-        SetCommandFromAlgorithm();
+        SetCommandFromAlgorithm(); // The first run of algorithm on game start
     }
 }
 
 void RollingBot::OnStep()
 {
+    if (Observation()->GetGameLoop() == 0) //! gameloop 0 should be skipped since 1. OnGameStart() has done the thing 2. OnStep is called twice on loop 0
+    {
+        return;
+    }
     // after a specific interval, run the algorithm and get the final orders to be given
-    if (Observation()->GetGameLoop() % m_interval_size == 0 && Observation()->GetGameLoop() != 0 && !Observation()->GetUnits(Unit::Alliance::Enemy).empty() && !Observation()->GetUnits(Unit::Alliance::Self).empty())
+    if (Observation()->GetGameLoop() % m_interval_size == 0 && !Observation()->GetUnits(Unit::Alliance::Enemy).empty() && !Observation()->GetUnits(Unit::Alliance::Self).empty())
     {
         { // stop all the units first, or it may cause some problem since the simulation starts from the condition where all units are still
             Units my_team = Observation()->GetUnits(Unit::Alliance::Self);
@@ -47,7 +51,7 @@ void RollingBot::OnStep()
         {
             bool has_cooldown_record = (m_my_team_cooldown_last_frame.find(u->tag) != m_my_team_cooldown_last_frame.end() /*&& std::abs(m_my_team_cooldown_last_frame[u->tag]) > 1.f*/);
             if (u->orders.empty() ||
-                (has_cooldown_record && (m_my_team_cooldown_last_frame[u->tag] < u->weapon_cooldown)) ||
+                (has_cooldown_record && (m_my_team_cooldown_last_frame[u->tag] - u->weapon_cooldown) < -1e-7) ||
                 (!has_cooldown_record && u->weapon_cooldown > 0.f)) // 需要下一个动作
             {
                 if (m_selected_commands.find(u->tag) == m_selected_commands.end()) // 当前地图游戏中的单位在命令序列中的对应命令如果不存在
@@ -58,11 +62,11 @@ void RollingBot::OnStep()
                 Actions()->SendChat("one action!");
 #endif // DEBUG
                 std::deque<ActionRaw> &unit_commands = m_selected_commands[u->tag];
-                if (!m_selected_commands.at(u->tag).empty()) // 如果当前单位的动作队列不为空
+                if (!unit_commands.empty()) // 如果当前单位的动作队列不为空
                 {
                     const ActionRaw &action = unit_commands.front();
                     //todo 注入并执行
-                    if (action.ability_id == ABILITY_ID::ATTACK)
+                    if (action.ability_id == ABILITY_ID::ATTACK_ATTACK)
                     {
                         switch (action.target_type)
                         {

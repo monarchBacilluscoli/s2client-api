@@ -74,14 +74,13 @@ public:
 
     std::vector<Command> GetOrders() { return m_commands; }
     std::vector<Command> GetOriginalOrders() { return m_original_commands; } // get the original orders (sent and stored, raw orders)
-    float GetTeamHealthLoss(Unit::Alliance alliance) const;                  // get health loss result
-    const std::list<Unit> &GetTeamDeadUnits(Unit::Alliance alliance) const;  // get dead units result
 
     const std::map<Tag, const Unit *> &GetRelativeUnits() const { return m_relative_units; }
     const State &GetSave() const { return m_save; }
 
-    // get some statistical data
-    std::map<Tag, UnitStatisticalData> GetUnitsStatistics(); //todo transform the local statistics to global statistics
+    float GetTeamHealthLoss(Unit::Alliance alliance) const;                 // get health loss result
+    const std::list<Unit> &GetTeamDeadUnits(Unit::Alliance alliance) const; // get dead units result
+    std::map<Tag, UnitStatisticalData> GetUnitsStatistics();
     const UnitStatisticalData &GetUnitStatistics(Tag tag);
     GameResult CheckGameResult() const;
 

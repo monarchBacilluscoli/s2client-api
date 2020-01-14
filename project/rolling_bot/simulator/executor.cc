@@ -24,17 +24,19 @@ void Executor::OnStep()
             {
                 ++m_units_statistics[u->tag].attack_number;
             }
+#ifdef DEBUG
             // check if the command for this unit existed
             if (m_commands.find(u->tag) == m_commands.end())
             {
                 // std::cout << m_commands.size() << "\t" << std::flush;
                 std::cout << "mistake, no commands for this unit@" << __FUNCTION__ << std::endl;
             }
+#endif // DEBUG
             if (!m_commands.at(u->tag).empty())
             {
                 ActionRaw action = m_commands.at(u->tag).front();
                 //todo distinguish the attack action and move action
-                if (action.ability_id == ABILITY_ID::ATTACK)
+                if (action.ability_id == ABILITY_ID::ATTACK_ATTACK)
                 {
                     switch (action.target_type)
                     {
@@ -186,7 +188,7 @@ float Executor::CalculateHealthChange(Tag tag) const
     }
     else
     {
-        change = - m_initial_units_states.at(tag).health;
+        change = -m_initial_units_states.at(tag).health;
     }
     return change;
 }
