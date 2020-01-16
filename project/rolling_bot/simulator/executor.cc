@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "executor.h"
 
 namespace sc2
@@ -90,6 +91,41 @@ void Executor::OnStep()
                 //todo if no actions available, what can I do?
             }
         }
+        try
+        {
+            const Unit &u_last = m_units_states_last_loop[u->tag];
+            if (u->orders.empty()) // 1. the oldest order is at 0 2. the order keeps there while it is unfinished 3. process is meaningless in normal unit actions
+            {
+                if (!u_last.orders.empty())
+                {
+                    m_units_statistics[u->tag].events.actions.emplace_back(Observation()->GetGameLoop(), u_last.orders.front().ability_id);
+                }
+            }
+            else if (!u_last.orders.empty() && u->orders.front() != u_last.orders.front())
+            {
+                m_units_statistics[u->tag].events.actions.emplace_back(Observation()->GetGameLoop(), u_last.orders.front().ability_id);
+            }
+            else if (u_last.weapon_cooldown < u->weapon_cooldown) // attack need to be recorded specially since only if the target has been dead, or the attack order will not be ended
+            {
+                m_units_statistics[u->tag].events.actions.emplace_back(Observation()->GetGameLoop(), ABILITY_ID::ATTACK_ATTACK);
+                std::cout << "attack at loop " << Observation()->GetGameLoop();
+                Actions()->SendChat(std::string("attack at loop ") + std::to_string(Observation()->GetGameLoop()));
+            }
+            // record states
+            if (u_last.health != u->health)
+            {
+                m_units_statistics[u->tag].events.health.emplace_back(Observation()->GetGameLoop(), u->health);
+            }
+            if (u_last.shield > u->shield) // only record the damaged shield value, since it will increase automatically per frame, the store space will be two large //todo make sure the increase rate of shield
+            {
+                m_units_statistics[u->tag].events.shield.emplace_back(Observation()->GetGameLoop(), u->shield);
+            }
+        }
+        catch (const std::out_of_range &e) // handle the out_of_range exeception of map
+        {
+            // nothing need to do, after this catch will be a assignment statement
+        }
+        m_units_states_last_loop[u->tag] = *u;
         m_cooldown_last_frame[u->tag] = u->weapon_cooldown;
     }
 }
@@ -221,7 +257,7 @@ void Executor::SetIsSetting(bool is_setting)
 void Executor::Clear()
 {
     ClearCommands();
-    ClearCooldownData();
+    ClearCooldownData(); //todo can be deleted, since it is included in units_states_last_loop
     ClearUnitsData();
 }
 
@@ -241,6 +277,7 @@ void Executor::ClearUnitsData()
     m_initial_units.clear();
     m_units_statistics.clear();
     m_initial_units_states.clear();
+    m_units_states_last_loop.clear();
 }
 
 void Executor::ClearDeadUnits()
@@ -263,7 +300,7 @@ void Executor::InitUnitStatistics(const Units &all_units)
     for (const auto &u : all_units)
     {
         m_initial_units[u->tag] = u;
-        m_units_statistics[u->tag] = {0, 0, 0.f};
+        m_units_statistics[u->tag] = UnitStatisticalData();
         m_initial_units_states[u->tag] = *u;
     }
 }

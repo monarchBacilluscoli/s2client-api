@@ -25,18 +25,19 @@ private:
     std::map<Tag, std::queue<ActionRaw>> m_commands;
 
     std::map<Tag, float> m_cooldown_last_frame;
+    std::map<Tag, Unit> m_units_states_last_loop;
     std::map<Tag, UnitStatisticalData> m_units_statistics;
     std::map<Tag, Unit> m_initial_units_states;
     std::map<Tag, const Unit *> m_initial_units;
     UnitsByAlliance m_dead_units;
 
-    bool m_is_setting = true; // if in setting state, do not call any of the client event here
+    bool m_is_setting = true; // if in setting state, do not call any of the client event about executing actions here
 
 public:
     // transform vector commands to map+queue commands for easy use
     void SetCommands(const std::vector<Command> &commands);
-    void Clear();
-    void Initialize();
+    void Clear(); // clear all data for next simulation
+    void Initialize(); // according to the new state initialize the records
     void SetIsSetting(bool is_setting);
 
     void OnStep() override;

@@ -3,13 +3,43 @@
 #include <sc2api/sc2_api.h>
 #include <sc2api/sc2_score.h>
 #include <sc2lib/sc2_utils.h>
+#include <vector>
 #include <iostream>
 #include <list>
 #include <chrono>
 #include <thread>
-#include "debug_renderer/debug_renderer.h"
+#include "../project/rolling_bot/simulator/statistical_data.h"
 
 using namespace sc2;
+
+struct TestEvents
+{
+    struct Action
+    {
+        uint32_t game_loop;
+        AbilityID ability;
+        Action() : game_loop(0), ability(0) {}
+        Action(uint32_t loop, AbilityID ab) : game_loop(loop), ability(ab) {}
+    };
+    struct State
+    {
+        uint32_t game_loop;
+        float state; // shield/health
+        State() : game_loop(0), state(0.f){};
+        State(uint32_t loop, float st) : game_loop(loop), state(st){};
+    };
+    struct Position
+    {
+        uint32_t game_loop;
+        Point2D position;
+        Position() : game_loop(0), position(Point2D()){};
+        Position(uint32_t loop, Point2D pos) : game_loop{loop}, position(pos){};
+    };
+
+    std::list<Action> actions; // only self unit
+    std::list<State> health;
+    std::list<State> shield;
+};
 
 class EnemyBot : public Agent
 {
@@ -53,66 +83,18 @@ public:
 
     virtual void OnUnitIdle(const Unit *unit) final // randomly select an enemy and attack it
     {
-        Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
-        // Actions()->UnitCommand(unit, ABILITY_ID::ATTACK, GetRandomEntry(enemies));
-        Actions()->UnitCommand(unit, ABILITY_ID::ATTACK_ATTACK, enemies.front());
+        Actions()->UnitCommand(unit, ABILITY_ID::ATTACK, FindRandomLocation(Observation()->GetGameInfo()));
+        std::cout << Observation()->GetGameLoop() << std::endl;
     }
 
     virtual void OnUnitDestroyed(const Unit *unit) override
     {
-        // m_all_units = Observation()->GetUnits();
-        // std::cout << m_all_units.size() << std::flush;
-        // std::cout << "Player " << unit->owner << "'s unit "
-        //           << unit->unit_type << " died" << std::endl;
-        // switch (unit->alliance)
-        // {
-        // case Unit::Alliance::Enemy:
-        //     m_self_dead_units.push_back(*unit);
-        //     break;
-        // case Unit::Alliance::Ally:
-        //     m_ally_dead_units.push_back(*unit);
-        //     break;
-        // case Unit::Alliance::Neutral:
-        //     m_neutral_dead_units.push_back(*unit);
-        //     break;
-        // case Unit::Alliance::Self:
-        //     m_self_dead_units.push_back(*unit);
-        // default:
-        //     break;
-        // }
     }
 
     virtual void OnStep() final
     {
-        m_all_units = Observation()->GetUnits();
-        std::cout << __FUNCTION__ << ": " << m_all_units.size() << '\t' << std::flush;
-        // Debug()->DebugKillUnits(m_all_units);
-        std::cout << Observation()->GetGameLoop() << '\t' << std::endl;
-        // if (Observation()->GetUnits(Unit::Alliance::Self).size() <= 1 || Observation()->GetUnits(Unit::Alliance::Enemy).size() <= 1)
-        // {
-        //     std::cout << "ready to end!" << std::endl;
-        // }
-        if (Observation()->GetGameLoop() > 100)
-        {
-            Actions()->UnitCommand(Observation()->GetUnits(Unit::Alliance::Self), ABILITY_ID::STOP_STOP);
-        }
-        Units team = Observation()->GetUnits(Unit::Alliance::Self);
-        for (const auto u : team)
-        {
-            if (!u->orders.empty())
-            {
-                std::cout << u->orders.size() << std::endl;
-            }
-        }
-        Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
-        for (const auto u : enemies)
-        {
-            if (!u->orders.empty())
-            {
-                std::cout << u->orders.size() << std::endl;
-            }
-        }
-
+        bool is_order_empty = Observation()->GetUnits(Unit::Alliance::Self).front()->orders.empty();
+        std::cout << Observation()->GetGameLoop() << std::endl;
         return;
     }
 
@@ -133,11 +115,9 @@ public:
 class DebugTestBot : public Agent
 {
 private:
-    Units m_units;
-    int m_kill_loop = 1000;
-    int m_last_kill_loop;
-    std::vector<Point2D> m_pos_set;
-    bool m_last_change_dim = false;
+    Units m_initial_units;
+    std::map<Tag, Unit> m_units_last_loop;
+    std::map<Tag, TestEvents> m_events;
 
 private:
     void OnGameEnd() final
@@ -146,17 +126,75 @@ private:
 
     void OnUnitIdle(const Unit *u) final
     {
+        Actions()->UnitCommand(u, ABILITY_ID::ATTACK_ATTACK, Observation()->GetUnits(Unit::Alliance::Enemy).front());
+        Actions()->UnitCommand(u, ABILITY_ID::MOVE, FindRandomLocation(Observation()->GetGameInfo()), true);
+        Actions()->UnitCommand(u, ABILITY_ID::MOVE, Point2D(0.f, GetRandomFraction() * Observation()->GetGameInfo().playable_max.y), true);
+        std::cout << "new orders is set at gameloop: " << Observation()->GetGameLoop() << std::endl;
+        return;
     }
 
     void OnGameStart() final
     {
-        m_units = Observation()->GetUnits(Unit::Alliance::Self);
-        Debug()->DebugEnemyControl();
-        Debug()->SendDebug();
+        m_initial_units = Observation()->GetUnits(Unit::Alliance::Self);
+        for (auto &&u : m_initial_units)
+        {
+            m_units_last_loop[u->tag] = *u;
+        }
+
+        // some actions
+    }
+
+    void OnUnitDestroyed(const Unit *u) final
+    {
+        m_units_last_loop.erase(u->tag);
     }
 
     void OnStep()
     {
+        Units units = Observation()->GetUnits();
+        for (auto &&u : units) // only count alive units
+        {
+            const Unit &u_last = m_units_last_loop[u->tag];
+            //todo record actions
+            if (u->orders.empty()) // 1. the oldest order is at 0 2. the order keeps there while it is unfinished 3. process is meaningless in normal unit actions
+            {
+                if (!u_last.orders.empty())
+                {
+                    m_events[u->tag].actions.emplace_back(Observation()->GetGameLoop(), u_last.orders.front().ability_id);
+                }
+            }
+            else if (!u_last.orders.empty() && u->orders.front() != u_last.orders.front())
+            {
+                m_events[u->tag].actions.emplace_back(Observation()->GetGameLoop(), u_last.orders.front().ability_id);
+            }
+            else if (u_last.weapon_cooldown < u->weapon_cooldown) // attack need to be recorded specially since only if the target has been dead, or the attack order will not be ended
+            {
+                m_events[u->tag].actions.emplace_back(Observation()->GetGameLoop(), ABILITY_ID::ATTACK_ATTACK);
+                std::cout << "attack at loop " << Observation()->GetGameLoop();
+                Actions()->SendChat(std::string("attack at loop ") + std::to_string(Observation()->GetGameLoop()));
+            }
+            // record states
+            if (u_last.health != u->health)
+            {
+                m_events[u->tag].health.emplace_back(Observation()->GetGameLoop(), u->health);
+            }
+            if (u_last.shield > u->shield) // only record the damaged shield value, since it will increase automatically per frame, the store space will be two large //todo make sure the increase rate of shield
+            {
+                m_events[u->tag].shield.emplace_back(Observation()->GetGameLoop(), u->shield);
+            }
+            m_units_last_loop[u->tag] = *u;
+        }
+        Point2D current_pos = Observation()->GetUnits(Unit::Alliance::Self).front()->pos;
+        const std::vector<UnitOrder> &orders = Observation()->GetUnits(Unit::Alliance::Self).front()->orders;
+        if (orders.empty())
+        {
+            std::cout << "orders empty at: " << Observation()->GetGameLoop() << std::endl;
+        }
+        if (Observation()->GetGameLoop() % 1000 == 0)
+        {
+            Control()->SaveReplay("tutorial_replay.SC2Replay");
+        }
+        return;
     }
 };
 
