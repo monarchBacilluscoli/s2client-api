@@ -108,7 +108,7 @@ void Executor::OnStep()
             else if (u_last.weapon_cooldown < u->weapon_cooldown) // attack need to be recorded specially since only if the target has been dead, or the attack order will not be ended
             {
                 m_units_statistics[u->tag].events.actions.emplace_back(Observation()->GetGameLoop(), ABILITY_ID::ATTACK_ATTACK);
-                std::cout << "attack at loop " << Observation()->GetGameLoop();
+                // std::cout << "attack at loop " << Observation()->GetGameLoop();
                 Actions()->SendChat(std::string("attack at loop ") + std::to_string(Observation()->GetGameLoop()));
             }
             // record states

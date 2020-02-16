@@ -12,7 +12,7 @@
             "args": [
                 // Remember to add the executable dir here, and pay attention to this form of args
                 "-e",
-                "${HOME}/StarCraftII/Versions/Base75689/SC2_x64", //! versions may change, please verify it
+                "${HOME}/StarCraftII/Versions/Base70154/SC2_x64", //! versions may change, please verify it
                 "-m",
                 // "${HOME}/StarCraftII/maps/EnemyTower.SC2Map",
                 // "${HOME}/StarCraftII/maps/testBattle_distant_vs_melee_debug.SC2Map",
