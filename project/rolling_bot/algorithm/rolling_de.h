@@ -3,7 +3,7 @@
 
 #include "differential_evolution.h"
 #include "../simulator/simulator_pool.h"
-#include "gnuplot-iostream.h"
+#include "../contrib/gnuplot-iostream.h"
 #include "rolling_ea.h"
 
 namespace sc2

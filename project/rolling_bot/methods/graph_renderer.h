@@ -1,7 +1,7 @@
 #ifndef GRAPH_RENDERER_H
 #define GRAPH_RENDERER_H
 
-#include "gnuplot-iostream.h"
+#include "../../../contrib/gnuplot-iostream.h"
 #include <list>
 #include <tuple>
 #include <vector>

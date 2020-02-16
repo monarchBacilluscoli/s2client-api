@@ -5,7 +5,7 @@
 #include <numeric>
 #include <algorithm>
 #include <iostream>
-#include "gnuplot-iostream.h"
+#include "../contrib/gnuplot-iostream.h"
 
 #define MULTI_THREADED
 

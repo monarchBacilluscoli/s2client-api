@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     bool is_debug = false;
     std::string net_address = "127.0.0.1";
 
-    std::string starcraft_path = "/home/liuyongfeng/StarCraftII/Versions/Base70154/SC2_x64";
+    // std::string starcraft_path;;
     int port_start = 4000;
     int main_process_port = 6379;
     bool real_time = false;
@@ -112,12 +112,13 @@ int main(int argc, char *argv[])
 
     Coordinator coordinator;
     coordinator.LoadSettings(argc, argv);
+    std::string starcraft_path = coordinator.GetExePath();
     coordinator.SetProcessPath(starcraft_path);
     std::string map_path = coordinator.GetMapPath(); // you can set your own map_path here
 
     //! Bots here
     Bot bot(coordinator.GetExePath(), map_path);
-    RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path, max_generations, 50);
+    RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path, max_generations, population_size);
 
     rolling_bot.Algorithm().SetDebug(is_debug);
     rolling_bot.Algorithm().SetSimLength(sim_length);
