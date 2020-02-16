@@ -1,3 +1,5 @@
+//This file includes some events happen during the game play: actions the units take, states changes and so on.
+//The structure of them is when and what
 #ifndef STATISTICAL_DATA_H
 #define STATISTICAL_DATA_H
 
@@ -37,6 +39,7 @@ struct Events
     Events() = default;
 };
 
+// The class used to record a unit's data during a game
 struct UnitStatisticalData
 {
     // self unit's data

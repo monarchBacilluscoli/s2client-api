@@ -302,7 +302,7 @@ std::map<Tag, UnitStatisticalData> Simulator::GetUnitsStatistics()
     return units_statistics;
 }
 
-const UnitStatisticalData& Simulator::GetUnitStatistics(Tag tag)
+const UnitStatisticalData &Simulator::GetUnitStatistics(Tag tag)
 {
     return m_executor.GetUnitStatistics(m_relative_units[tag]->tag);
 }

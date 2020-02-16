@@ -24,12 +24,11 @@ class Executor : public Agent // executor of actions and observer of game status
 private:
     std::map<Tag, std::queue<ActionRaw>> m_commands;
 
-    std::map<Tag, float> m_cooldown_last_frame;
-    std::map<Tag, Unit> m_units_states_last_loop;
-    std::map<Tag, UnitStatisticalData> m_units_statistics;
-    std::map<Tag, Unit> m_initial_units_states;
-    std::map<Tag, const Unit *> m_initial_units;
-    UnitsByAlliance m_dead_units;
+    std::map<Tag, Unit> m_units_states_last_loop; // for comparasion
+    std::map<Tag, UnitStatisticalData> m_units_statistics; // 
+    std::map<Tag, Unit> m_initial_units_states; // use for the comparision with current state
+    std::map<Tag, const Unit *> m_initial_units; // save all the initial units here or it will not be gotten if dead
+    UnitsByAlliance m_dead_units; // for easy use
 
     bool m_is_setting = true; // if in setting state, do not call any of the client event about executing actions here
 
@@ -52,7 +51,6 @@ public:
 private:
     void ClearCommands();
     void ClearUnitsData();
-    void ClearCooldownData();
     void ClearDeadUnits();
     void InitUnitStatistics(const Units &all_units);
     void RecordInitialUnitsStates(const Units &all_units);

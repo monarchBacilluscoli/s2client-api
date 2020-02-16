@@ -14,29 +14,27 @@ void Executor::OnStep()
     Units my_team = Observation()->GetUnits(Unit::Alliance::Self);
     for (const Unit *u : my_team)
     {
-        bool has_cooldown_record = (m_cooldown_last_frame.find(u->tag) != m_cooldown_last_frame.end());
+        bool has_cooldown_record = (m_units_states_last_loop.find(u->tag) != m_units_states_last_loop.end());
         // check if the current has been finished
-        if (u->orders.empty() ||                                                             // no order now
-            (has_cooldown_record && (m_cooldown_last_frame[u->tag] < u->weapon_cooldown)) || // this unit has executed a new attack just now
-            (!has_cooldown_record && u->weapon_cooldown > 0.f))                              // it has shot once but that wasn't recorded
+        if (u->orders.empty() ||                                                                                // no order now
+            (has_cooldown_record && (m_units_states_last_loop[u->tag].weapon_cooldown < u->weapon_cooldown)) || // this unit has executed a new attack just now
+            (!has_cooldown_record && u->weapon_cooldown > 0.f))                                                 // it has shot once but that wasn't recorded
         {
-            ++m_units_statistics[u->tag].action_number;
-            if (has_cooldown_record && (m_cooldown_last_frame[u->tag] < u->weapon_cooldown) || (!has_cooldown_record && u->weapon_cooldown > 0.01f))
+            ++m_units_statistics[u->tag].action_number; // one more action here, then make sure which action happened.
+            if (has_cooldown_record && (m_units_states_last_loop[u->tag].weapon_cooldown < u->weapon_cooldown) || (!has_cooldown_record && u->weapon_cooldown > 0.01f))
             {
-                ++m_units_statistics[u->tag].attack_number;
+                ++m_units_statistics[u->tag].attack_number; // know attack number & total number, then I know move number
             }
 #ifdef DEBUG
-            // check if the command for this unit existed
-            if (m_commands.find(u->tag) == m_commands.end())
+            if (m_commands.find(u->tag) == m_commands.end()) // check if the command for this unit existed
             {
                 // std::cout << m_commands.size() << "\t" << std::flush;
                 std::cout << "mistake, no commands for this unit@" << __FUNCTION__ << std::endl;
             }
 #endif // DEBUG
-            if (!m_commands.at(u->tag).empty())
+            if (!m_commands.at(u->tag).empty()) // it there are commands for this unit
             {
                 ActionRaw action = m_commands.at(u->tag).front();
-                //todo distinguish the attack action and move action
                 if (action.ability_id == ABILITY_ID::ATTACK_ATTACK)
                 {
                     switch (action.target_type)
@@ -126,7 +124,6 @@ void Executor::OnStep()
             // nothing need to do, after this catch will be a assignment statement
         }
         m_units_states_last_loop[u->tag] = *u;
-        m_cooldown_last_frame[u->tag] = u->weapon_cooldown;
     }
 }
 
@@ -257,18 +254,12 @@ void Executor::SetIsSetting(bool is_setting)
 void Executor::Clear()
 {
     ClearCommands();
-    ClearCooldownData(); //todo can be deleted, since it is included in units_states_last_loop
     ClearUnitsData();
 }
 
 void Executor::ClearCommands()
 {
     m_commands.clear();
-}
-
-void Executor::ClearCooldownData()
-{
-    m_cooldown_last_frame.clear();
 }
 
 void Executor::ClearUnitsData()

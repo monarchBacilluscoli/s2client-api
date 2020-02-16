@@ -1,3 +1,5 @@
+// It is the record of the state at a point of time during a game, used as a save for Control()->Save() doesn't function in multiplyer game.
+
 #ifndef STATE_H
 #define STATE_H
 
