@@ -103,13 +103,14 @@ protected:
     virtual void Breed() = 0;    // use parent population to generate child population
     virtual void Evaluate() = 0; // Evaluate all solutions
     virtual void Select() = 0;   // select which solutions to enter into the next generation
-    //todo maybe I need a ActionAfterEachGeneration() to store all the objs or somthing else
     virtual void ActionAfterEachGeneration();
     virtual void RecordRunningData();
     virtual void RecordObjectives();
 
+    virtual void OutputToConsoleEachGeneration(std::ostream &out);
+    virtual void OutputObjectives(std::ostream &out);
 #ifdef USE_GRAPHICS
-    virtual void ShowGraphEachGeneration(); //todo show the overall status
+    virtual void ShowGraphEachGeneration();
     virtual void ShowOverallStatusGraphEachGeneration();
     virtual void ShowSolutionDistribution(int showed_generations_count) = 0;
 #endif //USE_GRAPHICS
@@ -241,6 +242,7 @@ template <class T, template <typename> class TSolution>
 void EvolutionaryAlgorithm<T, TSolution>::ActionAfterEachGeneration()
 {
     RecordRunningData();
+    OutputToConsoleEachGeneration(std::cout);
 #ifdef USE_GRAPHICS
     ShowGraphEachGeneration();
 #endif // USE_GRAPHICS
@@ -284,6 +286,27 @@ void EvolutionaryAlgorithm<T, TSolution>::RecordObjectives()
     }
 }
 
+template <class T, template <typename> class TSolution>
+void EvolutionaryAlgorithm<T, TSolution>::OutputToConsoleEachGeneration(std::ostream &out)
+{
+    OutputObjectives(out);
+}
+
+template <class T, template <typename> class TSolution>
+void EvolutionaryAlgorithm<T, TSolution>::OutputObjectives(std::ostream &out)
+{
+    std::vector<std::string> objective_names(m_objective_size * 2);
+    for (size_t i = 0; i < m_objective_size; ++i)
+    {
+        objective_names[0 + i] = m_objective_names[i] + " average";
+        out << objective_names[0 + i] << ": \t" << m_history_objs_ave[i].back() << "\t";
+        objective_names[m_objective_size + i] = m_objective_names[i] + " best";
+        out << objective_names[m_objective_size + i] << ": \t" << m_history_objs_best[i].back() << "\t";
+        // objective_names[m_objective_size * 2 + i] = m_objective_names[i] + " worst";
+    }
+    out << std::endl;
+}
+
 #ifdef USE_GRAPHICS
 template <class T, template <typename> class TSolution>
 void EvolutionaryAlgorithm<T, TSolution>::ShowGraphEachGeneration()
@@ -309,12 +332,12 @@ void EvolutionaryAlgorithm<T, TSolution>::ShowOverallStatusGraphEachGeneration()
     for (size_t i = 0; i < m_objective_size; ++i)
     {
         line_names[0 + i] = m_objective_names[i] + " average";
-        std::cout << line_names[0 + i] << ": \t" << m_history_objs_ave[i].back() << "\t";
+        // std::cout << line_names[0 + i] << ": \t" << m_history_objs_ave[i].back() << "\t";
         line_names[m_objective_size + i] = m_objective_names[i] + " best";
-        std::cout << line_names[m_objective_size + i] << ": \t" << m_history_objs_best[i].back() << "\t";
+        // std::cout << line_names[m_objective_size + i] << ": \t" << m_history_objs_best[i].back() << "\t";
         // line_names[m_objective_size * 2 + i] = m_objective_names[i] + " worst";
     }
-    std::cout << std::endl;
+    // std::cout << std::endl;
     m_overall_evolution_status_renderer.Show(data, generation_indices, line_names);
 }
 #endif // USE_GRAPHICS

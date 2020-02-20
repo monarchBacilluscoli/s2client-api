@@ -31,7 +31,7 @@ void Executor::OnStep()
                 // std::cout << m_commands.size() << "\t" << std::flush;
                 std::cout << "mistake, no commands for this unit@" << __FUNCTION__ << std::endl;
             }
-#endif // DEBUG
+#endif                                          // DEBUG
             if (!m_commands.at(u->tag).empty()) // it there are commands for this unit
             {
                 ActionRaw action = m_commands.at(u->tag).front();
@@ -89,34 +89,35 @@ void Executor::OnStep()
                 //todo if no actions available, what can I do?
             }
         }
-        try
+        try // Record
+        //1. the oldest order is at 0 2. the order keeps there while it is unfinished 3. process is meaningless in normal unit actions
         {
             const Unit &u_last = m_units_states_last_loop[u->tag];
-            if (u->orders.empty()) // 1. the oldest order is at 0 2. the order keeps there while it is unfinished 3. process is meaningless in normal unit actions
+            if (u->orders.empty())
             {
-                if (!u_last.orders.empty())
+                if (!u_last.orders.empty()) // if current order is empty but an order has been finished in the last frame, record it
                 {
-                    m_units_statistics[u->tag].events.actions.emplace_back(Observation()->GetGameLoop(), u_last.orders.front().ability_id);
+                    m_units_statistics[u->tag].events.actions.emplace_back(Observation()->GetGameLoop(), u->pos, u_last.orders.front().ability_id);
                 }
             }
-            else if (!u_last.orders.empty() && u->orders.front() != u_last.orders.front())
+            else if (!u_last.orders.empty() && u->orders.front() != u_last.orders.front()) // if current order is not empty but is not the same with the one at last frame
             {
-                m_units_statistics[u->tag].events.actions.emplace_back(Observation()->GetGameLoop(), u_last.orders.front().ability_id);
+                m_units_statistics[u->tag].events.actions.emplace_back(Observation()->GetGameLoop(), u->pos, u_last.orders.front().ability_id);
             }
-            else if (u_last.weapon_cooldown < u->weapon_cooldown) // attack need to be recorded specially since only if the target has been dead, or the attack order will not be ended
+            else if (u_last.weapon_cooldown < u->weapon_cooldown) // attack need to be recorded specifically since only if the target had been dead, the attack order will not be ended, in other words, the order would never change
             {
-                m_units_statistics[u->tag].events.actions.emplace_back(Observation()->GetGameLoop(), ABILITY_ID::ATTACK_ATTACK);
+                m_units_statistics[u->tag].events.actions.emplace_back(Observation()->GetGameLoop(), u->pos, ABILITY_ID::ATTACK_ATTACK);
                 // std::cout << "attack at loop " << Observation()->GetGameLoop();
                 Actions()->SendChat(std::string("attack at loop ") + std::to_string(Observation()->GetGameLoop()));
             }
             // record states
             if (u_last.health != u->health)
             {
-                m_units_statistics[u->tag].events.health.emplace_back(Observation()->GetGameLoop(), u->health);
+                m_units_statistics[u->tag].events.health.emplace_back(Observation()->GetGameLoop(), u->pos, u->health);
             }
             if (u_last.shield > u->shield) // only record the damaged shield value, since it will increase automatically per frame, the store space will be two large //todo make sure the increase rate of shield
             {
-                m_units_statistics[u->tag].events.shield.emplace_back(Observation()->GetGameLoop(), u->shield);
+                m_units_statistics[u->tag].events.shield.emplace_back(Observation()->GetGameLoop(), u->pos, u->shield);
             }
         }
         catch (const std::out_of_range &e) // handle the out_of_range exeception of map

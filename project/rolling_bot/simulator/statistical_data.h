@@ -10,26 +10,33 @@ namespace sc2
 {
 struct Events
 {
-    struct Action
+    class Event
     {
-        uint32_t game_loop;
-        AbilityID ability;
-        Action() : game_loop(0), ability(0) {}
-        Action(uint32_t loop, AbilityID ab) : game_loop(loop), ability(ab) {}
+        uint32_t m_game_loop;
+        Point3D m_pos;
+
+    public:
+        uint32_t gameLoop() { return m_game_loop; };
+        Point3D position() { return m_pos; };
+        Event() : m_game_loop(0), m_pos(){};
+        Event(uint32_t game_loop, const Point3D &pos) : m_game_loop(game_loop), m_pos(pos){};
     };
-    struct State
+    class Action : public Event
     {
-        uint32_t game_loop;
-        float state; // shield/health
-        State() : game_loop(0), state(0.f){};
-        State(uint32_t loop, float st) : game_loop(loop), state(st){};
+        AbilityID m_ability;
+
+    public:
+        AbilityID ability() { return m_ability; };
+        Action() : Event(), m_ability(0) {}
+        Action(uint32_t loop, const Point3D &pos, AbilityID ability) : Event(loop, pos), m_ability(ability) {}
     };
-    struct Position
+    class State : public Event
     {
-        uint32_t game_loop;
-        Point2D position;
-        Position() : game_loop(0), position(Point2D()){};
-        Position(uint32_t loop, Point2D pos) : game_loop{loop}, position(pos){};
+        float m_value; // shield/health
+    public:
+        float value() { return m_value; };
+        State() : Event(), m_value(0.f){};
+        State(uint32_t loop, const Point3D &pos, float state) : Event(loop, pos), m_value(state){};
     };
     std::list<Action> actions; // only self unit
     std::list<State> health;
