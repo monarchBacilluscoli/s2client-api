@@ -63,24 +63,25 @@ int main(int argc, char *argv[])
 #endif //USE_SYSTEM_COMMAND
 
     // Some settings
-    bool is_debug = false;
+    bool is_debug = true;
     std::string net_address = "127.0.0.1";
 
     // std::string starcraft_path;;
     int port_start = 4000;
     int main_process_port = 6379;
-    bool real_time = false;
+    bool real_time = false; // but if the graphics is on, the main game will be showed in real-time mode
     bool multi_threaded = false;
     // use this to control the cauculation times per second
     uint frames = 60;
     int population_size = 50;
     int max_generations = 200;
+    int max_no_improve_generation = 100;
     int ga_muatation_rate = 0.5;
     int command_length = 50;
     int sim_length = 200;
     int interval_size = 200;
     int evaluation_multiplier = 1;
-    PLAY_STYLE play_style = PLAY_STYLE::NORMAL;
+    PLAY_STYLE play_style = PLAY_STYLE::IRONHEAD;
     bool use_fix = true;
     bool use_priori = true;
     bool use_assembled = true;
@@ -120,6 +121,7 @@ int main(int argc, char *argv[])
     Bot bot(coordinator.GetExePath(), map_path);
     RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path, max_generations, population_size);
 
+    rolling_bot.Algorithm().ConvergenceTermination()->SetMaxNoImproveGeneration(max_no_improve_generation);
     rolling_bot.Algorithm().SetDebug(is_debug);
     rolling_bot.Algorithm().SetSimLength(sim_length);
     rolling_bot.Algorithm().SetCommandLength(command_length);
@@ -128,9 +130,11 @@ int main(int argc, char *argv[])
     rolling_bot.Algorithm().SetUseFix(use_fix);
     rolling_bot.Algorithm().SetUsePriori(use_priori);
     rolling_bot.Algorithm().SetUseAssemble(use_assembled);
+    rolling_bot.Algorithm().TerminationCondition(TERMINATION_CONDITION::CONVERGENCE);
     rolling_bot.SetIntervalLength(interval_size);
     rolling_bot.SetStyle(play_style);
     rolling_bot.SetRemark(record_remark);
+    std::cout << rolling_bot.Algorithm().GetMaxGeneration() << std::endl;
 
     //! participants settings here
     coordinator.SetParticipants({CreateParticipant(Race::Terran, &rolling_bot),

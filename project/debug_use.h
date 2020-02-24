@@ -1,3 +1,5 @@
+// This file is only used for debugging, and will not exist in program in future
+
 #ifdef DEBUG
 
 #ifndef DEBUG_USE_H
@@ -7,7 +9,7 @@
 
 namespace sc2
 {
-void check_unit_tag_same(const std::vector<Solution<Command>> &pop, const Solution<Command> *sol = nullptr)
+void check_unit_tag_same(const std::vector<Solution<Command>> &pop, const Solution<Command> *sol = nullptr) // check if the order of units is the same with a solution in a population
 {
     if (!sol)
     {

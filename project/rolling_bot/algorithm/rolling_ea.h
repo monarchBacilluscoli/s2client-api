@@ -1,44 +1,23 @@
 #ifndef ROLLING_EA_H
 #define ROLLING_EA_H
 
+
 #include "../../global_defines.h"
 
 #include "evolutionary_algorithm.h"
 #include "../simulator/simulator_pool.h"
 #include "rolling_solution.h"
+#include "terminator.h"
 
 namespace sc2
 {
+
 class RollingEA : virtual public EvolutionaryAlgorithm<Command, RollingSolution> //! because of virtual inheritance, the base class's constructor is invalid
 {
 public:
     using EA = EvolutionaryAlgorithm<Command, RollingSolution>;
 
 public:
-    class ConvergenceTermination // convergence termination condition checker for this class
-    {
-    private:
-        // settings
-        const RollingEA &m_algo;
-        float m_no_improve_threshold = .01f; //
-        int m_max_no_impreve_generation = 20;
-        // data
-        int m_current_no_improve_generation = 0;
-        std::vector<float> m_last_record_obj_average;
-
-    public:
-        ConvergenceTermination(const RollingEA &algo) : m_algo(algo){};
-        ConvergenceTermination(const RollingEA &algo, int max_no_improve_generation, float no_improve_tolerance) : m_algo(algo), m_max_no_impreve_generation(max_no_improve_generation), m_no_improve_threshold(no_improve_tolerance){};
-        ~ConvergenceTermination() = default;
-        bool operator()();
-
-        float GetNoImproveTolerance() { return m_no_improve_threshold; };
-        int GetMaxNoImproveGeneration() { return m_max_no_impreve_generation; };
-        void SetNoImproveTolerance(float no_improve_tolerance) { m_no_improve_threshold = no_improve_tolerance; };
-        void SetMaxNoInproveGeneration(int max_no_improve_generation) { m_max_no_impreve_generation = max_no_improve_generation; };
-        void clear(); // for the use of next run
-    };
-
     struct memory
     {
         std::map<Tag, Command> best_iron_commands;
@@ -49,7 +28,7 @@ public:
 protected:
     // game data
     const ObservationInterface *m_observation;
-    Units m_my_team; // updated at the beginning of each algorithm run
+    Units m_my_team;    // updated at the beginning of each algorithm run
     Units m_enemy_team; // updated at the beginning of each algorithm run
     GameInfo m_game_info;
     Vector2D m_playable_dis;
@@ -70,7 +49,6 @@ protected:
     // simulators
     SimulatorPool m_simulation_pool;
     // methods
-    ConvergenceTermination m_convergence_termination_manager{*this};
     std::lognormal_distribution<float> m_log_dis{0, 0.6};
 
 public:
@@ -86,7 +64,7 @@ public:
                                                                                                                                                                                                                                                            map_path),
                                                                                                                                                                                                                                          m_evaluation_time_multiplier(evaluation_time_multiplier)
     {
-        m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE] = std::ref(m_convergence_termination_manager);
+        // m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE] = std::ref(m_convergence_termination_manager); //? if not ref here, the construct will copy the function object
         m_simulation_pool.StartSimsAsync();
 #ifdef USE_GRAPHICS
         m_objective_distribution.SetTitle("Objectives Distribution");
@@ -118,16 +96,16 @@ public:
     }
     void SetUseFix(bool use_fix) { m_use_fix = use_fix; };
     void SetUsePriori(bool use_priori) { m_use_priori = use_priori; };
-    void SetUseAssemble(bool use_assemble) {m_use_assemble = use_assemble;};
+    void SetUseAssemble(bool use_assemble) { m_use_assemble = use_assemble; };
     void SetDebug(bool is_debug) { m_is_debug = is_debug; }
 
 protected:
     // override functions
     virtual void InitBeforeRun() override;
     void InitOnlySelfMembersBeforeRun();
-    void Generate() override;
-    void Evaluate() override;
-    void Select() override; // sort and keep only the good solutions
+    virtual void Generate() override;
+    virtual void Evaluate() override;
+    virtual void Select() override; // sort and keep only the good solutions
 #ifdef USE_GRAPHICS
     virtual void ShowOverallStatusGraphEachGeneration() override;
     virtual void ShowSolutionDistribution(int showed_generations_count) override;
@@ -146,9 +124,9 @@ protected:
     void GenerateOne(RollingSolution<Command> &sol);
     virtual void RecordObjectives() override;
     virtual void ActionAfterRun() override;
-    RollingSolution<Command> AssembleASolutionFromGoodUnits(const Population& evaluated_pop); // Assemble a priori solution based on the evaluated population.
-    void AssembleASolutionFromGoodUnits(RollingSolution<Command>& modified_solution ,const Population &evaluated_pop); //! the param must be an evaluated population
-    RollingSolution<Command> AssembleASolutionFromGoodUnits(const std::vector<RollingSolution<Command>*>& evaluated_pop); // Assemble a priori solution based on the evaluated population. //! the param must be an evaluated population
+    RollingSolution<Command> AssembleASolutionFromGoodUnits(const Population &evaluated_pop);                              // Assemble a priori solution based on the evaluated population.
+    void AssembleASolutionFromGoodUnits(RollingSolution<Command> &modified_solution, const Population &evaluated_pop);     //! the param must be an evaluated population
+    RollingSolution<Command> AssembleASolutionFromGoodUnits(const std::vector<RollingSolution<Command> *> &evaluated_pop); // Assemble a priori solution based on the evaluated population. //! the param must be an evaluated population
 
 protected: // some utilities
     Point2D FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float this_unit_weapon_range, const Units &enemy_team);

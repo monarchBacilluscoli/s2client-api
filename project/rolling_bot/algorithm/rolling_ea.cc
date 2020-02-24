@@ -6,38 +6,6 @@
 namespace sc2
 {
 
-bool RollingEA::ConvergenceTermination::operator()()
-{
-    std::vector<float> current_averages = m_algo.GetLastObjsAverage();
-    if (m_last_record_obj_average.empty()) // the first time to check
-    {
-        m_last_record_obj_average = current_averages;
-        return false;
-    }
-    float current_difference = current_averages[0] - current_averages[1];
-    float last_difference = m_last_record_obj_average[0] - m_last_record_obj_average[1];
-    m_last_record_obj_average = current_averages;
-    if (std::abs(current_difference - last_difference) > m_no_improve_threshold) // improve from last generation
-    {
-        m_current_no_improve_generation = 0;
-        return false;
-    }
-    else if (++m_current_no_improve_generation < m_max_no_impreve_generation) // no improvement from last generation
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
-}
-
-void RollingEA::ConvergenceTermination::clear()
-{
-    m_current_no_improve_generation = 0;
-    m_last_record_obj_average.clear();
-}
-
 void RollingEA::Initialize(const ObservationInterface *observation)
 {
     m_observation = observation;
@@ -52,7 +20,6 @@ void RollingEA::InitBeforeRun()
 void RollingEA::InitOnlySelfMembersBeforeRun()
 {                                              // doesn't call the base class's Init function
     InitFromObservation();                     // set the m_my_team and some other things
-    m_convergence_termination_manager.clear(); // must refresh the state of it
     for (RollingSolution<Command> &sol : m_population)
     {
         sol.variable.resize(m_my_team.size());

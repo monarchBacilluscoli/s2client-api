@@ -222,11 +222,11 @@ float Simulator::GetTeamHealthLoss(Unit::Alliance alliance) const
             // I need calculate the shield at the same time
             if (u->is_alive)
             {
-                health_loss += state_u.life - u->health + state_u.shields - u->shield;
+                health_loss += state_u.life - u->health + state_u.shield - u->shield;
             }
             else
             {
-                health_loss += state_u.life + state_u.shields;
+                health_loss += state_u.life + state_u.shield;
             }
         }
     }

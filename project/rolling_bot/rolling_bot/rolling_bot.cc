@@ -195,6 +195,9 @@ void RollingBot::SetCommandFromAlgorithm()
     std::cout << std::string("Run algorithm in game loop ") + std::to_string(Observation()->GetGameLoop()) << std::endl;
     m_rolling_ea.Initialize(Observation());
     RollingEA::Population pop = m_rolling_ea.Run(); // Run the algorithm
+    //todo output the final pop
+    //todo output the longest actions
+    //todo 
     selected_solution = m_solution_selector(pop);
     m_selected_commands = Command::ConmmandsVecToDeque(selected_solution.variable); // transfor command vector to deque for easy to use
     Actions()->SendChat("Number of enemies: " + std::to_string(Observation()->GetUnits(Unit::Alliance::Enemy).size()));

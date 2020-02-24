@@ -14,7 +14,7 @@ namespace sc2 {
         Tag unit_tag = 0; // only used in simulation
         float energy = 0;
         float life = 0;
-        float shields = 0;
+        float shield = 0;
     };
 
     struct State
