@@ -81,8 +81,8 @@ int main(int argc, char *argv[])
     int sim_length = 200;
     int interval_size = 200;
     int evaluation_multiplier = 1;
-    PLAY_STYLE play_style = PLAY_STYLE::IRONHEAD;
-    bool use_fix = true;
+    PLAY_STYLE play_style = PLAY_STYLE::NORMAL;
+    bool use_fix = false; // if the map is dynamic do not use the static fix
     bool use_priori = true;
     bool use_assembled = true;
 

@@ -198,6 +198,53 @@ private:
     }
 };
 
+class CopyTestBot : public Agent
+{
+    std::vector<Unit> m_save;
+
+public:
+    void OnGameStart() final
+    {
+        auto us = Observation()->GetUnits();
+        m_save.clear();
+        for (auto &&u : us)
+        {
+            m_save.push_back(*u);
+        }
+        return;
+    }
+    void OnStep() final
+    {
+        if (Observation()->GetGameLoop() % 200 == 0 && Observation()->GetGameLoop() != 0)
+        {
+            auto us = Observation()->GetUnits();
+            m_save.clear();
+            for (auto &&u : us)
+            {
+                m_save.push_back(*u);
+            }
+        }
+        if (Observation()->GetGameLoop() % 200 == 2 && Observation()->GetGameLoop() != 0)
+        {
+            Debug()->DebugKillUnits(Observation()->GetUnits());
+            Debug()->SendDebug();
+        }
+        if (Observation()->GetGameLoop() % 200 == 4 && Observation()->GetGameLoop() != 2)
+        {
+            for (auto &&u : m_save)
+            {
+                Debug()->DebugCreateUnit(u.unit_type, u.pos, u.owner == 16 ? 0 : u.owner);
+            }
+            Debug()->SendDebug();
+        }
+        if (Observation()->GetGameLoop() % 200 == 6 && Observation()->GetGameLoop() != 4)
+        {
+            std::cout << Observation()->GetUnits().size() << std::endl;
+        }
+        return;
+    }
+};
+
 int main(int argc, char *argv[])
 {
     // Simulator sim;
@@ -217,15 +264,16 @@ int main(int argc, char *argv[])
     Bot bot;
     EnemyBot enemy_bot;
     DebugTestBot debug_test_bot;
+    CopyTestBot copy_test_bot;
     // coordinator.SetMultithreaded(true);
-    coordinator.SetParticipants({CreateParticipant(Race::Terran, &debug_test_bot),
+    coordinator.SetParticipants({CreateParticipant(Race::Terran, &copy_test_bot),
                                  // CreateParticipant(Race::Terran, &enemy_bot),
                                  CreateComputer(Race::Terran)});
 
     const ObservationInterface *ob = coordinator.GetObservations().front();
 
     coordinator.LaunchStarcraft();
-    coordinator.StartGame("Test.SC2Map");
+    coordinator.StartGame("/home/liuyongfeng/StarCraftII/maps/MarineVSpatrolTankSim.SC2Map");
     // coordinator.StartGame("PCEnemyZealotVSMarinesSim.SC2Map");
     // coordinator.StartGame("Maze2.SC2Map");
 

@@ -16,7 +16,7 @@ State sc2::SaveMultiPlayerGame(const ObservationInterface *observation)
         u = us.at(i);
         save.unit_states[i] = UnitState({u->unit_type,
                                          u->pos,
-                                         static_cast<uint32_t>(u->owner),
+                                         static_cast<uint32_t>(u->owner == 16 ? 0 : u->owner), // a inconsistency between editor player property & api property
                                          u->tag, // this is just used for remote simulation
                                          u->energy,
                                          u->health,
