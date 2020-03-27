@@ -18,8 +18,8 @@ void RollingEA::InitBeforeRun()
 }
 
 void RollingEA::InitOnlySelfMembersBeforeRun()
-{                                              // doesn't call the base class's Init function
-    InitFromObservation();                     // set the m_my_team and some other things
+{                          // doesn't call the base class's Init function
+    InitFromObservation(); // set the m_my_team and some other things
     for (RollingSolution<Command> &sol : m_population)
     {
         sol.variable.resize(m_my_team.size());
@@ -325,6 +325,18 @@ Point2D RollingEA::FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &a
         return action_target_pos;
     }
     return FixOutsidePointIntoCircle(action_target_pos, nearest_enemy_pos_to_target_point, effective_range);
+}
+
+RollingSolution<Command> FixBasedOnSimulation(RollingSolution<Command> &modified_solution)
+{
+    //todo fix the executable actions, don't bother to fix the unused ones
+    //! based on the front of the results. I don't want to care about the multiple simulations
+    modified_solution.results.front();
+
+    //todo for each units and each used action.
+    //? how about the time consumption
+
+    //todo get all the 
 }
 
 } // namespace sc2

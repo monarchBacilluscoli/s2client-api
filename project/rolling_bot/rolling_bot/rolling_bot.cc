@@ -1,6 +1,8 @@
-#include "rolling_bot.h"
-#include "sc2api/sc2_score.h"
 #include <sstream>
+
+#include "sc2api/sc2_score.h"
+#include "rolling_bot.h"
+#include "debug_use.h"
 
 namespace sc2
 {
@@ -195,11 +197,18 @@ void RollingBot::SetCommandFromAlgorithm()
     std::cout << std::string("Run algorithm in game loop ") + std::to_string(Observation()->GetGameLoop()) << std::endl;
     m_rolling_ea.Initialize(Observation());
     RollingEA::Population pop = m_rolling_ea.Run(); // Run the algorithm
-    //todo output the final pop
-    //todo output the longest actions
-    //todo 
+    // output the final pop
+    // output the longest actions
+    // std::fstream stat_record("/home/liuyongfeng/s2client-api-liu/s2client-api/project/rolling_bot/rolling_bot/stat.txt", std::ios::out | std::ios::app);
+    // OutputAllStatistics(pop, stat_record);
+
     selected_solution = m_solution_selector(pop);
     m_selected_commands = Command::ConmmandsVecToDeque(selected_solution.variable); // transfor command vector to deque for easy to use
+
+    //! output the events
+
+    
+
     Actions()->SendChat("Number of enemies: " + std::to_string(Observation()->GetUnits(Unit::Alliance::Enemy).size()));
     Actions()->SendChat("Algorithm finished run after " + std::to_string(m_rolling_ea.GetCurrentGeneration()) + "generations");
     std::string objs_str = std::string("deploy, objs: ") + std::move(ContainerToStringWithSeparator(selected_solution.objectives));

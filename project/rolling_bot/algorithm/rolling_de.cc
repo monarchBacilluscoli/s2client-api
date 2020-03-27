@@ -14,7 +14,7 @@ void RollingDE::InitBeforeRun()
 void RollingDE::Breed()
 {
     DifferentialEvolution<Command, RollingSolution>::Breed();
-    if (m_use_assemble)
+    if (m_use_assemble) //? nothing wrong, use the population's evaluation to make a new solution, and replace a random solution in offspring. It's ok
     {
         RollingEA::AssembleASolutionFromGoodUnits(GetRandomEntry(m_offspring), m_population); // randomly exchange 1 solution with a new assemble solution
     }

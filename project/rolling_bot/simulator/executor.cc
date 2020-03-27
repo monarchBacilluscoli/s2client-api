@@ -60,7 +60,7 @@ void Executor::OnStep()
                         break;
                     }
                 }
-                else //! for now, "else" means move action
+                else //! for now, "else" means action MOVE 
                 {
                     switch (action.target_type)
                     {
@@ -126,6 +126,7 @@ void Executor::OnStep()
         }
         m_units_states_last_loop[u->tag] = *u;
     }
+    //todo record statistics of enemies 
 }
 
 void Executor::OnUnitDestroyed(const Unit *unit)

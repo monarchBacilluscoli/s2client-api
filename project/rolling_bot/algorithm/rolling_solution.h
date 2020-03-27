@@ -11,8 +11,8 @@ namespace sc2
 
 struct SimUnitData
 {
-    Unit final_state;
-    UnitStatisticalData statistics;
+    Unit final_state;               // the final state of the unit
+    UnitStatisticalData statistics; // the statictical data during simulation
 };
 struct SimGameData
 {

@@ -96,6 +96,14 @@ Point2D FixOutsidePointIntoCircle(const Point2D &pos, const Point2D &center, flo
     return (pos - center) / dis * radius + center;
 }
 
+Point2D FindNearestPointOnALine(const Point2D &point, const Point2D &line_end1, const Point2D &line_end2)
+{
+    Point2D nearest_point;
+    
+
+    return nearest_point;
+}
+
 float GetTotalHealth(const Units &us)
 {
     float total_health = std::accumulate(us.begin(), us.end(), 0.f, [](float ini_value, const Unit *u) -> float {

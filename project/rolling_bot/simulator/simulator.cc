@@ -96,7 +96,7 @@ void Simulator::SetOrders(const std::vector<Command> &commands
 #endif // USE_GRAPHICS
 )
 {
-    // Just simply press those actions in every unit
+    // Just simply press those actions into every unit
     //? Note that the orders can be stored into units or somewhere else is limited in StarCraft II, I need to figure out it
     m_original_commands = commands;
     m_commands = commands;

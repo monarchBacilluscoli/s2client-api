@@ -124,9 +124,11 @@ protected:
     void GenerateOne(RollingSolution<Command> &sol);
     virtual void RecordObjectives() override;
     virtual void ActionAfterRun() override;
-    RollingSolution<Command> AssembleASolutionFromGoodUnits(const Population &evaluated_pop);                              // Assemble a priori solution based on the evaluated population.
-    void AssembleASolutionFromGoodUnits(RollingSolution<Command> &modified_solution, const Population &evaluated_pop);     //! the param must be an evaluated population
-    RollingSolution<Command> AssembleASolutionFromGoodUnits(const std::vector<RollingSolution<Command> *> &evaluated_pop); // Assemble a priori solution based on the evaluated population. //! the param must be an evaluated population
+    RollingSolution<Command> AssembleASolutionFromGoodUnits(const Population &evaluated_pop);                               // Assemble a priori solution based on the evaluated population.
+    void AssembleASolutionFromGoodUnits(RollingSolution<Command> &modified_solution, const Population &evaluated_pop);      //! the param must be an evaluated population
+    RollingSolution<Command> AssembleASolutionFromGoodUnits(const std::vector<RollingSolution<Command> *> &evaluated_pop);  // Assemble a priori solution based on the evaluated population. //! the param must be an evaluated population
+
+    RollingSolution<Command> FixBasedOnSimulation(RollingSolution<Command> &modified_solution);                             // based on the simulation data to fix the move target of my units into effective area around enemies
 
 protected: // some utilities
     Point2D FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float this_unit_weapon_range, const Units &enemy_team);
