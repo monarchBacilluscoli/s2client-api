@@ -113,13 +113,22 @@ void RollingEA::Evaluate(Population &pop)
                     pop[i].results[j].units[unit.first];
                     pop[i].results[j].units[unit.first].final_state = *(unit.second);
                     pop[i].results[j].units[unit.first].statistics = m_simulation_pool[i].GetUnitStatistics(unit.first);
-                    pop[i].results[j].game.result = m_simulation_pool[i].CheckGameResult();
                 }
+                pop[i].results[j].game.end_loop = m_simulation_pool[i].GetEndLoop();
+                pop[i].results[j].game.result = m_simulation_pool[i].CheckGameResult();
                 pop[i].CalculateAver(); // based on the recorded statistics, calculate the average results
             }
             { // set the objectives
                 pop[i].objectives[0] += m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
                 pop[i].objectives[1] += -m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
+                if (pop[i].results[j].game.result != GameResult::Win) // maximization
+                {
+                    pop[i].objectives[2] -= m_sim_length;
+                }
+                else
+                {
+                    pop[i].objectives[2] -= pop[i].results[j].game.end_loop;
+                }
             }
         }
     }
@@ -128,13 +137,14 @@ void RollingEA::Evaluate(Population &pop)
     {
         pop[i].objectives[0] /= m_evaluation_time_multiplier;
         pop[i].objectives[1] /= m_evaluation_time_multiplier; // transform it to maximum optimization
+        pop[i].objectives[2] /= m_evaluation_time_multiplier;
     }
 }
 
 void RollingEA::Select()
 {
     m_population.insert(m_population.end(), m_offspring.begin(), m_offspring.end());
-    RollingSolution<Command>::DominanceSort(m_population);
+    RollingSolution<Command>::DominanceSort<RollingSolution>(m_population, RollingSolution<Command>::RollingLess);
     RollingSolution<Command>::CalculateCrowdedness(m_population);
     // choose solutions to be added to the next generation
     int rank_need_resort = m_population[m_population_size - 1].rank;                                         // DEBUG
@@ -196,7 +206,7 @@ void RollingEA::GenerateOne(RollingSolution<Command> &sol)
             if (GetRandomFraction() < m_attack_possibility)
             {
                 // randomly choose a location to attack...
-                action_raw.ability_id = ABILITY_ID::ATTACK_ATTACK;
+                action_raw.ability_id = ABILITY_ID::ATTACK;
                 action_raw.target_type = ActionRaw::TargetType::TargetPosition; //? pay attention here is my test code which need to changes
                 if (j == 0)
                 {
@@ -327,16 +337,51 @@ Point2D RollingEA::FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &a
     return FixOutsidePointIntoCircle(action_target_pos, nearest_enemy_pos_to_target_point, effective_range);
 }
 
-RollingSolution<Command> FixBasedOnSimulation(RollingSolution<Command> &modified_solution)
+RollingSolution<Command> RollingEA::FixBasedOnSimulation(const RollingSolution<Command> &parent)
 {
-    //todo fix the executable actions, don't bother to fix the unused ones
-    //! based on the front of the results. I don't want to care about the multiple simulations
-    modified_solution.results.front();
-
-    //todo for each units and each used action.
-    //? how about the time consumption
-
-    //todo get all the 
+    RollingSolution<Command> child = parent;
+    // find the unattacked move
+    if (child.results.size() == 1)
+    {
+        const auto &unit_stat = child.results.front().units;
+        std::vector<Command> &vars = child.variable;
+        for (Command &var : vars)
+        {
+            Tag tag = var.unit_tag;
+            float attack_range = m_unit_types[m_observation->GetUnit(tag)->unit_type].weapons.front().range;
+            const std::list<Events::Action> &actions = unit_stat.at(tag).statistics.events.actions;
+            int move_count = 0;
+            std::list<Events::Action>::const_iterator it2 = actions.begin();
+            for (std::list<Events::Action>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+            {
+                it2 = it;
+                ++it2;
+                if (it->ability() == ABILITY_ID::MOVE)
+                {
+                    //todo check if out of range
+                    if (it2->ability() != ABILITY_ID::ATTACK_ATTACK)
+                    {
+                        //todo get the positions of enemies
+                        std::vector<Point2D> possible_enemey_pos(m_enemy_team.size());
+                        for (int i = 0; i < m_enemy_team.size(); ++i)
+                        {
+                            possible_enemey_pos[i] = child.GetUnitPossiablePosition(m_enemy_team[i]->tag, it->gameLoop());
+                        }
+                        //todo find the nearest one
+                        Point2D target = FindNearestPointFromPoint(it->position(), possible_enemey_pos);
+                        //todo check if the unit is out of range
+                        if (Distance2D(target, it->position()) > attack_range * 1.5)
+                        {
+                            Point2D fix = FixOutsidePointIntoCircle(var.actions[move_count].target_point, target, attack_range * 1.5);
+                            var.actions[move_count].target_point = fix;
+                        }
+                    }
+                    ++move_count;
+                }
+            }
+        }
+    }
+    return child;
 }
 
 } // namespace sc2

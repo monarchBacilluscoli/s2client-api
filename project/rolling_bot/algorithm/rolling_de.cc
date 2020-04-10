@@ -3,6 +3,7 @@
 
 namespace sc2
 {
+
 void RollingDE::InitBeforeRun()
 {
     EvolutionaryAlgorithm::InitBeforeRun();
@@ -13,7 +14,20 @@ void RollingDE::InitBeforeRun()
 
 void RollingDE::Breed()
 {
-    DifferentialEvolution<Command, RollingSolution>::Breed();
+    if (m_use_fix_by_data && m_current_generation % 6 == 0) // if use fix, then fix all individuals based on the sim data
+    {
+        std::cout << "fix" << std::endl;
+        int sz = EA::m_population.size();
+        EA::m_offspring = EA::m_population;
+        for (size_t i = 0; i < sz; ++i)
+        {
+            m_offspring[i] = FixBasedOnSimulation(m_population[i]);
+        }
+    }
+    else
+    {
+        DifferentialEvolution<Command, RollingSolution>::Breed();
+    }
     if (m_use_assemble) //? nothing wrong, use the population's evaluation to make a new solution, and replace a random solution in offspring. It's ok
     {
         RollingEA::AssembleASolutionFromGoodUnits(GetRandomEntry(m_offspring), m_population); // randomly exchange 1 solution with a new assemble solution

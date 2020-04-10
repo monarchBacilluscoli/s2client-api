@@ -37,6 +37,11 @@ Point2D FindCenterOfMap(const GameInfo &game_info)
     return target_pos;
 }
 
+const Point2D &FindNearestPointFromPoint(const Point2D &p, std::vector<Point2D> ps)
+{
+    return *(std::min_element(ps.begin(), ps.end(), [&p](const Point2D &a, const Point2D &b) -> bool { return Distance2D(a, p) < Distance2D(b, p); }));
+}
+
 const Unit *FindNearestUnitFromPoint(const Point2D &p, const Units &us)
 {
     float min_distance = std::numeric_limits<float>::max();
@@ -99,9 +104,19 @@ Point2D FixOutsidePointIntoCircle(const Point2D &pos, const Point2D &center, flo
 Point2D FindNearestPointOnALine(const Point2D &point, const Point2D &line_end1, const Point2D &line_end2)
 {
     Point2D nearest_point;
-    
 
     return nearest_point;
+}
+
+float AreaTriangle(const Point2D &p1, const Point2D &p2, const Point2D &p3)
+{
+    return std::abs((p2.x * p1.y - p1.x * p2.y + p3.x * p2.y - p2.x * p3.y - p3.x * p1.y + p1.x * p3.y) / 2);
+}
+
+Point2D CalcPointOnLineByRatio(const Point2D &end1, const Point2D &end2, float ratio)
+{
+    Point2D vec = end2 - end1;
+    return end1 + ratio * vec;
 }
 
 float GetTotalHealth(const Units &us)

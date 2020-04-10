@@ -16,8 +16,8 @@ struct Events
         Point3D m_pos;
 
     public:
-        uint32_t gameLoop() { return m_game_loop; };
-        Point3D position() { return m_pos; };
+        uint32_t gameLoop() const { return m_game_loop; };
+        Point3D position() const { return m_pos; };
         Event() : m_game_loop(0), m_pos(){};
         Event(uint32_t game_loop, const Point3D &pos) : m_game_loop(game_loop), m_pos(pos){};
     };
@@ -26,7 +26,8 @@ struct Events
         AbilityID m_ability;
 
     public:
-        AbilityID ability() { return m_ability; };
+        AbilityID ability() const { return m_ability; };
+        void setAbility(const ABILITY_ID &id) { m_ability = id; };
         Action() : Event(), m_ability(0) {}
         Action(uint32_t loop, const Point3D &pos, AbilityID ability) : Event(loop, pos), m_ability(ability) {}
     };
@@ -34,7 +35,7 @@ struct Events
     {
         float m_value; // shield/health
     public:
-        float value() { return m_value; };
+        float value() const { return m_value; };
         State() : Event(), m_value(0.f){};
         State(uint32_t loop, const Point3D &pos, float state) : Event(loop, pos), m_value(state){};
     };

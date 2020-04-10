@@ -5,12 +5,20 @@
 #include <sc2lib/sc2_utils.h>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <list>
 #include <chrono>
 #include <thread>
 #include "../project/rolling_bot/simulator/statistical_data.h"
 
 using namespace sc2;
+
+std::string CurrentFolder()
+{
+    std::string path(__FILE__);
+    std::size_t cut = path.rfind('/');
+    return path.substr(0, cut);
+}
 
 struct TestEvents
 {
@@ -245,9 +253,143 @@ public:
     }
 };
 
+class FacingTestBot : public Agent
+{
+private:
+    std::vector<float> facing_record = std::vector<float>(10000);
+    const Unit *tank;
+
+public:
+    void OnGameStart()
+    {
+        tank = Observation()->GetUnits(Unit::Alliance::Enemy).front();
+    }
+    void OnStep()
+    {
+        if (Observation()->GetGameLoop() < facing_record.size())
+        {
+            facing_record[Observation()->GetGameLoop()] = tank->facing;
+        }
+        else if (Observation()->GetGameLoop() == facing_record.size())
+        {
+            std::string record_path = std::string(__FILE__);
+            size_t pos = record_path.rfind('/');
+            std::fstream output_file(record_path.substr(0, pos) + "/my_test_data/facing_data.txt", std::ios::out | std::ios::trunc);
+            output_file << std::endl;
+            for (size_t i = 0; i < facing_record.size(); i++)
+            {
+                output_file << facing_record[i] << '\t';
+            }
+            output_file << std::endl;
+        }
+        else
+        {
+            std::cout << "okk!" << std::endl;
+        }
+    }
+};
+
+class ActionTestBot : public Agent
+{
+private:
+    std::map<Tag, Unit> m_units_states_last_loop;
+    std::map<Tag, bool> m_is_an_attack_to_be_recorded;
+    bool m_is_left = true;
+    int target_loc = 1;
+
+public:
+    void OnStep() override
+    {
+        // execute
+        for (const Unit *u : Observation()->GetUnits(Unit::Alliance::Self))
+        {
+            bool has_cooldown_record = (m_units_states_last_loop.find(u->tag) != m_units_states_last_loop.end());
+            // check if the current has been finished
+            if (u->orders.empty() ||                                                                                // no order now/ start
+                (has_cooldown_record && (m_units_states_last_loop[u->tag].weapon_cooldown < u->weapon_cooldown)) || // this unit has executed a new attack just now
+                (!has_cooldown_record && u->weapon_cooldown > 0.f))                                                 // it has shot once but that wasn't recorded
+            {
+                Point2D target_point;
+                if (target_loc == 1)
+                {
+                    target_point.x = 12;
+                    target_point.y = 16;
+                    target_loc = 2;
+                }
+                else if (target_loc == 2)
+                {
+                    target_point.x = 16;
+                    target_point.y = 20;
+                    target_loc = 3;
+                }
+                else if (target_loc == 3)
+                {
+                    target_point.x = 16;
+                    target_point.y = 25;
+                    target_loc = 4;
+                }
+                else if (target_loc == 4)
+                {
+                    target_point.x = 16;
+                    target_point.y = 25.1;
+                    target_loc = 1;
+                }
+                Actions()->UnitCommand(u, ABILITY_ID::MOVE, target_point);
+                Actions()->UnitCommand(u, ABILITY_ID::ATTACK, target_point, true);
+            }
+        }
+        // data
+        std::fstream fs(CurrentFolder() + "/my_test_data/" + "test.txt", std::ios::out | std::ios::app);
+        fs << Observation()->GetGameLoop() << '\t';
+        for (const Unit *u : Observation()->GetUnits(Unit::Alliance::Self))
+        {
+            fs << u->pos.x << '\t' << u->pos.y << '\t' << u->orders.size() << ':' << '\t';
+            for (const auto &order : u->orders)
+            {
+                fs << order.ability_id << '\t' << order.target_pos.x << '\t' << order.target_pos.y << '\t' << order.target_unit_tag << '\t';
+            }
+        }
+        fs << std::endl;
+        // my note method
+        std::fstream record_fs(CurrentFolder() + "/my_test_data/" + "record.txt", std::ios::out | std::ios::app);
+        for (const Unit *u : Observation()->GetUnits(Unit::Alliance::Self))
+        {
+            if (m_units_states_last_loop.find(u->tag) != m_units_states_last_loop.end())
+            {
+                const Unit &u_last = m_units_states_last_loop[u->tag];
+                if ((u->orders.empty() && !u_last.orders.empty()) || (!u_last.orders.empty() && u->orders.front() != u_last.orders.front()))
+                {
+                    if (u_last.orders.front().ability_id == ABILITY_ID::ATTACK && m_is_an_attack_to_be_recorded.find(u->tag) != m_is_an_attack_to_be_recorded.end() && m_is_an_attack_to_be_recorded.at(u->tag) == true) // this attack has been executed successful.
+                    {
+                        record_fs << Observation()->GetGameLoop() - 1 << '\t' << u_last.pos.x << '\t' << u_last.pos.y << '\t' << 32 << '\t' << u_last.orders.front().target_pos.x << '\t' << u_last.orders.front().target_pos.y << '\t' << std::endl;
+                        m_is_an_attack_to_be_recorded.at(u->tag) = false;
+                    }
+                    else // not an attack action or attack doesn't take effect (no enemy)
+                    {
+                        record_fs << Observation()->GetGameLoop() - 1 << '\t' << u_last.pos.x << '\t' << u_last.pos.y << '\t' << u_last.orders.front().ability_id << '\t' << u_last.orders.front().target_pos.x << '\t' << u_last.orders.front().target_pos.y << '\t' << std::endl;
+                    }
+                }
+            }
+            else
+            {
+                record_fs << Observation()->GetGameLoop() << '\t' << u->pos.x << '\t' << u->pos.y << '\t' << -1 << std::endl;
+            }
+        }
+        // record
+        if (Observation()->GetGameLoop() == 1000)
+        {
+            Control()->SaveReplay(CurrentFolder() + '/' + "agent_replay.SC2Replay");
+        }
+        // update the record
+        for (const Unit *u : Observation()->GetUnits(Unit::Alliance::Self))
+        {
+            m_units_states_last_loop[u->tag] = *u;
+        }
+    }
+};
+
 int main(int argc, char *argv[])
 {
-    // Simulator sim;
 
 #ifdef USE_SYSTEM_COMMAND
     //kill all the previous sc2 processes
@@ -265,15 +407,17 @@ int main(int argc, char *argv[])
     EnemyBot enemy_bot;
     DebugTestBot debug_test_bot;
     CopyTestBot copy_test_bot;
+    FacingTestBot facing_test_bot;
+    ActionTestBot action_test_bot;
     // coordinator.SetMultithreaded(true);
-    coordinator.SetParticipants({CreateParticipant(Race::Terran, &copy_test_bot),
+    coordinator.SetParticipants({CreateParticipant(Race::Terran, &action_test_bot),
                                  // CreateParticipant(Race::Terran, &enemy_bot),
                                  CreateComputer(Race::Terran)});
 
     const ObservationInterface *ob = coordinator.GetObservations().front();
 
     coordinator.LaunchStarcraft();
-    coordinator.StartGame("/home/liuyongfeng/StarCraftII/maps/MarineVSpatrolTankSim.SC2Map");
+    coordinator.StartGame("/home/liuyongfeng/StarCraftII/maps/Test/ActionTest.SC2Map");
     // coordinator.StartGame("PCEnemyZealotVSMarinesSim.SC2Map");
     // coordinator.StartGame("Maze2.SC2Map");
 

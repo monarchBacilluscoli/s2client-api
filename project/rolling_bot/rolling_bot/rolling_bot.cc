@@ -39,6 +39,12 @@ void RollingBot::OnStep()
     // after a specific interval, run the algorithm and get the final orders to be given
     if (Observation()->GetGameLoop() % m_interval_size == 0 && !Observation()->GetUnits(Unit::Alliance::Enemy).empty() && !Observation()->GetUnits(Unit::Alliance::Self).empty())
     {
+
+        if (Observation()->GetGameLoop() != 0)
+        {
+            Control()->SaveReplay(CurrentFolder() + "/fix_test.SC2Replay");
+        }
+
         { // stop all the units first, or it may cause some problem since the simulation starts from the condition where all units are still
             Units my_team = Observation()->GetUnits(Unit::Alliance::Self);
             Actions()->UnitCommand(my_team, ABILITY_ID::STOP_STOP);
@@ -68,7 +74,7 @@ void RollingBot::OnStep()
                 {
                     const ActionRaw &action = unit_commands.front();
                     //todo 注入并执行
-                    if (action.ability_id == ABILITY_ID::ATTACK_ATTACK)
+                    if (action.ability_id == ABILITY_ID::ATTACK_ATTACK || action.ability_id == ABILITY_ID::ATTACK)
                     {
                         switch (action.target_type)
                         {
@@ -203,11 +209,23 @@ void RollingBot::SetCommandFromAlgorithm()
     // OutputAllStatistics(pop, stat_record);
 
     selected_solution = m_solution_selector(pop);
+
+    // std::fstream solution_record(CurrentFolder() + "/solution_record.txt", std::ios::out | std::ios::app);
+    // OutputSolution(raw_selected_solution, solution_record);
+    // solution_record << std::endl
+    //                 << std::endl;
+    //! check all the events
+    // std::fstream stat_record(CurrentFolder() + "/stat_record.txt", std::ios::out | std::ios::app);
+    // std::fstream solution_record(CurrentFolder() + "/solution_record.txt", std::ios::out | std::ios::app);
+    // OutputEvents(selected_solution, stat_record);
+    // OutputSolution(selected_solution, solution_record);
+    // selected_solution.GetUnitPossiablePosition(Observation()->GetUnits(Unit::Alliance::Enemy).front()->tag, 97);
+
+    std::fstream stat_record(CurrentFolder() + "/stat_record.txt", std::ios::out | std::ios::app);
+    // OutputEvents(selected_solution, stat_record);
+    // OutputSolution(selected_solution, solution_record);
+
     m_selected_commands = Command::ConmmandsVecToDeque(selected_solution.variable); // transfor command vector to deque for easy to use
-
-    //! output the events
-
-    
 
     Actions()->SendChat("Number of enemies: " + std::to_string(Observation()->GetUnits(Unit::Alliance::Enemy).size()));
     Actions()->SendChat("Algorithm finished run after " + std::to_string(m_rolling_ea.GetCurrentGeneration()) + "generations");
@@ -247,7 +265,14 @@ const RollingSolution<Command> &RollingBot::SelectMostOKSolution(const Populatio
         throw("The pop passed here is an empty pop.@RollingBot::" + std::string(__FUNCTION__));
     }
     Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const RollingSolution<Command> &current_largetest, const RollingSolution<Command> &first) {
-        return (std::abs(current_largetest.objectives[0]) - std::abs(current_largetest.objectives[1])) < (std::abs(first.objectives[0]) - std::abs(first.objectives[1])); // the first obj is gain, the second obj is loss
+        if ((std::abs(current_largetest.objectives[0]) - std::abs(current_largetest.objectives[1])) - (std::abs(first.objectives[0]) - std::abs(first.objectives[1])) > 0.0001f)
+        {
+            return (std::abs(current_largetest.objectives[0]) - std::abs(current_largetest.objectives[1])) < (std::abs(first.objectives[0]) - std::abs(first.objectives[1])); // the first obj is gain, the second obj is loss
+        }
+        else
+        {
+            return current_largetest.results.front().game.end_loop > first.results.front().game.end_loop;
+        }
     });
     return *it;
 }

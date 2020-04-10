@@ -83,7 +83,7 @@ public:
     template <template <typename, typename> class TContainer>
     void Show(const TContainer<std::vector<std::vector<float>>, std::allocator<std::vector<std::vector<float>>>> &objs, const std::vector<std::string> &names)
     {
-        size_t obj_group_sz = objs.size();
+        size_t obj_group_sz = objs.size() < names.size() ? objs.size() : names.size();
         if (obj_group_sz > g_max_group_count)
         {
             throw("ScatterRenderer2D can not render so many groups of points, please check the ScatterRenderer2D::MaxGroupSize to get the max size@" + std::string(__FUNCTION__));

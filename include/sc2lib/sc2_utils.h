@@ -2,6 +2,7 @@
 
 #include "sc2api/sc2_common.h"
 #include "sc2api/sc2_map_info.h"
+#include "sc2api/sc2_data.h"
 #include <vector>
 #include <numeric>
 
@@ -14,11 +15,16 @@ void KillProcess(const std::string &string_contained);
 Point2D FindRandomLocation(const Point2D &min, const Point2D &max);
 Point2D FindRandomLocation(const GameInfo &game_info);
 Point2D FindCenterOfMap(const GameInfo &game_info);
+const Point2D &FindNearestPointFromPoint(const Point2D &p, std::vector<Point2D> ps);
 const Unit *FindNearestUnitFromPoint(const Point2D &p, const Units &us);
 float MoveDistance(const Unit *u, int frames, const UnitTypes &uts);
 Point2D FixOutsidePointIntoRectangle(const Point2D &pos, const Point2D &min, const Point2D &max);
 Point2D FixOutsidePointIntoCircle(const Point2D &pos, const Point2D &center, float radius); // move outside points to the circumference of a circle, points inside stay still
 Point2D FindNearestPointOnALine(const Point2D &point, const Point2D &line_end1, const Point2D &line_end2);
+
+float AreaTriangle(const Point2D &p1, const Point2D &p2, const Point2D &p3);
+float DisPointToLine(const Point2D &point, const Point2D &line_end1, const Point2D &line_end2);
+Point2D CalcPointOnLineByRatio(const Point2D &end1, const Point2D &end2, float ratio); // from end1 to end2
 
 float GetTotalHealth(const Units &us);     // return current total health of some units (only choose those who are alive)
 float GetTotalShield(const Units &us);     // return current total health of some units (only choose those who are alive)

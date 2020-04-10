@@ -7,6 +7,7 @@
 #include <numeric>
 #include <algorithm>
 #include <string>
+#include <functional>
 
 enum class DOMINANCE
 {
@@ -53,7 +54,7 @@ struct Solution
     template <template <typename> class TSolution> // 只有使用模板，vector之中的派生类才能被传进来进行排序
     using Population = std::vector<TSolution<T>>;
     template <template <typename> class TSolution>
-    static void DominanceSort(Population<TSolution> &pop);
+    static void DominanceSort(Population<TSolution> &pop, std::function<bool(const TSolution<T> &a, const TSolution<T> &b)> compare_less/* = TSolution<T>::RankLess*/);
     template <template <typename> class TSolution>
     static void CalculateCrowdedness(Population<TSolution> &pop);
 };
@@ -154,7 +155,7 @@ bool Solution<T>::RankLess(const Solution<T> &l, const Solution<T> &r)
         {
             throw("The obj sizes of the two solution are not the same @ Solution::" + std::string(__FUNCTION__));
         }
-        else
+        else // ??
         {
             for (size_t i = 0; i < l_obj_sz; ++i)
             {
@@ -171,7 +172,7 @@ bool Solution<T>::RankLess(const Solution<T> &l, const Solution<T> &r)
 
 template <class T>
 template <template <typename> class TSolution>
-void Solution<T>::DominanceSort(Population<TSolution> &p)
+void Solution<T>::DominanceSort(Population<TSolution> &p, std::function<bool(const TSolution<T> &a, const TSolution<T> &b)> compare_less)
 {
     // make sure all the rank is set right
     for (auto &item : p)
@@ -229,7 +230,7 @@ void Solution<T>::DominanceSort(Population<TSolution> &p)
         current_set_count += current_layer_sz;
         ++current_rank;
     }
-    std::sort(p.begin(), p.end(), &TSolution<T>::RankLess);
+    std::sort(p.begin(), p.end(), compare_less);
     return;
 }
 

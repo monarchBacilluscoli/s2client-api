@@ -250,9 +250,9 @@ std::vector<TSolution<T>> EvolutionaryAlgorithm<T, TSolution>::Run()
         }
     }
     std::cout << "Finish run after " << m_current_generation - 1 << " generations!@" << __FUNCTION__ << std::endl;
-#ifdef DEBUG
-    std::cout << "Here is still " << std::count_if(m_population.begin(), m_population.end(), [](const TSolution<T> &s) -> bool { return s.is_priori; }) << " priori solutions.";
-#endif // DEBUG
+// #ifdef DEBUG
+//     std::cout << "Here is still " << std::count_if(m_population.begin(), m_population.end(), [](const TSolution<T> &s) -> bool { return s.is_priori; }) << " priori solutions.";
+// #endif // DEBUG
     return std::vector<TSolution<T>>(m_population.begin(), end_it);
 }
 

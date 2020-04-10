@@ -74,15 +74,17 @@ int main(int argc, char *argv[])
     // use this to control the cauculation times per second
     uint frames = 60;
     int population_size = 50;
-    int max_generations = 200;
+    int max_generations = 100;
     int max_no_improve_generation = 100;
     int ga_muatation_rate = 0.5;
     int command_length = 50;
-    int sim_length = 200;
+    int sim_length = 300;
     int interval_size = 200;
     int evaluation_multiplier = 1;
     PLAY_STYLE play_style = PLAY_STYLE::NORMAL;
     bool use_fix = false; // if the map is dynamic do not use the static fix
+    bool use_fix_by_data = true;
+    unsigned fix_by_data_interval = 6;
     bool use_priori = true;
     bool use_assembled = true;
 
@@ -123,11 +125,14 @@ int main(int argc, char *argv[])
 
     rolling_bot.Algorithm().ConvergenceTermination()->SetMaxNoImproveGeneration(max_no_improve_generation);
     rolling_bot.Algorithm().SetDebug(is_debug);
+    rolling_bot.Algorithm().SetAttackPossibility(1.f);
     rolling_bot.Algorithm().SetSimLength(sim_length);
     rolling_bot.Algorithm().SetCommandLength(command_length);
     rolling_bot.Algorithm().SetEvaluationTimeMultiplier(evaluation_multiplier);
     rolling_bot.Algorithm().SetRandomEngineSeed(1);
     rolling_bot.Algorithm().SetUseFix(use_fix);
+    rolling_bot.Algorithm().SetUseFixByData(use_fix_by_data);
+    rolling_bot.Algorithm().SetFixByDataInterval(fix_by_data_interval);
     rolling_bot.Algorithm().SetUsePriori(use_priori);
     rolling_bot.Algorithm().SetUseAssemble(use_assembled);
     rolling_bot.Algorithm().TerminationCondition(TERMINATION_CONDITION::CONVERGENCE);

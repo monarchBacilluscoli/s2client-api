@@ -1,7 +1,6 @@
 #ifndef ROLLING_EA_H
 #define ROLLING_EA_H
 
-
 #include "../../global_defines.h"
 
 #include "evolutionary_algorithm.h"
@@ -38,10 +37,12 @@ protected:
     unsigned int m_command_length = 8;
     unsigned int m_sim_length = 300;
     unsigned int m_evaluation_time_multiplier = 1; // the evaluation times for each solution (to avoid randomness)
+    unsigned int m_fix_by_data_interval = 6;
 #ifdef USE_GRAPHICS
     ScatterRenderer2D m_objective_distribution;
     DebugRenderers m_debug_renderers;
 #endif //USE_GRAPHICS
+    bool m_use_fix_by_data = true;
     bool m_use_fix = false;
     bool m_use_priori = false;
     bool m_use_assemble = false;
@@ -53,7 +54,7 @@ protected:
 
 public:
     RollingEA() = delete;
-    RollingEA(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation, int population_size, int random_seed = 0, unsigned int evaluation_time_multiplier = 1) : EvolutionaryAlgorithm(2, max_generation, population_size, random_seed, {std::string("enemy loss"), std::string("my team loss")}),
+    RollingEA(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation, int population_size, int random_seed = 0, unsigned int evaluation_time_multiplier = 1) : EvolutionaryAlgorithm(3, max_generation, population_size, random_seed, {std::string("enemy loss"), std::string("my team loss")}),
 #ifdef USE_GRAPHICS
                                                                                                                                                                                                                                          m_debug_renderers(population_size),
 #endif //USE_GRAPHICS
@@ -85,7 +86,7 @@ public:
     // settings about the game
     void SetSimLength(unsigned int sim_length) { m_sim_length = sim_length; }
     void SetCommandLength(unsigned int command_length) { m_command_length = command_length; }
-    void SetAttackPossibility(float attack_possibility) { m_attack_possibility = attack_possibility; }
+    void SetAttackPossibility(float attack_possibility) { m_attack_possibility = attack_possibility; } // the posssibility of attack when generati
     void SetEvaluationTimeMultiplier(unsigned int times)
     {
         m_evaluation_time_multiplier = times;
@@ -98,6 +99,9 @@ public:
     void SetUsePriori(bool use_priori) { m_use_priori = use_priori; };
     void SetUseAssemble(bool use_assemble) { m_use_assemble = use_assemble; };
     void SetDebug(bool is_debug) { m_is_debug = is_debug; }
+    void SetFixByDataInterval(int interval) { m_fix_by_data_interval = interval; };
+    void SetUseFixByData(bool use) { m_use_fix_by_data = use; };
+    bool IsUseFixByData() const { return m_use_fix_by_data; }
 
 protected:
     // override functions
@@ -124,11 +128,12 @@ protected:
     void GenerateOne(RollingSolution<Command> &sol);
     virtual void RecordObjectives() override;
     virtual void ActionAfterRun() override;
-    RollingSolution<Command> AssembleASolutionFromGoodUnits(const Population &evaluated_pop);                               // Assemble a priori solution based on the evaluated population.
-    void AssembleASolutionFromGoodUnits(RollingSolution<Command> &modified_solution, const Population &evaluated_pop);      //! the param must be an evaluated population
-    RollingSolution<Command> AssembleASolutionFromGoodUnits(const std::vector<RollingSolution<Command> *> &evaluated_pop);  // Assemble a priori solution based on the evaluated population. //! the param must be an evaluated population
+    RollingSolution<Command> AssembleASolutionFromGoodUnits(const Population &evaluated_pop);                              // Assemble a priori solution based on the evaluated population.
+    void AssembleASolutionFromGoodUnits(RollingSolution<Command> &modified_solution, const Population &evaluated_pop);     //! the param must be an evaluated population
+    RollingSolution<Command> AssembleASolutionFromGoodUnits(const std::vector<RollingSolution<Command> *> &evaluated_pop); // Assemble a priori solution based on the evaluated population. //! the param must be an evaluated population
 
-    RollingSolution<Command> FixBasedOnSimulation(RollingSolution<Command> &modified_solution);                             // based on the simulation data to fix the move target of my units into effective area around enemies
+public:
+    RollingSolution<Command> FixBasedOnSimulation(const RollingSolution<Command> &parent); // based on the simulation data to fix the move target of my units into effective area around enemies
 
 protected: // some utilities
     Point2D FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float this_unit_weapon_range, const Units &enemy_team);
