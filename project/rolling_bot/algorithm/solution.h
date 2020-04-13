@@ -54,9 +54,11 @@ struct Solution
     template <template <typename> class TSolution> // 只有使用模板，vector之中的派生类才能被传进来进行排序
     using Population = std::vector<TSolution<T>>;
     template <template <typename> class TSolution>
-    static void DominanceSort(Population<TSolution> &pop, std::function<bool(const TSolution<T> &a, const TSolution<T> &b)> compare_less/* = TSolution<T>::RankLess*/);
+    static void DominanceSort(Population<TSolution> &pop, std::function<bool(const TSolution<T> &a, const TSolution<T> &b)> compare_less /* = TSolution<T>::RankLess*/);
     template <template <typename> class TSolution>
     static void CalculateCrowdedness(Population<TSolution> &pop);
+    template <template <typename> class TSolution>
+    static void CalculateCrowdedness(Population<TSolution> &pop, int bg, int ed);
 };
 
 template <class T>
@@ -244,6 +246,7 @@ void Solution<T>::CalculateCrowdedness(Population<TSolution> &pop)
     for (int i = 0; i < pop_sz; ++i)
     {
         // check the last and next
+        //! Here is something wrong
         if ((i - 1) < 0 || pop[i].rank != pop[(size_t)i - 1].rank ||
             (i + 1) >= pop_sz || pop[i].rank != pop[(size_t)i + 1].rank)
         {
@@ -258,6 +261,47 @@ void Solution<T>::CalculateCrowdedness(Population<TSolution> &pop)
             }
         }
     }
+}
+
+template <class T>
+template <template <typename> class TSolution>
+void Solution<T>::CalculateCrowdedness(Population<TSolution> &pop, int from, int to)
+{
+
+    int obj_sz = pop.front().objectives.size();
+    std::vector<float> normalized_objs(pop.size());
+    normalized_objs[from] = 0;
+    normalized_objs[to - 1] = 1;
+    for (size_t j = from + 1; j < to - 1; ++j)
+    {
+        pop[j].crowdedness = 0;
+    }
+    for (int i = 0; i < obj_sz; ++i)
+    {
+        //todo sort the pop by each obj
+        std::stable_sort(pop.begin() + from, pop.begin() + to, [i](const Solution<T> &s1, const Solution<T> &s2) -> bool {
+            // no matter max or min, crowdness can be calc by this
+            return s1.objectives[i] < s2.objectives[i];
+        });
+        //todo calculate the crowdeness for this obj and add it
+        if (pop[from].objectives[i] != pop[to - 1].objectives[i]) // if the objective value is the same for all of the inidividuals, do not consider it
+        {
+            pop[from].crowdedness = std::numeric_limits<float>::max();
+            pop[to - 1].crowdedness = std::numeric_limits<float>::max();
+            for (size_t j = from + 1; j < to - 1; ++j)
+            {
+                normalized_objs[j] = (pop[j].objectives[i] - pop[from].objectives[i]) / (pop[to - 1].objectives[i] - pop[from].objectives[i]);
+            }
+            for (size_t j = from + 1; j < to - 1; ++j)
+            {
+                if (std::abs(pop[j].crowdedness - std::numeric_limits<float>::max()) > 0.01f)
+                {
+                    pop[j].crowdedness += std::abs(normalized_objs[j + 1] - normalized_objs[j - 1]);
+                }
+            }
+        }
+    }
+    return;
 }
 
 #endif //SOLUTION_H

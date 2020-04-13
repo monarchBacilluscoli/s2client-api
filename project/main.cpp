@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     bool use_priori = true;
     bool use_assembled = true;
 
-    std::string point_of_expriment = std::string(use_priori ? "priori " : "") + (use_fix ? "fix " : "") + (use_assembled ? "assemble " : "");
+    std::string point_of_expriment = std::string(use_priori ? "priori " : "") + (use_fix ? "fix " : "") + (use_fix_by_data ? "data_fix " : "") + (use_assembled ? "assemble " : "");
     int game_round = 10;
     std::vector<std::string> record_remark_vec = {
         point_of_expriment + ", ",
