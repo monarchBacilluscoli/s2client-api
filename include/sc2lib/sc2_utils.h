@@ -1,10 +1,11 @@
 #pragma once
 
+#include <vector>
+#include <numeric>
 #include "sc2api/sc2_common.h"
 #include "sc2api/sc2_map_info.h"
 #include "sc2api/sc2_data.h"
-#include <vector>
-#include <numeric>
+#include "sc2api/sc2_unit.h"
 
 namespace sc2
 {

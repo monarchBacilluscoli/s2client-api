@@ -221,7 +221,7 @@ void RollingBot::SetCommandFromAlgorithm()
     // OutputSolution(selected_solution, solution_record);
     // selected_solution.GetUnitPossiablePosition(Observation()->GetUnits(Unit::Alliance::Enemy).front()->tag, 97);
 
-    std::fstream stat_record(CurrentFolder() + "/stat_record.txt", std::ios::out | std::ios::app);
+    // std::fstream stat_record(CurrentFolder() + "/stat_record.txt", std::ios::out | std::ios::app);
     // OutputEvents(selected_solution, stat_record);
     // OutputSolution(selected_solution, solution_record);
 

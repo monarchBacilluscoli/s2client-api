@@ -1,7 +1,8 @@
 #include "global_defines.h"
 
-#include "rolling_ea.h"
 #include <sc2lib/sc2_utils.h>
+#include "rolling_ea.h"
+#include "./debug_use.h"
 
 namespace sc2
 {
@@ -82,6 +83,7 @@ void RollingEA::Evaluate(Population &pop)
             ob = 0.f; // clear the objective value for the addition operation
         }
     }
+    int my_dead = 0, enemy_dead = 0;
     for (size_t j = 0; j < m_evaluation_time_multiplier; ++j)
     {
         m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, pop); // Start all simulations at the same time
@@ -113,14 +115,28 @@ void RollingEA::Evaluate(Population &pop)
                     pop[i].results[j].units[unit.first];
                     pop[i].results[j].units[unit.first].final_state = *(unit.second);
                     pop[i].results[j].units[unit.first].statistics = m_simulation_pool[i].GetUnitStatistics(unit.first);
+                    if (!(unit.second->is_alive)) // dead count
+                    {
+                        if (unit.second->alliance == Unit::Alliance::Ally || unit.second->alliance == Unit::Alliance::Self)
+                        {
+                            ++my_dead;
+                        }
+                        else if (unit.second->alliance == Unit::Alliance::Enemy)
+                        {
+                            ++enemy_dead;
+                        }
+                    }
                 }
                 pop[i].results[j].game.end_loop = m_simulation_pool[i].GetEndLoop();
                 pop[i].results[j].game.result = m_simulation_pool[i].CheckGameResult();
                 pop[i].CalculateAver(); // based on the recorded statistics, calculate the average results
             }
             { // set the objectives
-                pop[i].objectives[0] += m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
-                pop[i].objectives[1] += -m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
+
+                pop[i].objectives[0] += m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy); // 加上一个惩罚吧
+                pop[i].objectives[1] -= m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
+                // pop[i].objectives[0] += enemy_dead * 100; // can't do it like this, since it will make the subtraction wired
+                // pop[i].objectives[1] -= my_dead * 100;
                 if (pop[i].results[j].game.result != GameResult::Win) // maximization
                 {
                     pop[i].objectives[2] -= m_sim_length;
@@ -144,18 +160,39 @@ void RollingEA::Evaluate(Population &pop)
 void RollingEA::Select()
 {
     m_population.insert(m_population.end(), m_offspring.begin(), m_offspring.end());
+    // std::cout << std::count_if(m_population.begin(), m_population.end(), [](const RollingSolution<Command> &rs) -> bool { return (std::abs(rs.objectives.at(0) - 0) < 0.1f) && (std::abs(rs.objectives.at(1) - 0) < 0.1f); }) << std::endl;
     RollingSolution<Command>::DominanceSort<RollingSolution>(m_population, RollingSolution<Command>::RollingLess);
-    RollingSolution<Command>::CalculateCrowdedness(m_population);
     // choose solutions to be added to the next generation
-    int rank_need_resort = m_population[m_population_size - 1].rank;                                         // DEBUG
+    int rank_need_resort = m_population[m_population_size - 1].rank;
     if (m_population.size() > m_population_size && m_population[m_population_size].rank == rank_need_resort) // if next element is still of this rank, it means this rank can not be contained fully in current population, it needs selecting
     {
         // resort solutions of current rank
         Population::iterator bg = std::find_if(m_population.begin(), m_population.end(), [rank_need_resort](const RollingSolution<Command> &s) { return rank_need_resort == s.rank; });
         Population::iterator ed = std::find_if(m_population.rbegin(), m_population.rend(), [rank_need_resort](const RollingSolution<Command> &s) { return rank_need_resort == s.rank; }).base();
+        RollingSolution<Command>::CalculateCrowdedness(m_population, std::distance(m_population.begin(), bg), std::distance(m_population.begin(), ed));
+        // std::cout << bg - m_population.begin() << '\t' << ed - m_population.begin() << std::endl;
+        // std::for_each(bg, ed, [](const RollingSolution<Command> &s) -> void {
+        //     std::cout << s.crowdedness << '\t';
+        // });
+        // std::cout << std::endl;
         std::sort(bg, ed, [](const RollingSolution<Command> &l, const RollingSolution<Command> &r) { return l.crowdedness > r.crowdedness; });
+
+        // std::string path = CurrentFolder() + "/sort_test.txt";
+        // std::fstream fs = std::fstream(path, std::ios::app | std::ios::out);
+        // std::for_each(bg, ed, [](const RollingSolution<Command> &s) -> void {
+        //     std::cout << s.crowdedness << '\t';
+        // });
+        // std::cout << std::endl;
     }
+    // std::cout << "max: " << std::distance(std::max_element(m_population.begin(), m_population.end(), [](const RollingSolution<Command> &c1, const RollingSolution<Command> &c2) -> bool {
+    //                                           return c1.objectives.front() < c2.objectives.front();
+    //                                       }),
+    //                                       m_population.begin())
+    //           << std::endl;
+    // ;
+
     m_population.resize(EA::m_population_size);
+    // std::cout << std::count_if(m_population.begin(), m_population.end(), [](const RollingSolution<Command> &rs) -> bool { return (std::abs(rs.objectives.at(0) - 0) < 0.1f) && (std::abs(rs.objectives.at(1) - 0) < 0.1f); }) << std::endl;
     return;
 }
 
@@ -372,7 +409,7 @@ RollingSolution<Command> RollingEA::FixBasedOnSimulation(const RollingSolution<C
                         //todo check if the unit is out of range
                         if (Distance2D(target, it->position()) > attack_range * 1.5)
                         {
-                            Point2D fix = FixOutsidePointIntoCircle(var.actions[move_count].target_point, target, attack_range * 1.5);
+                            Point2D fix = FixOutsidePointIntoCircle(var.actions[move_count].target_point, target, attack_range * 1);
                             var.actions[move_count].target_point = fix;
                         }
                     }

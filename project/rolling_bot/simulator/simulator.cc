@@ -312,6 +312,7 @@ GameResult Simulator::CheckGameResult() const
     return m_executor.CheckGameResult();
 }
 
-u_int32_t Simulator::GetEndLoop() const {
+u_int32_t Simulator::GetEndLoop() const
+{
     return m_executor.GetEndLoop();
 }

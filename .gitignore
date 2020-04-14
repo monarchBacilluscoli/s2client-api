@@ -69,3 +69,4 @@ protocol
 project/rolling_bot/rolling_bot/*.txt
 project/stat_record.txt
 replays
+.gitignore
