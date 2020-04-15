@@ -35,6 +35,7 @@ float GetTotalShieldLoss(const Units &us); // return the total health loss of so
 
 time_t OutputGameResult(const ObservationInterface *ob, const std::string &file_path, const std::string &remark = std::string()); // return the recording time
 
+
 template <class T, class TAllocator, template <typename, typename> class TContainer>
 std::string ContainerToStringWithSeparator(TContainer<T, TAllocator> container, char separator = '\t') /* we always have something stored in vec need printing */
 {

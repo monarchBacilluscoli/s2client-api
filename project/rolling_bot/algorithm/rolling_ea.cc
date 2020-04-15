@@ -72,6 +72,9 @@ void RollingEA::Evaluate()
 
 void RollingEA::Evaluate(Population &pop)
 {
+    // get initial total health of both team from observation
+    float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
+    float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
     size_t pop_sz = pop.size();
     for (auto &item : pop)
     {
@@ -119,15 +122,17 @@ void RollingEA::Evaluate(Population &pop)
                 pop[i].CalculateAver(); // based on the recorded statistics, calculate the average results
             }
             { // set the objectives
-                pop[i].objectives[0] += m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
-                pop[i].objectives[1] += -m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
+                float enemy_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
+                float my_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
+                pop[i].objectives[0] += m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy) / total_health_enemy - m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self) / total_health_me;
+                // pop[i].objectives[1] += -m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
                 if (pop[i].results[j].game.result != GameResult::Win) // maximization
                 {
-                    pop[i].objectives[2] -= m_sim_length;
+                    pop[i].objectives[1] -= m_sim_length;
                 }
                 else
                 {
-                    pop[i].objectives[2] -= pop[i].results[j].game.end_loop;
+                    pop[i].objectives[1] -= pop[i].results[j].game.end_loop;
                 }
             }
         }
@@ -136,26 +141,48 @@ void RollingEA::Evaluate(Population &pop)
     for (size_t i = 0; i < pop_sz; i++)
     {
         pop[i].objectives[0] /= m_evaluation_time_multiplier;
-        pop[i].objectives[1] /= m_evaluation_time_multiplier; // transform it to maximum optimization
-        pop[i].objectives[2] /= m_evaluation_time_multiplier;
+        // pop[i].objectives[1] /= m_evaluation_time_multiplier; // transform it to maximum optimization
+        pop[i].objectives[1] /= m_evaluation_time_multiplier;
     }
+    return;
 }
 
 void RollingEA::Select()
 {
     m_population.insert(m_population.end(), m_offspring.begin(), m_offspring.end());
+    // std::cout << std::count_if(m_population.begin(), m_population.end(), [](const RollingSolution<Command> &rs) -> bool { return (std::abs(rs.objectives.at(0) - 0) < 0.1f) && (std::abs(rs.objectives.at(1) - 0) < 0.1f); }) << std::endl;
     RollingSolution<Command>::DominanceSort<RollingSolution>(m_population, RollingSolution<Command>::RollingLess);
-    RollingSolution<Command>::CalculateCrowdedness(m_population);
     // choose solutions to be added to the next generation
-    int rank_need_resort = m_population[m_population_size - 1].rank;                                         // DEBUG
+    int rank_need_resort = m_population[m_population_size - 1].rank;
     if (m_population.size() > m_population_size && m_population[m_population_size].rank == rank_need_resort) // if next element is still of this rank, it means this rank can not be contained fully in current population, it needs selecting
     {
         // resort solutions of current rank
         Population::iterator bg = std::find_if(m_population.begin(), m_population.end(), [rank_need_resort](const RollingSolution<Command> &s) { return rank_need_resort == s.rank; });
         Population::iterator ed = std::find_if(m_population.rbegin(), m_population.rend(), [rank_need_resort](const RollingSolution<Command> &s) { return rank_need_resort == s.rank; }).base();
+        RollingSolution<Command>::CalculateCrowdedness(m_population, std::distance(m_population.begin(), bg), std::distance(m_population.begin(), ed));
+        // std::cout << bg - m_population.begin() << '\t' << ed - m_population.begin() << std::endl;
+        // std::for_each(bg, ed, [](const RollingSolution<Command> &s) -> void {
+        //     std::cout << s.crowdedness << '\t';
+        // });
+        // std::cout << std::endl;
         std::sort(bg, ed, [](const RollingSolution<Command> &l, const RollingSolution<Command> &r) { return l.crowdedness > r.crowdedness; });
+
+        // std::string path = CurrentFolder() + "/sort_test.txt";
+        // std::fstream fs = std::fstream(path, std::ios::app | std::ios::out);
+        // std::for_each(bg, ed, [](const RollingSolution<Command> &s) -> void {
+        //     std::cout << s.crowdedness << '\t';
+        // });
+        // std::cout << std::endl;
     }
+    // std::cout << "max: " << std::distance(std::max_element(m_population.begin(), m_population.end(), [](const RollingSolution<Command> &c1, const RollingSolution<Command> &c2) -> bool {
+    //                                           return c1.objectives.front() < c2.objectives.front();
+    //                                       }),
+    //                                       m_population.begin())
+    //           << std::endl;
+    // ;
+
     m_population.resize(EA::m_population_size);
+    // std::cout << std::count_if(m_population.begin(), m_population.end(), [](const RollingSolution<Command> &rs) -> bool { return (std::abs(rs.objectives.at(0) - 0) < 0.1f) && (std::abs(rs.objectives.at(1) - 0) < 0.1f); }) << std::endl;
     return;
 }
 

@@ -30,7 +30,7 @@ public:
               int population_size = 50,
               float scale_factor = .5f,
               float crossover_rate = .5f,
-              int random_seed = rand()) : EvolutionaryAlgorithm(3, max_generation, population_size, random_seed, {"Enemy Loss", "My Team Loss"}), DifferentialEvolution(3, max_generation, population_size, scale_factor, crossover_rate), RollingEA(net_address, port_start, process_path, map_path, max_generation, population_size, random_seed)
+              int random_seed = rand()) : EvolutionaryAlgorithm(2, max_generation, population_size, random_seed, {"Enemy Loss", "My Team Loss"}), DifferentialEvolution(2, max_generation, population_size, scale_factor, crossover_rate), RollingEA(net_address, port_start, process_path, map_path, max_generation, population_size, random_seed)
     {
         SetAttackPossibility(.9f);
     }

@@ -135,7 +135,6 @@ bool RollingSolution<T>::RollingLess(const RollingSolution<T> &l, const RollingS
         }
         else if (l.results.front().game.result == GameResult::Win || r.results.front().game.result == GameResult::Win)
         {
-            std::cout << "sort loop" << std::endl;
             auto loop_add = [](u_int32_t sum, const SimData &d) -> u_int32_t { return sum + d.game.end_loop; };
             // return std::accumulate(l.results.begin(), l.results.end(), 0, loop_add) < std::accumulate(r.results.begin(), r.results.end(), 0, loop_add);
             return l.results.front().game.end_loop < r.results.front().game.end_loop;

@@ -122,7 +122,7 @@ Point2D CalcPointOnLineByRatio(const Point2D &end1, const Point2D &end2, float r
 float GetTotalHealth(const Units &us)
 {
     float total_health = std::accumulate(us.begin(), us.end(), 0.f, [](float ini_value, const Unit *u) -> float {
-        return ini_value + u->is_alive ? u->health : 0.f;
+        return ini_value + (u->is_alive ? u->health : 0.f);
     });
     return total_health;
 }
