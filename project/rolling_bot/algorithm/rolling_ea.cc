@@ -1,7 +1,10 @@
 #include "global_defines.h"
 
+#include <fstream>
+
 #include "rolling_ea.h"
 #include <sc2lib/sc2_utils.h>
+#include "../../debug_use.h"
 
 namespace sc2
 {
@@ -122,17 +125,15 @@ void RollingEA::Evaluate(Population &pop)
                 pop[i].CalculateAver(); // based on the recorded statistics, calculate the average results
             }
             { // set the objectives
-                float enemy_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
-                float my_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
-                pop[i].objectives[0] += m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy) / total_health_enemy - m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self) / total_health_me;
-                // pop[i].objectives[1] += -m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
+                pop[i].objectives[0] += m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
+                pop[i].objectives[1] += -m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
                 if (pop[i].results[j].game.result != GameResult::Win) // maximization
                 {
-                    pop[i].objectives[1] -= m_sim_length;
+                    pop[i].objectives[2] -= m_sim_length;
                 }
                 else
                 {
-                    pop[i].objectives[1] -= pop[i].results[j].game.end_loop;
+                    pop[i].objectives[2] -= pop[i].results[j].game.end_loop;
                 }
             }
         }
@@ -141,8 +142,8 @@ void RollingEA::Evaluate(Population &pop)
     for (size_t i = 0; i < pop_sz; i++)
     {
         pop[i].objectives[0] /= m_evaluation_time_multiplier;
-        // pop[i].objectives[1] /= m_evaluation_time_multiplier; // transform it to maximum optimization
-        pop[i].objectives[1] /= m_evaluation_time_multiplier;
+        pop[i].objectives[1] /= m_evaluation_time_multiplier; // transform it to maximum optimization
+        pop[i].objectives[2] /= m_evaluation_time_multiplier;
     }
     return;
 }
@@ -181,8 +182,24 @@ void RollingEA::Select()
     //           << std::endl;
     // ;
 
+    // std::string path = CurrentFolder() + "/sort_test.txt";
+    // std::fstream fs = std::fstream(path, std::ios::app | std::ios::out);
+    // int i = 0;
+    // for (const auto &s : m_population)
+    // {
+    //     fs << i << '\t';
+    //     for (const auto &o : s.objectives)
+    //     {
+    //         fs << o << '\t';
+    //     }
+    //     fs << s.rank << '\t' << s.crowdedness << std::endl;
+    //     ++i;
+    // }
+    // fs << std::endl;
+    // fs.close();
+
     m_population.resize(EA::m_population_size);
-    // std::cout << std::count_if(m_population.begin(), m_population.end(), [](const RollingSolution<Command> &rs) -> bool { return (std::abs(rs.objectives.at(0) - 0) < 0.1f) && (std::abs(rs.objectives.at(1) - 0) < 0.1f); }) << std::endl;
+
     return;
 }
 
@@ -303,7 +320,16 @@ void RollingEA::RecordObjectives()
 
 void RollingEA::ActionAfterRun()
 {
-    // Evaluate(m_population);
+    if (m_is_output_file)
+    {
+        if (m_output_file_path.empty())
+        {
+            m_output_file_path = CurrentFolder() + "/obj_record.txt";
+        }
+        std::fstream fs = std::fstream(m_output_file_path, std::ios::app | std::ios::out);
+        EA::OutputAllHistoryObjectives(fs);
+        fs.close();
+    }
 }
 
 RollingSolution<Command> RollingEA::AssembleASolutionFromGoodUnits(const Population &evaluated_pop)

@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
             uint frames = 60;
             int population_size = 50;
             int max_generations = 100;
-            int max_no_improve_generation = 100;
+            int max_no_improve_generation = 10;
             int ga_muatation_rate = 0.5;
             int command_length = 50;
             int sim_length = 300;
@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
             unsigned fix_by_data_interval = 6;
             bool use_priori = true;
             bool use_assembled = true;
+            bool use_output_file = true;
 
             std::string point_of_expriment = std::string(use_priori ? "priori " : "") + (use_fix ? "fix " : "") + (use_fix_by_data ? "data_fix " : "") + (use_assembled ? "assemble " : "");
             int game_round = 10;
@@ -144,6 +145,7 @@ int main(int argc, char *argv[])
             rolling_bot.SetIntervalLength(interval_size);
             rolling_bot.SetStyle(play_style);
             rolling_bot.SetRemark(record_remark);
+            rolling_bot.Algorithm().SetUseOutputFile(true); 
             std::cout << rolling_bot.Algorithm().GetMaxGeneration() << std::endl;
 
             //! participants settings here

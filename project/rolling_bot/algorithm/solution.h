@@ -273,7 +273,7 @@ void Solution<T>::CalculateCrowdedness(Population<TSolution> &pop, int from, int
     normalized_objs[to - 1] = 1;
     for (size_t j = from + 1; j < to - 1; ++j)
     {
-        pop[j].crowdedness = 0;
+        pop[j].crowdedness = 0.f;
     }
     for (int i = 0; i < obj_sz; ++i)
     {
@@ -285,7 +285,7 @@ void Solution<T>::CalculateCrowdedness(Population<TSolution> &pop, int from, int
         //todo calculate the crowdeness for this obj and add it
         if (pop[from].objectives[i] != pop[to - 1].objectives[i]) // if the objective value is the same for all of the inidividuals, do not consider it
         {
-            pop[from].crowdedness = std::numeric_limits<float>::max();
+            // pop[from].crowdedness = std::numeric_limits<float>::max(); // 给这个目标上最差的个体再来一次? 没有这个必要
             pop[to - 1].crowdedness = std::numeric_limits<float>::max();
             for (size_t j = from + 1; j < to - 1; ++j)
             {

@@ -16,6 +16,12 @@ const std::vector<std::string> g_play_style_names = {
 
 void RollingBot::OnGameStart()
 {
+    std::string path = m_rolling_ea.GetOutputPath();
+    std::fstream fs = std::fstream(path, std::ios::app | std::ios::out);
+    fs << std::endl
+       << "start:" << std::endl;
+    fs.close();
+
     // only after game starting I can initialize the ga, or the information
     // will not be passed to it
     m_rolling_ea.Initialize(Observation());

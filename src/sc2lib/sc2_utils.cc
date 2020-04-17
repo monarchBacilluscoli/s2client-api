@@ -197,7 +197,7 @@ time_t OutputGameResult(const ObservationInterface *ob, const std::string &file_
 
 void KillProcess(const std::string &string_contained)
 {
-    std::string kill_command = "ps -aux| grep " + string_contained + " | grep -v grep |awk '{print $2}' | xargs kill";
+    std::string kill_command = "ps -aux| grep " + string_contained + " | grep -v grep |awk '{print $2}' | xargs kill -9";
     system(kill_command.c_str());
 }
 

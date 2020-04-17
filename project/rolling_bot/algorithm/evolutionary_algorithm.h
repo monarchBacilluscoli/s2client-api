@@ -10,6 +10,9 @@
 #include <random>
 #include <iostream>
 #include <memory>
+#include <fstream>
+#include <string>
+
 #include "solution.h"
 #ifdef USE_GRAPHICS
 #include "../methods/graph_renderer.h"
@@ -18,6 +21,7 @@
 #include "../simulator/command.h"
 #endif // DEBUG
 #include "terminator.h"
+#include "../../debug_use.h"
 
 namespace sc2
 {
@@ -40,6 +44,7 @@ protected:
     using MGT = MaxGenerationTerminator<T, TSolution>;
     using MET = MaxEvaluationTerminator<T, TSolution>;
     //! some settings
+    bool m_is_output_file = false;
     int m_objective_size = 1;
     int m_population_size = 50;
     int m_current_generation = 0;
@@ -58,6 +63,7 @@ protected:
     Population m_offspring{};
 
     //! methods
+    std::string m_output_file_path = CurrentFolder() + "/obj_record.txt";
     std::list<std::vector<std::vector<float>>> m_history_objs{}; // for debug or record use
     std::vector<std::vector<float>> m_history_objs_ave{};        // obj-generation
     std::vector<std::vector<float>> m_history_objs_best{};       // obj-generation
@@ -90,6 +96,8 @@ public:
     void SetRandomEngineSeed(int seed) { m_random_engine.seed(seed); };
     void SetTerminationCondition(TERMINATION_CONDITION termination_condition) { m_termination_condition = termination_condition; };
     void SetMaxGeneration(int max_generation) { std::dynamic_pointer_cast<MGT>(m_termination_conditions[TERMINATION_CONDITION::MAX_GENERATION])->SetMaxGeneration(max_generation); };
+    void SetUseOutputFile(bool use) { m_is_output_file = use; };
+    void SetOutputPath(const std::string &path) { m_output_file_path = path; };
 
     int GetPopulationSize() const { return m_population_size; };
     int GetObjectiveSize() const { return m_objective_size; };
@@ -103,6 +111,8 @@ public:
     std::vector<float> GetLastObjsWorst() const;
     virtual std::shared_ptr<TB> TerminationCondition(TERMINATION_CONDITION termination_condition);
     virtual std::shared_ptr<CT> ConvergenceTermination() { return std::dynamic_pointer_cast<CT>(m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE]); };
+    bool GetUseOutput() { return m_is_output_file; };
+    std::string GetOutputPath() { return m_output_file_path; };
 
     virtual Population Run();
 
@@ -118,7 +128,8 @@ protected:
     virtual void RecordObjectives();
 
     virtual void OutputToConsoleEachGeneration(std::ostream &out);
-    virtual void OutputObjectives(std::ostream &out);
+    virtual void OutputCurrentObjectives(std::ostream &out);
+    virtual void OutputAllHistoryObjectives(std::ostream &out);
 #ifdef USE_GRAPHICS
     virtual void ShowGraphEachGeneration();
     virtual void ShowOverallStatusGraphEachGeneration();
@@ -250,9 +261,9 @@ std::vector<TSolution<T>> EvolutionaryAlgorithm<T, TSolution>::Run()
         }
     }
     std::cout << "Finish run after " << m_current_generation - 1 << " generations!@" << __FUNCTION__ << std::endl;
-// #ifdef DEBUG
-//     std::cout << "Here is still " << std::count_if(m_population.begin(), m_population.end(), [](const TSolution<T> &s) -> bool { return s.is_priori; }) << " priori solutions.";
-// #endif // DEBUG
+    // #ifdef DEBUG
+    //     std::cout << "Here is still " << std::count_if(m_population.begin(), m_population.end(), [](const TSolution<T> &s) -> bool { return s.is_priori; }) << " priori solutions.";
+    // #endif // DEBUG
     return std::vector<TSolution<T>>(m_population.begin(), end_it);
 }
 
@@ -307,22 +318,42 @@ void EvolutionaryAlgorithm<T, TSolution>::RecordObjectives()
 template <class T, template <typename> class TSolution>
 void EvolutionaryAlgorithm<T, TSolution>::OutputToConsoleEachGeneration(std::ostream &out)
 {
-    OutputObjectives(out);
+    OutputCurrentObjectives(out);
 }
 
 template <class T, template <typename> class TSolution>
-void EvolutionaryAlgorithm<T, TSolution>::OutputObjectives(std::ostream &out)
+void EvolutionaryAlgorithm<T, TSolution>::OutputCurrentObjectives(std::ostream &out)
 {
-    std::vector<std::string> objective_names(m_objective_size * 2);
+    std::vector<std::string> field_names(m_objective_size * 2);
     for (size_t i = 0; i < m_objective_size; ++i)
     {
-        objective_names[0 + i] = m_objective_names[i] + " average";
-        out << objective_names[0 + i] << ": \t" << m_history_objs_ave[i].back() << "\t";
-        objective_names[m_objective_size + i] = m_objective_names[i] + " best";
-        out << objective_names[m_objective_size + i] << ": \t" << m_history_objs_best[i].back() << "\t";
+        field_names[0 + i] = m_objective_names[i] + " average";
+        out << field_names[0 + i] << ": \t" << m_history_objs_ave[i].back() << "\t";
+        field_names[m_objective_size + i] = m_objective_names[i] + " best";
+        out << field_names[m_objective_size + i] << ": \t" << m_history_objs_best[i].back() << "\t";
         // objective_names[m_objective_size * 2 + i] = m_objective_names[i] + " worst";
     }
     out << std::endl;
+}
+
+template <class T, template <typename> class TSolution>
+void EvolutionaryAlgorithm<T, TSolution>::OutputAllHistoryObjectives(std::ostream &out)
+{
+    std::vector<std::string> field_names(m_objective_size * 2);
+    size_t history_length = m_history_objs_ave.front().size();
+    for (int j = 0; j < history_length; ++j)
+    {
+        for (size_t i = 0; i < m_objective_size; ++i)
+        {
+            field_names[0 + i] = m_objective_names[i] + " average";
+            out << field_names[0 + i] << ": \t" << m_history_objs_ave[i][j] << "\t";
+            field_names[m_objective_size + i] = m_objective_names[i] + " best";
+            out << field_names[m_objective_size + i] << ": \t" << m_history_objs_best[i][j] << "\t";
+            // objective_names[m_objective_size * 2 + i] = m_objective_names[i] + " worst";
+        }
+        out << std::endl;
+    }
+    out << std::endl; // split diffrent run
 }
 
 #ifdef USE_GRAPHICS
