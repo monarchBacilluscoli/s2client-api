@@ -5,6 +5,44 @@
 
 using namespace sc2;
 
+bool UnitState::operator==(const UnitState &state) const
+{
+    // UnitTypeID unit_type;
+    // Point2D pos;
+    // uint32_t player_id = 0;
+    // Tag unit_tag = 0; // only used in simulation
+    // float energy = 0;
+    // float life = 0;
+    // float shield = 0;
+    if (
+        unit_type == state.unit_type &&
+        pos == state.pos &&
+        player_id == state.player_id &&
+        unit_tag == state.unit_tag &&
+        std::abs(energy - state.energy) <= 0.0001f &&
+        std::abs(life - state.life) <= 0.0001f &&
+        std::abs(shield - state.shield) <= 0.0001f)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool UnitState::operator!=(const UnitState &state) const
+{
+    return !(*this == state);
+}
+
+bool State::operator==(const State &state) const
+{
+    return state.unit_states == unit_states;
+}
+
+bool State::operator!=(const State &state) const
+{
+    return !(*this == state);
+}
+
 State sc2::SaveMultiPlayerGame(const ObservationInterface *observation)
 {
     State save;
@@ -17,7 +55,7 @@ State sc2::SaveMultiPlayerGame(const ObservationInterface *observation)
         save.unit_states[i] = UnitState({u->unit_type,
                                          u->pos,
                                          static_cast<uint32_t>(u->owner == 16 ? 0 : u->owner), // a inconsistency between editor player property & api property
-                                         u->tag, // this is just used for remote simulation
+                                         u->tag,                                               // this is just used for remote simulation
                                          u->energy,
                                          u->health,
                                          u->shield});

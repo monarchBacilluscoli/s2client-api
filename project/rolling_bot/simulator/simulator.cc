@@ -242,14 +242,29 @@ void Simulator::Load()
 {
     if (IsMultiPlayerGame())
     {
-        LoadMultiPlayerGame(m_save, m_executor, *this);
-        SetUnitsRelations(m_save, m_executor.Observation()->GetUnits());
+        m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);
+        SetReversedUnitRelation(m_target_to_source_unit_tags, m_relative_units);
+        m_executor.Initialize();
+        { //! check the crush of unit relationship
+            std::set<const Unit *> check_set;
+            for (const auto &item : m_relative_units)
+            {
+                check_set.insert(item.second);
+            }
+            if (check_set.size() != m_relative_units.size() || m_relative_units.size() != Observation()->GetUnits().size())
+            {
+                std::cout << "mistake in copy: " << m_relative_units.size() - check_set.size() << std::endl;                                           // it means that some units were mistaken to be seen as the same one
+                std::cout << "difference between save and current units: " << m_relative_units.size() - Observation()->GetUnits().size() << std::endl; // it can mean that some units has been dead
+            }
+        }
     }
     else
     {
+        std::cout << "simple load" << std::endl;
         m_executor.Control()->Load();
         // I don't have to rebuild the relationships, the tags will keep
         // unchanged after Save() and Load()
+        // I am not sure
     }
 }
 
@@ -312,6 +327,7 @@ GameResult Simulator::CheckGameResult() const
     return m_executor.CheckGameResult();
 }
 
-u_int32_t Simulator::GetEndLoop() const {
+u_int32_t Simulator::GetEndLoop() const
+{
     return m_executor.GetEndLoop();
 }

@@ -23,14 +23,6 @@ void CheckEvents(const RollingSolution<> &s, std::ostream &os);
 
 void OutputUnit(const Unit *u, std::ostream &os);
 
-// void CreateFileInCurrentFilePath(const std::string &filename, std::fstream &fs)
-// {
-//     std::string path(__FILE__);
-//     std::size_t cut = path.rfind('/');
-//     path = path.substr(0, cut) + '/' + filename;
-//     fs.open(path, std::ios::out | std::ios::app);
-// }
-
 std::string CurrentFolder();
 
 } // namespace sc2

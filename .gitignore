@@ -68,3 +68,7 @@ core
 protocol
 project/rolling_bot/rolling_bot/*.txt
 project/stat_record.txt
+project/rolling_bot/algorithm/rolling_ea.cc
+project/sim_record.txt
+project/obj_record.txt
+project/conver_data.txt

@@ -12,8 +12,6 @@ namespace sc2
 class RollingDE : public DifferentialEvolution<Command, RollingSolution>, public RollingEA
 {
 private:
-
-
 protected:
     using EA = EvolutionaryAlgorithm<Command, RollingSolution>;
 
@@ -35,8 +33,6 @@ public:
         SetAttackPossibility(.9f);
     }
     virtual ~RollingDE() = default;
-
-
 
 protected:
     void InitBeforeRun() override;

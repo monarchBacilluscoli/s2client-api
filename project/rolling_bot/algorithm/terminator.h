@@ -76,7 +76,7 @@ private:
     using EA = EvolutionaryAlgorithm<T, TSolution>;
     using TB = TerminatorBase<T, TSolution>;
     // settings
-    float m_no_improve_threshold = .01f; //
+    float m_no_improve_threshold = .00001f; //
     int m_max_no_impreve_generation = 20;
     // data
     int m_current_no_improve_generation = 0;

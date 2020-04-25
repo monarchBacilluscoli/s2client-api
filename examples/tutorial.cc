@@ -388,6 +388,36 @@ public:
     }
 };
 
+class SaveTestBot : public Agent
+{
+private:
+    std::vector<Unit> us;
+
+public:
+    void OnStep()
+    {
+        std::cout << Observation()->GetGameLoop() << std::endl;
+        if (Observation()->GetGameLoop() == 100)
+        {
+            Control()->Save();
+            for (const auto &u : Observation()->GetUnits())
+            {
+                us.push_back(*u);
+            }
+        }
+        if (Observation()->GetGameLoop() % 400 == 0 && Observation()->GetGameLoop() != 0)
+        {
+            Control()->Load();
+            //check the unit
+            for (const auto &u : Observation()->GetUnits())
+            {
+                std::cout << u->tag << 't';
+            }
+            std::cout << std::endl;
+        }
+    }
+};
+
 int main(int argc, char *argv[])
 {
 
@@ -409,8 +439,9 @@ int main(int argc, char *argv[])
     CopyTestBot copy_test_bot;
     FacingTestBot facing_test_bot;
     ActionTestBot action_test_bot;
+    SaveTestBot save_bot;
     // coordinator.SetMultithreaded(true);
-    coordinator.SetParticipants({CreateParticipant(Race::Terran, &action_test_bot),
+    coordinator.SetParticipants({CreateParticipant(Race::Terran, &save_bot),
                                  // CreateParticipant(Race::Terran, &enemy_bot),
                                  CreateComputer(Race::Terran)});
 

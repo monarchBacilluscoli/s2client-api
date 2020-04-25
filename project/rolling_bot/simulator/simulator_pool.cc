@@ -242,12 +242,11 @@ void SimulatorPool::RunSimsAsync(int steps, DebugRenderers &debug_renderers)
             Simulation<std::thread::id> &new_sim = m_simulations.back();
             new_sim.sim.SetBaseSettings(m_port_end, m_process_path, Simulator::GenerateSimMapPath(m_map_path));
             m_port_end += 2;
-            // thread_list.push_back(std::thread{[&new_sim, &observation = m_observation, orders = m_sol_sim_map[i]->sim.GetOrders()]() -> void {
             new_sim.sim.LaunchStarcraft();
             new_sim.sim.StartGame();
             new_sim.sim.CopyAndSetState(m_observation);
             new_sim.sim.SetOrders(m_sol_sim_map[i]->sim.GetOriginalOrders()); //! this is not the source of the problem
-            // }});
+            
             m_sol_sim_map[i] = &new_sim;
             break;
         }

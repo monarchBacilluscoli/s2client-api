@@ -35,7 +35,7 @@ protected:
     // settings about game
     float m_attack_possibility = 0.7;
     unsigned int m_command_length = 8;
-    unsigned int m_sim_length = 300;
+    uint32_t m_sim_length = 300;
     unsigned int m_evaluation_time_multiplier = 1; // the evaluation times for each solution (to avoid randomness)
     unsigned int m_fix_by_data_interval = 6;
 #ifdef USE_GRAPHICS
@@ -51,6 +51,9 @@ protected:
     SimulatorPool m_simulation_pool;
     // methods
     std::lognormal_distribution<float> m_log_dis{0, 0.6};
+
+    // some output settings
+    bool m_output_conver_data = false;
 
 public:
     RollingEA() = delete;
@@ -85,6 +88,7 @@ public:
 public:
     // settings about the game
     void SetSimLength(unsigned int sim_length) { m_sim_length = sim_length; }
+    unsigned int GetSimLength() { return m_sim_length; };
     void SetCommandLength(unsigned int command_length) { m_command_length = command_length; }
     void SetAttackPossibility(float attack_possibility) { m_attack_possibility = attack_possibility; } // the posssibility of attack when generati
     void SetEvaluationTimeMultiplier(unsigned int times)
@@ -101,7 +105,12 @@ public:
     void SetDebug(bool is_debug) { m_is_debug = is_debug; }
     void SetFixByDataInterval(int interval) { m_fix_by_data_interval = interval; };
     void SetUseFixByData(bool use) { m_use_fix_by_data = use; };
-    bool IsUseFixByData() const { return m_use_fix_by_data; }
+    void SetOutputCoverData(bool use) { m_output_conver_data; };
+    bool IsUsePriori() { return m_use_priori; };
+    bool IsUseAssemble() { return m_use_assemble; };
+    bool IsUseFixByData() const { return m_use_fix_by_data; };
+    bool IsOutputCoverData() const { return m_output_conver_data; };
+    std::string GetSettingString();
 
 protected:
     // override functions
@@ -118,7 +127,13 @@ protected:
     virtual void ActionAfterEachGeneration() override
     {
         EA::ActionAfterEachGeneration();
-        //todo another implementation: compound some solutions -> evaluate them -> sort -> put them into solutions
+        if (m_output_conver_data)
+        {
+            std::string path = CurrentFolder() + "/conver_data.txt";
+            std::fstream out_file(path, std::ios::out | std::ios::app);
+            OutputPopulationStat(out_file);
+            out_file.close();
+        }
     };
 
 protected:
@@ -133,10 +148,12 @@ protected:
     RollingSolution<Command> AssembleASolutionFromGoodUnits(const std::vector<RollingSolution<Command> *> &evaluated_pop); // Assemble a priori solution based on the evaluated population. //! the param must be an evaluated population
 
 public:
+    void OutputPopulationSimResult(std::ostream &os) const;
     RollingSolution<Command> FixBasedOnSimulation(const RollingSolution<Command> &parent); // based on the simulation data to fix the move target of my units into effective area around enemies
 
 protected: // some utilities
     Point2D FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float this_unit_weapon_range, const Units &enemy_team);
+    void OutputPopulationStat(std::ostream &os);
 };
 
 } // namespace sc2

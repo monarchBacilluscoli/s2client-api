@@ -19,8 +19,16 @@ void RollingBot::OnGameStart()
     std::string path = m_rolling_ea.GetOutputPath();
     std::fstream fs = std::fstream(path, std::ios::app | std::ios::out);
     fs << std::endl
-       << "start:" << std::endl;
+       << "start:\t" << m_rolling_ea.GetObjectiveSize() << m_rolling_ea.IsUsePriori() << m_rolling_ea.IsUseFixByData() << m_rolling_ea.IsUseAssemble() << '\t' << m_rolling_ea.GetSimLength() << std::endl;
     fs.close();
+
+    if (m_is_output_conver)
+    {
+        std::string conver_path = CurrentFolder() + "/conver_data.txt";
+        std::fstream conver_file(conver_path, std::ios::out | std::ios::app);
+        conver_file << "// " << m_rolling_ea.GetObjectiveSize() << m_rolling_ea.IsUsePriori() << m_rolling_ea.IsUseFixByData() << m_rolling_ea.IsUseAssemble() << '\t' << m_rolling_ea.GetSimLength() << '\t' << m_rolling_ea.GetSimLength() << '\t' << m_interval_size << std::endl;
+        conver_file.close();
+    }
 
     // only after game starting I can initialize the ga, or the information
     // will not be passed to it
@@ -33,6 +41,28 @@ void RollingBot::OnGameStart()
     {
         //Run algorithm once
         SetCommandFromAlgorithm(); // The first run of algorithm on game start
+    }
+
+    if (m_is_output_sim_record)
+    {
+        // output the final pop
+        std::string output_file_path = CurrentFolder() + "/sim_record.txt";
+        std::fstream sim_fs = std::fstream(output_file_path, std::ios::app | std::ios::out);
+        sim_fs << "//" << m_rolling_ea.GetObjectiveSize() << m_rolling_ea.IsUsePriori() << m_rolling_ea.IsUseFixByData() << m_rolling_ea.IsUseAssemble() << '\t' << m_rolling_ea.GetSimLength() << std::endl;
+        m_rolling_ea.OutputPopulationSimResult(sim_fs);
+        sim_fs.close();
+    }
+
+    if (m_is_only_start)
+    {
+        AgentControl()->Restart(); // for test
+    }
+
+    static int count = 0;
+    ++count;
+    if (count > 10)
+    {
+        exit(0);
     }
 }
 

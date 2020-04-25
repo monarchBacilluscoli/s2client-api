@@ -31,6 +31,12 @@ struct AverageSimData
     std::map<Tag, UnitStatisticalData> units_statistics;
     float win_rate; //? how to define it? how to handle tie?
 
+    //? maybe temporary use
+    float total_health_loss_mine = 0.f;
+    float total_health_loss_enemy = 0.f;
+    uint32_t win_loop = std::numeric_limits<uint32_t>::max();
+
+    void Clear();
     static std::map<Tag, UnitStatisticalData> CalculateAverUnitStatistics(const std::vector<SimData> &results);
     static float CalculateWinRate(const std::vector<SimData> &results);
 };
@@ -66,6 +72,9 @@ void RollingSolution<T>::ClearSimData()
     aver_result.units_statistics.clear();
     aver_result.win_rate = 0.f;
     results.clear();
+    aver_result.total_health_loss_enemy = 0.f;
+    aver_result.total_health_loss_mine = 0.f;
+    aver_result.win_loop = std::numeric_limits<uint32_t>::max();
 }
 
 template <class T>
