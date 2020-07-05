@@ -102,3 +102,15 @@ If you are using Visual Studio 2017 and just want precompiled library files you 
 Additional community built AI libraries can be found [here](https://github.com/Blizzard/s2client-proto#community).
 
 If you are new to programming, the [CommandCenter](https://github.com/davechurchill/CommandCenter) framework may be a good starting point.
+
+
+Added by LiuYongfeng
+----------------
+
+### Maps 
+
+https://github.com/monarchBacilluscoli/sc2maps
+
+### Replays
+
+https://github.com/monarchBacilluscoli/sc2replays
