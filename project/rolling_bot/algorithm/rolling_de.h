@@ -3,7 +3,7 @@
 
 #include "differential_evolution.h"
 #include "../simulator/simulator_pool.h"
-#include "gnuplot-iostream.h"
+#include "../contrib/gnuplot-iostream.h"
 #include "rolling_ea.h"
 
 namespace sc2
@@ -11,7 +11,10 @@ namespace sc2
 
 class RollingDE : public DifferentialEvolution<Command, RollingSolution>, public RollingEA
 {
+private:
 protected:
+    using EA = EvolutionaryAlgorithm<Command, RollingSolution>;
+
 public:
     RollingDE() = delete;
     /* I must call the construct of the virtual base class, since all the virtual derived classes will not call it (since the multiple calls will cause multiple constructing, it is banned)
@@ -25,7 +28,7 @@ public:
               int population_size = 50,
               float scale_factor = .5f,
               float crossover_rate = .5f,
-              int random_seed = rand()) : EvolutionaryAlgorithm(2, max_generation, population_size, random_seed, {"Enemy Loss", "My Team Loss"}), DifferentialEvolution(2, max_generation, population_size, scale_factor, crossover_rate), RollingEA(net_address, port_start, process_path, map_path, max_generation, population_size, random_seed)
+              int random_seed = rand()) : EvolutionaryAlgorithm(3, max_generation, population_size, random_seed, {"Enemy Loss", "My Team Loss"}), DifferentialEvolution(3, max_generation, population_size, scale_factor, crossover_rate), RollingEA(net_address, port_start, process_path, map_path, max_generation, population_size, random_seed)
     {
         SetAttackPossibility(.9f);
     }

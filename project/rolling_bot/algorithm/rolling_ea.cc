@@ -1,42 +1,13 @@
 #include "global_defines.h"
 
+#include <fstream>
+
 #include "rolling_ea.h"
 #include <sc2lib/sc2_utils.h>
+#include "../../debug_use.h"
 
 namespace sc2
 {
-
-bool RollingEA::ConvergenceTermination::operator()()
-{
-    std::vector<float> current_averages = m_algo.GetLastObjsAverage();
-    if (m_last_record_obj_average.empty()) // the first time to check
-    {
-        m_last_record_obj_average = current_averages;
-        return false;
-    }
-    float current_difference = current_averages[0] - current_averages[1];
-    float last_difference = m_last_record_obj_average[0] - m_last_record_obj_average[1];
-    m_last_record_obj_average = current_averages;
-    if (std::abs(current_difference - last_difference) > m_no_improve_threshold) // improve from last generation
-    {
-        m_current_no_improve_generation = 0;
-        return false;
-    }
-    else if (++m_current_no_improve_generation < m_max_no_impreve_generation) // no improvement from last generation
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
-}
-
-void RollingEA::ConvergenceTermination::clear()
-{
-    m_current_no_improve_generation = 0;
-    m_last_record_obj_average.clear();
-}
 
 void RollingEA::Initialize(const ObservationInterface *observation)
 {
@@ -50,9 +21,8 @@ void RollingEA::InitBeforeRun()
 }
 
 void RollingEA::InitOnlySelfMembersBeforeRun()
-{                                              // doesn't call the base class's Init function
-    InitFromObservation();                     // set the m_my_team and some other things
-    m_convergence_termination_manager.clear(); // must refresh the state of it
+{                          // doesn't call the base class's Init function
+    InitFromObservation(); // set the m_my_team and some other things
     for (RollingSolution<Command> &sol : m_population)
     {
         sol.variable.resize(m_my_team.size());
@@ -105,80 +75,236 @@ void RollingEA::Evaluate()
 
 void RollingEA::Evaluate(Population &pop)
 {
-    size_t pop_sz = pop.size();
-    for (auto &item : pop)
+    if (m_objective_size == 3)
     {
-        item.results.resize(m_evaluation_time_multiplier);
-        item.objectives.resize(m_objective_size);
-        for (auto &ob : item.objectives)
-        {
-            ob = 0.f; // clear the objective value for the addition operation
-        }
-    }
-    for (size_t j = 0; j < m_evaluation_time_multiplier; ++j)
-    {
-        m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, pop); // Start all simulations at the same time
-        if (m_is_debug)
-        {
-#ifdef USE_GRAPHICS
-            m_simulation_pool.RunSimsAsync(m_sim_length, m_debug_renderers);
-#else
-            m_simulation_pool.RunSimsAsync(m_sim_length);
-#endif //USE_GRAPHICS
-        }
-        else
-        {
-            m_simulation_pool.RunSimsAsync(m_sim_length);
-        }
+        // get initial total health of both team from observation
+        float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
+        float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
         size_t pop_sz = pop.size();
+        for (auto &item : pop)
+        {
+            item.ClearSimData();
+            item.results.resize(m_evaluation_time_multiplier);
+            item.objectives.resize(m_objective_size);
+            for (auto &ob : item.objectives)
+            {
+                ob = 0.f; // clear the objective value for the addition operation
+            }
+        }
+        for (size_t j = 0; j < m_evaluation_time_multiplier; ++j)
+        {
+            m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, pop); // Start all simulations at the same time
+            if (m_is_debug)
+            {
+#ifdef USE_GRAPHICS
+                m_simulation_pool.RunSimsAsync(m_sim_length, m_debug_renderers);
+#else
+                m_simulation_pool.RunSimsAsync(m_sim_length);
+#endif //USE_GRAPHICS
+            }
+            else
+            {
+                m_simulation_pool.RunSimsAsync(m_sim_length);
+            }
+            size_t pop_sz = pop.size();
+            for (size_t i = 0; i < pop_sz; i++)
+            {
+                {                                                                                                      // record game results
+                    const std::map<Tag, const Unit *> &units_correspondence = m_simulation_pool[i].GetRelativeUnits(); // Units final state in simulation
+#ifdef DEBUG
+                    if (i + 1 < pop_sz && m_simulation_pool[i].GetRelativeUnits().size() != m_simulation_pool[i + 1].GetRelativeUnits().size())
+                    {
+                        std::cout << "some mistake in return units map" << std::endl;
+                    }
+#endif // DEBUG
+                    for (const auto &unit : units_correspondence)
+                    {
+                        // pop[i].results[j].units[unit.first];s
+                        pop[i].results[j].units[unit.first].final_state = *(unit.second);
+                        pop[i].results[j].units[unit.first].statistics = m_simulation_pool[i].GetUnitStatistics(unit.first);
+                    }
+                    pop[i].results[j].game.end_loop = m_simulation_pool[i].GetEndLoop();
+                    pop[i].results[j].game.result = m_simulation_pool[i].CheckGameResult();
+                    pop[i].CalculateAver(); // based on the recorded statistics, calculate the average results
+                }
+                { // set the objectives
+                    float enemy_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
+                    float my_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
+                    pop[i].objectives[0] += m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
+                    pop[i].objectives[1] += -m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
+                    pop[i].aver_result.total_health_loss_enemy += enemy_loss;
+                    pop[i].aver_result.total_health_loss_mine += my_loss;
+                    if (pop[i].results[j].game.result != GameResult::Win) // maximization
+                    {
+                        pop[i].objectives[2] -= m_sim_length;
+                        pop[i].aver_result.win_loop += m_sim_length;
+                        // std::cout << pop[i].aver_result.win_loop << '\t' << m_sim_length << std::endl;
+                    }
+                    else
+                    {
+                        pop[i].objectives[2] -= pop[i].results[j].game.end_loop;
+                        pop[i].aver_result.win_loop += pop[i].results[j].game.end_loop;
+                    }
+                }
+            }
+        }
+        // write the real obj values to those solutions
         for (size_t i = 0; i < pop_sz; i++)
         {
-            {                                                                                                      // record game results
-                const std::map<Tag, const Unit *> &units_correspondence = m_simulation_pool[i].GetRelativeUnits(); // Units final state in simulation
-#ifdef DEBUG
-                if (i + 1 < pop_sz && m_simulation_pool[i].GetRelativeUnits().size() != m_simulation_pool[i + 1].GetRelativeUnits().size())
-                {
-                    std::cout << "some mistake in return units map" << std::endl;
-                }
-#endif // DEBUG
-                for (const auto &unit : units_correspondence)
-                {
-                    pop[i].results[j].units[unit.first];
-                    pop[i].results[j].units[unit.first].final_state = *(unit.second);
-                    pop[i].results[j].units[unit.first].statistics = m_simulation_pool[i].GetUnitStatistics(unit.first);
-                    pop[i].results[j].game.result = m_simulation_pool[i].CheckGameResult();
-                }
-                pop[i].CalculateAver(); // based on the recorded statistics, calculate the average results
-            }
-            { // set the objectives
-                pop[i].objectives[0] += m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
-                pop[i].objectives[1] += -m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
-            }
+            pop[i].objectives[0] /= m_evaluation_time_multiplier;
+            pop[i].objectives[1] /= m_evaluation_time_multiplier; // transform it to maximum optimization
+            pop[i].objectives[2] /= m_evaluation_time_multiplier;
+            pop[i].aver_result.total_health_loss_enemy /= m_evaluation_time_multiplier;
+            pop[i].aver_result.total_health_loss_mine /= m_evaluation_time_multiplier;
+            pop[i].aver_result.win_loop /= m_evaluation_time_multiplier;
         }
     }
-    // write the real obj values to those solutions
-    for (size_t i = 0; i < pop_sz; i++)
+    else if (m_objective_size == 2)
     {
-        pop[i].objectives[0] /= m_evaluation_time_multiplier;
-        pop[i].objectives[1] /= m_evaluation_time_multiplier; // transform it to maximum optimization
+        // get initial total health of both team from observation
+        float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
+        float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
+        size_t pop_sz = pop.size();
+        for (auto &item : pop)
+        {
+            item.ClearSimData();
+            item.results.resize(m_evaluation_time_multiplier);
+            item.objectives.resize(m_objective_size);
+            for (auto &ob : item.objectives)
+            {
+                ob = 0.f; // clear the objective value for the addition operation
+            }
+        }
+        for (size_t j = 0; j < m_evaluation_time_multiplier; ++j)
+        {
+            m_simulation_pool.CopyStateAndSendOrdersAsync(m_observation, pop); // Start all simulations at the same time
+            if (m_is_debug)
+            {
+#ifdef USE_GRAPHICS
+                m_simulation_pool.RunSimsAsync(m_sim_length, m_debug_renderers);
+#else
+                m_simulation_pool.RunSimsAsync(m_sim_length);
+#endif //USE_GRAPHICS
+            }
+            else
+            {
+                try
+                {
+                    /* code */
+                    m_simulation_pool.RunSimsAsync(m_sim_length);
+                }
+                catch (const std::exception &e)
+                {
+                    std::cerr << e.what() << '\n'; // there has been a timeout handler in RunSimsAsync()
+                }
+            }
+            size_t pop_sz = pop.size();
+            for (size_t i = 0; i < pop_sz; i++)
+            {
+                {                                                                                                      // record game results
+                    const std::map<Tag, const Unit *> &units_correspondence = m_simulation_pool[i].GetRelativeUnits(); // Units final state in simulation
+#ifdef DEBUG
+                    if (i + 1 < pop_sz && m_simulation_pool[i].GetRelativeUnits().size() != m_simulation_pool[i + 1].GetRelativeUnits().size())
+                    {
+                        std::cout << "some mistake in return units map" << std::endl;
+                    }
+#endif // DEBUG
+                    for (const auto &unit : units_correspondence)
+                    {
+                        pop[i].results[j].units[unit.first];
+                        pop[i].results[j].units[unit.first].final_state = *(unit.second);
+                        pop[i].results[j].units[unit.first].statistics = m_simulation_pool[i].GetUnitStatistics(unit.first);
+                    }
+                    pop[i].results[j].game.end_loop = m_simulation_pool[i].GetEndLoop();
+                    pop[i].results[j].game.result = m_simulation_pool[i].CheckGameResult();
+                    pop[i].CalculateAver(); // based on the recorded statistics, calculate the average results
+                }
+                { // set the objectives
+                    float enemy_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
+                    float my_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
+                    pop[i].objectives[0] += enemy_loss / total_health_enemy - my_loss / total_health_me;
+                    pop[i].aver_result.total_health_loss_enemy += enemy_loss;
+                    pop[i].aver_result.total_health_loss_mine += my_loss;
+                    // pop[i].objectives[1] += -m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
+                    if (pop[i].results[j].game.result != GameResult::Win) // maximization
+                    {
+                        pop[i].objectives[1] -= m_sim_length;
+                        pop[i].aver_result.win_loop += m_sim_length;
+                    }
+                    else
+                    {
+                        pop[i].objectives[1] -= pop[i].results[j].game.end_loop;
+                        pop[i].aver_result.win_loop += pop[i].results[j].game.end_loop;
+                    }
+                }
+            }
+        }
+        // write the real obj values to those solutions
+        for (size_t i = 0; i < pop_sz; i++)
+        {
+            pop[i].objectives[0] /= m_evaluation_time_multiplier;
+            // pop[i].objectives[1] /= m_evaluation_time_multiplier; // transform it to maximum optimization
+            pop[i].objectives[1] /= m_evaluation_time_multiplier;
+            pop[i].aver_result.total_health_loss_enemy /= m_evaluation_time_multiplier;
+            pop[i].aver_result.total_health_loss_mine /= m_evaluation_time_multiplier;
+            pop[i].aver_result.win_loop /= m_evaluation_time_multiplier;
+        }
     }
+    return;
 }
 
 void RollingEA::Select()
 {
     m_population.insert(m_population.end(), m_offspring.begin(), m_offspring.end());
-    RollingSolution<Command>::DominanceSort(m_population);
-    RollingSolution<Command>::CalculateCrowdedness(m_population);
+    // std::cout << std::count_if(m_population.begin(), m_population.end(), [](const RollingSolution<Command> &rs) -> bool { return (std::abs(rs.objectives.at(0) - 0) < 0.1f) && (std::abs(rs.objectives.at(1) - 0) < 0.1f); }) << std::endl;
+    RollingSolution<Command>::DominanceSort<RollingSolution>(m_population, RollingSolution<Command>::RollingLess);
     // choose solutions to be added to the next generation
-    int rank_need_resort = m_population[m_population_size - 1].rank;                                         // DEBUG
+    int rank_need_resort = m_population[m_population_size - 1].rank;
     if (m_population.size() > m_population_size && m_population[m_population_size].rank == rank_need_resort) // if next element is still of this rank, it means this rank can not be contained fully in current population, it needs selecting
     {
         // resort solutions of current rank
         Population::iterator bg = std::find_if(m_population.begin(), m_population.end(), [rank_need_resort](const RollingSolution<Command> &s) { return rank_need_resort == s.rank; });
         Population::iterator ed = std::find_if(m_population.rbegin(), m_population.rend(), [rank_need_resort](const RollingSolution<Command> &s) { return rank_need_resort == s.rank; }).base();
-        std::sort(bg, ed, [](const RollingSolution<Command> &l, const RollingSolution<Command> &r) { return l.crowdedness > r.crowdedness; });
+        RollingSolution<Command>::CalculateCrowdedness(m_population, std::distance(m_population.begin(), bg), std::distance(m_population.begin(), ed));
+        // std::cout << bg - m_population.begin() << '\t' << ed - m_population.begin() << std::endl;
+        // std::for_each(bg, ed, [](const RollingSolution<Command> &s) -> void {
+        //     std::cout << s.crowdedness << '\t';
+        // });
+        // std::cout << std::endl;
+        std::stable_sort(bg, ed, [](const RollingSolution<Command> &l, const RollingSolution<Command> &r) { return l.crowdedness > r.crowdedness; });
+
+        // std::string path = CurrentFolder() + "/sort_test.txt";
+        // std::fstream fs = std::fstream(path, std::ios::app | std::ios::out);
+        // std::for_each(bg, ed, [](const RollingSolution<Command> &s) -> void {
+        //     std::cout << s.crowdedness << '\t';
+        // });
+        // std::cout << std::endl;
     }
+    // std::cout << "max: " << std::distance(std::max_element(m_population.begin(), m_population.end(), [](const RollingSolution<Command> &c1, const RollingSolution<Command> &c2) -> bool {
+    //                                           return c1.objectives.front() < c2.objectives.front();
+    //                                       }),
+    //                                       m_population.begin())
+    //           << std::endl;
+    // ;
+
+    // std::string path = CurrentFolder() + "/sort_test.txt";
+    // std::fstream fs = std::fstream(path, std::ios::app | std::ios::out);
+    // int i = 0;
+    // for (const auto &s : m_population)
+    // {
+    //     fs << i << '\t';
+    //     for (const auto &o : s.objectives)
+    //     {
+    //         fs << o << '\t';
+    //     }
+    //     fs << s.rank << '\t' << s.crowdedness << std::endl;
+    //     ++i;
+    // }
+    // fs << std::endl;
+    // fs.close();
+
     m_population.resize(EA::m_population_size);
+
     return;
 }
 
@@ -229,7 +355,7 @@ void RollingEA::GenerateOne(RollingSolution<Command> &sol)
             if (GetRandomFraction() < m_attack_possibility)
             {
                 // randomly choose a location to attack...
-                action_raw.ability_id = ABILITY_ID::ATTACK_ATTACK;
+                action_raw.ability_id = ABILITY_ID::ATTACK;
                 action_raw.target_type = ActionRaw::TargetType::TargetPosition; //? pay attention here is my test code which need to changes
                 if (j == 0)
                 {
@@ -299,7 +425,16 @@ void RollingEA::RecordObjectives()
 
 void RollingEA::ActionAfterRun()
 {
-    // Evaluate(m_population);
+    if (m_is_output_file)
+    {
+        if (m_output_file_path.empty())
+        {
+            m_output_file_path = CurrentFolder() + "/obj_record.txt";
+        }
+        std::fstream fs = std::fstream(m_output_file_path, std::ios::app | std::ios::out);
+        EA::OutputAllHistoryObjectives(fs);
+        fs.close();
+    }
 }
 
 RollingSolution<Command> RollingEA::AssembleASolutionFromGoodUnits(const Population &evaluated_pop)
@@ -358,6 +493,96 @@ Point2D RollingEA::FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &a
         return action_target_pos;
     }
     return FixOutsidePointIntoCircle(action_target_pos, nearest_enemy_pos_to_target_point, effective_range);
+}
+
+RollingSolution<Command> RollingEA::FixBasedOnSimulation(const RollingSolution<Command> &parent)
+{
+    RollingSolution<Command> child = parent;
+    // find the unattacked move
+    if (child.results.size() == 1)
+    {
+        const auto &unit_stat = child.results.front().units;
+        std::vector<Command> &vars = child.variable;
+        for (Command &var : vars)
+        {
+            Tag tag = var.unit_tag;
+            float attack_range = m_unit_types[m_observation->GetUnit(tag)->unit_type].weapons.front().range;
+            const std::list<Events::Action> &actions = unit_stat.at(tag).statistics.events.actions;
+            int move_count = 0;
+            std::list<Events::Action>::const_iterator it2 = actions.begin();
+            for (std::list<Events::Action>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+            {
+                it2 = it;
+                ++it2;
+                if (it->ability() == ABILITY_ID::MOVE)
+                {
+                    //todo check if out of range
+                    if (it2->ability() != ABILITY_ID::ATTACK_ATTACK)
+                    {
+                        //todo get the positions of enemies
+                        std::vector<Point2D> possible_enemey_pos(m_enemy_team.size());
+                        for (int i = 0; i < m_enemy_team.size(); ++i)
+                        {
+                            possible_enemey_pos[i] = child.GetUnitPossiablePosition(m_enemy_team[i]->tag, it->gameLoop());
+                        }
+                        //todo find the nearest one
+                        Point2D target = FindNearestPointFromPoint(it->position(), possible_enemey_pos);
+                        //todo check if the unit is out of range
+                        if (Distance2D(target, it->position()) > attack_range * 1.5)
+                        {
+                            Point2D fix = FixOutsidePointIntoCircle(var.actions[move_count].target_point, target, attack_range * 1.5);
+                            var.actions[move_count].target_point = fix;
+                        }
+                    }
+                    ++move_count;
+                }
+            }
+        }
+    }
+    return child;
+}
+
+void RollingEA::OutputPopulationStat(std::ostream &os)
+{
+    //todo aver and max
+    float damage_aver = std::accumulate(m_population.begin(), m_population.end(), 0.f, [](float init, const RollingSolution<Command> &r) -> float {
+                            return init + r.aver_result.total_health_loss_enemy;
+                        }) /
+                        m_population.size();
+    auto damage_max_it = std::max_element(m_population.begin(), m_population.end(), [](const RollingSolution<Command> &l, const RollingSolution<Command> &r) -> bool {
+        return l.aver_result.total_health_loss_enemy < r.aver_result.total_health_loss_enemy;
+    });
+    float hurt_aver = std::accumulate(m_population.begin(), m_population.end(), 0.f, [](float init, const RollingSolution<Command> r) -> float {
+                          return init + r.aver_result.total_health_loss_mine;
+                      }) /
+                      m_population.size();
+    auto hurt_min_it = std::max_element(m_population.begin(), m_population.end(), [](const RollingSolution<Command> &l, const RollingSolution<Command> &r) -> bool {
+        return l.aver_result.total_health_loss_mine > r.aver_result.total_health_loss_mine;
+    });
+    uint32_t win_loop = std::accumulate(m_population.begin(), m_population.end(), 0.f, [](float init, const RollingSolution<Command> &r) -> float {
+                            return init + r.aver_result.win_loop;
+                        }) /
+                        m_population.size();
+    auto win_loop_min_it = std::max_element(m_population.begin(), m_population.end(), [](const RollingSolution<Command> &l, const RollingSolution<Command> &r) -> bool {
+        return l.aver_result.win_loop > r.aver_result.win_loop;
+    });
+    os << damage_aver << '\t' << damage_max_it->aver_result.total_health_loss_enemy << '\t' << hurt_aver << '\t' << hurt_min_it->aver_result.total_health_loss_mine << '\t' << win_loop << '\t' << win_loop_min_it->aver_result.win_loop << std::endl;
+}
+
+void RollingEA::OutputPopulationSimResult(std::ostream &os) const
+{
+    for (auto &&s : m_population)
+    {
+        float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
+        float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
+        os << s.aver_result.total_health_loss_enemy << '\t' << s.aver_result.total_health_loss_mine << '\t' << s.aver_result.win_loop << '\t' << total_health_enemy << '\t' << total_health_me << '\t' << s.rank << std::endl;
+    }
+    os << std::endl;
+}
+
+std::string RollingEA::GetSettingString()
+{
+    return std::to_string(m_objective_size) + '\t' + std::to_string(m_population_size) + '\t' + std::to_string(std::static_pointer_cast<MGT>(TerminationCondition(TERMINATION_CONDITION::MAX_GENERATION))->MaxGeneration()) + '\t' + std::to_string(m_use_priori) + '\t' + std::to_string(m_use_fix_by_data) + '\t' + std::to_string(m_use_assemble) + '\t' + std::to_string(m_sim_length);
 }
 
 } // namespace sc2

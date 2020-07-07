@@ -2,6 +2,14 @@
 
 namespace sc2
 {
+void AverageSimData::Clear()
+{
+    win_rate = 0.f;
+    total_health_loss_mine = 0.f;
+    total_health_loss_enemy = 0.f;
+    win_loop = std::numeric_limits<uint32_t>::max();
+}
+
 std::map<Tag, UnitStatisticalData> AverageSimData::CalculateAverUnitStatistics(const std::vector<SimData> &results)
 {
     std::map<Tag, UnitStatisticalData> aver_result;

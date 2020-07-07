@@ -5,6 +5,44 @@
 
 using namespace sc2;
 
+bool UnitState::operator==(const UnitState &state) const
+{
+    // UnitTypeID unit_type;
+    // Point2D pos;
+    // uint32_t player_id = 0;
+    // Tag unit_tag = 0; // only used in simulation
+    // float energy = 0;
+    // float life = 0;
+    // float shield = 0;
+    if (
+        unit_type == state.unit_type &&
+        pos == state.pos &&
+        player_id == state.player_id &&
+        unit_tag == state.unit_tag &&
+        std::abs(energy - state.energy) <= 0.0001f &&
+        std::abs(life - state.life) <= 0.0001f &&
+        std::abs(shield - state.shield) <= 0.0001f)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool UnitState::operator!=(const UnitState &state) const
+{
+    return !(*this == state);
+}
+
+bool State::operator==(const State &state) const
+{
+    return state.unit_states == unit_states;
+}
+
+bool State::operator!=(const State &state) const
+{
+    return !(*this == state);
+}
+
 State sc2::SaveMultiPlayerGame(const ObservationInterface *observation)
 {
     State save;
@@ -16,8 +54,8 @@ State sc2::SaveMultiPlayerGame(const ObservationInterface *observation)
         u = us.at(i);
         save.unit_states[i] = UnitState({u->unit_type,
                                          u->pos,
-                                         static_cast<uint32_t>(u->owner),
-                                         u->tag, // this is just used for remote simulation
+                                         static_cast<uint32_t>(u->owner == 16 ? 0 : u->owner), // a inconsistency between editor player property & api property
+                                         u->tag,                                               // this is just used for remote simulation
                                          u->energy,
                                          u->health,
                                          u->shield});
@@ -58,7 +96,7 @@ std::map<Tag, const Unit *> sc2::LoadMultiPlayerGame(State save, Client &current
     for (const UnitState &state_u : save.unit_states)
     {
         unit_map[state_u.unit_tag] = u_copied = FindNearestUnitFromPoint(state_u.pos, us_copied);
-        current_client.Debug()->DebugSetShields(state_u.shields + 0.1f, u_copied); // WTF, shield cannot be set to 0, if you set 0, you will find it is full in game, but if you set it as 0.1f, the data in game will be 0, fuck again.
+        current_client.Debug()->DebugSetShields(state_u.shield + 0.1f, u_copied); // WTF, shield cannot be set to 0, if you set 0, you will find it is full in game, but if you set it as 0.1f, the data in game will be 0, fuck again.
         current_client.Debug()->DebugSetLife(state_u.life, u_copied);
         current_client.Debug()->DebugSetEnergy(state_u.energy, u_copied);
     }

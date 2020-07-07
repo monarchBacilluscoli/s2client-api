@@ -7,6 +7,7 @@
 #include <numeric>
 #include <algorithm>
 #include <string>
+#include <functional>
 
 enum class DOMINANCE
 {
@@ -53,9 +54,11 @@ struct Solution
     template <template <typename> class TSolution> // 只有使用模板，vector之中的派生类才能被传进来进行排序
     using Population = std::vector<TSolution<T>>;
     template <template <typename> class TSolution>
-    static void DominanceSort(Population<TSolution> &pop);
+    static void DominanceSort(Population<TSolution> &pop, std::function<bool(const TSolution<T> &a, const TSolution<T> &b)> compare_less /* = TSolution<T>::RankLess*/);
     template <template <typename> class TSolution>
     static void CalculateCrowdedness(Population<TSolution> &pop);
+    template <template <typename> class TSolution>
+    static void CalculateCrowdedness(Population<TSolution> &pop, int bg, int ed);
 };
 
 template <class T>
@@ -79,7 +82,7 @@ bool Solution<T>::multi_greater(const Solution<T> &a, const Solution<T> &b)
         {
             return false;
         }
-        else if (equal && abs(a.objectives[i] - b.objectives[i]) > 0.000001)
+        else if (equal && std::abs(a.objectives[i] - b.objectives[i]) > 0.000001)
         {
             equal = false;
         }
@@ -106,7 +109,7 @@ DOMINANCE Solution<T>::Dominate(const Solution<T> &a, const Solution<T> &b)
     int sz = a.objectives.size();
     for (size_t i = 0; i < sz; i++)
     {
-        if (abs(a.objectives[i] - b.objectives[i]) > 0.000005)
+        if (std::abs(a.objectives[i] - b.objectives[i]) > 0.000005)
         {
             if (a.objectives[i] > b.objectives[i])
             {
@@ -154,7 +157,7 @@ bool Solution<T>::RankLess(const Solution<T> &l, const Solution<T> &r)
         {
             throw("The obj sizes of the two solution are not the same @ Solution::" + std::string(__FUNCTION__));
         }
-        else
+        else // ??
         {
             for (size_t i = 0; i < l_obj_sz; ++i)
             {
@@ -171,28 +174,28 @@ bool Solution<T>::RankLess(const Solution<T> &l, const Solution<T> &r)
 
 template <class T>
 template <template <typename> class TSolution>
-void Solution<T>::DominanceSort(Population<TSolution> &p)
+void Solution<T>::DominanceSort(Population<TSolution> &pop, std::function<bool(const TSolution<T> &a, const TSolution<T> &b)> compare_less)
 {
     // make sure all the rank is set right
-    for (auto &item : p)
+    for (auto &item : pop)
     {
         item.rank = std::numeric_limits<int>::max();
     }
     // set dominate relationship
-    size_t pop_sz = p.size();
+    size_t pop_sz = pop.size();
     for (size_t i = 0; i < pop_sz - 1; i++)
     {
         for (size_t j = i + 1; j < pop_sz; j++)
         {
-            switch (TSolution<T>::Dominate(p[i], p[j])) //! 如果遵照TSolution是此处Solution的派生类的原则的话，此处使用Solution也没有问题（搁置），不过可能会重载静态函数？嗯，TSolution就用TSolution的支配排序方法吧
+            switch (TSolution<T>::Dominate(pop[i], pop[j])) //! 如果遵照TSolution是此处Solution的派生类的原则的话，此处使用Solution也没有问题（搁置），不过可能会重载静态函数？嗯，TSolution就用TSolution的支配排序方法吧
             {
             case DOMINANCE::BETTER:
-                p[i].dominant_solutions.push_back(&p[j]);
-                p[j].dominated_count++;
+                pop[i].dominant_solutions.push_back(&pop[j]);
+                pop[j].dominated_count++;
                 break;
             case DOMINANCE::WORSE:
-                p[j].dominant_solutions.push_back(&p[i]);
-                p[i].dominated_count++;
+                pop[j].dominant_solutions.push_back(&pop[i]);
+                pop[i].dominated_count++;
                 break;
             default:
                 //if p[i] and p[j] are equal, do nothing
@@ -208,10 +211,10 @@ void Solution<T>::DominanceSort(Population<TSolution> &p)
         std::list<int> current_layer_indices;
         for (size_t i = 0; i < pop_sz; i++)
         {
-            if (p[i].dominated_count == 0 && p[i].rank > current_rank)
+            if (pop[i].dominated_count == 0 && pop[i].rank > current_rank)
             {
                 // set rank and store the solution into current layer
-                p[i].rank = current_rank;
+                pop[i].rank = current_rank;
                 current_layer_indices.push_back(i);
             }
         }
@@ -220,16 +223,16 @@ void Solution<T>::DominanceSort(Population<TSolution> &p)
         //handle count first
         for (const auto &index : current_layer_indices)
         {
-            for (auto &item : p[index].dominant_solutions)
+            for (auto &item : pop[index].dominant_solutions)
             {
                 item->dominated_count--;
             }
-            p[index].dominant_solutions.clear();
+            pop[index].dominant_solutions.clear();
         }
         current_set_count += current_layer_sz;
         ++current_rank;
     }
-    std::sort(p.begin(), p.end(), &TSolution<T>::RankLess);
+    std::sort(pop.begin(), pop.end(), compare_less);
     return;
 }
 
@@ -257,6 +260,47 @@ void Solution<T>::CalculateCrowdedness(Population<TSolution> &pop)
             }
         }
     }
+}
+
+template <class T>
+template <template <typename> class TSolution>
+void Solution<T>::CalculateCrowdedness(Population<TSolution> &pop, int from, int to)
+{
+
+    int obj_sz = pop.front().objectives.size();
+    std::vector<float> normalized_objs(pop.size());
+    normalized_objs[from] = 0;
+    normalized_objs[to - 1] = 1;
+    for (size_t j = from + 1; j < to - 1; ++j)
+    {
+        pop[j].crowdedness = 0.f;
+    }
+    for (int i = 0; i < obj_sz; ++i)
+    {
+        //todo sort the pop by each obj
+        std::stable_sort(pop.begin() + from, pop.begin() + to, [i](const Solution<T> &s1, const Solution<T> &s2) -> bool {
+            // no matter max or min, crowdness can be calc by this
+            return s1.objectives[i] < s2.objectives[i];
+        });
+        //todo calculate the crowdeness for this obj and add it
+        if (pop[from].objectives[i] != pop[to - 1].objectives[i]) // if the objective value is the same for all of the inidividuals, do not consider it
+        {
+            // pop[from].crowdedness = std::numeric_limits<float>::max(); // 给这个目标上最差的个体再来一次? 没有这个必要
+            pop[to - 1].crowdedness = std::numeric_limits<float>::max();
+            for (size_t j = from + 1; j < to - 1; ++j)
+            {
+                normalized_objs[j] = (pop[j].objectives[i] - pop[from].objectives[i]) / (pop[to - 1].objectives[i] - pop[from].objectives[i]);
+            }
+            for (size_t j = from + 1; j < to - 1; ++j)
+            {
+                if (std::abs(pop[j].crowdedness - std::numeric_limits<float>::max()) > 0.01f)
+                {
+                    pop[j].crowdedness += std::abs(normalized_objs[j + 1] - normalized_objs[j - 1]);
+                }
+            }
+        }
+    }
+    return;
 }
 
 #endif //SOLUTION_H

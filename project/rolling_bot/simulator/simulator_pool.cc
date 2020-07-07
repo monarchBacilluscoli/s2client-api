@@ -240,14 +240,13 @@ void SimulatorPool::RunSimsAsync(int steps, DebugRenderers &debug_renderers)
             Simulation<std::thread::id> sim = Simulation<std::thread::id>();
             m_simulations.emplace_back();
             Simulation<std::thread::id> &new_sim = m_simulations.back();
-            new_sim.sim.SetBaseSettings(m_port_end, m_process_path, Simulator::GetSimMapPath(m_map_path));
+            new_sim.sim.SetBaseSettings(m_port_end, m_process_path, Simulator::GenerateSimMapPath(m_map_path));
             m_port_end += 2;
-            // thread_list.push_back(std::thread{[&new_sim, &observation = m_observation, orders = m_sol_sim_map[i]->sim.GetOrders()]() -> void {
             new_sim.sim.LaunchStarcraft();
             new_sim.sim.StartGame();
             new_sim.sim.CopyAndSetState(m_observation);
             new_sim.sim.SetOrders(m_sol_sim_map[i]->sim.GetOriginalOrders()); //! this is not the source of the problem
-            // }});
+            
             m_sol_sim_map[i] = &new_sim;
             break;
         }
@@ -294,7 +293,12 @@ void SimulatorPool::RunSimsAsync(int steps)
     for (size_t i = 0; i < sz; i++)
     {
         Simulation<std::thread::id> &simulation = *m_sol_sim_map[i];
-        simulation.result_holder = std::async(std::launch::async, &Simulator::Run, &(m_sol_sim_map[i]->sim), steps);
+        simulation.result_holder = std::async(std::launch::async, &Simulator::Run, &(m_sol_sim_map[i]->sim), steps
+#ifdef USE_GRAPHICS
+                                              ,
+                                              nullptr
+#endif // USE_GRAPHICS
+        );
     }
     // if there is any thread get stuck (timeout), throw it away and create a new one
     std::chrono::time_point<std::chrono::steady_clock> deadline = std::chrono::steady_clock::now() + m_wait_duration;

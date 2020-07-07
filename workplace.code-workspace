@@ -81,6 +81,7 @@
 			"**/docs": true,
 			"**/protocol": true,
 			"tests": true
-		}
+		},
+		"editor.fontFamily": "Consolas, 'Courier New', monospace"
 	}
 }

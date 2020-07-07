@@ -1,9 +1,7 @@
 #ifndef DEBUG_RENDERER_H
 #define DEBUG_RENDERER_H
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
+#include "../contrib/SDL-mirror/include/SDL.h"
 #include <sc2api/sc2_api.h>
 #include <string>
 #include <list>
@@ -57,7 +55,6 @@ private:
     // some objects;
     SDL_Window *m_window = nullptr;
     SDL_Renderer *m_renderer = nullptr;
-    TTF_Font *font = nullptr;
 
 private:
     // some settings

@@ -6,39 +6,17 @@
 #include "evolutionary_algorithm.h"
 #include "../simulator/simulator_pool.h"
 #include "rolling_solution.h"
+#include "terminator.h"
 
 namespace sc2
 {
+
 class RollingEA : virtual public EvolutionaryAlgorithm<Command, RollingSolution> //! because of virtual inheritance, the base class's constructor is invalid
 {
 public:
     using EA = EvolutionaryAlgorithm<Command, RollingSolution>;
 
 public:
-    class ConvergenceTermination // convergence termination condition checker for this class
-    {
-    private:
-        // settings
-        const RollingEA &m_algo;
-        float m_no_improve_threshold = .01f; //
-        int m_max_no_impreve_generation = 20;
-        // data
-        int m_current_no_improve_generation = 0;
-        std::vector<float> m_last_record_obj_average;
-
-    public:
-        ConvergenceTermination(const RollingEA &algo) : m_algo(algo){};
-        ConvergenceTermination(const RollingEA &algo, int max_no_improve_generation, float no_improve_tolerance) : m_algo(algo), m_max_no_impreve_generation(max_no_improve_generation), m_no_improve_threshold(no_improve_tolerance){};
-        ~ConvergenceTermination() = default;
-        bool operator()();
-
-        float GetNoImproveTolerance() { return m_no_improve_threshold; };
-        int GetMaxNoImproveGeneration() { return m_max_no_impreve_generation; };
-        void SetNoImproveTolerance(float no_improve_tolerance) { m_no_improve_threshold = no_improve_tolerance; };
-        void SetMaxNoInproveGeneration(int max_no_improve_generation) { m_max_no_impreve_generation = max_no_improve_generation; };
-        void clear(); // for the use of next run
-    };
-
     struct memory
     {
         std::map<Tag, Command> best_iron_commands;
@@ -49,7 +27,7 @@ public:
 protected:
     // game data
     const ObservationInterface *m_observation;
-    Units m_my_team; // updated at the beginning of each algorithm run
+    Units m_my_team;    // updated at the beginning of each algorithm run
     Units m_enemy_team; // updated at the beginning of each algorithm run
     GameInfo m_game_info;
     Vector2D m_playable_dis;
@@ -57,12 +35,14 @@ protected:
     // settings about game
     float m_attack_possibility = 0.7;
     unsigned int m_command_length = 8;
-    unsigned int m_sim_length = 300;
+    uint32_t m_sim_length = 300;
     unsigned int m_evaluation_time_multiplier = 1; // the evaluation times for each solution (to avoid randomness)
+    unsigned int m_fix_by_data_interval = 6;
 #ifdef USE_GRAPHICS
     ScatterRenderer2D m_objective_distribution;
     DebugRenderers m_debug_renderers;
 #endif //USE_GRAPHICS
+    bool m_use_fix_by_data = true;
     bool m_use_fix = false;
     bool m_use_priori = false;
     bool m_use_assemble = false;
@@ -70,12 +50,15 @@ protected:
     // simulators
     SimulatorPool m_simulation_pool;
     // methods
-    ConvergenceTermination m_convergence_termination_manager{*this};
     std::lognormal_distribution<float> m_log_dis{0, 0.6};
+
+    // some output settings
+    bool m_output_conver_data = false;
+    bool m_output_v_and_o = false;
 
 public:
     RollingEA() = delete;
-    RollingEA(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation, int population_size, int random_seed = 0, unsigned int evaluation_time_multiplier = 1) : EvolutionaryAlgorithm(2, max_generation, population_size, random_seed, {std::string("enemy loss"), std::string("my team loss")}),
+    RollingEA(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation, int population_size, int random_seed = 0, unsigned int evaluation_time_multiplier = 1) : EvolutionaryAlgorithm(3, max_generation, population_size, random_seed, {std::string("enemy loss"), std::string("my team loss")}),
 #ifdef USE_GRAPHICS
                                                                                                                                                                                                                                          m_debug_renderers(population_size),
 #endif //USE_GRAPHICS
@@ -86,7 +69,7 @@ public:
                                                                                                                                                                                                                                                            map_path),
                                                                                                                                                                                                                                          m_evaluation_time_multiplier(evaluation_time_multiplier)
     {
-        m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE] = std::ref(m_convergence_termination_manager);
+        // m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE] = std::ref(m_convergence_termination_manager); //? if not ref here, the construct will copy the function object
         m_simulation_pool.StartSimsAsync();
 #ifdef USE_GRAPHICS
         m_objective_distribution.SetTitle("Objectives Distribution");
@@ -106,8 +89,9 @@ public:
 public:
     // settings about the game
     void SetSimLength(unsigned int sim_length) { m_sim_length = sim_length; }
+    unsigned int GetSimLength() { return m_sim_length; };
     void SetCommandLength(unsigned int command_length) { m_command_length = command_length; }
-    void SetAttackPossibility(float attack_possibility) { m_attack_possibility = attack_possibility; }
+    void SetAttackPossibility(float attack_possibility) { m_attack_possibility = attack_possibility; } // the posssibility of attack when generati
     void SetEvaluationTimeMultiplier(unsigned int times)
     {
         m_evaluation_time_multiplier = times;
@@ -118,16 +102,27 @@ public:
     }
     void SetUseFix(bool use_fix) { m_use_fix = use_fix; };
     void SetUsePriori(bool use_priori) { m_use_priori = use_priori; };
-    void SetUseAssemble(bool use_assemble) {m_use_assemble = use_assemble;};
+    void SetUseAssemble(bool use_assemble) { m_use_assemble = use_assemble; };
     void SetDebug(bool is_debug) { m_is_debug = is_debug; }
+    void SetFixByDataInterval(int interval) { m_fix_by_data_interval = interval; };
+    void SetUseFixByData(bool use) { m_use_fix_by_data = use; };
+    void SetOutputCoverData(bool use) { m_output_conver_data; };
+    void SetOutputVAndO(bool use) { m_output_v_and_o = use; };
+    bool IsUsePriori() { return m_use_priori; };
+    bool IsUseAssemble() { return m_use_assemble; };
+    bool IsUseFixByData() const { return m_use_fix_by_data; };
+    bool IsOutputCoverData() const { return m_output_conver_data; };
+    bool IsOutputVAndO() const { return m_output_v_and_o; };
+
+    std::string GetSettingString();
 
 protected:
     // override functions
     virtual void InitBeforeRun() override;
     void InitOnlySelfMembersBeforeRun();
-    void Generate() override;
-    void Evaluate() override;
-    void Select() override; // sort and keep only the good solutions
+    virtual void Generate() override;
+    virtual void Evaluate() override;
+    virtual void Select() override; // sort and keep only the good solutions
 #ifdef USE_GRAPHICS
     virtual void ShowOverallStatusGraphEachGeneration() override;
     virtual void ShowSolutionDistribution(int showed_generations_count) override;
@@ -136,7 +131,36 @@ protected:
     virtual void ActionAfterEachGeneration() override
     {
         EA::ActionAfterEachGeneration();
-        //todo another implementation: compound some solutions -> evaluate them -> sort -> put them into solutions
+        if (m_output_conver_data)
+        {
+            std::string path = CurrentFolder() + "/conver_data.txt";
+            std::fstream out_file(path, std::ios::out | std::ios::app);
+            OutputPopulationStat(out_file);
+            out_file.close();
+        }
+        //todo output all actions
+        if (m_output_v_and_o)
+        {
+            std::string path = CurrentFolder() + "/v_and_o_data.txt";
+            std::fstream out_file(path, std::ios::out | std::ios::app);
+            for (const auto sol : m_population)
+            {
+                for (auto &&v : sol.variable)
+                {
+                    for (auto &&a : v.actions)
+                    {
+                        out_file << a.target_point.x << '\t' << a.target_point.y << '\t';
+                    }
+                }
+                for (auto &&o : sol.objectives)
+                {
+                    out_file << o << '\t';
+                }
+                out_file << std::endl;
+            }
+            out_file << std::endl;
+            out_file.close();
+        }
     };
 
 protected:
@@ -146,12 +170,17 @@ protected:
     void GenerateOne(RollingSolution<Command> &sol);
     virtual void RecordObjectives() override;
     virtual void ActionAfterRun() override;
-    RollingSolution<Command> AssembleASolutionFromGoodUnits(const Population& evaluated_pop); // Assemble a priori solution based on the evaluated population.
-    void AssembleASolutionFromGoodUnits(RollingSolution<Command>& modified_solution ,const Population &evaluated_pop); //! the param must be an evaluated population
-    RollingSolution<Command> AssembleASolutionFromGoodUnits(const std::vector<RollingSolution<Command>*>& evaluated_pop); // Assemble a priori solution based on the evaluated population. //! the param must be an evaluated population
+    RollingSolution<Command> AssembleASolutionFromGoodUnits(const Population &evaluated_pop);                              // Assemble a priori solution based on the evaluated population.
+    void AssembleASolutionFromGoodUnits(RollingSolution<Command> &modified_solution, const Population &evaluated_pop);     //! the param must be an evaluated population
+    RollingSolution<Command> AssembleASolutionFromGoodUnits(const std::vector<RollingSolution<Command> *> &evaluated_pop); // Assemble a priori solution based on the evaluated population. //! the param must be an evaluated population
+
+public:
+    void OutputPopulationSimResult(std::ostream &os) const;
+    RollingSolution<Command> FixBasedOnSimulation(const RollingSolution<Command> &parent); // based on the simulation data to fix the move target of my units into effective area around enemies
 
 protected: // some utilities
     Point2D FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float this_unit_weapon_range, const Units &enemy_team);
+    void OutputPopulationStat(std::ostream &os);
 };
 
 } // namespace sc2

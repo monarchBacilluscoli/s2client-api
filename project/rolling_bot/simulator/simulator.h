@@ -83,13 +83,9 @@ public:
     std::map<Tag, UnitStatisticalData> GetUnitsStatistics();
     const UnitStatisticalData &GetUnitStatistics(Tag tag);
     GameResult CheckGameResult() const;
+    u_int32_t GetEndLoop() const;
 
 private:
-    //! set units relations
-    //! so the caller of this simultor doesn't have to know the tags of units
-    //! here
-    void SetUnitsRelations(State state, Units us_copied);
-
     //! the bot to be called outside to send orders or get observations
     Executor m_executor;
     //! save of state
@@ -99,9 +95,15 @@ private:
     //! translated orders by local unit tags rather than original tags
     std::vector<Command> m_commands;
 
-    void SetReversedUnitRelation(std::map<Tag, Tag> &target_to_source_units, const std::map<Tag, const Unit *> &relative_units);
     std::map<Tag, const Unit *> m_relative_units;    //! form source tag to target unit
     std::map<Tag, Tag> m_target_to_source_unit_tags; //! from target to source unit tags
+
+    //! set units relations
+    //! so the caller of this simultor doesn't have to know the tags of units
+    //! here
+    void SetUnitsRelations(State state, Units us_copied);
+
+    void SetReversedUnitRelation(std::map<Tag, Tag> &target_to_source_units, const std::map<Tag, const Unit *> &relative_units);
 
 public:
     static std::string GenerateSimMapPath(const std::string &map_path);

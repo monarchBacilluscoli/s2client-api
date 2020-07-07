@@ -12,12 +12,14 @@
 #include <string>
 #include <stdint.h>
 
-namespace sc2 {
+namespace sc2
+{
 
 class ObservationInterface;
 
 //! An order that is active on a unit.
-struct UnitOrder {
+struct UnitOrder
+{
     //! Ability ID that triggered the order.
     AbilityID ability_id;
     //! Target unit of the order, if there is one.
@@ -27,15 +29,19 @@ struct UnitOrder {
     //! Progress of the order.
     float progress;
 
-    UnitOrder() :
-        ability_id(0),
-        target_unit_tag(NullTag),
-        progress(0.0f) {
+    UnitOrder() : ability_id(0),
+                  target_unit_tag(NullTag),
+                  progress(0.0f)
+    {
     }
+
+    bool operator==(const UnitOrder &rhs) const;
+    bool operator!=(const UnitOrder &rhs) const;
 };
 
 //! A passenger on a transport.
-struct PassengerUnit {
+struct PassengerUnit
+{
     //! The tag of the unit in the transport.
     Tag tag;
     //! The health of the unit in the transport.
@@ -53,23 +59,25 @@ struct PassengerUnit {
     //! The type of unit in the transport.
     UnitTypeID unit_type;
 
-    PassengerUnit() :
-        tag(NullTag),
-        health(0.0f),
-        health_max(0.0f),
-        shield(0.0f),
-        shield_max(0.0f),
-        energy(0.0f),
-        energy_max(0.0f),
-        unit_type(0) {
+    PassengerUnit() : tag(NullTag),
+                      health(0.0f),
+                      health_max(0.0f),
+                      shield(0.0f),
+                      shield_max(0.0f),
+                      energy(0.0f),
+                      energy_max(0.0f),
+                      unit_type(0)
+    {
     }
 };
 
 //! A unit. Could be a structure, a worker or a military unit.
-class Unit {
+class Unit
+{
 public:
     //! If the unit is shown on screen or not.
-    enum DisplayType {
+    enum DisplayType
+    {
         //! Unit will be visible.
         Visible = 1,
         //! Unit is represented by a snapshot in the fog-of-war. This is for units that don't belong to the player.
@@ -80,7 +88,8 @@ public:
     };
 
     //! Relationship to this player.
-    enum Alliance {
+    enum Alliance
+    {
         //! Belongs to the player.
         Self = 1,
         //! Ally of the player.
@@ -92,7 +101,8 @@ public:
     };
 
     //! Unit cloak state.
-    enum CloakState {
+    enum CloakState
+    {
         //! Cloaked, invisible to enemies until detected.
         Cloaked = 1,
         //! Cloaked enemy, but detected.
@@ -195,18 +205,19 @@ public:
     Unit();
 };
 
-typedef std::vector<const Unit*> Units;
+typedef std::vector<const Unit *> Units;
 typedef std::unordered_map<Tag, size_t> UnitIdxMap;
 
-class UnitPool {
+class UnitPool
+{
 public:
-    Unit* CreateUnit(Tag tag);
-    Unit* GetUnit(Tag tag) const;
-    Unit* GetExistingUnit(Tag tag) const;
+    Unit *CreateUnit(Tag tag);
+    Unit *GetUnit(Tag tag) const;
+    Unit *GetExistingUnit(Tag tag) const;
     void MarkDead(Tag tag);
 
     //TODO: Change alive -> Exist
-    void ForEachExistingUnit(const std::function<void(Unit& unit)>& functor) const;
+    void ForEachExistingUnit(const std::function<void(Unit &unit)> &functor) const;
     void ClearExisting();
     bool UnitExists(Tag tag);
 
@@ -216,30 +227,34 @@ private:
     static const size_t ENTRY_SIZE = 1000;
     typedef std::pair<size_t, size_t> PoolIndex;
     // std::array<Unit, ENTRY_SIZE>
-    std::vector<std::vector<Unit> > unit_pool_;
+    std::vector<std::vector<Unit>> unit_pool_;
     PoolIndex available_index_;
-    std::unordered_map<Tag, Unit*> tag_to_unit_;
-    std::unordered_map<Tag, Unit*> tag_to_existing_unit_;
+    std::unordered_map<Tag, Unit *> tag_to_unit_;
+    std::unordered_map<Tag, Unit *> tag_to_existing_unit_;
 };
 
 //! Determines if the unit matches the unit type.
-struct IsUnit {
-    IsUnit(UNIT_TYPEID type) : type_(type) {};
+struct IsUnit
+{
+    IsUnit(UNIT_TYPEID type) : type_(type){};
     UNIT_TYPEID type_;
-    bool operator()(const Unit& unit) { return unit.unit_type == type_; };
+    bool operator()(const Unit &unit) { return unit.unit_type == type_; };
 };
 
 //! Determines if units matches the unit type.
-struct IsUnits {
-    IsUnits(std::vector<UNIT_TYPEID> types) : types_(types) {};
+struct IsUnits
+{
+    IsUnits(std::vector<UNIT_TYPEID> types) : types_(types){};
     std::vector<UNIT_TYPEID> types_;
-    bool operator()(const Unit& unit) {
+    bool operator()(const Unit &unit)
+    {
         bool included = false;
-        for (const auto& type : types_) {
+        for (const auto &type : types_)
+        {
             included = included || (unit.unit_type == type);
         }
         return included;
     };
 };
 
-}
+} // namespace sc2

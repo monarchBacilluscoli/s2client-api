@@ -1,6 +1,8 @@
-#include "rolling_bot.h"
-#include "sc2api/sc2_score.h"
 #include <sstream>
+
+#include "sc2api/sc2_score.h"
+#include "rolling_bot.h"
+#include "debug_use.h"
 
 namespace sc2
 {
@@ -14,6 +16,20 @@ const std::vector<std::string> g_play_style_names = {
 
 void RollingBot::OnGameStart()
 {
+    std::string path = m_rolling_ea.GetOutputPath();
+    std::fstream fs = std::fstream(path, std::ios::app | std::ios::out);
+    fs << std::endl
+       << "start:\t" << m_rolling_ea.GetObjectiveSize() << m_rolling_ea.IsUsePriori() << m_rolling_ea.IsUseFixByData() << m_rolling_ea.IsUseAssemble() << '\t' << m_rolling_ea.GetSimLength() << std::endl;
+    fs.close();
+
+    if (m_is_output_conver)
+    {
+        std::string conver_path = CurrentFolder() + "/conver_data.txt";
+        std::fstream conver_file(conver_path, std::ios::out | std::ios::app);
+        conver_file << "// " << m_rolling_ea.GetObjectiveSize() << m_rolling_ea.IsUsePriori() << m_rolling_ea.IsUseFixByData() << m_rolling_ea.IsUseAssemble() << '\t' << m_rolling_ea.GetSimLength() << '\t' << m_rolling_ea.GetSimLength() << '\t' << m_interval_size << std::endl;
+        conver_file.close();
+    }
+
     // only after game starting I can initialize the ga, or the information
     // will not be passed to it
     m_rolling_ea.Initialize(Observation());
@@ -26,6 +42,28 @@ void RollingBot::OnGameStart()
         //Run algorithm once
         SetCommandFromAlgorithm(); // The first run of algorithm on game start
     }
+
+    if (m_is_output_sim_record)
+    {
+        // output the final pop
+        std::string output_file_path = CurrentFolder() + "/sim_record.txt";
+        std::fstream sim_fs = std::fstream(output_file_path, std::ios::app | std::ios::out);
+        sim_fs << "//" << m_rolling_ea.GetObjectiveSize() << m_rolling_ea.IsUsePriori() << m_rolling_ea.IsUseFixByData() << m_rolling_ea.IsUseAssemble() << '\t' << m_rolling_ea.GetSimLength() << std::endl;
+        m_rolling_ea.OutputPopulationSimResult(sim_fs);
+        sim_fs.close();
+    }
+
+    if (m_is_only_start)
+    {
+        AgentControl()->Restart(); // for test
+    }
+
+    static int count = 0;
+    ++count;
+    if (count > 10)
+    {
+        exit(0);
+    }
 }
 
 void RollingBot::OnStep()
@@ -37,6 +75,12 @@ void RollingBot::OnStep()
     // after a specific interval, run the algorithm and get the final orders to be given
     if (Observation()->GetGameLoop() % m_interval_size == 0 && !Observation()->GetUnits(Unit::Alliance::Enemy).empty() && !Observation()->GetUnits(Unit::Alliance::Self).empty())
     {
+
+        if (Observation()->GetGameLoop() != 0)
+        {
+            Control()->SaveReplay(CurrentFolder() + "/fix_test.SC2Replay");
+        }
+
         { // stop all the units first, or it may cause some problem since the simulation starts from the condition where all units are still
             Units my_team = Observation()->GetUnits(Unit::Alliance::Self);
             Actions()->UnitCommand(my_team, ABILITY_ID::STOP_STOP);
@@ -66,7 +110,7 @@ void RollingBot::OnStep()
                 {
                     const ActionRaw &action = unit_commands.front();
                     //todo 注入并执行
-                    if (action.ability_id == ABILITY_ID::ATTACK_ATTACK)
+                    if (action.ability_id == ABILITY_ID::ATTACK_ATTACK || action.ability_id == ABILITY_ID::ATTACK)
                     {
                         switch (action.target_type)
                         {
@@ -195,8 +239,30 @@ void RollingBot::SetCommandFromAlgorithm()
     std::cout << std::string("Run algorithm in game loop ") + std::to_string(Observation()->GetGameLoop()) << std::endl;
     m_rolling_ea.Initialize(Observation());
     RollingEA::Population pop = m_rolling_ea.Run(); // Run the algorithm
+    // output the final pop
+    // output the longest actions
+    // std::fstream stat_record("/home/liuyongfeng/s2client-api-liu/s2client-api/project/rolling_bot/rolling_bot/stat.txt", std::ios::out | std::ios::app);
+    // OutputAllStatistics(pop, stat_record);
+
     selected_solution = m_solution_selector(pop);
+
+    // std::fstream solution_record(CurrentFolder() + "/solution_record.txt", std::ios::out | std::ios::app);
+    // OutputSolution(raw_selected_solution, solution_record);
+    // solution_record << std::endl
+    //                 << std::endl;
+    //! check all the events
+    // std::fstream stat_record(CurrentFolder() + "/stat_record.txt", std::ios::out | std::ios::app);
+    // std::fstream solution_record(CurrentFolder() + "/solution_record.txt", std::ios::out | std::ios::app);
+    // OutputEvents(selected_solution, stat_record);
+    // OutputSolution(selected_solution, solution_record);
+    // selected_solution.GetUnitPossiablePosition(Observation()->GetUnits(Unit::Alliance::Enemy).front()->tag, 97);
+
+    std::fstream stat_record(CurrentFolder() + "/stat_record.txt", std::ios::out | std::ios::app);
+    // OutputEvents(selected_solution, stat_record);
+    // OutputSolution(selected_solution, solution_record);
+
     m_selected_commands = Command::ConmmandsVecToDeque(selected_solution.variable); // transfor command vector to deque for easy to use
+
     Actions()->SendChat("Number of enemies: " + std::to_string(Observation()->GetUnits(Unit::Alliance::Enemy).size()));
     Actions()->SendChat("Algorithm finished run after " + std::to_string(m_rolling_ea.GetCurrentGeneration()) + "generations");
     std::string objs_str = std::string("deploy, objs: ") + std::move(ContainerToStringWithSeparator(selected_solution.objectives));
@@ -230,12 +296,37 @@ const RollingSolution<Command> &RollingBot::SelectMostRunAwaySolution(const Popu
 
 const RollingSolution<Command> &RollingBot::SelectMostOKSolution(const Population &pop)
 {
+    // float total_enemy_health = GetTotalHealth(Observation()->GetUnits(Unit::Alliance::Enemy));
+    // float total_my_health = GetTotalHealth(Observation()->GetUnits(Unit::Alliance::Self));
+    // if (pop.empty())
+    // {
+    //     throw("The pop passed here is an empty pop.@RollingBot::" + std::string(__FUNCTION__));
+    // }
+    // //todo Here I need another version for 2
+    // Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [total_enemy_health, total_my_health](const RollingSolution<Command> &current_largetest, const RollingSolution<Command> &first) {
+    //     if ((std::abs(current_largetest.objectives[0]) - std::abs(current_largetest.objectives[1])) - (std::abs(first.objectives[0]) - std::abs(first.objectives[1])) > 0.0001f)
+    //     {
+    //         return (std::abs(current_largetest.objectives[0]) / total_enemy_health - std::abs(current_largetest.objectives[1]) / total_my_health) < (std::abs(first.objectives[0]) / total_enemy_health - std::abs(first.objectives[1]) / total_my_health); // the first obj is gain, the second obj is loss
+    //     }
+    //     else
+    //     {
+    //         return current_largetest.results.front().game.end_loop > first.results.front().game.end_loop;
+    //     }
+    // });
+    // return *it;
     if (pop.empty())
     {
         throw("The pop passed here is an empty pop.@RollingBot::" + std::string(__FUNCTION__));
     }
     Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [](const RollingSolution<Command> &current_largetest, const RollingSolution<Command> &first) {
-        return (std::abs(current_largetest.objectives[0]) - std::abs(current_largetest.objectives[1])) < (std::abs(first.objectives[0]) - std::abs(first.objectives[1])); // the first obj is gain, the second obj is loss
+        if ((std::abs(current_largetest.objectives[0]) - std::abs(current_largetest.objectives[1])) - (std::abs(first.objectives[0]) - std::abs(first.objectives[1])) > 0.0001f)
+        {
+            return (std::abs(current_largetest.objectives[0]) - std::abs(current_largetest.objectives[1])) < (std::abs(first.objectives[0]) - std::abs(first.objectives[1])); // the first obj is gain, the second obj is loss
+        }
+        else
+        {
+            return current_largetest.results.front().game.end_loop > first.results.front().game.end_loop;
+        }
     });
     return *it;
 }

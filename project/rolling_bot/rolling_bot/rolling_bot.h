@@ -42,6 +42,9 @@ private:
     int m_game_round = 10;
     int m_current_round = 1;
     std::string m_remark;
+    bool m_is_only_start = false;
+    bool m_is_output_conver = false; // only output the algorithm's data at the start frame
+    bool m_is_output_sim_record = false;
 
 public:
     RollingBot() = delete;
@@ -62,11 +65,18 @@ public:
 
     void SetGameRound(int round);
     void SetRemark(const std::string &remark);
+    void SetOnlyStart(bool only) { m_is_only_start = only; };
+    bool GetOnlyStart() const { return m_is_only_start; };
+    void SetOutputConver(bool use) { m_is_output_conver = use; };
+    bool GetOutputConver() const { return m_is_output_conver; };
+    void SetOutputSimRecord(bool use) { m_is_output_sim_record = use; };
+    bool GetOutputSimRecord() const { return m_is_output_sim_record; };
 
 public:
     RollingEA &Algorithm(); // return the reference of algo obj of base class
 protected:
     void SetCommandFromAlgorithm();
+
 protected:
     static const RollingSolution<Command> &SelectMostIronHeadSolution(const Population &pop);
     static const RollingSolution<Command> &SelectMostRunAwaySolution(const Population &pop);

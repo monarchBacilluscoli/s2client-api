@@ -5,6 +5,7 @@
 #define REMOTE_DESKTOP
 
 #ifdef REMOTE_DESKTOP
+#define USE_SYSTEM_COMMAND
 #else
 #define REAL_TIME_UPDATE
 #define USE_GRAPHICS
