@@ -31,7 +31,7 @@ enum class TERMINATION_CONDITION
     CONVERGENCE = 1,
     MAX_EVALUATION = 2,
 };
-template <class T, template <typename> class TSolution> // T is the variable type and TSolution is the solution type
+template <class T, template <typename> class TSolution = Solution> // T is the variable type and TSolution is the solution type
 class EvolutionaryAlgorithm
 {
 

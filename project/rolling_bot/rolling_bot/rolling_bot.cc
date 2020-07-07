@@ -296,6 +296,24 @@ const RollingSolution<Command> &RollingBot::SelectMostRunAwaySolution(const Popu
 
 const RollingSolution<Command> &RollingBot::SelectMostOKSolution(const Population &pop)
 {
+    // float total_enemy_health = GetTotalHealth(Observation()->GetUnits(Unit::Alliance::Enemy));
+    // float total_my_health = GetTotalHealth(Observation()->GetUnits(Unit::Alliance::Self));
+    // if (pop.empty())
+    // {
+    //     throw("The pop passed here is an empty pop.@RollingBot::" + std::string(__FUNCTION__));
+    // }
+    // //todo Here I need another version for 2
+    // Population::const_iterator it = std::max_element(pop.begin(), pop.end(), [total_enemy_health, total_my_health](const RollingSolution<Command> &current_largetest, const RollingSolution<Command> &first) {
+    //     if ((std::abs(current_largetest.objectives[0]) - std::abs(current_largetest.objectives[1])) - (std::abs(first.objectives[0]) - std::abs(first.objectives[1])) > 0.0001f)
+    //     {
+    //         return (std::abs(current_largetest.objectives[0]) / total_enemy_health - std::abs(current_largetest.objectives[1]) / total_my_health) < (std::abs(first.objectives[0]) / total_enemy_health - std::abs(first.objectives[1]) / total_my_health); // the first obj is gain, the second obj is loss
+    //     }
+    //     else
+    //     {
+    //         return current_largetest.results.front().game.end_loop > first.results.front().game.end_loop;
+    //     }
+    // });
+    // return *it;
     if (pop.empty())
     {
         throw("The pop passed here is an empty pop.@RollingBot::" + std::string(__FUNCTION__));
