@@ -54,6 +54,7 @@ protected:
 
     // some output settings
     bool m_output_conver_data = false;
+    bool m_output_v_and_o = false;
 
 public:
     RollingEA() = delete;
@@ -106,10 +107,13 @@ public:
     void SetFixByDataInterval(int interval) { m_fix_by_data_interval = interval; };
     void SetUseFixByData(bool use) { m_use_fix_by_data = use; };
     void SetOutputCoverData(bool use) { m_output_conver_data; };
+    void SetOutputVAndO(bool use) { m_output_v_and_o = use; };
     bool IsUsePriori() { return m_use_priori; };
     bool IsUseAssemble() { return m_use_assemble; };
     bool IsUseFixByData() const { return m_use_fix_by_data; };
     bool IsOutputCoverData() const { return m_output_conver_data; };
+    bool IsOutputVAndO() const { return m_output_v_and_o; };
+
     std::string GetSettingString();
 
 protected:
@@ -132,6 +136,29 @@ protected:
             std::string path = CurrentFolder() + "/conver_data.txt";
             std::fstream out_file(path, std::ios::out | std::ios::app);
             OutputPopulationStat(out_file);
+            out_file.close();
+        }
+        //todo output all actions
+        if (m_output_v_and_o)
+        {
+            std::string path = CurrentFolder() + "/v_and_o_data.txt";
+            std::fstream out_file(path, std::ios::out | std::ios::app);
+            for (const auto sol : m_population)
+            {
+                for (auto &&v : sol.variable)
+                {
+                    for (auto &&a : v.actions)
+                    {
+                        out_file << a.target_point.x << '\t' << a.target_point.y << '\t';
+                    }
+                }
+                for (auto &&o : sol.objectives)
+                {
+                    out_file << o << '\t';
+                }
+                out_file << std::endl;
+            }
+            out_file << std::endl;
             out_file.close();
         }
     };

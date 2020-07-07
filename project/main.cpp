@@ -83,8 +83,8 @@ int main(int argc, char *argv[])
             int max_no_improve_generation = 100;
             int ga_muatation_rate = 0.5;
             int command_length = 50;
-            int sim_length = 300;
-            int interval_size = 200;
+            int sim_length = 200;
+            int interval_size = 150;
             int evaluation_multiplier = 1;
             PLAY_STYLE play_style = PLAY_STYLE::NORMAL;
             bool use_fix = false; // if the map is dynamic do not use the static fix
@@ -97,6 +97,7 @@ int main(int argc, char *argv[])
             bool use_output_file = false;
             bool set_output_conver = false;
             bool use_output_sim_record = false;
+            bool use_output_v_and_o = false;
             bool only_start = false;
 
             std::string point_of_expriment = std::string(use_priori ? "priori " : "") + (use_fix ? "fix " : "") + (use_fix_by_data ? "data_fix " : "") + (use_assembled ? "assemble " : "");
@@ -150,10 +151,14 @@ int main(int argc, char *argv[])
             rolling_bot.SetIntervalLength(interval_size);
             rolling_bot.SetStyle(play_style);
             rolling_bot.SetRemark(record_remark);
-            rolling_bot.Algorithm().SetUseOutputFile(use_output_file);
-            rolling_bot.SetOutputConver(set_output_conver);
-            rolling_bot.SetOutputSimRecord(use_output_sim_record);
             rolling_bot.SetOnlyStart(only_start);
+            rolling_bot.Algorithm().SetUseOutputFile(use_output_file);
+            if (only_start) // 只有仅记录start的情况下数据才有用
+            {
+                rolling_bot.Algorithm().SetOutputVAndO(use_output_v_and_o);
+                rolling_bot.SetOutputConver(set_output_conver);
+                rolling_bot.SetOutputSimRecord(use_output_sim_record);
+            }
 
             // std::cout << rolling_bot.Algorithm().GetMaxGeneration() << std::endl;
 
