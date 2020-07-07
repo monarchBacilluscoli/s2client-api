@@ -1,5 +1,7 @@
 #include "global_defines.h"
 
+#include <fstream>
+
 #include <sc2lib/sc2_utils.h>
 #include "rolling_ea.h"
 #include "./debug_use.h"
