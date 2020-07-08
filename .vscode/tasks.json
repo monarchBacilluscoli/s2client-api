@@ -15,9 +15,9 @@
         },
         {
             "type": "shell",
-            "label": "make the entire project",
+            "label": "make entire project",
             "command": "make",
-            "args": [ 
+            "args": [
                 "-j" // let the make be able to build multiple tasks for one time
             ],
             "options": {
@@ -26,7 +26,7 @@
         },
         {
             "type": "shell",
-            "label": "kill previous SC2 processes",
+            "label": "clean previous SC2 processes",
             "command": "ps -aux| grep SC2_x64 | grep -v grep |awk '{print $2}' | xargs kill",
             "args": [],
             "options": {
@@ -34,18 +34,11 @@
             }
         },
         {
-            "type": "shell",
-            "label": "g++ build active file",
-            "command": "/usr/bin/g++",
-            "args": [
-                "-g",
-                "${file}",
-                "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
-            ],
-            "options": {
-                "cwd": "/usr/bin"
-            }
+            "label": "clean and make",
+            "dependsOn":[
+                "clean previous SC2 processes",
+                "make entire project"
+            ]
         }
     ],
     "version": "2.0.0"
