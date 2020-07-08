@@ -182,7 +182,7 @@ void RollingBot::OnGameEnd()
     time_t recording_time = OutputGameResult(Observation(), "scores/test_scores.txt", m_remark);
     std::stringstream ss;
     ss << std::put_time(gmtime(&recording_time), "%Y_%m_%d_%H_%M_%S");
-    std::string path = std::string("replays/") + ss.str() + ".SC2Replay";
+    std::string path = std::string("sc2replays/") + ss.str() + ".SC2Replay";
     Control()->SaveReplay(path);
     std::cout << "Replay saved!" << std::endl;
     if (m_current_round < m_game_round)

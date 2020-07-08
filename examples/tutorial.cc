@@ -109,7 +109,7 @@ public:
     virtual void OnGameEnd() final
     {
         std::cout << "Game ended!" << std::endl;
-        std::string path = "replays/last_tutorial.SC2Replay";
+        std::string path = "sc2replays/last_tutorial.SC2Replay";
         Control()->SaveReplay(path);
         std::cout << "Replay saved" << std::endl;
         std::vector<PlayerResult> game_result = Observation()->GetResults(); // get player result to see if this method is valid

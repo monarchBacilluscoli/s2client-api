@@ -13,3 +13,6 @@
 [submodule "contrib/ipv6-parse"]
 	path = contrib/ipv6-parse
 	url = https://github.com/jrepp/ipv6-parse
+[submodule "sc2replays"]
+	path = sc2replays
+	url = https://github.com/monarchBacilluscoli/sc2replays
