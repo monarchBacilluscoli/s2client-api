@@ -62,7 +62,6 @@ doxygen.log
 .vscode/ipch
 *.bin
 *.SC2Replay
-scores/
 sim_replays/
 core
 protocol

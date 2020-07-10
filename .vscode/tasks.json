@@ -38,7 +38,8 @@
             "dependsOn":[
                 "clean previous SC2 processes",
                 "make entire project"
-            ]
+            ],
+            "dependsOrder": "sequence"
         }
     ],
     "version": "2.0.0"

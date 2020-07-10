@@ -1,0 +1,3 @@
+total_damage_dealt.life	total_damage_dealt.shields	total_damage_taken.life	total_damage_taken.shields	total_healed.life	total_healed.shields	game loop	map name	record time	remark
+297	0	1201.17	0	0	0	241	MazeEnemyTowerVSThors	2019-12-19 08:07:43	test_remark
+149	0	1201.17	0	0	0	241	MazeEnemyTowerVSThors	2019-12-20 06:51:43	test_remark
