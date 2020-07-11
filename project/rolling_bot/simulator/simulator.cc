@@ -129,6 +129,16 @@ void Simulator::SetOrders(const std::vector<Command> &commands
     m_executor.SetIsSetting(false);
 }
 
+//todo
+void Simulator::SetOrders(const std::vector<std::vector<Command>> &commands
+#ifdef USE_GRAPHICS
+                          ,
+                          DebugRenderer *debug_renderer
+#endif // USE_GRAPHICS
+)
+{
+}
+
 void Simulator::SetDirectOrders(const std::vector<Command> &commands
 #ifdef USE_GRAPHICS
                                 ,
@@ -150,6 +160,15 @@ void Simulator::SetDirectOrders(const std::vector<Command> &commands
     }
 #endif // USE_GRAPHICS
     m_executor.SetIsSetting(false);
+}
+
+void Simulator::SetDirectOrders(const std::vector<std::vector<Command>> &commands
+#ifdef USE_GRAPHICS
+                                ,
+                                DebugRenderer *debug_renderer
+#endif // USE_GRAPHICS
+)
+{
 }
 
 void Simulator::SetUnitsRelations(State state, Units us_copied)
