@@ -12,7 +12,7 @@ using namespace sc2;
 class Bot : public Agent
 {
 private:
-    Simulator sim;
+    Simulator sim = Simulator(1);
 
 public:
     Bot(const std::string &ps_path, const std::string &map)

@@ -89,7 +89,7 @@ std::thread::id Simulator::Run(int steps
     return std::this_thread::get_id();
 }
 
-void Simulator::SetOrders(const std::vector<Command> &commands
+void Simulator::SetOrders(const std::vector<Command> &commands, const std::vector<Command> &enemy_commands
 #ifdef USE_GRAPHICS
                           ,
                           DebugRenderer *debug_renderer
@@ -99,10 +99,11 @@ void Simulator::SetOrders(const std::vector<Command> &commands
     // Just simply press those actions into every unit
     //? Note that the orders can be stored into units or somewhere else is limited in StarCraft II, I need to figure out it
     m_original_commands = commands;
+    m_original_enemy_commands = enemy_commands;
     m_commands = commands;
+    m_enemy_commands = commands;
     m_executor.SetIsSetting(true);
-    // std::cout << "original commands size: " << commands.size()<<std::endl;
-    // translate the command into local tag command
+    m_enemy_executor.SetIsSetting(true);
     for (Command &cmd : m_commands)
     {
         cmd.unit_tag = m_relative_units.at(cmd.unit_tag)->tag;
@@ -114,8 +115,20 @@ void Simulator::SetOrders(const std::vector<Command> &commands
             }
         }
     }
+    for (Command &cmd : m_enemy_commands)
+    {
+        cmd.unit_tag = m_relative_units.at(cmd.unit_tag)->tag;
+        for (ActionRaw &act : cmd.actions)
+        {
+            if (act.target_type == ActionRaw::TargetUnitTag)
+            {
+                act.target_tag = m_relative_units.at(cmd.unit_tag)->tag;
+            }
+        }
+    }
+    //todo set the both executor
     m_executor.SetCommands(m_commands);
-//todo need to translate the command, I mean the tags of units from the original process to simulation process
+    m_enemy_executor.SetCommands(m_enemy_commands);
 #ifdef USE_GRAPHICS
     if (debug_renderer)
     {
@@ -127,16 +140,7 @@ void Simulator::SetOrders(const std::vector<Command> &commands
     }
 #endif // USE_GRAPHICS
     m_executor.SetIsSetting(false);
-}
-
-//todo
-void Simulator::SetOrders(const std::vector<std::vector<Command>> &commands
-#ifdef USE_GRAPHICS
-                          ,
-                          DebugRenderer *debug_renderer
-#endif // USE_GRAPHICS
-)
-{
+    m_executor.SetIsSetting(false);
 }
 
 void Simulator::SetDirectOrders(const std::vector<Command> &commands
