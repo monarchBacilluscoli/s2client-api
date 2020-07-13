@@ -193,24 +193,68 @@ void Simulator::SetStartPoint(const std::vector<Command> &commands,
     SetOrders(commands);
 }
 
-const ObservationInterface *Simulator::Observation() const
+const ObservationInterface *Simulator::Observation(int player) const
 {
-    return m_executor.Observation();
+    if (player == 1)
+    {
+        return m_executor.Observation();
+    }
+    else if (player = 2 && Coordinator::IsMultiPlayerGame())
+    {
+        return m_enemy_executor.Observation();
+    }
+    else
+    {
+        throw("There is no 2nd players in single player sim or your input is more than 2@Simulator::" + std::string(__FUNCTION__));
+    }
 }
 
-DebugInterface *Simulator::Debug()
+DebugInterface *Simulator::Debug(int player)
 {
-    return m_executor.Debug();
+    if (player == 1)
+    {
+        return m_executor.Debug();
+    }
+    else if (player = 2 && Coordinator::IsMultiPlayerGame())
+    {
+        return m_enemy_executor.Debug();
+    }
+    else
+    {
+        throw("There is no 2nd players in single player sim or your input is more than 2@Simulator::" + std::string(__FUNCTION__));
+    }
 }
 
-ActionInterface *Simulator::Actions()
+ActionInterface *Simulator::Actions(int player)
 {
-    return m_executor.Actions();
+    if (player == 1)
+    {
+        return m_executor.Actions();
+    }
+    else if (player = 2 && Coordinator::IsMultiPlayerGame())
+    {
+        return m_enemy_executor.Actions();
+    }
+    else
+    {
+        throw("There is no 2nd players in single player sim or your input is more than 2@Simulator::" + std::string(__FUNCTION__));
+    }
 }
 
-ControlInterface *Simulator::Control()
+ControlInterface *Simulator::Control(int player)
 {
-    return m_executor.Control();
+    if (player == 1)
+    {
+        return m_executor.Control();
+    }
+    else if (player = 2 && Coordinator::IsMultiPlayerGame())
+    {
+        return m_enemy_executor.Control();
+    }
+    else
+    {
+        throw("There is no 2nd players in single player sim or your input is more than 2@Simulator::" + std::string(__FUNCTION__));
+    }
 }
 
 float Simulator::GetTeamHealthLoss(Unit::Alliance alliance) const

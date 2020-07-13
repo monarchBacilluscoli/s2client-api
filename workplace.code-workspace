@@ -75,11 +75,15 @@
 			"unordered_set": "cpp"
 		},
 		"files.exclude": {
+			".history": true,
 			"**.bat": true,
 			"**/.md": true,
 			"**/contrib": true,
 			"**/docs": true,
 			"**/protocol": true,
+			"build": true,
+			"examples": true,
+			"sc2replays": true,
 			"tests": true
 		},
 		"editor.fontFamily": "Consolas, 'Courier New', monospace"

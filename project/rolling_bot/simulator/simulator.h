@@ -88,14 +88,14 @@ namespace sc2
 
                 // load the copied state
                 void Load();
-                //? is anyone really needs a Run() which runs the game until gameover
-                // exposes ObservationInterface of the executor
-                const ObservationInterface *Observation() const;
-                // exposes DebugInterface of the executor
-                DebugInterface *Debug();
-                // exposes ActionInterface of the executor
-                ActionInterface *Actions();
-                ControlInterface *Control();
+                // exposes ObservationInterface of the executors, 1 means the self player, 2 means the enemy player
+                const ObservationInterface *Observation(int player = 1) const;
+                // exposes DebugInterface of the executors, 1 means the self player, 2 means the enemy player
+                DebugInterface *Debug(int player = 1);
+                // exposes ActionInterface of the executors, 1 means the self player, 2 means the enemy player
+                ActionInterface *Actions(int player = 1);
+                // exposes ControlInterface of the executors, 1 means the self player, 2 means the enemy player
+                ControlInterface *Control(int player = 1);
 
                 std::vector<Command> GetOrders() { return m_commands; }
                 std::vector<Command> GetOriginalOrders() { return m_original_commands; } // get the original orders (sent and stored, raw orders)

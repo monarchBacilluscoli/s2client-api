@@ -49,6 +49,28 @@ public:
 
 int main(int argc, char *argv[])
 {
+    {
+        //todo 测试直观可行性
+        Simulator sim(2);
+        sim.LoadSettings(argc, argv);
+        std::string starcraft_path = sim.GetExePath();
+        sim.SetProcessPath(starcraft_path);
+        sim.SetPortStart(2000);
+        sim.SetMapPath("2P_EnemyZealotModVSMarinesSim.SC2Map");
+        sim.SetStepSize(1);
+        sim.LaunchStarcraft();
+        sim.StartGame();
+        for (size_t i = 0; i < 100; i++)
+        {
+            sim.Update();
+        }
+        sim.Control()->SaveReplay("2psimulator_test.SC2Replay");
+        
+        //todo 输入指令观察数据
+
+        return 0;
+    }
+
     while (true)
     {
         try
