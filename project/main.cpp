@@ -49,27 +49,29 @@ public:
 
 int main(int argc, char *argv[])
 {
-    {
-        //todo 测试直观可行性
-        Simulator sim(2);
-        sim.LoadSettings(argc, argv);
-        std::string starcraft_path = sim.GetExePath();
-        sim.SetProcessPath(starcraft_path);
-        sim.SetPortStart(2000);
-        sim.SetMapPath("2P_EnemyZealotModVSMarinesSim.SC2Map");
-        sim.SetStepSize(1);
-        sim.LaunchStarcraft();
-        sim.StartGame();
-        for (size_t i = 0; i < 100; i++)
-        {
-            sim.Update();
-        }
-        sim.Control()->SaveReplay("2psimulator_test.SC2Replay");
-        
-        //todo 输入指令观察数据
-
-        return 0;
-    }
+    // {
+    //     // 测试直观可行性
+    //     Simulator sim(2);
+    //     sim.LoadSettings(argc, argv);
+    //     std::string starcraft_path = sim.GetExePath();
+    //     sim.SetProcessPath(starcraft_path);
+    //     sim.SetPortStart(2000);
+    //     sim.SetMapPath("2P_EnemyZealotModVSMarinesSim.SC2Map");
+    //     sim.SetStepSize(1);
+    //     sim.LaunchStarcraft();
+    //     sim.StartGame();
+    //     for (size_t i = 0; i < 100; i++)
+    //     {
+    //         sim.Update();
+    //     }
+    //     sim.Control()->SaveReplay("2psimulator_test.SC2Replay");
+    //     //? 结论，多人游戏可以debug
+    //     //todo 输入指令观察数据
+    //     //todo 创造一系列攻击指令给敌我单位（有无“获得”？默认或为有？）
+    //     //todo 我方站成一列，敌方zealot依序砍一刀。
+    //     //todo 注意录像。
+    //     return 0;
+    // }
 
     while (true)
     {

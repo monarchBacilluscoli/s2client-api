@@ -42,7 +42,8 @@ namespace sc2
                 void SetOpponent(Difficulty difficulty);
 
                 // copys state and sets orders for preparation to run
-                void SetStartPoint(const std::vector<Command> &commands, const ObservationInterface *ob);
+                void SetStartPoint(const std::vector<Command> &commands, const ObservationInterface *ob);                                             // for single-player compatibility
+                void SetStartPoint(const std::vector<Command> &commands, const std::vector<Command> &enemy_commands, const ObservationInterface *ob); // for multi-player
                 // direct send the orders to team 1 (self team) units
                 void SetOrders(const std::vector<Command> &commands, const std::vector<Command> &enemy_commands = std::vector<Command>()
 #ifdef USE_GRAPHICS // this graohics may be used for debug
@@ -57,9 +58,9 @@ namespace sc2
                                DebugRenderer *debug_renderer = nullptr
 #endif // USE_GRAPHICS
                 );
-                void SetDirectOrders(const std::vector<Command> &commands
+                void SetDirectOrders(const std::vector<Command> &commands, const std::vector<Command> &enemy_commands = std::vector<Command>()
 #ifdef USE_GRAPHICS
-                                     ,
+                                                                               ,
                                      DebugRenderer *debug_renderer = nullptr
 #endif // USE_GRAPHICS
                 );
@@ -97,17 +98,19 @@ namespace sc2
                 // exposes ControlInterface of the executors, 1 means the self player, 2 means the enemy player
                 ControlInterface *Control(int player = 1);
 
-                std::vector<Command> GetOrders() { return m_commands; }
-                std::vector<Command> GetOriginalOrders() { return m_original_commands; } // get the original orders (sent and stored, raw orders)
+                std::vector<Command> GetOrders(int player = 1) { return player == 1 ? m_commands : m_enemy_commands; }
+                std::vector<Command> GetOriginalOrders(int player = 1) { return player == 1 ? m_original_commands : m_original_enemy_commands; } // get the original orders (sent and stored, raw orders)
                 const std::map<Tag, const Unit *> &GetRelativeUnits() const { return m_relative_units; }
                 const State &GetSave() const { return m_save; }
 
-                float GetTeamHealthLoss(Unit::Alliance alliance) const;                 // get health loss result
-                const std::list<Unit> &GetTeamDeadUnits(Unit::Alliance alliance) const; // get dead units result
-                std::map<Tag, UnitStatisticalData> GetUnitsStatistics();
-                const UnitStatisticalData &GetUnitStatistics(Tag tag);
+                float GetTeamHealthLoss(Unit::Alliance alliance) const;                                 // get health loss result
+                float GetTeamHealthLoss(int player = 1) const;                                          // get health loss result
+                const std::list<Unit> &GetTeamDeadUnits(Unit::Alliance alliance, int player = 1) const; // get dead units result
+                std::map<Tag, UnitStatisticalData> GetUnitsStatistics(int player = 1);
+                const UnitStatisticalData &GetUnitStatistics(Tag tag, int player = 1);
+
                 // check if the game is end by either side winning
-                GameResult CheckGameResult() const;
+                GameResult CheckGameResult(int player = 1) const;
                 u_int32_t GetEndLoop() const;
 
         private:
@@ -132,6 +135,8 @@ namespace sc2
                 void SetUnitsRelations(State state, Units us_copied);
                 // set reversed unit tags for (?)
                 void SetReversedUnitRelation(std::map<Tag, Tag> &target_to_source_units, const std::map<Tag, const Unit *> &relative_units);
+                // translate the tags in those commands into local tags
+                void TranslateCommands(std::vector<Command> &commands);
 
         public:
                 // add "Sim" after the original map name

@@ -82,7 +82,6 @@
 			"**/docs": true,
 			"**/protocol": true,
 			"build": true,
-			"examples": true,
 			"sc2replays": true,
 			"tests": true
 		},

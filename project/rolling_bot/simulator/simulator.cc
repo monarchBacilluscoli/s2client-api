@@ -15,11 +15,14 @@ void Simulator::CopyAndSetState(const ObservationInterface *ob_source
 )
 {
     m_executor.Clear();
+    m_enemy_executor.Clear();
     m_executor.SetIsSetting(true);
+    m_enemy_executor.SetIsSetting(true);
     m_save = SaveMultiPlayerGame(ob_source);
     m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);
     SetReversedUnitRelation(m_target_to_source_unit_tags, m_relative_units);
     m_executor.Initialize();
+    m_enemy_executor.Initialize();
     { //! check the crush of unit relationship
         std::set<const Unit *> check_set;
         for (const auto &item : m_relative_units)
@@ -47,6 +50,7 @@ void Simulator::CopyAndSetState(const ObservationInterface *ob_source
     }
 #endif // USE_GRAPHICS
     m_executor.SetIsSetting(false);
+    m_enemy_executor.SetIsSetting(false);
 }
 
 std::thread::id Simulator::Run(int steps
@@ -58,6 +62,7 @@ std::thread::id Simulator::Run(int steps
 {
     // set false to let simu bot to use the normal mode to call the OnStep
     m_executor.SetIsSetting(false);
+    m_enemy_executor.SetIsSetting(false);
     int game_loop = (size_t)ceil(steps / GetStepSize());
 #ifdef USE_GRAPHICS
     if (debug_renderer)
@@ -86,6 +91,7 @@ std::thread::id Simulator::Run(int steps
     }
 #endif // USE_GRAPHICS
     m_executor.SetIsSetting(true);
+    m_enemy_executor.SetIsSetting(true);
     return std::this_thread::get_id();
 }
 
@@ -101,32 +107,11 @@ void Simulator::SetOrders(const std::vector<Command> &commands, const std::vecto
     m_original_commands = commands;
     m_original_enemy_commands = enemy_commands;
     m_commands = commands;
-    m_enemy_commands = commands;
+    m_enemy_commands = enemy_commands;
     m_executor.SetIsSetting(true);
     m_enemy_executor.SetIsSetting(true);
-    for (Command &cmd : m_commands)
-    {
-        cmd.unit_tag = m_relative_units.at(cmd.unit_tag)->tag;
-        for (ActionRaw &act : cmd.actions)
-        {
-            if (act.target_type == ActionRaw::TargetUnitTag)
-            {
-                act.target_tag = m_relative_units.at(cmd.unit_tag)->tag;
-            }
-        }
-    }
-    for (Command &cmd : m_enemy_commands)
-    {
-        cmd.unit_tag = m_relative_units.at(cmd.unit_tag)->tag;
-        for (ActionRaw &act : cmd.actions)
-        {
-            if (act.target_type == ActionRaw::TargetUnitTag)
-            {
-                act.target_tag = m_relative_units.at(cmd.unit_tag)->tag;
-            }
-        }
-    }
-    //todo set the both executor
+    TranslateCommands(m_commands);
+    TranslateCommands(m_enemy_commands);
     m_executor.SetCommands(m_commands);
     m_enemy_executor.SetCommands(m_enemy_commands);
 #ifdef USE_GRAPHICS
@@ -140,10 +125,11 @@ void Simulator::SetOrders(const std::vector<Command> &commands, const std::vecto
     }
 #endif // USE_GRAPHICS
     m_executor.SetIsSetting(false);
-    m_executor.SetIsSetting(false);
+    m_enemy_executor.SetIsSetting(false);
 }
 
-void Simulator::SetDirectOrders(const std::vector<Command> &commands
+void Simulator::SetDirectOrders(const std::vector<Command> &commands,
+                                const std::vector<Command> &enemy_commands
 #ifdef USE_GRAPHICS
                                 ,
                                 DebugRenderer *debug_renderer
@@ -151,8 +137,11 @@ void Simulator::SetDirectOrders(const std::vector<Command> &commands
 )
 {
     m_commands = commands;
+    m_enemy_commands = enemy_commands;
     m_executor.SetIsSetting(true);
+    m_enemy_executor.SetIsSetting(true);
     m_executor.SetCommands(m_commands);
+    m_enemy_executor.SetCommands(m_enemy_commands);
 #ifdef USE_GRAPHICS
     if (debug_renderer)
     {
@@ -164,6 +153,7 @@ void Simulator::SetDirectOrders(const std::vector<Command> &commands
     }
 #endif // USE_GRAPHICS
     m_executor.SetIsSetting(false);
+    m_enemy_executor.SetIsSetting(false);
 }
 
 void Simulator::SetDirectOrders(const std::vector<std::vector<Command>> &commands
@@ -191,6 +181,14 @@ void Simulator::SetStartPoint(const std::vector<Command> &commands,
 {
     CopyAndSetState(ob);
     SetOrders(commands);
+}
+
+void Simulator::SetStartPoint(const std::vector<Command> &commands,
+                              const std::vector<Command> &enemy_commands,
+                              const ObservationInterface *ob)
+{
+    CopyAndSetState(ob);
+    SetOrders(commands, enemy_commands);
 }
 
 const ObservationInterface *Simulator::Observation(int player) const
@@ -300,9 +298,58 @@ float Simulator::GetTeamHealthLoss(Unit::Alliance alliance) const
     return health_loss;
 }
 
-const std::list<Unit> &Simulator::GetTeamDeadUnits(Unit::Alliance alliance) const
+float Simulator::GetTeamHealthLoss(int player) const
 {
-    return m_executor.GetDeadUnits(alliance);
+    int player_id;
+    if (player == 1)
+    {
+        player_id = m_executor.Observation()->GetPlayerID();
+    }
+    else if (player == 2)
+    {
+        player_id = m_enemy_executor.Observation()->GetPlayerID();
+    }
+    else
+    {
+        throw("There is no 2nd players in single player sim or your input is more than 2@Simulator::" + std::string(__FUNCTION__));
+    }
+    float health_loss = 0.f;
+    // use the data from m_save and current data to simply calculate the health loss
+    for (const UnitState &state_u : m_save.unit_states)
+    {
+        if (state_u.player_id == player_id)
+        {
+            const Unit *u = m_relative_units.at(state_u.unit_tag);
+            // check if the unit has been dead
+            // because the API will keep the a unit's health its number the last time he lived if he has been dead now
+            // I need calculate the shield at the same time
+            if (u->is_alive)
+            {
+                health_loss += state_u.life - u->health + state_u.shield - u->shield;
+            }
+            else
+            {
+                health_loss += state_u.life + state_u.shield;
+            }
+        }
+    }
+    return health_loss;
+}
+
+const std::list<Unit> &Simulator::GetTeamDeadUnits(Unit::Alliance alliance, int player) const
+{
+    if (player == 1)
+    {
+        return m_executor.GetDeadUnits(alliance);
+    }
+    else if (player == 2)
+    {
+        return m_enemy_executor.GetDeadUnits(alliance);
+    }
+    else
+    {
+        throw("There is no 2nd players in single player sim or your input is more than 2@Simulator::" + std::string(__FUNCTION__));
+    }
 }
 
 void Simulator::Load()
@@ -312,6 +359,7 @@ void Simulator::Load()
         m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);
         SetReversedUnitRelation(m_target_to_source_unit_tags, m_relative_units);
         m_executor.Initialize();
+        m_enemy_executor.Initialize();
         { //! check the crush of unit relationship
             std::set<const Unit *> check_set;
             for (const auto &item : m_relative_units)
@@ -373,10 +421,25 @@ void Simulator::SetReversedUnitRelation(std::map<Tag, Tag> &target_to_source_uni
     return;
 }
 
-std::map<Tag, UnitStatisticalData> Simulator::GetUnitsStatistics()
+void Simulator::TranslateCommands(std::vector<Command> &commands)
+{
+    for (Command &cmd : commands)
+    {
+        cmd.unit_tag = m_relative_units.at(cmd.unit_tag)->tag;
+        for (ActionRaw &act : cmd.actions)
+        {
+            if (act.target_type == ActionRaw::TargetUnitTag)
+            {
+                act.target_tag = m_relative_units.at(cmd.unit_tag)->tag;
+            }
+        }
+    }
+}
+
+std::map<Tag, UnitStatisticalData> Simulator::GetUnitsStatistics(int player)
 {
     std::map<Tag, UnitStatisticalData> units_statistics;
-    const std::map<Tag, UnitStatisticalData> &raw_statistics = m_executor.GetUnitsStatistics();
+    const std::map<Tag, UnitStatisticalData> &raw_statistics = (player == 1) ? m_executor.GetUnitsStatistics() : m_enemy_executor.GetUnitsStatistics();
     for (const auto &u : m_save.unit_states) // tag from main process
     {
         units_statistics[u.unit_tag] = raw_statistics.at(m_relative_units[u.unit_tag]->tag);
@@ -384,14 +447,37 @@ std::map<Tag, UnitStatisticalData> Simulator::GetUnitsStatistics()
     return units_statistics;
 }
 
-const UnitStatisticalData &Simulator::GetUnitStatistics(Tag tag)
+const UnitStatisticalData &Simulator::GetUnitStatistics(Tag tag, int player)
 {
-    return m_executor.GetUnitStatistics(m_relative_units[tag]->tag);
+    //todo which unit, which player
+    if (player == 1)
+    {
+        return m_executor.GetUnitStatistics(m_relative_units[tag]->tag);
+    }
+    else if (player == 2)
+    {
+        return m_enemy_executor.GetUnitStatistics(m_relative_units[tag]->tag);
+    }
+    else
+    {
+        throw("There is no 2nd players in single player sim or your input is more than 2@Simulator::" + std::string(__FUNCTION__));
+    }
 }
 
-GameResult Simulator::CheckGameResult() const
+GameResult Simulator::CheckGameResult(int player) const
 {
-    return m_executor.CheckGameResult();
+    if (player == 1)
+    {
+        return m_executor.CheckGameResult();
+    }
+    else if (player == 2)
+    {
+        return m_enemy_executor.CheckGameResult();
+    }
+    else
+    {
+        throw("There is no 2nd players in single player sim or your input is more than 2@Simulator::" + std::string(__FUNCTION__));
+    }
 }
 
 u_int32_t Simulator::GetEndLoop() const

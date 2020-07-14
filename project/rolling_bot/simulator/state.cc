@@ -86,8 +86,8 @@ std::map<Tag, const Unit *> sc2::LoadMultiPlayerGame(State save, Client &current
         current_client.Debug()->DebugCreateUnit(state_u.unit_type, state_u.pos, state_u.player_id);
     }
     current_client.Debug()->SendDebug();
-    count = ceil(2 / step_size);
-    for (size_t i = 0; i < count; i++)
+    count = ceil(3 / step_size); // the creation may need 3 (or 2?) loops to take effect (not so sure)
+    for (size_t i = 0; i < count; ++i)
     {
         current_coordinator.Update();
     }

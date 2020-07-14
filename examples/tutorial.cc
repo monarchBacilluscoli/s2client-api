@@ -213,6 +213,7 @@ class CopyTestBot : public Agent
 public:
     void OnGameStart() final
     {
+        // 存储所有的单位
         auto us = Observation()->GetUnits();
         m_save.clear();
         for (auto &&u : us)
@@ -223,6 +224,7 @@ public:
     }
     void OnStep() final
     {
+        // 200 loops: save all the units' states
         if (Observation()->GetGameLoop() % 200 == 0 && Observation()->GetGameLoop() != 0)
         {
             auto us = Observation()->GetUnits();
@@ -231,20 +233,24 @@ public:
             {
                 m_save.push_back(*u);
             }
+            std::cout << Observation()->GetUnits().size() << std::endl;
         }
+        // 202 loops: kill all the enemy
         if (Observation()->GetGameLoop() % 200 == 2 && Observation()->GetGameLoop() != 0)
         {
             Debug()->DebugKillUnits(Observation()->GetUnits());
             Debug()->SendDebug();
         }
-        if (Observation()->GetGameLoop() % 200 == 4 && Observation()->GetGameLoop() != 2)
+        // 203 loops:
+        if (Observation()->GetGameLoop() % 200 == 3 && Observation()->GetGameLoop() != 2)
         {
             for (auto &&u : m_save)
             {
-                Debug()->DebugCreateUnit(u.unit_type, u.pos, u.owner == 16 ? 0 : u.owner);
+                Debug()->DebugCreateUnit(u.unit_type, u.pos, u.owner == 16 ? 0 : u.owner); //? what is this for? ok, here is a bug fix of sc2api
             }
             Debug()->SendDebug();
         }
+        // 206 loops: get unit size
         if (Observation()->GetGameLoop() % 200 == 6 && Observation()->GetGameLoop() != 4)
         {
             std::cout << Observation()->GetUnits().size() << std::endl;
@@ -441,14 +447,17 @@ int main(int argc, char *argv[])
     ActionTestBot action_test_bot;
     SaveTestBot save_bot;
     // coordinator.SetMultithreaded(true);
-    coordinator.SetParticipants({CreateParticipant(Race::Terran, &save_bot),
-                                 // CreateParticipant(Race::Terran, &enemy_bot),
-                                 CreateComputer(Race::Terran)});
+    coordinator.SetParticipants({
+        CreateParticipant(Race::Terran, &copy_test_bot),
+        CreateParticipant(Race::Terran, &enemy_bot)
+        //  CreateComputer(Race::Terran)
+    });
 
     const ObservationInterface *ob = coordinator.GetObservations().front();
 
     coordinator.LaunchStarcraft();
-    coordinator.StartGame("/home/liuyongfeng/StarCraftII/maps/Test/ActionTest.SC2Map");
+    coordinator.StartGame("/home/liuyongfeng/StarCraftII/maps/2P_EnemyZealotModVSMarinesSim.SC2Map");
+    // coordinator.StartGame("/home/liuyongfeng/StarCraftII/maps/Test/ActionTest.SC2Map");
     // coordinator.StartGame("PCEnemyZealotVSMarinesSim.SC2Map");
     // coordinator.StartGame("Maze2.SC2Map");
 

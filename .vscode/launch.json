@@ -74,7 +74,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "clean and make",
+            "preLaunchTask": "make entire project",
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
