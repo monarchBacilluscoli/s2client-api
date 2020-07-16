@@ -59,14 +59,10 @@ namespace sc2
             {TERMINATION_CONDITION::MAX_EVALUATION, std::make_shared<MET>(*this)},
         };
         //! data
-        Population m_population{};
-        Population m_offspring{};
+        std::vector<Population> m_populations{1, Population()};
+        std::vector<Population> m_offsprings{1, Population()};
 
-        Population m_rival_population{};
-        Population m_rival_offspring{};
-
-        std::vector<Population> m_populations{};
-        std::vector<Population> m_offsprings{};
+        int m_sub_pop_size = m_population_size / 5;
 
         //! methods
         std::string m_output_file_path = CurrentFolder() + "/obj_record.txt";
@@ -82,13 +78,13 @@ namespace sc2
     public:
         EvolutionaryAlgorithm() = default;
         // a constructor with all parameters
-        EvolutionaryAlgorithm(int objective_size, int max_generation, int population_size, int random_seed = 0, std::vector<std::string> objective_names = std::vector<std::string>()) : m_termination_conditions{
-                                                                                                                                                                                             // if true, stop loop
-                                                                                                                                                                                             {TERMINATION_CONDITION::MAX_GENERATION, std::make_shared<MGT>(*this, max_generation)},
-                                                                                                                                                                                             {TERMINATION_CONDITION::CONVERGENCE, std::make_shared<CT>(*this)}, /* add it by yourself */
-                                                                                                                                                                                             {TERMINATION_CONDITION::MAX_EVALUATION, std::make_shared<MET>(*this)},
-                                                                                                                                                                                         },
-                                                                                                                                                                                         m_population_size(population_size), m_objective_size(objective_size), m_random_engine{random_seed}, m_history_objs_ave(objective_size), m_history_objs_best(objective_size), m_history_objs_worst(objective_size), m_objective_names(objective_size)
+        EvolutionaryAlgorithm(int objective_size, int max_generation, int population_size, int random_seed = 0, std::vector<std::string> objective_names = std::vector<std::string>(), int num_pop = 1) : m_termination_conditions{
+                                                                                                                                                                                                              // if true, stop loop
+                                                                                                                                                                                                              {TERMINATION_CONDITION::MAX_GENERATION, std::make_shared<MGT>(*this, max_generation)},
+                                                                                                                                                                                                              {TERMINATION_CONDITION::CONVERGENCE, std::make_shared<CT>(*this)}, /* add it by yourself */
+                                                                                                                                                                                                              {TERMINATION_CONDITION::MAX_EVALUATION, std::make_shared<MET>(*this)},
+                                                                                                                                                                                                          },
+                                                                                                                                                                                                          m_population_size(population_size), m_objective_size(objective_size), m_random_engine{random_seed}, m_history_objs_ave(objective_size), m_history_objs_best(objective_size), m_history_objs_worst(objective_size), m_objective_names(objective_size), m_populations(num_pop)
         {
 #ifdef USE_GRAPHICS
             m_overall_evolution_status_renderer.SetTitle("Evolution Status");
@@ -107,7 +103,7 @@ namespace sc2
 
         int GetPopulationSize() const { return m_population_size; };
         int GetObjectiveSize() const { return m_objective_size; };
-        const Population &GetPopulation() const { return m_population; };
+        const Population &GetPopulation() const { return m_populations[0]; };
         TERMINATION_CONDITION GetTerminationCondition() const { return m_termination_condition; };
         int GetCurrentGeneration() const { return m_current_generation; };
         virtual int CurrentEvaluation() const { return 0; };
@@ -219,9 +215,17 @@ namespace sc2
     template <class T, template <typename> class TSolution>
     void EvolutionaryAlgorithm<T, TSolution>::InitBeforeRun()
     {
-        m_population.clear();
+        for (auto &pop : m_populations)
+        {
+            pop.clear();
+            pop.resize(m_population_size); // they have the same size
+            for (TSolution<T> &sol : pop)  // they have the same evaluation method
+            {
+                sol.objectives.resize(m_objective_size);
+            }
+        }
+
         m_current_generation = 0;
-        m_population.resize(m_population_size);
         m_history_objs.clear();
         m_history_objs_ave.resize(m_objective_size);
         m_history_objs_best.resize(m_objective_size);
@@ -233,10 +237,6 @@ namespace sc2
             m_history_objs_worst[i].clear();
         }
 
-        for (TSolution<T> &sol : m_population)
-        {
-            sol.objectives.resize(m_objective_size);
-        }
         std::dynamic_pointer_cast<CT>(m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE])->clear();
 #ifdef USE_GRAPHICS
         m_overall_evolution_status_renderer.SetXRange(0, std::dynamic_pointer_cast<MGT>(m_termination_conditions[TERMINATION_CONDITION::MAX_GENERATION]).MaxGeneration());
@@ -252,22 +252,22 @@ namespace sc2
         ActionAfterEachGeneration(); // you need to run it after the first generation
         for (m_current_generation = 1; !CheckIfTerminationMeet(); ++m_current_generation)
         {
-            Breed(); //todo 分别breed
+            Breed();    //todo 分别breed
             Evaluate(); //todo 混在一起一起评估
-            Select(); //todo 分别select
+            Select();   //todo 分别select
             ActionAfterEachGeneration();
         }
         ActionAfterRun();
-        typename std::vector<TSolution<T>>::iterator end_it = m_population.begin(); // 显式指明这是一个类型
-        for (end_it = m_population.begin(); end_it != m_population.end(); ++end_it)
+        typename std::vector<TSolution<T>>::iterator end_it = m_populations[0].begin(); // 显式指明这是一个类型 // only the main pop need to be returned
+        for (end_it = m_populations[0].begin(); end_it != m_populations[0].end(); ++end_it)
         {
-            if ((*end_it).rank > (*m_population.begin()).rank)
+            if ((*end_it).rank > (*m_populations[0].begin()).rank)
             {
                 break;
             }
         }
         std::cout << "Finish run after " << m_current_generation - 1 << " generations!@" << __FUNCTION__ << std::endl;
-        return std::vector<TSolution<T>>(m_population.begin(), end_it);
+        return std::vector<TSolution<T>>(m_populations[0].begin(), end_it);
     }
 
     template <class T, template <typename> class TSolution>
@@ -288,15 +288,15 @@ namespace sc2
     }
 
     template <class T, template <typename> class TSolution>
-    void EvolutionaryAlgorithm<T, TSolution>::RecordObjectives()
+    void EvolutionaryAlgorithm<T, TSolution>::RecordObjectives() //! only the main pop need to be recorded
     {
         // all the objs
-        int pop_sz = m_population.size();
+        int pop_sz = m_populations[0].size();
         m_history_objs.emplace_back(std::vector<std::vector<float>>(pop_sz, std::vector<float>(m_objective_size)));
         std::vector<std::vector<float>> &current_generation_objs = m_history_objs.back();
         for (size_t i = 0; i < pop_sz; ++i)
         {
-            current_generation_objs[i] = m_population[i].objectives;
+            current_generation_objs[i] = m_populations[0][i].objectives;
         }
         for (size_t i = 0; i < m_objective_size; ++i)
         {

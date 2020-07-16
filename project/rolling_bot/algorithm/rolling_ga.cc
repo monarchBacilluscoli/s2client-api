@@ -28,8 +28,8 @@ void RollingGA::InitOnlySelfMemeberBeforeRun()
 
 void RollingGA::Mutate()
 {
-	int children_sz = m_offspring.size();
-	for (RollingSolution<Command> &sol : m_population)
+	int children_sz = m_offsprings[0].size();
+	for (RollingSolution<Command> &sol : m_populations[0])
 	{
 		if (GetRandomFraction() < GA::m_mutation_rate)
 		{
@@ -40,12 +40,23 @@ void RollingGA::Mutate()
 
 void RollingGA::Crossover()
 {
-	m_offspring.clear();
-	m_offspring.reserve(m_population_size * 2); // Errr, for easy use
-	for (size_t i = 0; i < m_population_size; i += 2)
+	if (m_offsprings.size() != m_populations.size())
 	{
-		Population temp_children = Crossover_(EA::m_population[i], EA::m_population[GetRandomInteger(0, m_population_size - 1)]);
-		EA::m_offspring.insert(m_offspring.end(), temp_children.cbegin(), temp_children.cend());
+		m_offsprings.resize(m_populations.size());
+	}
+	for (size_t i = 0; i < m_offsprings.size(); i++)
+	{
+		m_offsprings[i].clear();
+		m_offsprings[i].reserve(m_population_size * 2); // Errr, for easy use
+	}
+
+	for (size_t i = 0; i < m_populations.size(); i++)
+	{
+		for (size_t j = 0; j < m_population_size; j += 2)
+		{
+			Population temp_children = Crossover_(EA::m_populations[i][j], EA::m_populations[i][GetRandomInteger(0, m_population_size - 1)]);
+			EA::m_offsprings[i].insert(m_offsprings[i].end(), temp_children.cbegin(), temp_children.cend());
+		}
 	}
 }
 
