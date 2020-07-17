@@ -17,11 +17,14 @@ namespace sc2
         if (m_use_fix_by_data && m_current_generation % 6 == 0) // if use fix, then fix all individuals based on the sim data
         {
             std::cout << "fix" << std::endl;
-            int sz = EA::m_populations[0].size();
-            EA::m_offsprings[0] = EA::m_populations[0];
-            for (size_t i = 0; i < sz; ++i)
+            for (int l = 0; l < m_populations.size(); l++)
             {
-                m_offsprings[0][i] = FixBasedOnSimulation(m_populations[0][i]);
+                int sz = EA::m_populations[l].size();
+                EA::m_offsprings[l] = EA::m_populations[l];
+                for (int i = 0; i < sz; ++i)
+                {
+                    m_offsprings[l][i] = FixBasedOnSimulation(m_populations[l][i]);
+                }
             }
         }
         else

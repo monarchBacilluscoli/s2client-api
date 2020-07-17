@@ -177,7 +177,7 @@ namespace sc2
 
     public:
         void OutputPopulationSimResult(std::ostream &os, int pop_index = 0) const;
-        RollingSolution<Command> FixBasedOnSimulation(const RollingSolution<Command> &parent); // based on the simulation data to fix the move target of my units into effective area around enemies
+        RollingSolution<Command> FixBasedOnSimulation(const RollingSolution<Command> &parent, int pop_index = 0); // based on the simulation data to fix the move target of my units into effective area around enemies
 
     protected: // some utilities
         Point2D FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float this_unit_weapon_range, const Units &enemy_team);

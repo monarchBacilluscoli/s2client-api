@@ -40,16 +40,16 @@ namespace sc2
         {
             for (size_t j = 0; j < m_population_size; ++j)
             {
-                GenerateOne(m_populations[i][j]);
+                GenerateOne(m_populations[i][j], i);
             }
         }
 
-        if (m_use_priori) // generate some solutions with priori knowledge
+        if (m_use_priori) // generate some solutions with priori knowledge //?only my team uses it?
         {
             int enemy_sz = std::min(m_enemy_team.size(), (size_t)m_population_size / 5);
             for (size_t i = 0; i < enemy_sz; ++i)
             {
-                RollingSolution<Command> &random_sol = m_populations[0][i];
+                RollingSolution<Command> &random_sol = m_populations[0][i]; // select one to modify
                 Point2D target_position = m_enemy_team[i]->pos;
                 int unit_sz = random_sol.variable.size();
                 for (size_t j = 0; j < unit_sz; ++j)
@@ -81,7 +81,7 @@ namespace sc2
                 Evaluate(m_offsprings[0]);
             }
         }
-        else
+        else if (m_populations.size() == 2)
         {
             if (m_current_generation == 0)
             {
@@ -101,7 +101,6 @@ namespace sc2
             // get initial total health of both team from observation
             float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
             float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
-            size_t pop_sz = pop.size();
             for (auto &item : pop)
             {
                 item.ClearSimData();
@@ -276,6 +275,81 @@ namespace sc2
 
     void RollingEA::Evaluate(Population &my_pop, Population enemy_pop, int sub_pop_size)
     {
+        std::vector<std::vector<int>> index_map = std::vector<std::vector<int>>(my_pop.size(), std::vector<int>(sub_pop_size));
+        std::vector<int> index_vec(enemy_pop.size());
+        std::iota(enemy_pop.begin(), enemy_pop.end(), 0);
+        float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
+        float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
+        for (auto &item : my_pop)
+        {
+            item.ClearSimData();
+            item.results.resize(sub_pop_size); // to contain the sub_pop_size's results
+            item.objectives.resize(m_objective_size);
+            for (auto &ob : item.objectives)
+            {
+                ob = 0.f; // clear the objective value for the addition operation
+            }
+        }
+        for (int i = 0; i < my_pop.size(); ++i)
+        {
+            std::shuffle(index_vec.begin(), index_vec.end(), m_random_engine);
+            // choose both sidess
+            for (int j = 0; j < sub_pop_size; ++j)
+            {
+                // set the orders
+                m_simulation_pool.SendOrders(my_pop[i].variable, enemy_pop[index_vec[j]].variable, i * sub_pop_size + j);
+                index_map[i][j] = index_vec[j]; // note the mapping relationship between my orders and the random enemy orders
+            }
+        }
+        if (m_is_debug)
+        {
+#ifdef USE_GRAPHICS
+            m_simulation_pool.RunSimsAsync(m_sim_length, m_debug_renderers);
+#else
+            m_simulation_pool.RunSimsAsync(m_sim_length);
+#endif //USE_GRAPHICS
+        }
+        else
+        {
+            m_simulation_pool.RunSimsAsync(m_sim_length);
+        }
+        //todo gather the data
+        //todo gather data for my pop
+        int sim_index = 0;
+        for (int i = 0; i < my_pop.size(); i++) // get the data
+        {
+            for (int j = 0; j < sub_pop_size; j++)
+            {
+                sim_index = i * sub_pop_size + j;
+                const std::map<Tag, const Unit *> &units_correspondence = m_simulation_pool[sim_index].GetRelativeUnits();
+                RollingSolution<Command> &enemy_sol = enemy_pop[index_map[i][j]];
+                enemy_sol.results.push_back(SimData());
+                for (const auto &unit : units_correspondence)
+                {
+                    my_pop[i].results[j].units[unit.first].final_state = *(unit.second);
+                    my_pop[i].results[j].units[unit.first].statistics = m_simulation_pool[i].GetUnitStatistics(unit.first, 1);
+
+                    enemy_sol.results.back().units[unit.first].final_state = *(unit.second);
+                    enemy_sol.results.back().units[unit.first].statistics = m_simulation_pool[i].GetUnitStatistics(unit.first, 2);
+                }
+
+                my_pop[i].results[j].game.end_loop = m_simulation_pool[i].GetEndLoop();
+                my_pop[i].results[j].game.result = m_simulation_pool[i].CheckGameResult();
+                enemy_sol.results.back().game.end_loop = m_simulation_pool[i].GetEndLoop();
+                enemy_sol.results.back().game.result = m_simulation_pool[i].CheckGameResult(2);
+            }
+        }
+        for (int i = 0; i < my_pop.size(); ++i) // calculate average data and set the objectives
+        {
+            my_pop[i].CalculateAver();
+            //! AverSimData doesn't know what team a unit belongs to, so I need to calculate here 
+            my_pop[i].objectives[0] =std::accumulate()
+        }
+        for (int i = 0; i < enemy_pop.size(); ++i)
+        {
+            enemy_pop[i].CalculateAver();
+        }
+
     }
 
     void RollingEA::Select()
@@ -330,16 +404,33 @@ namespace sc2
 
     void RollingEA::GenerateOne(RollingSolution<Command> &sol, int pop_index)
     { //todo need to be modified
-        size_t team_size = m_my_team.size();
-        for (size_t i = 0; i < team_size; i++)
+        int team_size;
+        Units team, rival_team;
+        if (pop_index = 0)
         {
-            sol.variable[i].unit_tag = m_my_team[i]->tag;
+            team = m_my_team;
+            rival_team = m_enemy_team;
+        }
+        else if (pop_index = 1)
+        {
+            team = m_enemy_team;
+            rival_team = m_my_team;
+        }
+        else
+        {
+            throw("here are at most two teams@RollingEA::" + std::string(__FUNCTION__));
+        }
+
+        team_size = team.size();
+        for (int i = 0; i < team_size; ++i)
+        {
+            sol.variable[i].unit_tag = team[i]->tag;
             float move_dis_per_command = m_playable_dis.y / 3;
             float longest_map_bound = std::max(m_playable_dis.x, m_playable_dis.y);
             float moveable_radius = std::min(longest_map_bound, move_dis_per_command); //todo Think about the boundaries of the map!
-            Point2D current_location = m_my_team[i]->pos;
+            Point2D current_location = team[i]->pos;
             sol.variable[i].actions.resize(m_command_length);
-            for (size_t j = 0; j < m_command_length; j++)
+            for (int j = 0; j < m_command_length; ++j)
             {
                 ActionRaw &action_raw = sol.variable[i].actions[j];
                 // randomly choose to move or attack
@@ -377,7 +468,7 @@ namespace sc2
                 {
                     if (GetRandomFraction() < 0.7)
                     {
-                        action_raw.target_point = FixActionPosIntoEffectiveRangeToNearestEnemy(action_raw.target_point, m_unit_types[m_my_team[i]->unit_type].weapons.front().range * m_log_dis(m_random_engine), m_enemy_team);
+                        action_raw.target_point = FixActionPosIntoEffectiveRangeToNearestEnemy(action_raw.target_point, m_unit_types[team[i]->unit_type].weapons.front().range * m_log_dis(m_random_engine), rival_team);
                     }
                 }
             }
@@ -486,8 +577,17 @@ namespace sc2
         return FixOutsidePointIntoCircle(action_target_pos, nearest_enemy_pos_to_target_point, effective_range);
     }
 
-    RollingSolution<Command> RollingEA::FixBasedOnSimulation(const RollingSolution<Command> &parent)
+    RollingSolution<Command> RollingEA::FixBasedOnSimulation(const RollingSolution<Command> &parent, int pop_index)
     {
+        Units rival_team;
+        if (pop_index == 0)
+        {
+            rival_team = m_enemy_team;
+        }
+        else
+        {
+            rival_team = m_my_team;
+        }
         RollingSolution<Command> child = parent;
         // find the unattacked move
         if (child.results.size() == 1)
@@ -511,10 +611,10 @@ namespace sc2
                         if (it2->ability() != ABILITY_ID::ATTACK_ATTACK)
                         {
                             //todo get the positions of enemies
-                            std::vector<Point2D> possible_enemey_pos(m_enemy_team.size());
-                            for (int i = 0; i < m_enemy_team.size(); ++i)
+                            std::vector<Point2D> possible_enemey_pos(rival_team.size());
+                            for (int i = 0; i < rival_team.size(); ++i)
                             {
-                                possible_enemey_pos[i] = child.GetUnitPossiablePosition(m_enemy_team[i]->tag, it->gameLoop());
+                                possible_enemey_pos[i] = child.GetUnitPossiablePosition(rival_team[i]->tag, it->gameLoop());
                             }
                             //todo find the nearest one
                             Point2D target = FindNearestPointFromPoint(it->position(), possible_enemey_pos);
