@@ -7,7 +7,7 @@ namespace sc2
         win_rate = 0.f;
         total_health_loss_mine = 0.f;
         total_health_loss_enemy = 0.f;
-        win_loop = std::numeric_limits<uint32_t>::max();
+        end_loop = std::numeric_limits<uint32_t>::max();
     }
 
     std::map<Tag, UnitStatisticalData> AverageSimData::CalculateAverUnitStatistics(const std::vector<SimData> &results)
@@ -73,11 +73,5 @@ namespace sc2
                    static_cast<float>(results.size());
         }
     }
-
-    // static float AverageSimData::CalculateTotalHealthLoss(const std::map<Tag, UnitStatisticalData> &stats, Unit::Alliance alliance)
-    // {
-        
-        
-    // }
 
 } // namespace sc2

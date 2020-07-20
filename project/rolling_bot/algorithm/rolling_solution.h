@@ -34,7 +34,7 @@ namespace sc2
         //? maybe temporary use
         float total_health_loss_mine = 0.f;
         float total_health_loss_enemy = 0.f;
-        uint32_t win_loop = std::numeric_limits<uint32_t>::max();
+        uint32_t end_loop = std::numeric_limits<uint32_t>::max();
 
         void Clear();
         static std::map<Tag, UnitStatisticalData> CalculateAverUnitStatistics(const std::vector<SimData> &results);
@@ -59,13 +59,16 @@ namespace sc2
         void ClearSimData();
         void CalculateAver();
 
+        //todo for sorting
         static bool AttackCountLess(const RollingSolution<T> &first, const RollingSolution<T> &second);
         static bool HealthChangeLess(const RollingSolution<T> &first, const RollingSolution<T> &second);
         static bool RollingLess(const RollingSolution<T> &l, const RollingSolution<T> &r);
-        //todo DifferenceLess
 
         // utilities
         Point2D GetUnitPossiablePosition(Tag tag, u_int32_t game_loop);
+
+    private:
+        float CalculateAverTotalHealthLoss(Unit::Alliance alliance);
     };
 
     template <class T>
@@ -76,7 +79,7 @@ namespace sc2
         results.clear();
         aver_result.total_health_loss_enemy = 0.f;
         aver_result.total_health_loss_mine = 0.f;
-        aver_result.win_loop = std::numeric_limits<uint32_t>::max();
+        aver_result.end_loop = std::numeric_limits<uint32_t>::max();
     }
 
     template <class T>
@@ -96,8 +99,10 @@ namespace sc2
         }
 #endif // DEBUG
         aver_result.units_statistics = AverageSimData::CalculateAverUnitStatistics(results);
-        aver_result.win_loop = AverageSimData::
-                                   aver_result.win_rate = AverageSimData::CalculateAverWinRate(results);
+        aver_result.end_loop = AverageSimData::CalculateAverEndLoop(results);
+        aver_result.win_rate = AverageSimData::CalculateAverWinRate(results);
+        aver_result.total_health_loss_mine = CalculateAverTotalHealthLoss(Unit::Alliance::Self);
+        aver_result.total_health_loss_enemy = CalculateAverTotalHealthLoss(Unit::Alliance::Enemy);
     }
 
     template <class T>
@@ -156,6 +161,19 @@ namespace sc2
                 return false;
             }
         }
+    }
+    template <class T>
+    float RollingSolution<T>::CalculateAverTotalHealthLoss(Unit::Alliance alliance)
+    {
+        float sum = 0.f;
+        for (const auto &sim_unit_data : results.front().units)
+        {
+            if (sim_unit_data.second.final_state.alliance == alliance)
+            {
+                sum += aver_result.units_statistics.at(sim_unit_data.first).health_change;
+            }
+        }
+        return sum;
     }
 
 } // namespace sc2

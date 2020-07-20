@@ -96,6 +96,7 @@ namespace sc2
 
     void RollingEA::Evaluate(Population &pop)
     {
+        const size_t pop_sz = pop.size();
         if (m_objective_size == 3)
         {
             // get initial total health of both team from observation
@@ -126,7 +127,6 @@ namespace sc2
                 {
                     m_simulation_pool.RunSimsAsync(m_sim_length);
                 }
-                size_t pop_sz = pop.size();
                 for (size_t i = 0; i < pop_sz; i++)
                 {
                     {                                                                                                      // record game results
@@ -157,13 +157,13 @@ namespace sc2
                         if (pop[i].results[j].game.result != GameResult::Win) // maximization
                         {
                             pop[i].objectives[2] -= m_sim_length;
-                            pop[i].aver_result.win_loop += m_sim_length;
+                            pop[i].aver_result.end_loop += m_sim_length;
                             // std::cout << pop[i].aver_result.win_loop << '\t' << m_sim_length << std::endl;
                         }
                         else
                         {
                             pop[i].objectives[2] -= pop[i].results[j].game.end_loop;
-                            pop[i].aver_result.win_loop += pop[i].results[j].game.end_loop;
+                            pop[i].aver_result.end_loop += pop[i].results[j].game.end_loop;
                         }
                     }
                 }
@@ -176,7 +176,7 @@ namespace sc2
                 pop[i].objectives[2] /= m_evaluation_time_multiplier;
                 pop[i].aver_result.total_health_loss_enemy /= m_evaluation_time_multiplier;
                 pop[i].aver_result.total_health_loss_mine /= m_evaluation_time_multiplier;
-                pop[i].aver_result.win_loop /= m_evaluation_time_multiplier;
+                pop[i].aver_result.end_loop /= m_evaluation_time_multiplier;
             }
         }
         else if (m_objective_size == 2)
@@ -218,7 +218,6 @@ namespace sc2
                         std::cerr << e.what() << '\n'; // there has been a timeout handler in RunSimsAsync()
                     }
                 }
-                size_t pop_sz = pop.size();
                 for (size_t i = 0; i < pop_sz; i++)
                 {
                     {                                                                                                      // record game results
@@ -249,12 +248,12 @@ namespace sc2
                         if (pop[i].results[j].game.result != GameResult::Win) // maximization
                         {
                             pop[i].objectives[1] -= m_sim_length;
-                            pop[i].aver_result.win_loop += m_sim_length;
+                            pop[i].aver_result.end_loop += m_sim_length;
                         }
                         else
                         {
                             pop[i].objectives[1] -= pop[i].results[j].game.end_loop;
-                            pop[i].aver_result.win_loop += pop[i].results[j].game.end_loop;
+                            pop[i].aver_result.end_loop += pop[i].results[j].game.end_loop;
                         }
                     }
                 }
@@ -267,17 +266,19 @@ namespace sc2
                 pop[i].objectives[1] /= m_evaluation_time_multiplier;
                 pop[i].aver_result.total_health_loss_enemy /= m_evaluation_time_multiplier;
                 pop[i].aver_result.total_health_loss_mine /= m_evaluation_time_multiplier;
-                pop[i].aver_result.win_loop /= m_evaluation_time_multiplier;
+                pop[i].aver_result.end_loop /= m_evaluation_time_multiplier;
             }
         }
         return;
     }
 
-    void RollingEA::Evaluate(Population &my_pop, Population enemy_pop, int sub_pop_size)
+    void RollingEA::Evaluate(Population &my_pop, Population &enemy_pop, int sub_pop_size)
     {
         std::vector<std::vector<int>> index_map = std::vector<std::vector<int>>(my_pop.size(), std::vector<int>(sub_pop_size));
+
         std::vector<int> index_vec(enemy_pop.size());
-        std::iota(enemy_pop.begin(), enemy_pop.end(), 0);
+        std::iota(index_vec.begin(), index_vec.end(), 0);
+
         float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
         float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
         for (auto &item : my_pop)
@@ -298,7 +299,7 @@ namespace sc2
             {
                 // set the orders
                 m_simulation_pool.SendOrders(my_pop[i].variable, enemy_pop[index_vec[j]].variable, i * sub_pop_size + j);
-                index_map[i][j] = index_vec[j]; // note the mapping relationship between my orders and the random enemy orders
+                index_map[i][j] = index_vec[j]; // note the enemy solution which fight against this solution of mine
             }
         }
         if (m_is_debug)
@@ -316,7 +317,7 @@ namespace sc2
         //todo gather the data
         //todo gather data for my pop
         int sim_index = 0;
-        for (int i = 0; i < my_pop.size(); i++) // get the data
+        for (int i = 0; i < my_pop.size(); i++) // get the data from simulators to solutions
         {
             for (int j = 0; j < sub_pop_size; j++)
             {
@@ -339,17 +340,44 @@ namespace sc2
                 enemy_sol.results.back().game.result = m_simulation_pool[i].CheckGameResult(2);
             }
         }
-        for (int i = 0; i < my_pop.size(); ++i) // calculate average data and set the objectives
+        for (int i = 0; i < my_pop.size(); ++i) // my pop: calculate average data and set the objectives
         {
             my_pop[i].CalculateAver();
-            //! AverSimData doesn't know what team a unit belongs to, so I need to calculate here 
-            my_pop[i].objectives[0] =std::accumulate()
+            if (m_objective_size == 3)
+            {
+                my_pop[i].objectives[0] = my_pop[i].aver_result.total_health_loss_enemy;
+                my_pop[i].objectives[1] = my_pop[i].aver_result.total_health_loss_mine;
+                my_pop[i].objectives[2] = my_pop[i].aver_result.end_loop;
+            }
+            else if (m_objective_size == 2)
+            {
+                float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
+                float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
+                my_pop[i].objectives[0] = my_pop[i].aver_result.total_health_loss_enemy / total_health_enemy - my_pop[i].aver_result.total_health_loss_mine / total_health_me;
+                my_pop[i].objectives[1] = my_pop[i].aver_result.end_loop;
+            }
+            else
+            {
+                throw("Here we only support 2 or 3 objectives@rolling_ea" + std::string(__FUNCTION__));
+            }
         }
         for (int i = 0; i < enemy_pop.size(); ++i)
         {
             enemy_pop[i].CalculateAver();
+            if (m_objective_size == 3)
+            {
+                enemy_pop[i].objectives[0] = enemy_pop[i].aver_result.total_health_loss_enemy;
+                enemy_pop[i].objectives[1] = enemy_pop[i].aver_result.total_health_loss_mine;
+                enemy_pop[i].objectives[2] = enemy_pop[i].aver_result.end_loop;
+            }
+            else if (m_objective_size == 2)
+            {
+                float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
+                float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
+                enemy_pop[i].objectives[0] = enemy_pop[i].aver_result.total_health_loss_enemy / total_health_enemy - my_pop[i].aver_result.total_health_loss_mine / total_health_me;
+                enemy_pop[i].objectives[1] = enemy_pop[i].aver_result.end_loop;
+            }
         }
-
     }
 
     void RollingEA::Select()
@@ -651,13 +679,13 @@ namespace sc2
             return l.aver_result.total_health_loss_mine > r.aver_result.total_health_loss_mine;
         });
         uint32_t win_loop = std::accumulate(m_populations[pop_index].begin(), m_populations[pop_index].end(), 0.f, [](float init, const RollingSolution<Command> &r) -> float {
-                                return init + r.aver_result.win_loop;
+                                return init + r.aver_result.end_loop;
                             }) /
                             m_populations[pop_index].size();
         auto win_loop_min_it = std::max_element(m_populations[pop_index].begin(), m_populations[pop_index].end(), [](const RollingSolution<Command> &l, const RollingSolution<Command> &r) -> bool {
-            return l.aver_result.win_loop > r.aver_result.win_loop;
+            return l.aver_result.end_loop > r.aver_result.end_loop;
         });
-        os << damage_aver << '\t' << damage_max_it->aver_result.total_health_loss_enemy << '\t' << hurt_aver << '\t' << hurt_min_it->aver_result.total_health_loss_mine << '\t' << win_loop << '\t' << win_loop_min_it->aver_result.win_loop << std::endl;
+        os << damage_aver << '\t' << damage_max_it->aver_result.total_health_loss_enemy << '\t' << hurt_aver << '\t' << hurt_min_it->aver_result.total_health_loss_mine << '\t' << win_loop << '\t' << win_loop_min_it->aver_result.end_loop << std::endl;
     }
 
     void RollingEA::OutputPopulationSimResult(std::ostream &os, int pop_index) const
@@ -666,7 +694,7 @@ namespace sc2
         {
             float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
             float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
-            os << s.aver_result.total_health_loss_enemy << '\t' << s.aver_result.total_health_loss_mine << '\t' << s.aver_result.win_loop << '\t' << total_health_enemy << '\t' << total_health_me << '\t' << s.rank << std::endl;
+            os << s.aver_result.total_health_loss_enemy << '\t' << s.aver_result.total_health_loss_mine << '\t' << s.aver_result.end_loop << '\t' << total_health_enemy << '\t' << total_health_me << '\t' << s.rank << std::endl;
         }
         os << std::endl;
     }

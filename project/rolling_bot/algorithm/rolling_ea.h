@@ -166,7 +166,7 @@ namespace sc2
     protected:
         // only belong to this class
         void Evaluate(Population &pop);
-        void Evaluate(Population &my_pop, Population enemy_pop, int sub_pop_size); // can be merged
+        void Evaluate(Population &my_pop, Population& enemy_pop, int sub_pop_size); // can be merged
         void InitFromObservation();
         void GenerateOne(RollingSolution<Command> &sol, int pop_index = 0); // 0 for me, 1 for enemey
         virtual void RecordObjectives() override;

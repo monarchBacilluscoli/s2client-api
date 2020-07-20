@@ -73,16 +73,16 @@ namespace sc2
     void DifferentialEvolution<T, TSolution>::Breed_(int pop_index)
     {
         // mutate each? solution in population, get the transition solution
-        int sz = EA::m_populations[i].size();
-        EA::m_offsprings[i].resize(sz, TSolution<T>(0, EA::m_objective_size));
+        int sz = EA::m_populations[pop_index].size();
+        EA::m_offsprings[pop_index].resize(sz, TSolution<T>(0, EA::m_objective_size));
         std::uniform_int_distribution<int> random_dis(0, sz - 1);
         for (size_t j = 0; j < sz; ++j)
         {
             //? Here I can not ensure the 3 random numbers are not the same. Should I ensure it?
             int index_a = random_dis(EA::m_random_engine);
             int index_b = random_dis(EA::m_random_engine);
-            EA::m_offsprings[i][j] = Mutate(EA::m_populations[i][j], EA::m_populations[i][index_a], EA::m_populations[i][index_b]);
-            Crossover(EA::m_populations[i][j], EA::m_offsprings[i][j]);
+            EA::m_offsprings[pop_index][j] = Mutate(EA::m_populations[pop_index][j], EA::m_populations[pop_index][index_a], EA::m_populations[pop_index][index_b]);
+            Crossover(EA::m_populations[pop_index][j], EA::m_offsprings[pop_index][j]);
         }
     }
 
