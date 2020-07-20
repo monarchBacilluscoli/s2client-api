@@ -434,12 +434,12 @@ namespace sc2
     { //todo need to be modified
         int team_size;
         Units team, rival_team;
-        if (pop_index = 0)
+        if (pop_index == 0)
         {
             team = m_my_team;
             rival_team = m_enemy_team;
         }
-        else if (pop_index = 1)
+        else if (pop_index ==    1)
         {
             team = m_enemy_team;
             rival_team = m_my_team;
@@ -556,7 +556,7 @@ namespace sc2
 
     void RollingEA::AssembleASolutionFromGoodUnits(RollingSolution<Command> &modified_solution, const Population &evaluated_pop)
     {
-        if (m_my_team.size() == 1) // no use
+        if (m_my_team.size() == 1) // just one unit, no need to merge multiple good units to single solution
         {
             return;
         }
@@ -580,7 +580,7 @@ namespace sc2
                     return false;
                 }
             });
-            // use its command as a part of this solution
+
             //! in generating function, the order of variables in solution is set according to m_my_team's order
             std::vector<Command>::const_iterator it_c = std::find_if(it_s->variable.begin(), it_s->variable.end(), [u_tag = m_my_team[i]->tag](const Command &cmd) -> bool { return u_tag == cmd.unit_tag; }); // find the command of this unit in this solution
             if (it_c != it_s->variable.end())
