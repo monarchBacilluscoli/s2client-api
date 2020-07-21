@@ -26,7 +26,7 @@ namespace sc2
             sim.SetProcessPath(process_path);
             sim.SetMapPath(sim_map_path);
             sim.SetStepSize(1);
-            port_start += 2;
+            port_start += 4;
             m_sol_sim_map[i++] = &simulation; // don't forget to set the map
         }
         m_port_end = port_start;
@@ -81,6 +81,7 @@ namespace sc2
         {
             simulation->result_holder.wait();
         }
+        return;
     }
 
     void SimulatorPool::CopyStateAndSendOrdersAsync(const ObservationInterface *ob, const std::vector<std::vector<Command>> &orders)
@@ -193,16 +194,16 @@ namespace sc2
         }
     }
 
-    void SimulatorPool::CopyStateAsync(const ObservationInterface *ob, int size)
+    void SimulatorPool::CopyStateAsync(const ObservationInterface *ob, int sims_size)
     {
         m_observation = ob;
         // launch some new simulators
-        if (size > m_simulations.size())
+        if (sims_size > m_simulations.size())
         {
-            int diff_sz = size - m_simulations.size();
+            int diff_sz = sims_size - m_simulations.size();
             int set_index = m_sol_sim_map.size();
-            m_sol_sim_map.resize(size);
-            for (int i = set_index; i < size; ++i)
+            m_sol_sim_map.resize(sims_size);
+            for (int i = set_index; i < sims_size; ++i)
             {
                 m_simulations.emplace_back(Simulation<std::thread::id>());
                 Simulator &sim = m_simulations.back().sim;
@@ -217,21 +218,21 @@ namespace sc2
                 m_port_end += 2;
                 m_sol_sim_map[i] = &m_simulations.back(); // don't forget to set the map
             }
-            for (size_t i = set_index; i < size; i++)
+            for (size_t i = set_index; i < sims_size; i++)
             {
                 m_sol_sim_map[i]->result_holder.wait();
             }
         }
         // copy state ssyncly
-        std::vector<std::future<void>> copy_holders(size); // I just need temporary holders to hold all threads. And when they are destroyed, they will wait for the return of those threads
-        for (size_t i = 0; i < size; ++i)
+        std::vector<std::future<void>> copy_holders(sims_size); // I just need temporary holders to hold all threads. And when they are destroyed, they will wait for the return of those threads
+        for (size_t i = 0; i < sims_size; ++i)
         {
             copy_holders[i] = std::async([&sim = m_sol_sim_map[i]->sim, &ob]() -> void {
                 sim.CopyAndSetState(ob);
             });
         }
         std::chrono::time_point<std::chrono::steady_clock> deadline = std::chrono::steady_clock::now() + m_wait_duration;
-        for (size_t i = 0; i < size; ++i)
+        for (size_t i = 0; i < sims_size; ++i)
         {
             std::future_status result_status = copy_holders[i].wait_until(deadline);
             switch (result_status)

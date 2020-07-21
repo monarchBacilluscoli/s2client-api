@@ -60,9 +60,9 @@ namespace sc2
         RollingEA() = delete;
         RollingEA(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation, int population_size, int random_seed = 0, unsigned int evaluation_time_multiplier = 1) : EvolutionaryAlgorithm(3, max_generation, population_size, random_seed, {std::string("enemy loss"), std::string("my team loss")}),
 #ifdef USE_GRAPHICS
-                                                                                                                                                                                                                                             m_debug_renderers(population_size),
+                                                                                                                                                                                                                                             m_debug_renderers(EA::m_populations.size() > 1 ? population_size * EA::m_sub_pop_size : population_size),
 #endif //USE_GRAPHICS
-                                                                                                                                                                                                                                             m_simulation_pool(population_size,
+                                                                                                                                                                                                                                             m_simulation_pool(EA::m_populations.size() > 1 ? population_size * EA::m_sub_pop_size : population_size,
                                                                                                                                                                                                                                                                net_address,
                                                                                                                                                                                                                                                                port_start,
                                                                                                                                                                                                                                                                process_path,
@@ -166,7 +166,7 @@ namespace sc2
     protected:
         // only belong to this class
         void Evaluate(Population &pop);
-        void Evaluate(Population &my_pop, Population& enemy_pop, int sub_pop_size); // can be merged
+        void Evaluate(Population &my_pop, Population &enemy_pop, int sub_pop_size); // can be merged
         void InitFromObservation();
         void GenerateOne(RollingSolution<Command> &sol, int pop_index = 0); // 0 for me, 1 for enemey
         virtual void RecordObjectives() override;

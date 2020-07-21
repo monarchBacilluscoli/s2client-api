@@ -291,6 +291,7 @@ namespace sc2
                 ob = 0.f; // clear the objective value for the addition operation
             }
         }
+        m_simulation_pool.CopyStateAsync(m_observation, m_population_size * m_sub_pop_size);
         for (int i = 0; i < my_pop.size(); ++i)
         {
             std::shuffle(index_vec.begin(), index_vec.end(), m_random_engine);
@@ -439,7 +440,7 @@ namespace sc2
             team = m_my_team;
             rival_team = m_enemy_team;
         }
-        else if (pop_index ==    1)
+        else if (pop_index == 1)
         {
             team = m_enemy_team;
             rival_team = m_my_team;

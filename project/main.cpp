@@ -201,12 +201,12 @@ int main(int argc, char *argv[])
 
             // std::string starcraft_path;;
             int port_start = 4000;
-            int main_process_port = 6379;
+            int main_process_port = 3900;
             bool real_time = false; // but if the graphics is on, the main game will be showed in real-time mode
             bool multi_threaded = false;
             // use this to control the cauculation times per second
             uint frames = 60;
-            int population_size = 50;
+            int population_size = 30;
             int max_generations = 100;
             int max_no_improve_generation = 100;
             int ga_muatation_rate = 0.5;

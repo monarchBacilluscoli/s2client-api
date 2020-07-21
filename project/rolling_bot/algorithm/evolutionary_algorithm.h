@@ -47,9 +47,14 @@ namespace sc2
         bool m_is_output_file = false;
         int m_objective_size = 1;
         int m_population_size = 50;
+        int m_sub_pop_size = m_population_size / 10;
         int m_current_generation = 0;
         int m_current_evaluation = 0;
         int m_max_evaluation = 0;
+        //! data
+        std::vector<Population> m_populations{1, Population()};
+        std::vector<Population> m_offsprings{1, Population()};
+
         TERMINATION_CONDITION m_termination_condition = TERMINATION_CONDITION::CONVERGENCE;
         std::vector<std::string> m_objective_names{std::vector<std::string>(m_objective_size)};
         std::map<TERMINATION_CONDITION, std::shared_ptr<TB>> m_termination_conditions = {
@@ -58,11 +63,6 @@ namespace sc2
             {TERMINATION_CONDITION::CONVERGENCE, std::make_shared<CT>(*this)}, /* add it by yourself */
             {TERMINATION_CONDITION::MAX_EVALUATION, std::make_shared<MET>(*this)},
         };
-        //! data
-        std::vector<Population> m_populations{1, Population()};
-        std::vector<Population> m_offsprings{1, Population()};
-
-        int m_sub_pop_size = m_population_size / 5;
 
         //! methods
         std::string m_output_file_path = CurrentFolder() + "/obj_record.txt";
@@ -78,13 +78,13 @@ namespace sc2
     public:
         EvolutionaryAlgorithm() = default;
         // a constructor with all parameters
-        EvolutionaryAlgorithm(int objective_size, int max_generation, int population_size, int random_seed = 0, std::vector<std::string> objective_names = std::vector<std::string>(), int num_pop = 1) : m_termination_conditions{
+        EvolutionaryAlgorithm(int objective_size, int max_generation, int population_size, int random_seed = 0, std::vector<std::string> objective_names = std::vector<std::string>(), int num_pop = 2) : m_termination_conditions{
                                                                                                                                                                                                               // if true, stop loop
                                                                                                                                                                                                               {TERMINATION_CONDITION::MAX_GENERATION, std::make_shared<MGT>(*this, max_generation)},
                                                                                                                                                                                                               {TERMINATION_CONDITION::CONVERGENCE, std::make_shared<CT>(*this)}, /* add it by yourself */
                                                                                                                                                                                                               {TERMINATION_CONDITION::MAX_EVALUATION, std::make_shared<MET>(*this)},
                                                                                                                                                                                                           },
-                                                                                                                                                                                                          m_population_size(population_size), m_objective_size(objective_size), m_random_engine{random_seed}, m_history_objs_ave(objective_size), m_history_objs_best(objective_size), m_history_objs_worst(objective_size), m_objective_names(objective_size), m_populations(num_pop)
+                                                                                                                                                                                                          m_population_size(population_size), m_objective_size(objective_size), m_random_engine{random_seed}, m_history_objs_ave(objective_size), m_history_objs_best(objective_size), m_history_objs_worst(objective_size), m_objective_names(objective_size), m_populations(num_pop, Population(m_population_size))
         {
 #ifdef USE_GRAPHICS
             m_overall_evolution_status_renderer.SetTitle("Evolution Status");
@@ -215,7 +215,7 @@ namespace sc2
     template <class T, template <typename> class TSolution>
     void EvolutionaryAlgorithm<T, TSolution>::InitBeforeRun()
     {
-        for (auto &pop : m_populations)
+        for (Population &pop : m_populations)
         {
             pop.clear();
             pop.resize(m_population_size); // they have the same size
@@ -247,8 +247,8 @@ namespace sc2
     std::vector<TSolution<T>> EvolutionaryAlgorithm<T, TSolution>::Run()
     {
         InitBeforeRun();
-        Generate(); //todo 各自generate各自
-        Evaluate(); //todo 合在一起evaluate
+        Generate();                  //todo 各自generate各自
+        Evaluate();                  //todo 合在一起evaluate
         ActionAfterEachGeneration(); // you need to run it after the first generation
         for (m_current_generation = 1; !CheckIfTerminationMeet(); ++m_current_generation)
         {

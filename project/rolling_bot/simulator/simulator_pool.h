@@ -43,7 +43,7 @@ namespace sc2
         void CopyStateAndSendOrdersAsync(const ObservationInterface *ob, const std::vector<std::vector<Command>> &orders);
         // for easy use
         void CopyStateAndSendOrdersAsync(const ObservationInterface *ob, const Population &pop);
-        void CopyStateAsync(const ObservationInterface *ob, int size);
+        void CopyStateAsync(const ObservationInterface *ob, int sims_size);
         void SendOrders(const std::vector<Command>& my_order, const std::vector<Command>& rival_order, int sim_index); // or you can use the operator[] to set it
         // Run all the simulations for specific number of steps
         void RunSimsAsync(int steps);
