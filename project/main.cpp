@@ -12,7 +12,7 @@ using namespace sc2;
 class Bot : public Agent
 {
 private:
-    Simulator sim = Simulator(1);
+    Simulator sim = Simulator();
 
 public:
     Bot(const std::string &ps_path, const std::string &map)
@@ -206,6 +206,7 @@ int main(int argc, char *argv[])
             bool multi_threaded = false;
             // use this to control the cauculation times per second
             uint frames = 60;
+            bool use_enemy_pop = true;
             int population_size = 30;
             int max_generations = 100;
             int max_no_improve_generation = 100;
@@ -261,7 +262,7 @@ int main(int argc, char *argv[])
 
             //! Bots here
             Bot bot(coordinator.GetExePath(), map_path);
-            RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path, max_generations, population_size);
+            RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path, max_generations, population_size, use_enemy_pop);
 
             rolling_bot.Algorithm().ConvergenceTermination()->SetMaxNoImproveGeneration(max_no_improve_generation);
             rolling_bot.Algorithm().SetDebug(is_debug);

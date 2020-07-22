@@ -53,7 +53,7 @@ public:
     //! in remote client, especially the map_path (a lot of errors have happend
     //! to it)
     RollingBot(const std::string &net_address, int port_start,
-               const std::string &process_path, const std::string &map_path, int max_generation = 50, int population_size = 50)
+               const std::string &process_path, const std::string &map_path, int max_generation = 50, int population_size = 50, bool use_enemy_pop = false)
         : m_rolling_ea(net_address, port_start, process_path, map_path, max_generation, population_size) {}
     virtual void OnGameStart() override;
     virtual void OnStep() override;

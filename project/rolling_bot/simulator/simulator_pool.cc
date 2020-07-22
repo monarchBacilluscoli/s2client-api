@@ -8,13 +8,14 @@ namespace sc2
                                  const std::string &net_address,
                                  int port_start,
                                  const std::string &process_path,
-                                 const std::string &map_path) : m_simulations(size),
-                                                                m_sol_sim_map(size),
-                                                                m_net_address(net_address),
-                                                                m_port_start(port_start),
-                                                                m_port_end(port_start),
-                                                                m_process_path(process_path),
-                                                                m_map_path(map_path)
+                                 const std::string &map_path,
+                                 int controlled_player_num) : m_simulations(size),
+                                                              m_sol_sim_map(size),
+                                                              m_net_address(net_address),
+                                                              m_port_start(port_start),
+                                                              m_port_end(port_start),
+                                                              m_process_path(process_path),
+                                                              m_map_path(map_path)
     {
         std::string sim_map_path = Simulator::GenerateSimMapPath(map_path);
         int i = 0;
@@ -26,13 +27,14 @@ namespace sc2
             sim.SetProcessPath(process_path);
             sim.SetMapPath(sim_map_path);
             sim.SetStepSize(1);
+            sim.SetControlledPlayerNum(controlled_player_num);
             port_start += 4;
             m_sol_sim_map[i++] = &simulation; // don't forget to set the map
         }
         m_port_end = port_start;
     };
 
-    void SimulatorPool::SetSims(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path)
+    void SimulatorPool::SetSims(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int controlled_player_num)
     {
         m_simulations.resize(size);
         m_sol_sim_map.resize(size);
@@ -46,6 +48,7 @@ namespace sc2
             sim.SetProcessPath(process_path);
             sim.SetMapPath(sim_map_path);
             sim.SetStepSize(1);
+            sim.SetControlledPlayerNum(controlled_player_num);
             port_start += 2;
             m_sol_sim_map[i++] = &simulation; // don't forget to set the map
         }

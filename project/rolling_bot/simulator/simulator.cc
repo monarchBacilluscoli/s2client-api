@@ -383,6 +383,25 @@ void Simulator::Load()
     }
 }
 
+void Simulator::SetControlledPlayerNum(int controlled_player_num)
+{
+    if (controlled_player_num == 1)
+    {
+        SetParticipants(
+            {CreateParticipant(Terran, &m_executor), CreateComputer(Terran)});
+    }
+    else if (controlled_player_num == 2)
+    {
+        SetParticipants(
+            {CreateParticipant(Terran, &m_executor), CreateParticipant(Terran, &m_enemy_executor)});
+    }
+    else
+    {
+        throw("Controlled player number sould be 1 or 2@Simulator::" + std::string(__FUNCTION__));
+    }
+    m_controlled_player_num = controlled_player_num;
+}
+
 void Simulator::SetOpponent(Agent *agent)
 {
     SetParticipants({CreateParticipant(Race::Terran, &m_executor),

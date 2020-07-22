@@ -252,7 +252,7 @@ const UnitStatisticalData &Executor::GetUnitStatistics(Tag tag)
 
 float Executor::CalculateHealthChange(Tag tag) const
 {
-    float change;
+    float change = 0;
     if (m_initial_units.at(tag)->is_alive)
     {
         change = m_initial_units.at(tag)->health - m_initial_units_states.at(tag).health;

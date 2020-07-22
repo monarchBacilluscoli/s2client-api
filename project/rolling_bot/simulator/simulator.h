@@ -17,24 +17,11 @@ namespace sc2
         {
 
         public:
-                Simulator(int controlled_player_num = 1)
-                {
-                        if (controlled_player_num == 1)
-                        {
-                                SetParticipants(
-                                    {CreateParticipant(Terran, &m_executor), CreateComputer(Terran)});
-                        }
-                        else if (controlled_player_num == 2)
-                        {
-                                SetParticipants(
-                                    {CreateParticipant(Terran, &m_executor), CreateParticipant(Terran, &m_enemy_executor)});
-                        }
-                        else
-                        {
-                                throw("Controlled player number sould be 1 or 2@Simulator::" + std::string(__FUNCTION__));
-                        }
-                }
+                Simulator() = default;
                 ~Simulator() = default;
+
+                // if you want the both sides' players are under your control, input 2
+                void SetControlledPlayerNum(int controlled_player_num = 1);
 
                 // set your opponent as a user-defined bot
                 void SetOpponent(Agent *agent);
@@ -114,6 +101,7 @@ namespace sc2
                 u_int32_t GetEndLoop() const;
 
         private:
+                int m_controlled_player_num = 1;
                 // the bot to be called outside to send orders or get observations
                 Executor m_executor;
                 Executor m_enemy_executor;
