@@ -54,7 +54,7 @@ public:
     //! to it)
     RollingBot(const std::string &net_address, int port_start,
                const std::string &process_path, const std::string &map_path, int max_generation = 50, int population_size = 50, bool use_enemy_pop = false)
-        : m_rolling_ea(net_address, port_start, process_path, map_path, max_generation, population_size) {}
+        : m_rolling_ea(net_address, port_start, process_path, map_path, max_generation, population_size, use_enemy_pop) {}
     virtual void OnGameStart() override;
     virtual void OnStep() override;
     virtual void OnUnitDestroyed(const Unit *u) override;
