@@ -28,7 +28,7 @@ namespace sc2
             sim.SetMapPath(sim_map_path);
             sim.SetStepSize(1);
             sim.SetControlledPlayerNum(controlled_player_num);
-            port_start += 4;
+            port_start += 10;                 // single player +2 is enough, but multiplayer sim needs -1,0,2,3,4,5 6 ports and 7 port nums.
             m_sol_sim_map[i++] = &simulation; // don't forget to set the map
         }
         m_port_end = port_start;

@@ -255,7 +255,7 @@ float Executor::CalculateHealthChange(Tag tag) const
     float change = 0;
     if (m_initial_units.at(tag)->is_alive)
     {
-        change = m_initial_units.at(tag)->health - m_initial_units_states.at(tag).health;
+        change = m_initial_units.at(tag)->health - m_initial_units_states.at(tag).health; // m_initial_units is just a pointer. which fetches the newest unit state
     }
     else
     {

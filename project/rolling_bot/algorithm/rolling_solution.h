@@ -85,6 +85,10 @@ namespace sc2
     template <class T>
     void RollingSolution<T>::CalculateAver()
     {
+        if (results.empty()) // enemy_pop可能出现没有数据的情况
+        {
+            return;
+        }
 #ifdef DEBUG
         int sim_sz = results.size();
         if (sim_sz > 1)
@@ -97,7 +101,7 @@ namespace sc2
                 }
             }
         }
-#endif // DEBUG
+#endif // DEBUG \
         aver_result.units_statistics = AverageSimData::CalculateAverUnitStatistics(results);
         aver_result.end_loop = AverageSimData::CalculateAverEndLoop(results);
         aver_result.win_rate = AverageSimData::CalculateAverWinRate(results);

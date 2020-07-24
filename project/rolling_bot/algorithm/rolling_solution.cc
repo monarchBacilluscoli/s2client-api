@@ -13,7 +13,7 @@ namespace sc2
     std::map<Tag, UnitStatisticalData> AverageSimData::CalculateAverUnitStatistics(const std::vector<SimData> &results)
     {
         std::map<Tag, UnitStatisticalData> aver_result;
-        if (results.size() == 0)
+        if (results.size() == 0) // because of the existence of enemy_pop and the evaluation based on random selection, here can be some solutions who don't have any sim data
         {
             throw(std::string{"no results recorded@"} + __FUNCTION__);
         }
@@ -59,7 +59,7 @@ namespace sc2
     {
         if (results.size() == 0)
         {
-            throw(std::string{"no results recorded@"} + __FUNCTION__);
+            return std::numeric_limits<float>::max(); // if there is no sim result (because of the random selecetion of enemy solutiosn in evaluation), I can only give it a worst result.
         }
         else if (results.size() == 1)
         {

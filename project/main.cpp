@@ -61,30 +61,86 @@ class ANBot : public Agent
     }
 };
 
+void SetAndStart(Simulator &sim, int port, int argc, char *argv[])
+{
+    sim.LoadSettings(argc, argv);
+    sim.SetControlledPlayerNum(2);
+    sim.SetPortStart(port);
+    sim.SetMapPath("2P_EnemyZealotModVSMarinesSim.SC2Map");
+    sim.SetStepSize(1);
+    sim.LaunchStarcraft();
+}
+
+void pringA()
+{
+    std::cout << "a" << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
     // {
     //     {
-    //         ANBot anbot;
-    //         //todo 输入指令观察数据
-    //         Coordinator coordinator;
-    //         coordinator.LoadSettings(argc, argv);
-    //         std::string starcraft_path = coordinator.GetExePath();
-    //         coordinator.SetProcessPath(starcraft_path);
-    //         std::string map_path = coordinator.GetMapPath(); // you can set your own map_path here
-    //         coordinator.SetParticipants({CreateParticipant(Race::Terran, &anbot),
-    //                                      CreateComputer(Race::Terran)});
-    //         coordinator.LaunchStarcraft();
-    //         coordinator.StartGame();
+    // ANBot anbot, bot;
+    // //todo 输入指令观察数据
+    // Coordinator coordinator, coordinator2;
+    // coordinator.LoadSettings(argc, argv);
+    // std::string starcraft_path = coordinator.GetExePath();
+    // coordinator.SetProcessPath(starcraft_path);
+    // std::string map_path = coordinator.GetMapPath(); // you can set your own map_path here
+    // coordinator.SetParticipants({CreateParticipant(Race::Terran, &anbot),
+    //                              CreateComputer(Race::Terran)});
+    // coordinator.LaunchStarcraft();
+    // coordinator.StartGame();
 
-    //         Simulator sim(2);
-    //         sim.LoadSettings(argc, argv);
-    //         sim.SetProcessPath(starcraft_path);
-    //         sim.SetPortStart(2000);
-    //         sim.SetMapPath("2P_EnemyZealotModVSMarinesSim.SC2Map");
-    //         sim.SetStepSize(1);
-    //         sim.LaunchStarcraft();
-    //         sim.StartGame();
+    // coordinator2.SetPortStart(9000);
+    // coordinator2.LoadSettings(argc, argv);
+    // coordinator2.SetProcessPath(starcraft_path);
+    // coordinator2.SetParticipants({CreateParticipant(Race::Terran, &anbot),
+    //                               CreateComputer(Race::Terran)});
+    // coordinator2.LaunchStarcraft();
+    // coordinator2.StartGame();
+
+    // return 0;
+
+    std::vector<Simulator> sims(100);
+    // for (int i = 0; i < 100; ++i)
+    // {
+    //     sims[i].SetControlledPlayerNum(2);
+    //     sims[i].LoadSettings(argc, argv);
+    //     sims[i].SetPortStart(2000 + 10 * i);
+    //     sims[i].SetMapPath("2P_EnemyZealotModVSMarinesSim.SC2Map");
+    //     sims[i].SetStepSize(1);
+    //     sims[i].LaunchStarcraft();
+    // }
+
+    // for (int i = 0; i < 100; ++i)
+    // {
+    //     sims[i].StartGame();
+    // }
+
+    // return 0;
+    std::vector<std::future<void>> sims_futures(100);
+    for (int i = 0; i < 100; ++i)
+    {
+        sims_futures[i] = std::async(SetAndStart, std::ref(sims[i]), 2000 + 10 * i, argc, argv);
+    }
+    for (int i = 0; i < 100; ++i)
+    {
+        sims_futures[i].wait();
+    }
+    std::string map_path = sims.front().GetMapPath();
+
+    std::vector<std::future<bool>> sims_futures2(100);
+    for (size_t i = 0; i < 100; i++)
+    {
+        sims_futures2[i] = std::async(&Coordinator::StartGame, sims[i], map_path);
+    }
+    for (int i = 0; i < 100; ++i)
+    {
+        // sims_futures[i].wait();
+    }
+
+    return 0;
 
     //         // sim.Debug(1)->DebugKillUnits(sim.Observation()->GetUnits());
     //         for (int i = 0; i < 10; i++)

@@ -315,8 +315,7 @@ namespace sc2
         {
             m_simulation_pool.RunSimsAsync(m_sim_length);
         }
-        //todo gather the data
-        //todo gather data for my pop
+        // gather the data
         int sim_index = 0;
         for (int i = 0; i < my_pop.size(); i++) // get the data from simulators to solutions
         {
@@ -362,21 +361,32 @@ namespace sc2
                 throw("Here we only support 2 or 3 objectives@rolling_ea" + std::string(__FUNCTION__));
             }
         }
-        for (int i = 0; i < enemy_pop.size(); ++i)
+        for (int i = 0; i < enemy_pop.size(); ++i) // 有数据的计算，没有数据的...给三个最差的目标
         {
-            enemy_pop[i].CalculateAver();
-            if (m_objective_size == 3)
+            if (enemy_pop[i].results.empty())
             {
-                enemy_pop[i].objectives[0] = enemy_pop[i].aver_result.total_health_loss_enemy;
-                enemy_pop[i].objectives[1] = enemy_pop[i].aver_result.total_health_loss_mine;
-                enemy_pop[i].objectives[2] = enemy_pop[i].aver_result.end_loop;
+
+                for (int j = 0; j < m_objective_size; ++j)
+                {
+                    enemy_pop[i].objectives[j] = std::numeric_limits<float>::lowest();
+                }
             }
-            else if (m_objective_size == 2)
+            else
             {
-                float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
-                float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
-                enemy_pop[i].objectives[0] = enemy_pop[i].aver_result.total_health_loss_enemy / total_health_enemy - my_pop[i].aver_result.total_health_loss_mine / total_health_me;
-                enemy_pop[i].objectives[1] = enemy_pop[i].aver_result.end_loop;
+                enemy_pop[i].CalculateAver();
+                if (m_objective_size == 3)
+                {
+                    enemy_pop[i].objectives[0] = enemy_pop[i].aver_result.total_health_loss_enemy;
+                    enemy_pop[i].objectives[1] = -enemy_pop[i].aver_result.total_health_loss_mine;
+                    enemy_pop[i].objectives[2] = -enemy_pop[i].aver_result.end_loop;
+                }
+                else if (m_objective_size == 2)
+                {
+                    float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
+                    float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
+                    enemy_pop[i].objectives[0] = enemy_pop[i].aver_result.total_health_loss_enemy / total_health_enemy - my_pop[i].aver_result.total_health_loss_mine / total_health_me;
+                    enemy_pop[i].objectives[1] = -enemy_pop[i].aver_result.end_loop;
+                }
             }
         }
     }
