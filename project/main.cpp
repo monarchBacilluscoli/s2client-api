@@ -51,7 +51,7 @@ class ANBot : public Agent
 {
     void OnGameEnd() final
     {
-        AgentControl()->Restart();
+        // AgentControl()->Restart();
     }
 
     void OnUnitIdle(const Unit *u) final
@@ -66,9 +66,33 @@ void SetAndStart(Simulator &sim, int port, int argc, char *argv[])
     sim.LoadSettings(argc, argv);
     sim.SetControlledPlayerNum(2);
     sim.SetPortStart(port);
-    sim.SetMapPath("2P_EnemyZealotModVSMarinesSim.SC2Map");
+    sim.SetMapPath("PCANP_EnemyZealotModVSMarines.SC2Map");
     sim.SetStepSize(1);
     sim.LaunchStarcraft();
+    sim.StartGame();
+}
+
+void CSet(Coordinator &cor, int port, int argc, char *argv[], Agent *bot1, Agent *bot2)
+{
+    cor.LoadSettings(argc, argv);
+    cor.SetParticipants({CreateParticipant(Terran, bot1)});
+    cor.SetPortStart(port);
+    cor.SetMapPath("PCANP_EnemyZealotModVSMarines.SC2Map");
+    cor.SetStepSize(1);
+}
+
+void CSetAndStart(Coordinator &cor, int port, int argc, char *argv[], Agent *bot1, Agent *bot2)
+{
+    cor.LaunchStarcraft();
+    cor.StartGame();
+}
+
+void Update(Coordinator &cor, int frames)
+{
+    for (int i = 0; i < frames; ++i)
+    {
+        cor.Update();
+    }
 }
 
 void pringA()
@@ -103,6 +127,7 @@ int main(int argc, char *argv[])
     // return 0;
 
     std::vector<Simulator> sims(100);
+    std::vector<Simulator> cors(100);
     // for (int i = 0; i < 100; ++i)
     // {
     //     sims[i].SetControlledPlayerNum(2);
@@ -119,28 +144,79 @@ int main(int argc, char *argv[])
     // }
 
     // return 0;
-    std::vector<std::future<void>> sims_futures(100);
-    for (int i = 0; i < 100; ++i)
-    {
-        sims_futures[i] = std::async(SetAndStart, std::ref(sims[i]), 2000 + 10 * i, argc, argv);
-    }
-    for (int i = 0; i < 100; ++i)
-    {
-        sims_futures[i].wait();
-    }
-    std::string map_path = sims.front().GetMapPath();
 
-    std::vector<std::future<bool>> sims_futures2(100);
-    for (size_t i = 0; i < 100; i++)
-    {
-        sims_futures2[i] = std::async(&Coordinator::StartGame, sims[i], map_path);
-    }
-    for (int i = 0; i < 100; ++i)
-    {
-        // sims_futures[i].wait();
-    }
+    // std::vector<ANBot> bots1{100};
+    // for (size_t i = 0; i < 100; i++)
+    // {
+    //     bots1.emplace_back(ANBot());
+    // }
 
-    return 0;
+    // std::vector<ANBot> bots2{100, ANBot()};
+    // Coordinator cor;
+    // ANBot abot;
+    // cor.LoadSettings(argc, argv);
+    // cor.SetParticipants({CreateParticipant(Terran, &(bots1[0])),
+    //                      //  CreateParticipant(Terran, &bots2[0])});
+    //                      CreateComputer(Terran)});
+    // cor.SetPortStart(2330);
+    // cor.SetMapPath("2P_EnemyZealotModVSMarinesSim.SC2Map");
+    // cor.SetStepSize(1);
+    // cor.LaunchStarcraft();
+    // cor.StartGame();
+
+    // std::vector<std::future<void>> cors_futures(100);
+    // for (int i = 0; i < 1; ++i)
+    // {
+    //     CSet(cors[i], 2000 + 10 * i, argc, argv, &(bots1[i]), &(bots2[i]));
+    // }
+    // for (int i = 0; i < 1; ++i)
+    // {
+    //     cors_futures[i] = std::async(CSetAndStart, std::ref(cors[i]), 2000 + 10 * i, argc, argv, &bots1[i], &bots2[i]);
+    // }
+    // for (int i = 0; i < 1; ++i)
+    // {
+    //     cors_futures[i].wait();
+    // }
+
+    if (0)
+    {
+        std::vector<std::future<void>> sims_futures(100);
+        for (int i = 0; i < 50; ++i)
+        {
+            sims_futures[i] = std::async(std::launch::async, SetAndStart, std::ref(sims[i]), 4000 + 10 * i, argc, argv);
+        }
+        for (int i = 0; i < 50; ++i)
+        {
+            sims_futures[i].wait();
+        }
+        std::string map_path = sims.front().GetMapPath();
+
+        // std::vector<std::future<void>> sims_futures_update(100);
+        for (int i = 0; i < 50; ++i)
+        {
+            sims_futures[i] = std::async(Update, std::ref(sims[i]), 100);
+        }
+
+        std::vector<std::future<bool>> sims_futures2(100);
+        for (size_t i = 0; i < 10; i++)
+        {
+            for (int j = 0; j < 10; ++j)
+            {
+                sims_futures2[i * 10 + j] = std::async(&Coordinator::StartGame, sims[i * 10 + j], map_path);
+            }
+            for (int j = 0; j < 10; ++j)
+            {
+                sims_futures2[i * 10 + j].wait();
+            }
+            // sims[i].StartGame();
+        }
+        for (int i = 0; i < 100; ++i)
+        {
+            sims_futures2[i].wait();
+        }
+
+        return 0;
+    }
 
     //         // sim.Debug(1)->DebugKillUnits(sim.Observation()->GetUnits());
     //         for (int i = 0; i < 10; i++)
@@ -263,7 +339,7 @@ int main(int argc, char *argv[])
             // use this to control the cauculation times per second
             uint frames = 60;
             bool use_enemy_pop = true;
-            int population_size = 30;
+            int population_size = 20;
             int max_generations = 100;
             int max_no_improve_generation = 100;
             int ga_muatation_rate = 0.5;

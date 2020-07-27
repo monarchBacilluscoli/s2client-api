@@ -17,7 +17,8 @@
                 // "${HOME}/StarCraftII/maps/EnemyTower.SC2Map",
                 // "${HOME}/StarCraftII/maps/testBattle_distant_vs_melee_debug.SC2Map",
                 // "${HOME}/StarCraftII/maps/PCANP_EnemyZealotVSMarines.SC2Map",
-                "${HOME}/StarCraftII/maps/PCANP_EnemyZealotModVSMarines.SC2Map",
+                // "${HOME}/StarCraftII/maps/PCANP_EnemyZealotModVSMarines.SC2Map",
+                "${HOME}/StarCraftII/maps/2P_EnemyZealotModVSMarines.SC2Map",
                 // "${HOME}/StarCraftII/maps/PCANP_EnemyZealotsModVSMarines.SC2Map",
                 // "${HOME}/StarCraftII/maps/PCANP_EnemyZealotsModMoreVSMarines.SC2Map", //* this
                 // "${HOME}/StarCraftII/maps/PCANP_EnemyZealotsVSMarines.SC2Map",
