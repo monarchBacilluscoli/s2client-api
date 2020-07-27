@@ -388,7 +388,7 @@ void Simulator::SetControlledPlayerNum(int controlled_player_num)
     if (controlled_player_num == 1)
     {
         SetParticipants(
-            {CreateParticipant(Terran, &m_executor), CreateComputer(Terran)});
+            {CreateParticipant(Terran, &m_executor)});
     }
     else if (controlled_player_num == 2)
     {

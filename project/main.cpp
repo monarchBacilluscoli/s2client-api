@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
     //     cors_futures[i].wait();
     // }
 
-    if (0)
+    if (1)
     {
         std::vector<std::future<void>> sims_futures(100);
         for (int i = 0; i < 50; ++i)

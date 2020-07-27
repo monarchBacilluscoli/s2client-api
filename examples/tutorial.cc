@@ -295,20 +295,43 @@ public:
     }
 };
 
-class ActionTestBot : public Agent
+class ActionTestBot : public Agent // This is used for testing if the enemy executor can also use the action mechanism for my executor // Then I used it for testing the debug()->
 {
 private:
     std::map<Tag, Unit> m_units_states_last_loop;
     std::map<Tag, bool> m_is_an_attack_to_be_recorded;
     bool m_is_left = true;
     int target_loc = 1;
+    bool tick = true;
 
 public:
+    void OnGameStart() override
+    {
+        Debug()->DebugEnemyControl();
+        Debug()->SendDebug();
+        return;
+    }
     void OnStep() override
     {
+        tick = (tick ? false : true);
         // execute
-        for (const Unit *u : Observation()->GetUnits(Unit::Alliance::Self))
+        for (const Unit *u : Observation()->GetUnits())
         {
+
+            //todo push new orders for the enemy
+            if (u->alliance == Unit::Alliance::Enemy)
+            {
+                if (u->unit_type == UNIT_TYPEID::TERRAN_SIEGETANK || u->unit_type == UNIT_TYPEID::TERRAN_SIEGETANKSIEGED)
+                {
+                    Actions()->UnitCommand(u, ABILITY_ID::MORPH_SIEGEMODE, true);
+                    if (!u->orders.empty())
+                    {
+                        std::cout << "good" << std::endl;
+                    }
+                }
+            }
+            //todo check if there is the new orderss
+
             bool has_cooldown_record = (m_units_states_last_loop.find(u->tag) != m_units_states_last_loop.end());
             // check if the current has been finished
             if (u->orders.empty() ||                                                                                // no order now/ start
@@ -347,7 +370,7 @@ public:
         // data
         std::fstream fs(CurrentFolder() + "/my_test_data/" + "test.txt", std::ios::out | std::ios::app);
         fs << Observation()->GetGameLoop() << '\t';
-        for (const Unit *u : Observation()->GetUnits(Unit::Alliance::Self))
+        for (const Unit *u : Observation()->GetUnits())
         {
             fs << u->pos.x << '\t' << u->pos.y << '\t' << u->orders.size() << ':' << '\t';
             for (const auto &order : u->orders)
@@ -358,7 +381,7 @@ public:
         fs << std::endl;
         // my note method
         std::fstream record_fs(CurrentFolder() + "/my_test_data/" + "record.txt", std::ios::out | std::ios::app);
-        for (const Unit *u : Observation()->GetUnits(Unit::Alliance::Self))
+        for (const Unit *u : Observation()->GetUnits())
         {
             if (m_units_states_last_loop.find(u->tag) != m_units_states_last_loop.end())
             {
@@ -387,7 +410,7 @@ public:
             Control()->SaveReplay(CurrentFolder() + '/' + "agent_replay.SC2Replay");
         }
         // update the record
-        for (const Unit *u : Observation()->GetUnits(Unit::Alliance::Self))
+        for (const Unit *u : Observation()->GetUnits())
         {
             m_units_states_last_loop[u->tag] = *u;
         }
@@ -448,8 +471,8 @@ int main(int argc, char *argv[])
     SaveTestBot save_bot;
     // coordinator.SetMultithreaded(true);
     coordinator.SetParticipants({
-        CreateParticipant(Race::Terran, &copy_test_bot),
-        CreateParticipant(Race::Terran, &enemy_bot)
+        CreateParticipant(Race::Terran, &action_test_bot),
+        // CreateParticipant(Race::Terran, &enemy_bot)
         //  CreateComputer(Race::Terran)
     });
 
