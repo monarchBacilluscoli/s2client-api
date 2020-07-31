@@ -5,7 +5,7 @@
 #include <string>
 #include <iostream>
 #include <chrono>
-
+#include <sc2api/test.h> // added by myself
 using namespace sc2;
 
 //! for test use
@@ -47,19 +47,19 @@ public:
     }
 };
 
-class ANBot : public Agent
-{
-    void OnGameEnd() final
-    {
-        // AgentControl()->Restart();
-    }
+// class ANBot : public Agent
+// {
+//     void OnGameEnd() final
+//     {
+//         // AgentControl()->Restart();
+//     }
 
-    void OnUnitIdle(const Unit *u) final
-    {
-        Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
-        Actions()->UnitCommand(u, ABILITY_ID::ATTACK, enemies.front());
-    }
-};
+//     void OnUnitIdle(const Unit *u) final
+//     {
+//         Units enemies = Observation()->GetUnits(Unit::Alliance::Enemy);
+//         Actions()->UnitCommand(u, ABILITY_ID::ATTACK, enemies.front());
+//     }
+// };
 
 void SetAndStart(Simulator &sim, int port, int argc, char *argv[])
 {
@@ -79,20 +79,6 @@ void CSet(Coordinator &cor, int port, int argc, char *argv[], Agent *bot1, Agent
     cor.SetPortStart(port);
     cor.SetMapPath("PCANP_EnemyZealotModVSMarines.SC2Map");
     cor.SetStepSize(1);
-}
-
-void CSetAndStart(Coordinator &cor, int port, int argc, char *argv[], Agent *bot1, Agent *bot2)
-{
-    cor.LaunchStarcraft();
-    cor.StartGame();
-}
-
-void Update(Coordinator &cor, int frames)
-{
-    for (int i = 0; i < frames; ++i)
-    {
-        cor.Update();
-    }
 }
 
 void pringA()
@@ -127,7 +113,8 @@ int main(int argc, char *argv[])
     // return 0;
 
     std::vector<Simulator> sims(100);
-    std::vector<Simulator> cors(100);
+    std::vector<Coordinator> cors(100);
+    Coordinator cor;
     // for (int i = 0; i < 100; ++i)
     // {
     //     sims[i].SetControlledPlayerNum(2);
@@ -145,13 +132,6 @@ int main(int argc, char *argv[])
 
     // return 0;
 
-    // std::vector<ANBot> bots1{100};
-    // for (size_t i = 0; i < 100; i++)
-    // {
-    //     bots1.emplace_back(ANBot());
-    // }
-
-    // std::vector<ANBot> bots2{100, ANBot()};
     // Coordinator cor;
     // ANBot abot;
     // cor.LoadSettings(argc, argv);
@@ -180,6 +160,8 @@ int main(int argc, char *argv[])
 
     if (1)
     {
+        Test::SetAndStartCors(argc, argv);
+
         std::vector<std::future<void>> sims_futures(100);
         for (int i = 0; i < 50; ++i)
         {
@@ -194,7 +176,7 @@ int main(int argc, char *argv[])
         // std::vector<std::future<void>> sims_futures_update(100);
         for (int i = 0; i < 50; ++i)
         {
-            sims_futures[i] = std::async(Update, std::ref(sims[i]), 100);
+            sims_futures[i] = std::async(&Test::Update, std::ref(sims[i]), 100);
         }
 
         std::vector<std::future<bool>> sims_futures2(100);
