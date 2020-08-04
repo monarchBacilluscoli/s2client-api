@@ -72,6 +72,9 @@ public:
     // Save/Load.
     virtual void Save() = 0;
     virtual void Load() = 0;
+
+    // Added by liuyongfeng
+    virtual void SetAppState(AppState stat) = 0;
 };
 
 class AgentControlInterface {
