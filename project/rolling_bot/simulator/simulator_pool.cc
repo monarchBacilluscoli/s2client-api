@@ -69,14 +69,34 @@ namespace sc2
                 try
                 {
                     sim->sim.LaunchStarcraft();
-                    sim->sim.StartGame();
                 }
                 catch (const std::exception &e)
                 {
                     std::cerr << e.what() << '\n';
-                    std::cerr << "Another map without endgame trigger named in this form \"<thismapname>+Sim.SC2Map\" is needed, or the simulator can not run properly, go checking it@" << __FUNCTION__;
-                    exit(-1);
+                    std::vector<ProcessInfo> infos = sim->sim.GetProcessInfo();
+                    for (int i = 0; i < 5; ++i)
+                    {
+
+                        if (IsProcessRunning(infos[0].process_id))
+                        {
+                            TerminateProcess(infos[0].process_id);
+                        }
+                        if (infos.size() > 1 && IsProcessRunning(infos[1].process_id))
+                        {
+                            TerminateProcess(infos[1].process_id);
+                        }
+                        SleepFor(500);
+                    }
+                    sim->sim.ClearOldProcessInfo();
+                    sim->sim.LaunchStarcraft();
                 }
+                while (!sim->sim.StartGame())
+                {
+                    sim->sim.ClearOldProcessInfo();
+                    sim->sim.ResetExecutors();
+                    sim->sim.LaunchStarcraft(); // 一般都是Launch也没Launch对，保险起见重新launch一遍
+                }
+
                 return std::this_thread::get_id();
             });
         }

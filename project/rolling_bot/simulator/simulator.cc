@@ -503,3 +503,9 @@ u_int32_t Simulator::GetEndLoop() const
 {
     return m_executor.GetEndLoop();
 }
+
+void Simulator::ResetExecutors()
+{
+    m_executor.Reset();
+    m_enemy_executor.Reset();
+}

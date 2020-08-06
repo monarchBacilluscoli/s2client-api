@@ -2117,10 +2117,10 @@ namespace sc2
 
         // The game application has hanged. Try and terminate it.
         app_state_ = AppState::timeout;
-        for (int i = 0; i < 10 && IsProcessRunning(pi_.process_id); ++i)
+        for (int i = 0; i < 5 && IsProcessRunning(pi_.process_id); ++i) // modified by liuyongfeng
         {
             TerminateProcess(pi_.process_id);
-            SleepFor(2000);
+            SleepFor(1000); // modified by liuyongfeng
         }
 
         if (IsProcessRunning(pi_.process_id))

@@ -7,6 +7,7 @@
 #include <chrono>
 #include <vector>
 #include <sc2api/sc2_api.h>
+#include "sc2utils/sc2_manage_process.h"
 
 #define CORS_COUNT 100
 
@@ -49,13 +50,37 @@ namespace sc2
             cor.SetPortStart(port);
             cor.SetMapPath("PCANP_EnemyZealotModVSMarines.SC2Map");
             cor.SetStepSize(1);
-            cor.LaunchStarcraft();
+            try
+            {
+                cor.LaunchStarcraft();
+            }
+            catch (const std::exception &e)
+            {
+                //todo get the port, get the id, terminate it and relaunch it
+                std::cerr << e.what() << '\n';
+                std::vector<ProcessInfo> infos = cor.GetProcessInfo();
+                for (int i = 0; i < 5; ++i)
+                {
+
+                    if (IsProcessRunning(infos[0].process_id))
+                    {
+                        TerminateProcess(infos[0].process_id);
+                    }
+                    if (infos.size() > 1 && IsProcessRunning(infos[1].process_id))
+                    {
+                        TerminateProcess(infos[1].process_id);
+                    }
+                    SleepFor(500);
+                }
+
+                cor.ClearOldProcessInfo();
+
+                cor.LaunchStarcraft();
+            }
             while (cor.StartGame() == false)
             {
                 std::cout << "启动不成功居然就返回了" << std::endl;
                 cor.ClearOldProcessInfo();
-                // bot1->Control()->SetAppState(AppState::normal);
-                // bot2->Control()->SetAppState(AppState::normal);
                 bot1->Reset();
                 bot2->Reset();
                 cor.LaunchStarcraft();

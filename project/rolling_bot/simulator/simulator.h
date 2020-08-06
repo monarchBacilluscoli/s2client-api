@@ -100,6 +100,8 @@ namespace sc2
                 GameResult CheckGameResult(int player = 1) const;
                 u_int32_t GetEndLoop() const;
 
+                void ResetExecutors(); // used for crash handle of simulator
+
         private:
                 int m_controlled_player_num = 1;
                 // the bot to be called outside to send orders or get observations

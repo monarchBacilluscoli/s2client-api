@@ -165,7 +165,11 @@ namespace sc2
             Client *c = clients[i];
 
             connected = c->Control()->Connect(process_settings.net_address, pi.port, process_settings.timeout_ms);
-            assert(connected);
+            if (!connected)
+            {
+                throw(std::runtime_error("connect error@" + std::string(__FUNCTION__)));
+            }
+            // assert(connected);
         }
 
         return connected;
@@ -1288,6 +1292,11 @@ namespace sc2
     void Coordinator::ClearOldProcessInfo()
     {
         imp_->process_settings_.process_info.clear();
+    }
+
+    const std::vector<ProcessInfo> &Coordinator::GetProcessInfo()
+    {
+        return imp_->process_settings_.process_info;
     }
 
 } // namespace sc2

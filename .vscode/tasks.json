@@ -16,9 +16,17 @@
         {
             "type": "shell",
             "label": "make entire project",
-            "command": "make",
+            "command": "cmake",
             "args": [
-                "-j" // let the make be able to build multiple tasks for one time
+                "--build",
+                "${cwd}/build", // let the make be able to build multiple tasks for one time
+                "--config",
+                "Debug",
+                "--target",
+                "all",
+                "--",
+                "-j",
+                "90"
             ],
             "options": {
                 "cwd": "${cwd}/build"
@@ -35,7 +43,7 @@
         },
         {
             "label": "clean and make",
-            "dependsOn":[
+            "dependsOn": [
                 "clean previous SC2 processes",
                 "make entire project"
             ],

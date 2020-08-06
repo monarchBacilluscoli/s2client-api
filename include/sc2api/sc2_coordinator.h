@@ -207,6 +207,8 @@ namespace sc2
 
         void ClearOldProcessInfo();
 
+        const std::vector<ProcessInfo>& GetProcessInfo();
+
     private:
         CoordinatorImp *imp_;
     };
