@@ -128,6 +128,7 @@ namespace sc2
                 // translate the tags in those commands into local tags
                 void TranslateCommands(std::vector<Command> &commands);
 
+
         public:
                 // add "Sim" after the original map name
                 static std::string GenerateSimMapPath(const std::string &map_path);

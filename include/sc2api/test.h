@@ -8,6 +8,7 @@
 #include <vector>
 #include <sc2api/sc2_api.h>
 #include "sc2utils/sc2_manage_process.h"
+#include <sys/wait.h>
 
 #define CORS_COUNT 100
 
@@ -72,29 +73,35 @@ namespace sc2
                     }
                     SleepFor(500);
                 }
-
+                int status;
+                ::waitpid(infos[0].process_id, &status, WUNTRACED | WCONTINUED); // 杀掉僵尸进程
+                if (infos.size() > 1)
+                {
+                    ::waitpid(infos[1].process_id, &status, WUNTRACED | WCONTINUED);
+                }
+                SleepFor(10000);
                 cor.ClearOldProcessInfo();
 
                 cor.LaunchStarcraft();
             }
-            while (cor.StartGame() == false)
-            {
-                std::cout << "启动不成功居然就返回了" << std::endl;
-                cor.ClearOldProcessInfo();
-                bot1->Reset();
-                bot2->Reset();
-                cor.LaunchStarcraft();
-            }
+            // while (cor.StartGame() == false)
+            // {
+            //     std::cout << "启动不成功居然就返回了" << std::endl;
+            //     cor.ClearOldProcessInfo();
+            //     bot1->Reset();
+            //     bot2->Reset();
+            //     cor.LaunchStarcraft();
+            // }
         }
 
         static void SetAndStartCors(int argc, char *argv[])
         {
             std::fstream file("./time.txt", std::ios::app);
             int update_frames = 100;
-            int port_start = 55000;
+            int port_start = 60000;
             int time_out_ms = 10000;
             int batch_count = 20;
-            bool one_by_one = false;
+            bool one_by_one = true;
 
             std::vector<Coordinator> cors(CORS_COUNT);
             ANBot bots1[CORS_COUNT];

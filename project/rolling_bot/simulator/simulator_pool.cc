@@ -58,14 +58,14 @@ namespace sc2
         }
     }
 
-    void SimulatorPool::StartSimsAsync()
+    void SimulatorPool::StartSimsAsync(int batch_size)
     {
         //todo ensure I have set the map right. and then use the map to start all games
-        int i = 0;
-        for (Simulation<std::thread::id> *simulation : m_sol_sim_map)
+        int sz = m_sol_sim_map.size();
+        for (int i = 0; i < sz; ++i)
         {
             // std::cout << i++ << std::endl;
-            simulation->result_holder = std::async(std::launch::async, [sim = simulation] { //note sim is a pointer
+            m_sol_sim_map[i]->result_holder = std::async(std::launch::async, [sim = m_sol_sim_map[i]] { //note sim is a pointer
                 try
                 {
                     sim->sim.LaunchStarcraft();
@@ -74,7 +74,7 @@ namespace sc2
                 {
                     std::cerr << e.what() << '\n';
                     std::vector<ProcessInfo> infos = sim->sim.GetProcessInfo();
-                    for (int i = 0; i < 5; ++i)
+                    for (int j = 0; j < 5; ++j)
                     {
 
                         if (IsProcessRunning(infos[0].process_id))
@@ -99,11 +99,18 @@ namespace sc2
 
                 return std::this_thread::get_id();
             });
+            if (i != 0 && ((i + 1) % batch_size == 0 || i == sz))
+            {
+                for (int j = i - batch_size + 1; j <= i; ++j)
+                {
+                    m_sol_sim_map[j]->result_holder.wait();
+                }
+            }
         }
-        for (Simulation<std::thread::id> *simulation : m_sol_sim_map)
-        {
-            simulation->result_holder.wait();
-        }
+        // for (Simulation<std::thread::id> *simulation : m_sol_sim_map)
+        // {
+        //     simulation->result_holder.wait();
+        // }
         return;
     }
 

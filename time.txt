@@ -1,0 +1,52 @@
+launch(ms):	687601
+launch(ms):	46659
+update(100, ms):	13296
+launch (100,20, ms):	46483
+launch (100,5, ms):	697966
+update(100, ms):	11108
+launch (100,50, ms):	135710
+update(100, ms):	3716
+launch (100,20, ms):	116089
+update(100, ms):	4552
+launch (100,20, ms):	169287
+update(100, ms):	4843
+launch (100,10, ms):	214841
+update(100, ms):	4357
+launch (10,10, ms):	10118
+update(100, ms):	467
+launch (2,10, ms):	18060
+update(100, ms):	302
+launch (2,10, ms):	17717
+launch (2,10, ms):	18082
+launch (100,10, ms):	400595
+update(100, ms):	36578
+launch (100,10, ms):	103531
+update(100, ms):	4516
+launch (100,10, ms):	101157
+update(100, ms):	4552
+launch (100,10, ms):	305238
+update(100, ms):	8637
+launch (100,20, ms):	59914
+update(100, ms):	4587
+launch (100,20, ms):	218108
+update(100, ms):	4579
+launch (100,20, ms):	138314
+launch (100,20, ms):	58934
+launch (100,20, ms):	322836
+update(100, ms):	4372
+launch (100,20, ms):	138993
+update(100, ms):	4682
+launch (100,20, ms):	177839
+update(100, ms):	4589
+launch (100,20, ms):	118239
+update(100, ms):	4606
+launch (100,20, ms):	130426
+update(100, ms):	4527
+launch (100,20, ms):	126662
+update(100, ms):	4725
+launch (100,20, ms):	40905
+update(100, ms):	3309
+launch (100,20, ms):	29004
+update(100, ms):	3129
+launch (100,20, ms):	40978
+update(100, ms):	3338

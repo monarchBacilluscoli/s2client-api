@@ -88,75 +88,10 @@ void pringA()
 
 int main(int argc, char *argv[])
 {
-    // {
-    //     {
-    // ANBot anbot, bot;
-    // //todo 输入指令观察数据
-    // Coordinator coordinator, coordinator2;
-    // coordinator.LoadSettings(argc, argv);
-    // std::string starcraft_path = coordinator.GetExePath();
-    // coordinator.SetProcessPath(starcraft_path);
-    // std::string map_path = coordinator.GetMapPath(); // you can set your own map_path here
-    // coordinator.SetParticipants({CreateParticipant(Race::Terran, &anbot),
-    //                              CreateComputer(Race::Terran)});
-    // coordinator.LaunchStarcraft();
-    // coordinator.StartGame();
-
-    // coordinator2.SetPortStart(9000);
-    // coordinator2.LoadSettings(argc, argv);
-    // coordinator2.SetProcessPath(starcraft_path);
-    // coordinator2.SetParticipants({CreateParticipant(Race::Terran, &anbot),
-    //                               CreateComputer(Race::Terran)});
-    // coordinator2.LaunchStarcraft();
-    // coordinator2.StartGame();
-
-    // return 0;
 
     std::vector<Simulator> sims(100);
     std::vector<Coordinator> cors(100);
     Coordinator cor;
-    // for (int i = 0; i < 100; ++i)
-    // {
-    //     sims[i].SetControlledPlayerNum(2);
-    //     sims[i].LoadSettings(argc, argv);
-    //     sims[i].SetPortStart(2000 + 10 * i);
-    //     sims[i].SetMapPath("2P_EnemyZealotModVSMarinesSim.SC2Map");
-    //     sims[i].SetStepSize(1);
-    //     sims[i].LaunchStarcraft();
-    // }
-
-    // for (int i = 0; i < 100; ++i)
-    // {
-    //     sims[i].StartGame();
-    // }
-
-    // return 0;
-
-    // Coordinator cor;
-    // ANBot abot;
-    // cor.LoadSettings(argc, argv);
-    // cor.SetParticipants({CreateParticipant(Terran, &(bots1[0])),
-    //                      //  CreateParticipant(Terran, &bots2[0])});
-    //                      CreateComputer(Terran)});
-    // cor.SetPortStart(2330);
-    // cor.SetMapPath("2P_EnemyZealotModVSMarinesSim.SC2Map");
-    // cor.SetStepSize(1);
-    // cor.LaunchStarcraft();
-    // cor.StartGame();
-
-    // std::vector<std::future<void>> cors_futures(100);
-    // for (int i = 0; i < 1; ++i)
-    // {
-    //     CSet(cors[i], 2000 + 10 * i, argc, argv, &(bots1[i]), &(bots2[i]));
-    // }
-    // for (int i = 0; i < 1; ++i)
-    // {
-    //     cors_futures[i] = std::async(CSetAndStart, std::ref(cors[i]), 2000 + 10 * i, argc, argv, &bots1[i], &bots2[i]);
-    // }
-    // for (int i = 0; i < 1; ++i)
-    // {
-    //     cors_futures[i].wait();
-    // }
 
     if (1)
     {
@@ -173,7 +108,6 @@ int main(int argc, char *argv[])
         }
         std::string map_path = sims.front().GetMapPath();
 
-        // std::vector<std::future<void>> sims_futures_update(100);
         for (int i = 0; i < 50; ++i)
         {
             sims_futures[i] = std::async(&Test::Update, std::ref(sims[i]), 100);
@@ -314,14 +248,14 @@ int main(int argc, char *argv[])
             std::string net_address = "127.0.0.1";
 
             // std::string starcraft_path;;
-            int port_start = 4000;
+            int port_start = 50000;
             int main_process_port = 3900;
             bool real_time = false; // but if the graphics is on, the main game will be showed in real-time mode
             bool multi_threaded = false;
             // use this to control the cauculation times per second
             uint frames = 60;
             bool use_enemy_pop = true;
-            int population_size = 20;
+            int population_size = 30;
             int max_generations = 100;
             int max_no_improve_generation = 100;
             int ga_muatation_rate = 0.5;
@@ -442,6 +376,7 @@ int main(int argc, char *argv[])
         catch (const std::exception &e)
         {
             std::cerr << e.what() << '\n';
+            SleepFor(60000);
             continue;
         }
     }

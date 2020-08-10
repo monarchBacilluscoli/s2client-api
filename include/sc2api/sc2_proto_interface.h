@@ -10,7 +10,7 @@ namespace sc2 {
 
 class ControlInterface;
 
-const unsigned int kDefaultProtoInterfaceTimeout = 120000; // A generous 120 seconds.
+const unsigned int kDefaultProtoInterfaceTimeout = 12000; // A generous 120 seconds.
 
 typedef std::shared_ptr<SC2APIProtocol::Request> GameRequestPtr;
 typedef std::shared_ptr<const SC2APIProtocol::Response> GameResponsePtr;

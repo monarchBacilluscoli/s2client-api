@@ -169,7 +169,6 @@ namespace sc2
             {
                 throw(std::runtime_error("connect error@" + std::string(__FUNCTION__)));
             }
-            // assert(connected);
         }
 
         return connected;

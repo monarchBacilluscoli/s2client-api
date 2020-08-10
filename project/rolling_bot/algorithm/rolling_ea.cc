@@ -288,7 +288,7 @@ namespace sc2
             item.objectives.resize(m_objective_size);
             for (auto &ob : item.objectives)
             {
-                ob = 0.f; // clear the objective value for the addition operation
+                ob = std::numeric_limits<float>::lowest(); // clear the objective value for the addition operation
             }
         }
         m_simulation_pool.CopyStateAsync(m_observation, m_population_size * m_sub_pop_size);
