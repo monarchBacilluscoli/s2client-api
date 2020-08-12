@@ -9,6 +9,7 @@
 #include <sc2api/sc2_api.h>
 #include "sc2utils/sc2_manage_process.h"
 #include <sys/wait.h>
+#include <sc2utils/port_checker.h>
 
 #define CORS_COUNT 100
 
@@ -31,6 +32,8 @@ namespace sc2
     class Test
     {
     private:
+        PortChecker port_checker;
+
     public:
         Test(/* args */) = default;
         ~Test() = default;
@@ -43,7 +46,7 @@ namespace sc2
             }
         }
 
-        static void CSetAndStart(Coordinator &cor, int port, int argc, char *argv[], Agent *bot1, Agent *bot2, int time_out_ms = 10000)
+        static void CSetAndStart(Coordinator &cor, int port, int argc, char *argv[], Agent *bot1, Agent *bot2, int time_out_ms = 10000) //todo 返回port_last
         {
             cor.LoadSettings(argc, argv);
             cor.SetTimeoutMS(time_out_ms);
@@ -84,14 +87,14 @@ namespace sc2
 
                 cor.LaunchStarcraft();
             }
-            // while (cor.StartGame() == false)
-            // {
-            //     std::cout << "启动不成功居然就返回了" << std::endl;
-            //     cor.ClearOldProcessInfo();
-            //     bot1->Reset();
-            //     bot2->Reset();
-            //     cor.LaunchStarcraft();
-            // }
+            while (cor.StartGame() == false)
+            {
+                std::cout << "启动不成功居然就返回了" << std::endl;
+                cor.ClearOldProcessInfo();
+                bot1->Reset();
+                bot2->Reset();
+                cor.LaunchStarcraft();
+            }
         }
 
         static void SetAndStartCors(int argc, char *argv[])

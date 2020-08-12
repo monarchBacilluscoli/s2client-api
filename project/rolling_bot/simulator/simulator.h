@@ -119,7 +119,7 @@ namespace sc2
                 std::map<Tag, const Unit *> m_relative_units;    // form source tag to target unit //todo check if opponent's is included
                 std::map<Tag, Tag> m_target_to_source_unit_tags; // from target to source unit tags
 
-                // set units relations
+                // set units relations#
                 // so the caller of this simultor doesn't have to know the tags of units
                 // in simulator here
                 void SetUnitsRelations(State state, Units us_copied);
@@ -127,7 +127,6 @@ namespace sc2
                 void SetReversedUnitRelation(std::map<Tag, Tag> &target_to_source_units, const std::map<Tag, const Unit *> &relative_units);
                 // translate the tags in those commands into local tags
                 void TranslateCommands(std::vector<Command> &commands);
-
 
         public:
                 // add "Sim" after the original map name
