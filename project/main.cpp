@@ -6,6 +6,7 @@
 #include <iostream>
 #include <chrono>
 #include <sc2api/test.h> // added by myself
+#include <sc2utils/sc2_manage_process.h>
 using namespace sc2;
 
 //! for test use

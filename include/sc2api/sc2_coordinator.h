@@ -144,6 +144,8 @@ namespace sc2
         //! param check_single  Checks if the game is a single player or multiplayer game
         void SetupPorts(size_t num_agents, int port_start, bool check_single = true);
 
+        void SetupPorts(size_t num_agents, const std::vector<int>& ports, bool check_single = true);
+
         // Run.
 
         //! Helper function used to actually run a bot. This function will behave differently in real-time compared to
@@ -207,7 +209,7 @@ namespace sc2
 
         void ClearOldProcessInfo();
 
-        const std::vector<ProcessInfo>& GetProcessInfo();
+        const std::vector<ProcessInfo> &GetProcessInfo();
 
     private:
         CoordinatorImp *imp_;

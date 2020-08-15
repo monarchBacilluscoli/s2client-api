@@ -1269,6 +1269,46 @@ namespace sc2
         }
     }
 
+    void Coordinator::SetupPorts(size_t num_agents, const std::vector<int> &ports, bool check_single)
+    {
+        // Join the game if there are two human participants.
+        size_t humans = 0;
+        if (check_single)
+        {
+            for (const auto &p_setup : imp_->game_settings_.player_setup)
+            {
+                if (p_setup.type == sc2::PlayerType::Participant)
+                {
+                    ++humans;
+                }
+            }
+        }
+        else
+        {
+            humans = num_agents;
+        }
+        int port_index = -1;
+        if (ports.size() < humans * 2 + 1)
+        {
+            throw(std::runtime_error("not enough ports set up"));
+        }
+        if (humans > 1)
+        {
+            imp_->game_settings_.ports.shared_port = ports[++port_index]; // this may will be randomly set when send request
+            imp_->game_settings_.ports.server_ports.game_port = ports[++port_index];
+            imp_->game_settings_.ports.server_ports.base_port = ports[++port_index];
+            imp_->game_settings_.ports.client_ports.clear();
+            for (size_t i = 1; i < num_agents; ++i)
+            {
+                PortSet port_set;
+                port_set.game_port = ports[++port_index];
+                port_set.base_port = ports[++port_index];
+                imp_->game_settings_.ports.client_ports.push_back(port_set);
+            }
+        }
+        return;
+    }
+
     int Coordinator::GetStepSize() { return imp_->process_settings_.step_size; }
     int Coordinator::GetPortStart() { return imp_->process_settings_.port_start; }
     std::string Coordinator::GetNetAddress() { return imp_->process_settings_.net_address; }
