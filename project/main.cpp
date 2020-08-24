@@ -89,7 +89,6 @@ void pringA()
 
 int main(int argc, char *argv[])
 {
-
     std::vector<Simulator> sims(100);
     std::vector<Coordinator> cors(100);
     Coordinator cor;
@@ -111,7 +110,7 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i < 50; ++i)
         {
-            sims_futures[i] = std::async(&Test::Update, std::ref(sims[i]), 100);
+            sims_futures[i] = std::async(&Test::Update, std::ref(sims[i]), 100, std::ref(std::cout));
         }
 
         std::vector<std::future<bool>> sims_futures2(100);

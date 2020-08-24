@@ -2117,10 +2117,10 @@ namespace sc2
 
         // The game application has hanged. Try and terminate it.
         app_state_ = AppState::timeout;
-        for (int i = 0; i < 5 && IsProcessRunning(pi_.process_id); ++i) // modified by liuyongfeng
+        for (int i = 0; i < 3 && IsProcessRunning(pi_.process_id); ++i) // modified by liuyongfeng
         {
             TerminateProcess(pi_.process_id);
-            SleepFor(1000); // modified by liuyongfeng
+            SleepFor(500); // modified by liuyongfeng
         }
 
         if (IsProcessRunning(pi_.process_id))
@@ -2220,21 +2220,24 @@ namespace sc2
         {
             std::cerr << std::endl
                       << "Error in returning observation:" << std::endl;
-            std::cerr << "The main response is of type: " << std::to_string(response->response_case()) << std::endl;
-            if (response_observation.HasResponse())
+            if (!response_observation.HasResponse()) // modified by LiuYongfeng
             {
                 std::cerr << "There is no ResponseObservation/message!" << std::endl;
             }
-            if (response->error_size() > 0)
-            {
-                for (int i = 0; i < response->error_size(); ++i)
-                    std::cerr << "Error string: " << response->error(i) << std::endl;
-            }
             else
             {
-                std::cerr << "No error strings in result." << std::endl;
+                std::cerr << "The main response is of type: " << std::to_string(response->response_case()) << std::endl;
+                if (response->error_size() > 0)
+                {
+                    for (int i = 0; i < response->error_size(); ++i)
+                        std::cerr << "Error string: " << response->error(i) << std::endl;
+                }
+                else
+                {
+                    std::cerr << "No error strings in result." << std::endl;
+                }
+                std::cerr << std::endl;
             }
-            std::cerr << std::endl;
             return false;
         }
 

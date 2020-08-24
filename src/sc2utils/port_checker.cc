@@ -15,11 +15,11 @@ bool PortChecker::Check(int port)
     // std::cout << ::getpid() << std::endl;
     if ((m_checker_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) // IPv4，可靠连接，这种组合的第0个协议（TCP）
     {
-        std::cout << "socket failed" << std::endl;
+        perror("socket: ");
     }
     if (setsockopt(m_checker_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &m_opt, sizeof(m_opt))) // 设置一些选项，完全可选的。
     {
-        std::cout << "setsockopt failed" << std::endl;
+        perror("setsockopt:");
     }
     m_address.sin_family = AF_INET;
     m_address.sin_addr.s_addr = INADDR_ANY; // 因为将IP绑定到本机，所以使用了INADDR_ANY(0.0.0.0)指定了IP

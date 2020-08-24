@@ -1331,6 +1331,9 @@ namespace sc2
     void Coordinator::ClearOldProcessInfo()
     {
         imp_->process_settings_.process_info.clear();
+        imp_->starcraft_started_ = false;
+        imp_->last_port_ = 0;
+        imp_->game_settings_.ports.client_ports.clear();
     }
 
     const std::vector<ProcessInfo> &Coordinator::GetProcessInfo()

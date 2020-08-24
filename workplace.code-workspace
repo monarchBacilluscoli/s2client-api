@@ -79,13 +79,12 @@
 			".history": true,
 			"**.bat": true,
 			"**/.md": true,
-			"**/contrib": true,
+			"**/contrib": false,
 			"**/docs": true,
 			"**/protocol": true,
 			"build": true,
 			"sc2replays": true,
 			"tests": true
-		},
-		"editor.fontFamily": "Consolas, 'Courier New', monospace"
+		}
 	}
 }

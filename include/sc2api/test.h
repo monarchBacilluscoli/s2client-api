@@ -2,8 +2,7 @@
 
 #include <sc2utils/port_checker.h>
 #include <sc2api/sc2_api.h>
-
-#define CORS_COUNT 100
+#include <iostream>
 
 namespace sc2
 {
@@ -23,9 +22,9 @@ namespace sc2
         Test(/* args */) = default;
         ~Test() = default;
 
-        static void Update(Coordinator &cor, int frames);
+        static void Update(Coordinator &cor, int frames, std::ostream &os = std::cout);
 
-        static void CSetAndStart(Coordinator &cor, int port, int argc, char *argv[], Agent *bot1, Agent *bot2, int time_out_ms = 10000);
+        static void CSetAndStart(Coordinator &cor, int port, int argc, char *argv[], Agent *bot1, Agent *bot2, int time_out_ms = 10000, std::ostream &os = std::cout);
 
         static void SetAndStartCors(int argc, char *argv[]);
     };

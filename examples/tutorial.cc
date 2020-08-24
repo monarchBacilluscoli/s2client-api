@@ -313,6 +313,11 @@ public:
     }
     void OnStep() override
     {
+        if (!(Observation()->GetGameLoop() % 20))
+        {
+            auto a = Observation()->GetRawActions();
+            std::cout << a.size() << std::endl;
+        }
         tick = (tick ? false : true);
         // execute
         for (const Unit *u : Observation()->GetUnits())

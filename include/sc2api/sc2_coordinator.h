@@ -211,6 +211,8 @@ namespace sc2
 
         const std::vector<ProcessInfo> &GetProcessInfo();
 
+        // void Reset();
+
     private:
         CoordinatorImp *imp_;
     };
