@@ -25,6 +25,7 @@ namespace sc2
 
     void Test::Update(Coordinator &cor, int frames, std::ostream &os)
     {
+        static int current_loop = 0;
         for (int i = 0; i < frames; ++i)
         {
             try
@@ -36,7 +37,7 @@ namespace sc2
                 os << "update:\t" << i << '\t' << cor.GetPortStart() << std::endl;
             }
         }
-    }
+        }
 
     void Test::CSetAndStart(Coordinator &cor, int port, int argc, char *argv[], Agent *bot1, Agent *bot2, int time_out_ms, std::ostream &os)
     {
@@ -53,7 +54,6 @@ namespace sc2
                 i = 0;
             }
         }
-        std::cout << port << std::endl;
         SleepFor(500);
         cor.SetPortStart(port + 1);
         cor.SetMapPath("PCANP_EnemyZealotModVSMarines.SC2Map");
@@ -68,13 +68,13 @@ namespace sc2
         }
         try
         {
-            if (cor.StartGame() == false) //! 不能先StartGame()肯定是先清空
+            if (cor.StartGame() == false)
             {
                 os << "启动不成功居然就返回了: " << port << std::endl;
 
                 // 有任何问题，先杀掉原始程序
                 std::vector<ProcessInfo> infos = cor.GetProcessInfo();
-                for (int i = 0; i < 3; ++i)
+                for (int i = 0; i < 2; ++i)
                 {
 
                     if (IsProcessRunning(infos[0].process_id))
@@ -88,7 +88,7 @@ namespace sc2
                     SleepFor(500);
                 }
                 int status;
-                ::waitpid(infos[0].process_id, &status, WUNTRACED | WCONTINUED); // 杀掉僵尸进程
+                ::waitpid(infos[0].process_id, &status, WUNTRACED | WCONTINUED); // kill the zombie ps
                 if (infos.size() > 1)
                 {
                     ::waitpid(infos[1].process_id, &status, WUNTRACED | WCONTINUED);
@@ -99,9 +99,7 @@ namespace sc2
                 bot1->Reset();
                 bot2->Reset();
                 PortChecker pc;
-                std::vector<int> ports(5);
                 //todo 得到7个ports
-
                 for (int i = 0; i < 7; ++i) //得到连续7个port
                 {
                     if (i != 2 && !pc.Check(port + i))
@@ -145,9 +143,6 @@ namespace sc2
             bot1->Reset();
             bot2->Reset();
             PortChecker pc;
-            std::vector<int> ports(5);
-            //todo 得到5个ports
-
             for (int i = 0; i < 7; ++i) //得到连续7个port
             {
                 if (i != 2 && !pc.Check(port + i))
@@ -156,7 +151,6 @@ namespace sc2
                     i = 0;
                 }
             }
-            //! 恐怕需要先杀掉原先的进程才行...可是StartGame不是杀过了吗？
             cor.SetPortStart(port + 1);
             cor.LaunchStarcraft();
             if (!cor.StartGame())
@@ -172,7 +166,7 @@ namespace sc2
         int update_frames = 50;
         int port_start = 61000;
         int time_out_ms = 10000;
-        int batch_count = 5;
+        int batch_count = 50;
         bool one_by_one = false;
 
         std::vector<Coordinator> cors(CORS_COUNT);

@@ -1,18 +1,13 @@
 #ifndef ROLLING_BOT_H
 #define ROLLING_BOT_H
 
-#include <queue>
 #include <string>
 #include <sc2api/sc2_api.h>
-#include <functional>
-#include <iostream>
-#include "../algorithm/rolling_ga.h"
-#include "../simulator/simulator.h"
+
 #include "../algorithm/rolling_de.h"
 
 namespace sc2
 {
-
     enum class PLAY_STYLE
     {
         NORMAL = 0,

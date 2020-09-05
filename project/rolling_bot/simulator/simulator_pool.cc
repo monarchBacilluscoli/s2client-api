@@ -1,5 +1,7 @@
 #include "simulator_pool.h"
 #include "sc2utils/sc2_manage_process.h"
+#include <sc2utils/port_checker.h>
+#include <sys/wait.h>
 namespace sc2
 {
     using Population = std::vector<RollingSolution<Command>>;
@@ -36,6 +38,10 @@ namespace sc2
 
     void SimulatorPool::SetSims(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int controlled_player_num)
     {
+        if (port_start + size * 20 > 32768 || port_start <= 1024)
+        {
+            throw("Suggest you to check so that the port numbers used will be in the range bewtteen 1024 and 32768@" + std::string(__FUNCTION__));
+        }
         m_simulations.resize(size);
         m_sol_sim_map.resize(size);
         std::string sim_map_path = Simulator::GenerateSimMapPath(map_path);
@@ -43,13 +49,12 @@ namespace sc2
         for (Simulation<std::thread::id> &simulation : m_simulations)
         {
             Simulator &sim = simulation.sim;
-            //sim.SetNetAddress(m_net_address);
             sim.SetPortStart(port_start);
             sim.SetProcessPath(process_path);
             sim.SetMapPath(sim_map_path);
             sim.SetStepSize(1);
             sim.SetControlledPlayerNum(controlled_player_num);
-            port_start += 2;
+            port_start += 20;                 // a value set by experience
             m_sol_sim_map[i++] = &simulation; // don't forget to set the map
         }
         if (port_start > m_port_end)
@@ -58,47 +63,125 @@ namespace sc2
         }
     }
 
-    void SimulatorPool::StartSimsAsync(int batch_size)
+    void SimulatorPool::StartSimsAsync(int batch_size) //? too many try...catch, ugly.
     {
-        //todo ensure I have set the map right. and then use the map to start all games
+        std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
         int sz = m_sol_sim_map.size();
         for (int i = 0; i < sz; ++i)
         {
-            // std::cout << i++ << std::endl;
-            m_sol_sim_map[i]->result_holder = std::async(std::launch::async, [sim = m_sol_sim_map[i]] { //note sim is a pointer
-                try
-                {
-                    sim->sim.LaunchStarcraft();
-                }
-                catch (const std::exception &e)
-                {
-                    std::cerr << e.what() << '\n';
-                    std::vector<ProcessInfo> infos = sim->sim.GetProcessInfo();
-                    for (int j = 0; j < 5; ++j)
-                    {
+            m_sol_sim_map[i]->result_holder =
+                std::async(std::launch::async,
+                           [sim = m_sol_sim_map[i]] { //note sim is a pointer
+                               PortChecker pc;
+                               uint16_t new_port_start = pc.GetContinuousPortFromPort(sim->sim.GetPortStart(), 7);
+                               SleepFor(500);
+                               sim->sim.SetPortStart(new_port_start + 1); //this is wierd,but the implementation is wierd, too.
+                               try
+                               {
+                                   sim->sim.LaunchStarcraft();
+                               }
+                               catch (const std::exception &e) // if there is any exception during launching, kill then relaunch the game
+                               {
+                                   std::cerr << "launch unsuccessful port: " << sim->sim.GetPortStart() << "@" + std::string(__FUNCTION__) << std::endl;
+                                   // 有任何问题，先杀掉原始程序
+                                   std::vector<ProcessInfo> infos = sim->sim.GetProcessInfo();
+                                   for (int i = 0; i < 3; ++i)
+                                   {
 
-                        if (IsProcessRunning(infos[0].process_id))
-                        {
-                            TerminateProcess(infos[0].process_id);
-                        }
-                        if (infos.size() > 1 && IsProcessRunning(infos[1].process_id))
-                        {
-                            TerminateProcess(infos[1].process_id);
-                        }
-                        SleepFor(500);
-                    }
-                    sim->sim.ClearOldProcessInfo();
-                    sim->sim.LaunchStarcraft();
-                }
-                while (!sim->sim.StartGame())
-                {
-                    sim->sim.ClearOldProcessInfo();
-                    sim->sim.ResetExecutors();
-                    sim->sim.LaunchStarcraft(); // 一般都是Launch也没Launch对，保险起见重新launch一遍
-                }
+                                       if (IsProcessRunning(infos[0].process_id))
+                                       {
+                                           TerminateProcess(infos[0].process_id);
+                                       }
+                                       if (infos.size() > 1 && IsProcessRunning(infos[1].process_id))
+                                       {
+                                           TerminateProcess(infos[1].process_id);
+                                       }
+                                       SleepFor(500);
+                                   }
+                                   int status;
+                                   ::waitpid(infos[0].process_id, &status, WUNTRACED | WCONTINUED); // kill the zombie ps
+                                   if (infos.size() > 1)
+                                   {
+                                       ::waitpid(infos[1].process_id, &status, WUNTRACED | WCONTINUED);
+                                   }
+                                   SleepFor(1000);
+                                   sim->sim.ClearOldProcessInfo();
+                                   sim->sim.ResetExecutors();
+                                   uint16_t new_port_start = pc.GetContinuousPortFromPort(sim->sim.GetPortStart(), 7);
+                                   sim->sim.SetPortStart(new_port_start + 1);
+                                   sim->sim.LaunchStarcraft();
+                               }
+                               try
+                               {
+                                   if (!sim->sim.StartGame()) // if the game start unsuccessfully, kill&relaunch&restart.
+                                   {
+                                       std::vector<ProcessInfo> infos = sim->sim.GetProcessInfo();
+                                       for (int i = 0; i < 3; ++i)
+                                       {
 
-                return std::this_thread::get_id();
-            });
+                                           if (IsProcessRunning(infos[0].process_id))
+                                           {
+                                               TerminateProcess(infos[0].process_id);
+                                           }
+                                           if (infos.size() > 1 && IsProcessRunning(infos[1].process_id))
+                                           {
+                                               TerminateProcess(infos[1].process_id);
+                                           }
+                                           SleepFor(500);
+                                       }
+                                       int status;
+                                       ::waitpid(infos[0].process_id, &status, WUNTRACED | WCONTINUED); // kill the zombie ps
+                                       if (infos.size() > 1)
+                                       {
+                                           ::waitpid(infos[1].process_id, &status, WUNTRACED | WCONTINUED);
+                                       }
+                                       SleepFor(1000);
+                                       sim->sim.ClearOldProcessInfo();
+                                       sim->sim.ResetExecutors();
+                                       uint16_t new_port_start = pc.GetContinuousPortFromPort(sim->sim.GetPortStart(), 7);
+                                       sim->sim.SetPortStart(new_port_start + 1);
+                                       sim->sim.LaunchStarcraft();
+                                       if (sim->sim.StartGame())
+                                       {
+                                           std::cout << "还是没成功 port：" << new_port_start << std::endl;
+                                       }
+                                   }
+                               }
+                               catch (const std::exception &e)
+                               {
+                                   std::vector<ProcessInfo> infos = sim->sim.GetProcessInfo();
+                                   for (int i = 0; i < 3; ++i)
+                                   {
+
+                                       if (IsProcessRunning(infos[0].process_id))
+                                       {
+                                           TerminateProcess(infos[0].process_id);
+                                       }
+                                       if (infos.size() > 1 && IsProcessRunning(infos[1].process_id))
+                                       {
+                                           TerminateProcess(infos[1].process_id);
+                                       }
+                                       SleepFor(500);
+                                   }
+                                   int status;
+                                   ::waitpid(infos[0].process_id, &status, WUNTRACED | WCONTINUED); // kill the zombie ps
+                                   if (infos.size() > 1)
+                                   {
+                                       ::waitpid(infos[1].process_id, &status, WUNTRACED | WCONTINUED);
+                                   }
+                                   SleepFor(1000);
+                                   sim->sim.ClearOldProcessInfo();
+                                   sim->sim.ResetExecutors();
+                                   uint16_t new_port_start = pc.GetContinuousPortFromPort(sim->sim.GetPortStart(), 7);
+                                   sim->sim.SetPortStart(new_port_start + 1);
+                                   sim->sim.LaunchStarcraft();
+                                   if (sim->sim.StartGame())
+                                   {
+                                       std::cout << "还是没成功 port：" << new_port_start << std::endl;
+                                   }
+                               }
+                               return std::this_thread::get_id();
+                           });
             if (i != 0 && ((i + 1) % batch_size == 0 || i == sz))
             {
                 for (int j = i - batch_size + 1; j <= i; ++j)
@@ -106,11 +189,10 @@ namespace sc2
                     m_sol_sim_map[j]->result_holder.wait();
                 }
             }
+            std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+            std::chrono::steady_clock::duration d = end - start;
+            std::cout << "start time used: " << std::chrono::duration_cast<std::chrono::milliseconds>(d).count() << std::endl;
         }
-        // for (Simulation<std::thread::id> *simulation : m_sol_sim_map)
-        // {
-        //     simulation->result_holder.wait();
-        // }
         return;
     }
 

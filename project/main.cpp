@@ -7,6 +7,8 @@
 #include <chrono>
 #include <sc2api/test.h> // added by myself
 #include <sc2utils/sc2_manage_process.h>
+#include <civetweb.h>
+
 using namespace sc2;
 
 //! for test use
@@ -92,8 +94,9 @@ int main(int argc, char *argv[])
     std::vector<Simulator> sims(100);
     std::vector<Coordinator> cors(100);
     Coordinator cor;
+    mg_init_library(MG_FEATURES_DEFAULT);
 
-    if (1)
+    if (0)
     {
         Test::SetAndStartCors(argc, argv);
 
@@ -131,6 +134,7 @@ int main(int argc, char *argv[])
             sims_futures2[i].wait();
         }
 
+        mg_exit_library();
         return 0;
     }
 

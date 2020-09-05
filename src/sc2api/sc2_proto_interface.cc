@@ -76,7 +76,7 @@ bool ProtoInterface::ConnectToGame(const std::string& address, int port, int tim
         control_->Error(ClientError::ConnectionClosed);
     });
 
-    return PingGame();
+    return PingGame(); //!这里可能是我抓第一个问题的关键
 }
 
 GameRequestPtr ProtoInterface::MakeRequest() {

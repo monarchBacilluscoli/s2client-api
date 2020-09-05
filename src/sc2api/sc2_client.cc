@@ -623,7 +623,7 @@ namespace sc2
             rendered_actions_ = SpatialActions();
         }
 
-        ConvertRawActions(response_, raw_actions_);
+        ConvertRawActions(response_, raw_actions_); //!看看这一块会不会出错，再看后面的会不会出错
         ConvertFeatureLayerActions(response_, feature_layer_actions_);
         ConvertRenderedActions(response_, rendered_actions_);
 
@@ -631,7 +631,7 @@ namespace sc2
         {
             for (ActionRaw &action : raw_actions_)
             {
-                action.ability_id = GetGeneralizedAbilityID(action.ability_id, *this);
+                action.ability_id = GetGeneralizedAbilityID(action.ability_id, *this); //! 所以到底是没有raw_actions还是它的转换信息没get到
             }
             for (SpatialUnitCommand &spatial_action : feature_layer_actions_.unit_commands)
             {
@@ -656,14 +656,15 @@ namespace sc2
             return false;
         }
 
+        // 更新单位
         units_previous_map_.clear();
         unit_pool_.ForEachExistingUnit([&](Unit &unit) {
             units_previous_map_[unit.tag] = unit;
-        });
+        }); //?把尚未更新的单位信息记录下来（previous记录）,不知道有啥用。哦，用于issue单位创生的事件
 
         unit_pool_.ClearExisting();
 
-        Convert(observation_raw, unit_pool_, current_game_loop_);
+        Convert(observation_raw, unit_pool_, current_game_loop_); // 从proto中记录新的单位信息
 
         // Remap ability ids in orders.
         unit_pool_.ForEachExistingUnit([&](Unit &unit) {
@@ -1660,7 +1661,7 @@ namespace sc2
             timeout_seconds = 1;
         }
 
-        for (unsigned int count_seconds = 0; count_seconds < timeout_seconds; ++count_seconds)
+        for (unsigned int count_seconds = 0; count_seconds < timeout_seconds; ++count_seconds) // !超时时间内会反复进行连接
         {
             if (proto_.ConnectToGame(address, port, timeout_ms))
             {
@@ -1680,7 +1681,7 @@ namespace sc2
         }
         std::cout << std::endl;
 
-        if (!connected)
+        if (!connected) //! 这里会有一个报错
         {
             std::cerr << "Unable to connect to game" << std::endl;
             return false;

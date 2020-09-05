@@ -313,28 +313,28 @@ public:
     }
     void OnStep() override
     {
-        if (!(Observation()->GetGameLoop() % 20))
-        {
-            auto a = Observation()->GetRawActions();
-            std::cout << a.size() << std::endl;
-        }
+        // if (!(Observation()->GetGameLoop() % 20))
+        // {
+        auto a = Observation()->GetRawActions();
+        std::cout << a.size() << std::endl;
+        // }
         tick = (tick ? false : true);
         // execute
         for (const Unit *u : Observation()->GetUnits())
         {
 
             //todo push new orders for the enemy
-            if (u->alliance == Unit::Alliance::Enemy)
-            {
-                if (u->unit_type == UNIT_TYPEID::TERRAN_SIEGETANK || u->unit_type == UNIT_TYPEID::TERRAN_SIEGETANKSIEGED)
-                {
-                    Actions()->UnitCommand(u, ABILITY_ID::MORPH_SIEGEMODE, true);
-                    if (!u->orders.empty())
-                    {
-                        std::cout << "good" << std::endl;
-                    }
-                }
-            }
+            // if (u->alliance == Unit::Alliance::Enemy)
+            // {
+            //     if (u->unit_type == UNIT_TYPEID::TERRAN_SIEGETANK || u->unit_type == UNIT_TYPEID::TERRAN_SIEGETANKSIEGED)
+            //     {
+            //         Actions()->UnitCommand(u, ABILITY_ID::MORPH_SIEGEMODE, true);
+            //         if (!u->orders.empty())
+            //         {
+            //             std::cout << "good" << std::endl;
+            //         }
+            //     }
+            // }
             //todo check if there is the new orderss
 
             bool has_cooldown_record = (m_units_states_last_loop.find(u->tag) != m_units_states_last_loop.end());
@@ -460,7 +460,10 @@ int main(int argc, char *argv[])
     KillProcess("SC2_x64");
 #endif
     Coordinator coordinator;
+    Coordinator coordinator2;
     coordinator.LoadSettings(argc, argv);
+    coordinator2.LoadSettings(argc, argv);
+    coordinator2.SetPortStart(12470);
 
     int frames = 60;
 #ifdef USE_GRAPHICS
@@ -477,13 +480,19 @@ int main(int argc, char *argv[])
     // coordinator.SetMultithreaded(true);
     coordinator.SetParticipants({
         CreateParticipant(Race::Terran, &action_test_bot),
-        // CreateParticipant(Race::Terran, &enemy_bot)
+        CreateParticipant(Race::Terran, &enemy_bot)
+        //  CreateComputer(Race::Terran)
+    });
+    coordinator2.SetParticipants({
+        CreateParticipant(Race::Terran, &action_test_bot),
+        CreateParticipant(Race::Terran, &enemy_bot)
         //  CreateComputer(Race::Terran)
     });
 
     const ObservationInterface *ob = coordinator.GetObservations().front();
 
     coordinator.LaunchStarcraft();
+    coordinator2.LaunchStarcraft();
     coordinator.StartGame("/home/liuyongfeng/StarCraftII/maps/2P_EnemyZealotModVSMarinesSim.SC2Map");
     // coordinator.StartGame("/home/liuyongfeng/StarCraftII/maps/Test/ActionTest.SC2Map");
     // coordinator.StartGame("PCEnemyZealotVSMarinesSim.SC2Map");

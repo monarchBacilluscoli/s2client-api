@@ -8,6 +8,8 @@
 
 PortChecker::PortChecker()
 {
+    m_address.sin_family = AF_INET;
+    m_address.sin_addr.s_addr = INADDR_ANY; // 因为将IP绑定到本机，所以使用了INADDR_ANY(0.0.0.0)指定了IP
 }
 
 bool PortChecker::Check(int port)
@@ -21,9 +23,7 @@ bool PortChecker::Check(int port)
     {
         perror("setsockopt:");
     }
-    m_address.sin_family = AF_INET;
-    m_address.sin_addr.s_addr = INADDR_ANY; // 因为将IP绑定到本机，所以使用了INADDR_ANY(0.0.0.0)指定了IP
-    m_address.sin_port = htons(port);       // 将unsigned short integer hostshort from host byte order to network byte order 即从本机可能是小端的字节序转换成网络字节序（大端）
+    m_address.sin_port = htons(port); // 将unsigned short integer hostshort from host byte order to network byte order 即从本机可能是小端的字节序转换成网络字节序（大端）
 
     if (bind(m_checker_fd, (sockaddr *)&m_address, sizeof(m_address)) < 0) // 将创建的socket绑定在对应的地址和端口
     {
@@ -32,16 +32,30 @@ bool PortChecker::Check(int port)
     }
     else
     {
-        // std::this_thread::sleep_for(std::chrono::milliseconds(100000));
-
-        // 关闭file descriptor
-        if (close(m_checker_fd) < 0)
+        if (close(m_checker_fd) < 0) // 关闭file descriptor
         {
             std::cout << "bind ok, release error: " << std::endl;
             perror("shutdown");
         }
         return true;
     }
+}
+
+uint16_t PortChecker::GetContinuousPortFromPort(uint16_t port_start, int continuous_port_num)
+{
+    for (int i = 0; i < continuous_port_num; ++i) //得到连续7个port
+    {
+        if (!Check(port_start + i))
+        {
+            port_start = port_start + i + 1;
+            i = 0;
+        }
+        else if (i < 7 && port_start + i > std::numeric_limits<u_int16_t>::max())
+        {
+            throw("no ports valid below port number " + std::to_string(std::numeric_limits<u_int16_t>::max()));
+        }
+    }
+    return port_start;
 }
 
 PortChecker::~PortChecker()

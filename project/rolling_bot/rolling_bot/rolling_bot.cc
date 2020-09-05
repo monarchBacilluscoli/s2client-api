@@ -1,4 +1,6 @@
 #include <sstream>
+#include <functional>
+#include <iostream>
 
 #include "sc2api/sc2_score.h"
 #include "rolling_bot.h"
@@ -16,15 +18,6 @@ namespace sc2
 
     void RollingBot::OnGameStart()
     {
-        // if (false)
-        // {
-        //     std::string path = m_rolling_ea.GetOutputPath();
-        //     std::fstream fs = std::fstream(path, std::ios::app | std::ios::out);
-        //     fs << std::endl
-        //        << "start:\t" << m_rolling_ea.GetObjectiveSize() << m_rolling_ea.IsUsePriori() << m_rolling_ea.IsUseFixByData() << m_rolling_ea.IsUseAssemble() << '\t' << m_rolling_ea.GetSimLength() << std::endl;
-        //     fs.close();
-        // }
-
         if (m_is_output_conver)
         {
             std::string conver_path = CurrentFolder() + "/conver_data.txt";

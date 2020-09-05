@@ -14,7 +14,7 @@
 
 namespace sc2 {
 
-void StartCivetweb() {
+void StartCivetweb() {// 主要作用是调用mg_start，但是貌似现在推荐使用mg_init，并且只允许一个线程进行init，如果多线程情况无法保证安全性
     static bool is_initialized = false;
     static const char* REQUEST_TIMEOUT_MS = "5000";
     static const char* WEBSOCKET_TIMEOUT_MS = "1200000";
@@ -24,7 +24,7 @@ void StartCivetweb() {
     if (is_initialized) {
         return;
     }
-
+    std::cout<<__FUNCTION__<<std::endl;
     const char* options[] = {
         "request_timeout_ms",
         REQUEST_TIMEOUT_MS,
@@ -39,6 +39,7 @@ void StartCivetweb() {
 
     mg_callbacks callbacks;
     memset(&callbacks, 0, sizeof(callbacks));
+    mg_init_library(MG_FEATURES_DEFAULT); // in the code after that, the feature settings are default
     mg_start(&callbacks, nullptr, options);
 
     is_initialized = true;
@@ -116,7 +117,7 @@ bool Connection::Connect(const std::string& address, int port, bool verbose) {
         nullptr,
         DataHandler,
         ConnectionClosedHandler,
-        (void*) this);
+        (void*) this); //表明这里确实是作为client去connect游戏（服务器）
 
     if (!connection_) {
         return false;
