@@ -19,28 +19,14 @@ namespace sc2
                                                               m_process_path(process_path),
                                                               m_map_path(map_path)
     {
-        std::string sim_map_path = Simulator::GenerateSimMapPath(map_path);
-        int i = 0;
-        for (Simulation<std::thread::id> &simulation : m_simulations)
-        {
-            Simulator &sim = simulation.sim;
-            //sim.SetNetAddress(m_net_address);
-            sim.SetPortStart(port_start);
-            sim.SetProcessPath(process_path);
-            sim.SetMapPath(sim_map_path);
-            sim.SetStepSize(1);
-            sim.SetControlledPlayerNum(controlled_player_num);
-            port_start += 10;                 // single player +2 is enough, but multiplayer sim needs -1,0,2,3,4,5 6 ports and 7 port nums.
-            m_sol_sim_map[i++] = &simulation; // don't forget to set the map
-        }
-        m_port_end = port_start;
+        SetSims(size, net_address, port_start, process_path, map_path, controlled_player_num);
     };
 
     void SimulatorPool::SetSims(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int controlled_player_num)
     {
-        if (port_start + size * 20 > 32768 || port_start <= 1024)
+        if (port_start + size * 20 > std::numeric_limits<uint16_t>::max() || port_start < 61000)
         {
-            throw("Suggest you to check so that the port numbers used will be in the range bewtteen 1024 and 32768@" + std::string(__FUNCTION__));
+            throw("Suggest you seting the port_start between 61000(which is bigger than what you can find in /proc/sys/net/ipv4/ip_local_port_range) and 65535@" + std::string(__FUNCTION__));
         }
         m_simulations.resize(size);
         m_sol_sim_map.resize(size);
@@ -54,8 +40,9 @@ namespace sc2
             sim.SetMapPath(sim_map_path);
             sim.SetStepSize(1);
             sim.SetControlledPlayerNum(controlled_player_num);
-            port_start += 20;                 // a value set by experience
-            m_sol_sim_map[i++] = &simulation; // don't forget to set the map
+            port_start += 20;               // a value set by experience
+            m_sol_sim_map[i] = &simulation; // don't forget to set the map
+            ++i;
         }
         if (port_start > m_port_end)
         {
@@ -65,16 +52,18 @@ namespace sc2
 
     void SimulatorPool::StartSimsAsync(int batch_size) //? too many try...catch, ugly.
     {
+        batch_size = 20;
+        std::mutex exception_mtx;
         std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
         int sz = m_sol_sim_map.size();
         for (int i = 0; i < sz; ++i)
         {
             m_sol_sim_map[i]->result_holder =
                 std::async(std::launch::async,
-                           [sim = m_sol_sim_map[i]] { //note sim is a pointer
+                           [sim = m_sol_sim_map[i], &exception_mtx] { //note sim is a pointer
                                PortChecker pc;
-                               uint16_t new_port_start = pc.GetContinuousPortFromPort(sim->sim.GetPortStart(), 7);
-                               SleepFor(500);
+                               uint16_t new_port_start = pc.GetContinuousPortsFromPort(sim->sim.GetPortStart(), 7);
+                               //    SleepFor(500);
                                sim->sim.SetPortStart(new_port_start + 1); //this is wierd,but the implementation is wierd, too.
                                try
                                {
@@ -82,7 +71,9 @@ namespace sc2
                                }
                                catch (const std::exception &e) // if there is any exception during launching, kill then relaunch the game
                                {
-                                   std::cerr << "launch unsuccessful port: " << sim->sim.GetPortStart() << "@" + std::string(__FUNCTION__) << std::endl;
+                                   sim->sim.LeaveGame();
+                                   std::lock_guard<std::mutex> lg(exception_mtx);
+                                   std::cerr << "launch unsuccessful" << e.what() << "port: " << sim->sim.GetPortStart() << "@" + std::string(__FUNCTION__) << std::endl;
                                    // 有任何问题，先杀掉原始程序
                                    std::vector<ProcessInfo> infos = sim->sim.GetProcessInfo();
                                    for (int i = 0; i < 3; ++i)
@@ -107,14 +98,17 @@ namespace sc2
                                    SleepFor(1000);
                                    sim->sim.ClearOldProcessInfo();
                                    sim->sim.ResetExecutors();
-                                   uint16_t new_port_start = pc.GetContinuousPortFromPort(sim->sim.GetPortStart(), 7);
+                                   uint16_t new_port_start = pc.GetContinuousPortsFromPort(sim->sim.GetPortStart(), 7);
                                    sim->sim.SetPortStart(new_port_start + 1);
                                    sim->sim.LaunchStarcraft();
+                                   SleepFor(1000);
                                }
                                try
                                {
-                                   if (!sim->sim.StartGame()) // if the game start unsuccessfully, kill&relaunch&restart.
+                                   while (!sim->sim.StartGame()) // if the game start unsuccessfully, kill&relaunch&restart.
                                    {
+                                       sim->sim.LeaveGame();
+                                       std::lock_guard<std::mutex> lg(exception_mtx);
                                        std::vector<ProcessInfo> infos = sim->sim.GetProcessInfo();
                                        for (int i = 0; i < 3; ++i)
                                        {
@@ -136,19 +130,19 @@ namespace sc2
                                            ::waitpid(infos[1].process_id, &status, WUNTRACED | WCONTINUED);
                                        }
                                        SleepFor(1000);
+
                                        sim->sim.ClearOldProcessInfo();
                                        sim->sim.ResetExecutors();
-                                       uint16_t new_port_start = pc.GetContinuousPortFromPort(sim->sim.GetPortStart(), 7);
+                                       uint16_t new_port_start = pc.GetContinuousPortsFromPort(sim->sim.GetPortStart(), 7);
                                        sim->sim.SetPortStart(new_port_start + 1);
                                        sim->sim.LaunchStarcraft();
-                                       if (sim->sim.StartGame())
-                                       {
-                                           std::cout << "还是没成功 port：" << new_port_start << std::endl;
-                                       }
+                                       SleepFor(1000);
                                    }
                                }
                                catch (const std::exception &e)
                                {
+                                   sim->sim.LeaveGame();
+                                   std::lock_guard<std::mutex> lg(exception_mtx);
                                    std::vector<ProcessInfo> infos = sim->sim.GetProcessInfo();
                                    for (int i = 0; i < 3; ++i)
                                    {
@@ -172,27 +166,38 @@ namespace sc2
                                    SleepFor(1000);
                                    sim->sim.ClearOldProcessInfo();
                                    sim->sim.ResetExecutors();
-                                   uint16_t new_port_start = pc.GetContinuousPortFromPort(sim->sim.GetPortStart(), 7);
+                                   uint16_t new_port_start = pc.GetContinuousPortsFromPort(sim->sim.GetPortStart(), 7);
                                    sim->sim.SetPortStart(new_port_start + 1);
                                    sim->sim.LaunchStarcraft();
-                                   if (sim->sim.StartGame())
+                                   SleepFor(1000);
+                                   if (!sim->sim.StartGame())
                                    {
-                                       std::cout << "还是没成功 port：" << new_port_start << std::endl;
+                                       std::cout << "还是没成功(err) port：" << new_port_start << std::endl;
                                    }
                                }
                                return std::this_thread::get_id();
                            });
-            if (i != 0 && ((i + 1) % batch_size == 0 || i == sz))
+            if (i != 0 && ((i + 1) % batch_size == 0 || i >= sz - 1))
             {
-                for (int j = i - batch_size + 1; j <= i; ++j)
+                int j = (i >= sz - 1 ? batch_size * (sz / batch_size) : i - batch_size + 1);
+                for (; j <= i; ++j)
                 {
                     m_sol_sim_map[j]->result_holder.wait();
                 }
+                std::cout << "start batch until sim " << i << " finished!" << std::endl;
             }
-            std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-            std::chrono::steady_clock::duration d = end - start;
-            std::cout << "start time used: " << std::chrono::duration_cast<std::chrono::milliseconds>(d).count() << std::endl;
         }
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        std::chrono::steady_clock::duration d = end - start;
+        std::cout << "start time used: " << std::chrono::duration_cast<std::chrono::milliseconds>(d).count() << std::endl;
+        //! update 一阵子看看效果
+        RunSimsAsync(100, 0);
+        for (size_t i = 0; i < sz; ++i)
+        {
+            std::cout << m_sol_sim_map[i]->sim.GetObservations().front()->GetGameLoop() << '\t';
+        }
+        std::cout << std::endl;
+
         return;
     }
 
@@ -335,7 +340,7 @@ namespace sc2
                 m_sol_sim_map[i]->result_holder.wait();
             }
         }
-        // copy state ssyncly
+        // copy state asyncly
         std::vector<std::future<void>> copy_holders(sims_size); // I just need temporary holders to hold all threads. And when they are destroyed, they will wait for the return of those threads
         for (size_t i = 0; i < sims_size; ++i)
         {
@@ -343,7 +348,9 @@ namespace sc2
                 sim.CopyAndSetState(ob);
             });
         }
-        std::chrono::time_point<std::chrono::steady_clock> deadline = std::chrono::steady_clock::now() + m_wait_duration;
+
+
+        std::chrono::time_point<std::chrono::steady_clock> deadline = std::chrono::steady_clock::now() + std::chrono::seconds(1000);
         for (size_t i = 0; i < sims_size; ++i)
         {
             std::future_status result_status = copy_holders[i].wait_until(deadline);
@@ -467,7 +474,7 @@ namespace sc2
         }
     }
 
-    void SimulatorPool::RunSimsAsync(int steps)
+    void SimulatorPool::RunSimsAsync(int steps, int batch_size)
     {
         // run all the sims synchronously
         size_t sz = m_sol_sim_map.size();
@@ -480,44 +487,73 @@ namespace sc2
                                                   nullptr
 #endif // USE_GRAPHICS
             );
+            if (batch_size != 0 && (i != 0 && ((i + 1) % batch_size == 0 || i >= sz - 1)))
+            {
+                std::chrono::time_point<std::chrono::steady_clock> deadline = std::chrono::steady_clock::now() + m_wait_duration;
+                int j = batch_size * static_cast<int>(i / batch_size);
+                for (; j <= i; ++j) // 似乎不太对
+                {
+                    std::future_status result_status = m_sol_sim_map[j]->result_holder.wait_until(deadline);
+                    switch (result_status)
+                    {
+                    case std::future_status::ready:
+                    {
+                        break;
+                    }
+                    case std::future_status::timeout:
+                    { //todo add a new simulation and reset the map... but how to handle the result?
+                        std::cout << "sim " << i << " timeout..." << std::endl;
+                        break;
+                    }
+                    default:
+                    {
+                        throw("how can this async task be deffered?@" + std::string(__FUNCTION__));
+                        break;
+                    }
+                    }
+                }
+                std::cout << "update batch until sim " << i << " finished!" << std::endl;
+            }
         }
         // if there is any thread get stuck (timeout), throw it away and create a new one
-        std::chrono::time_point<std::chrono::steady_clock> deadline = std::chrono::steady_clock::now() + m_wait_duration;
-        for (size_t i = 0; i < sz; i++)
+        if (batch_size == 0)
         {
-            std::list<std::thread> thread_list;
-            std::future_status result_status = m_sol_sim_map[i]->result_holder.wait_until(deadline);
-            switch (result_status)
+            std::chrono::time_point<std::chrono::steady_clock> deadline = std::chrono::steady_clock::now() + m_wait_duration;
+            for (size_t i = 0; i < sz; ++i)
             {
-            case std::future_status::ready:
-            {
-                // ok
-                break;
-            }
-            case std::future_status::timeout:
-            { // add a new simulation and reset the map... but how to handle the result?
-                std::cout << "sim " << i << " timeout..." << std::endl;
-                m_timeout_index_set.insert(i);
+                std::list<std::thread> thread_list;
+                std::future_status result_status = m_sol_sim_map[i]->result_holder.wait_until(deadline);
+                switch (result_status)
+                {
+                case std::future_status::ready:
+                {
+                    // ok
+                    continue;
+                }
+                case std::future_status::timeout:
+                { // add a new simulation and reset the map... but how to handle the result?
+                    std::cout << "sim " << i << " timeout..." << std::endl;
+                    // m_timeout_index_set.insert(i);
 
-                Simulation<std::thread::id> sim = Simulation<std::thread::id>();
-                m_simulations.emplace_back();
-                Simulation<std::thread::id> &new_sim = m_simulations.back();
-                new_sim.sim.SetBaseSettings(m_port_end, m_process_path, Simulator::GenerateSimMapPath(m_map_path));
-                m_port_end += 2;
-                new_sim.sim.LaunchStarcraft();
-                new_sim.sim.StartGame();
-                new_sim.sim.CopyAndSetState(m_observation);
-                new_sim.sim.SetOrders(m_sol_sim_map[i]->sim.GetOriginalOrders()); //! this is not the source of the problem
-                m_sol_sim_map[i] = &new_sim;
-                break;
+                    // Simulation<std::thread::id> sim = Simulation<std::thread::id>();
+                    // m_simulations.emplace_back();
+                    // Simulation<std::thread::id> &new_sim = m_simulations.back();
+                    // new_sim.sim.SetBaseSettings(m_port_end, m_process_path, Simulator::GenerateSimMapPath(m_map_path));
+                    // m_port_end += 2;
+                    // new_sim.sim.LaunchStarcraft();
+                    // new_sim.sim.StartGame();
+                    // new_sim.sim.CopyAndSetState(m_observation);
+                    // new_sim.sim.SetOrders(m_sol_sim_map[i]->sim.GetOriginalOrders()); //! this is not the source of the problem
+                    // m_sol_sim_map[i] = &new_sim;
+                    continue;
+                }
+                default:
+                {
+                    throw("how can this async task be deffered?@" + std::string(__FUNCTION__));
+                    continue;
+                }
+                }
             }
-            default:
-            {
-                throw("how can this async task be deffered?@" + std::string(__FUNCTION__));
-                break;
-            }
-            }
-            //? Do I need to run it?
         }
     }
 

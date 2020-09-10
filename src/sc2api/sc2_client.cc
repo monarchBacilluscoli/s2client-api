@@ -2046,7 +2046,10 @@ namespace sc2
 
     GameResponsePtr ControlImp::WaitForResponse()
     {
-        assert(app_state_ == AppState::normal);
+        if (app_state_ != AppState::normal)
+        {
+            throw(std::runtime_error("a process is in timeout_zombie state@" + std::string(__FUNCTION__)));
+        }
 
         GameResponsePtr response = proto_.WaitForResponseInternal();
 

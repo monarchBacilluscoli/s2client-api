@@ -19,15 +19,16 @@ bool PortChecker::Check(int port)
     {
         perror("socket: ");
     }
-    if (setsockopt(m_checker_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &m_opt, sizeof(m_opt))) // 设置一些选项，完全可选的。
-    {
-        perror("setsockopt:");
-    }
+    // if (setsockopt(m_checker_fd, SOL_SOCKET, SO_REUSEADDR, &m_opt, sizeof(m_opt))) // 设置一些选项，完全可选的。
+    // {
+    //     perror("setsockopt:");
+    // }
     m_address.sin_port = htons(port); // 将unsigned short integer hostshort from host byte order to network byte order 即从本机可能是小端的字节序转换成网络字节序（大端）
 
     if (bind(m_checker_fd, (sockaddr *)&m_address, sizeof(m_address)) < 0) // 将创建的socket绑定在对应的地址和端口
     {
-        perror("bind");
+        std::string error_s = "bind(" + std::to_string(port) + ")";
+        perror(error_s.c_str());
         return false;
     }
     else
@@ -41,14 +42,14 @@ bool PortChecker::Check(int port)
     }
 }
 
-uint16_t PortChecker::GetContinuousPortFromPort(uint16_t port_start, int continuous_port_num)
+uint16_t PortChecker::GetContinuousPortsFromPort(uint16_t port_start, int continuous_port_num)
 {
     for (int i = 0; i < continuous_port_num; ++i) //得到连续7个port
     {
         if (!Check(port_start + i))
         {
             port_start = port_start + i + 1;
-            i = 0;
+            i = -1;
         }
         else if (i < 7 && port_start + i > std::numeric_limits<u_int16_t>::max())
         {

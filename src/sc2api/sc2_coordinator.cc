@@ -400,7 +400,7 @@ namespace sc2
             }
 
             control->Step(process_settings_.step_size);
-            control->WaitStep(); //1. from here we know the game has been end.
+            control->WaitStep();                  //1. from here we know the game has been end.
             if (process_settings_.multi_threaded) // 直到这里才check是否是多线程
             {
                 CallOnStep(a); //2. The first chance to call the CallOnStep() is missing (This function will call OnGameEnd() based on whether the Agent is in game or not) since it is not a multi_threaded game according to my settings.
@@ -783,7 +783,7 @@ namespace sc2
         if (!is_game_created)
         {
             std::cerr << "Failed to create game." << std::endl;
-            exit(1);
+            return false;
         }
         return JoinGame();
     }

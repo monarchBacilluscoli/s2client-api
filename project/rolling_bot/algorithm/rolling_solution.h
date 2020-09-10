@@ -101,7 +101,7 @@ namespace sc2
                 }
             }
         }
-#endif // DEBUG \
+#endif // DEBUG
         aver_result.units_statistics = AverageSimData::CalculateAverUnitStatistics(results);
         aver_result.end_loop = AverageSimData::CalculateAverEndLoop(results);
         aver_result.win_rate = AverageSimData::CalculateAverWinRate(results);

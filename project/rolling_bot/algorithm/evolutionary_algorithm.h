@@ -47,7 +47,7 @@ namespace sc2
         bool m_is_output_file = false;
         int m_objective_size = 1;
         int m_population_size = 50;
-        int m_sub_pop_size = m_population_size / 10;
+        int m_sub_pop_size = m_population_size / 10 > 1 ? m_population_size / 10 : 1;
         int m_current_generation = 0;
         int m_current_evaluation = 0;
         int m_max_evaluation = 0;

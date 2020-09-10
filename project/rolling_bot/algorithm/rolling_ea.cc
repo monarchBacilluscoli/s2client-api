@@ -272,11 +272,11 @@ namespace sc2
         return;
     }
 
-    void RollingEA::Evaluate(Population &my_pop, Population &enemy_pop, int sub_pop_size)
+    void RollingEA::Evaluate(Population &my_pop, Population &enemy_pop, int sub_pop_size) //! 问题出在这里，希望不要是很多的copy错误，那样程序真的就没法运行了
     {
         std::vector<std::vector<int>> index_map = std::vector<std::vector<int>>(my_pop.size(), std::vector<int>(sub_pop_size));
 
-        std::vector<int> index_vec(enemy_pop.size());
+        std::vector<int> index_vec(enemy_pop.size()); // used for random selection of rival individual
         std::iota(index_vec.begin(), index_vec.end(), 0);
 
         float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
@@ -295,7 +295,7 @@ namespace sc2
         for (int i = 0; i < my_pop.size(); ++i)
         {
             std::shuffle(index_vec.begin(), index_vec.end(), m_random_engine);
-            // choose both sidess
+            // choose both sides
             for (int j = 0; j < sub_pop_size; ++j)
             {
                 // set the orders
@@ -389,6 +389,7 @@ namespace sc2
                 }
             }
         }
+        return;
     }
 
     void RollingEA::Select()

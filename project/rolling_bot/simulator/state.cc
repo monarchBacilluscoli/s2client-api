@@ -110,7 +110,7 @@ std::map<Tag, const Unit *> sc2::LoadMultiPlayerGame(State save, Client &current
         std::cout << "load mistake!" << std::endl;
     }
     current_client.Debug()->SendDebug();
-    count = ceil(2 / step_size);
+    count = ceil(2 / step_size); // what for?
     for (size_t i = 0; i < count; i++)
     {
         current_coordinator.Update();

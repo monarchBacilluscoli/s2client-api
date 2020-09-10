@@ -37,12 +37,11 @@ namespace sc2
                 os << "update:\t" << i << '\t' << cor.GetPortStart() << std::endl;
             }
         }
-        }
+    }
 
     void Test::CSetAndStart(Coordinator &cor, int port, int argc, char *argv[], Agent *bot1, Agent *bot2, int time_out_ms, std::ostream &os)
     {
         cor.LoadSettings(argc, argv);
-        // cor.SetTimeoutMS(time_out_ms);
         cor.SetParticipants({CreateParticipant(Terran, bot1),
                              CreateComputer(Terran)});
         PortChecker pc;
@@ -109,8 +108,6 @@ namespace sc2
                     }
                 }
                 cor.SetPortStart(port + 1);
-
-                //! 恐怕需要先杀掉原先的进程才行...可是StartGame不是杀过了吗？
                 cor.LaunchStarcraft();
                 cor.StartGame();
             }
