@@ -15,15 +15,10 @@ PortChecker::PortChecker()
 
 bool PortChecker::Check(int port)
 {
-    // std::cout << ::getpid() << std::endl;
     if ((m_checker_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) // IPv4，可靠连接，这种组合的第0个协议（TCP）
     {
         perror("socket: ");
     }
-    // if (setsockopt(m_checker_fd, SOL_SOCKET, SO_REUSEADDR, &m_opt, sizeof(m_opt))) // 设置一些选项，完全可选的。
-    // {
-    //     perror("setsockopt:");
-    // }
     m_address.sin_port = htons(port); // 将unsigned short integer hostshort from host byte order to network byte order 即从本机可能是小端的字节序转换成网络字节序（大端）
 
     if (bind(m_checker_fd, (sockaddr *)&m_address, sizeof(m_address)) < 0) // 将创建的socket绑定在对应的地址和端口
@@ -34,7 +29,6 @@ bool PortChecker::Check(int port)
     }
     else
     {
-        std::cout << m_checker_fd << std::endl;
         if (close(m_checker_fd) < 0) // 关闭file descriptor
         {
             std::cout << "bind ok, release error: " << std::endl;
@@ -59,10 +53,4 @@ uint16_t PortChecker::GetContinuousPortsFromPort(uint16_t port_start, int contin
         }
     }
     return port_start;
-}
-
-PortChecker::~PortChecker()
-{
-    // close(m_checker_fd); //! caution! if you close this one, the fd which is reused by others will also be closed! It dosn't need to close when you only use bind && after each time I close the fd, no need to close it again
-    // fcntl(m_checker_fd, )
 }

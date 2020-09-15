@@ -455,7 +455,6 @@ int main(int argc, char *argv[])
             renderer.DrawObservation(ob), // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
             renderer.Present(),
 #endif //USE_GRAPHICS
-            std::cout << ob->GetUnits().size() << std::endl,
             coordinator.Update())
         {
 #ifdef REAL_TIME_UPDATE
