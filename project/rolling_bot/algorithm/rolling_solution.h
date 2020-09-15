@@ -32,8 +32,8 @@ namespace sc2
         float win_rate; //? how to define it? how to handle tie?
 
         //? maybe temporary use
-        float total_health_loss_mine = 0.f;
-        float total_health_loss_enemy = 0.f;
+        float total_health_change_mine = 0.f;
+        float total_health_change_enemy = 0.f;
         uint32_t end_loop = std::numeric_limits<uint32_t>::max();
 
         void Clear();
@@ -77,8 +77,8 @@ namespace sc2
         aver_result.units_statistics.clear();
         aver_result.win_rate = 0.f;
         results.clear();
-        aver_result.total_health_loss_enemy = 0.f;
-        aver_result.total_health_loss_mine = 0.f;
+        aver_result.total_health_change_enemy = 0.f;
+        aver_result.total_health_change_mine = 0.f;
         aver_result.end_loop = std::numeric_limits<uint32_t>::max();
     }
 
@@ -105,8 +105,8 @@ namespace sc2
         aver_result.units_statistics = AverageSimData::CalculateAverUnitStatistics(results);
         aver_result.end_loop = AverageSimData::CalculateAverEndLoop(results);
         aver_result.win_rate = AverageSimData::CalculateAverWinRate(results);
-        aver_result.total_health_loss_mine = CalculateAverTotalHealthLoss(Unit::Alliance::Self);
-        aver_result.total_health_loss_enemy = CalculateAverTotalHealthLoss(Unit::Alliance::Enemy);
+        aver_result.total_health_change_mine = CalculateAverTotalHealthLoss(Unit::Alliance::Self);
+        aver_result.total_health_change_enemy = CalculateAverTotalHealthLoss(Unit::Alliance::Enemy);
     }
 
     template <class T>
@@ -154,12 +154,12 @@ namespace sc2
             {
                 throw("The obj sizes of the two solution are not the same @ Solution::" + std::string(__FUNCTION__));
             }
-            else if (l.results.front().game.result == GameResult::Win || r.results.front().game.result == GameResult::Win)
-            {
-                auto loop_add = [](u_int32_t sum, const SimData &d) -> u_int32_t { return sum + d.game.end_loop; };
-                // return std::accumulate(l.results.begin(), l.results.end(), 0, loop_add) < std::accumulate(r.results.begin(), r.results.end(), 0, loop_add);
-                return l.results.front().game.end_loop < r.results.front().game.end_loop;
-            }
+            // else if (l.results.front().game.result == GameResult::Win || r.results.front().game.result == GameResult::Win) //! old code for comparison of win loop
+            // {
+            //     auto loop_add = [](u_int32_t sum, const SimData &d) -> u_int32_t { return sum + d.game.end_loop; };
+            //     // return std::accumulate(l.results.begin(), l.results.end(), 0, loop_add) < std::accumulate(r.results.begin(), r.results.end(), 0, loop_add);
+            //     return l.results.front().game.end_loop < r.results.front().game.end_loop;
+            // }
             else
             {
                 return false;

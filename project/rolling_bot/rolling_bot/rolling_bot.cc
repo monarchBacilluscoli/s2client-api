@@ -53,13 +53,7 @@ namespace sc2
         {
             AgentControl()->Restart(); // for test
         }
-
-        static int count = 0;
-        ++count;
-        if (count > 10)
-        {
-            exit(0);
-        }
+        return;
     }
 
     void RollingBot::OnStep()
@@ -71,11 +65,7 @@ namespace sc2
         // after a specific interval, run the algorithm and get the final orders to be given
         if (Observation()->GetGameLoop() % m_interval_size == 0 && !Observation()->GetUnits(Unit::Alliance::Enemy).empty() && !Observation()->GetUnits(Unit::Alliance::Self).empty())
         {
-
-            if (Observation()->GetGameLoop() != 0)
-            {
-                Control()->SaveReplay(CurrentFolder() + "/fix_test.SC2Replay");
-            }
+            Control()->SaveReplay(CurrentFolder() + "/fix_test.SC2Replay");
 
             { // stop all the units first, or it may cause some problem since the simulation starts from the condition where all units are still
                 Units my_team = Observation()->GetUnits(Unit::Alliance::Self);

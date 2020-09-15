@@ -67,7 +67,7 @@ private:
     void ClearDeadUnits();
     void InitUnitStatistics(const Units &all_units);
     void RecordInitialUnitsStates(const Units &all_units);
-    float CalculateHealthChange(Tag tag) const;
+    float CalculateHealthChange(Tag tag) const; // final - initial
 };
 } // namespace sc2
 

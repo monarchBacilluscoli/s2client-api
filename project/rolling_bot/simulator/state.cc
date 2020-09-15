@@ -46,10 +46,10 @@ bool State::operator!=(const State &state) const
 State sc2::SaveMultiPlayerGame(const ObservationInterface *observation)
 {
     State save;
-    Units us = observation->GetUnits();
+    const Units us = observation->GetUnits();
     save.unit_states.resize(us.size());
     const Unit *u;
-    for (size_t i = 0; i < us.size(); i++)
+    for (size_t i = 0; i < us.size(); ++i)
     {
         u = us.at(i);
         save.unit_states[i] = UnitState({u->unit_type,

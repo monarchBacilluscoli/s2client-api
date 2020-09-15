@@ -51,6 +51,7 @@ void Simulator::CopyAndSetState(const ObservationInterface *ob_source
 #endif // USE_GRAPHICS
     m_executor.SetIsSetting(false);
     m_enemy_executor.SetIsSetting(false);
+    return;
 }
 
 std::thread::id Simulator::Run(int steps

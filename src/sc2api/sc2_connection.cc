@@ -162,7 +162,7 @@ void Connection::Send(const SC2APIProtocol::Request* request) {
 bool Connection::Receive(
     SC2APIProtocol::Response*& response,
     unsigned int timeout_ms) {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::unique_lock<std::mutex> lock(mutex_); //!liuyongfeng:这里有个lock？？
     // Block until a message is recieved.
     if (verbose_) {
         std::cout << "Waiting for response..." << std::endl;

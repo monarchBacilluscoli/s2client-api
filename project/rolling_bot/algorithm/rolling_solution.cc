@@ -5,8 +5,8 @@ namespace sc2
     void AverageSimData::Clear()
     {
         win_rate = 0.f;
-        total_health_loss_mine = 0.f;
-        total_health_loss_enemy = 0.f;
+        total_health_change_mine = 0.f;
+        total_health_change_enemy = 0.f;
         end_loop = std::numeric_limits<uint32_t>::max();
     }
 
@@ -26,12 +26,14 @@ namespace sc2
         }
         else
         {
+            int result_sz = results.size();
             for (const auto &u : results.front().units) // according to the first results to traverse the units
             {
-                aver_result[u.first].action_number = std::accumulate(results.begin(), results.end(), 0, [&u](int sum, const SimData &sim_data) -> int { return sum + sim_data.units.at(u.first).statistics.action_number; }) / results.size();
-                aver_result[u.first].attack_number = std::accumulate(results.begin(), results.end(), 0, [&u](int sum, const SimData &sim_data) -> int { return sum + sim_data.units.at(u.first).statistics.attack_number; }) / results.size();
-                aver_result[u.first].health_change = std::accumulate(results.begin(), results.end(), 0, [&u](float sum, const SimData &sim_data) -> float { return sum + sim_data.units.at(u.first).statistics.health_change; }) / results.size();
+                aver_result[u.first].action_number = std::accumulate(results.begin(), results.end(), 0, [&u](int sum, const SimData &sim_data) -> int { return sum + sim_data.units.at(u.first).statistics.action_number; }) / result_sz;
+                aver_result[u.first].attack_number = std::accumulate(results.begin(), results.end(), 0, [&u](int sum, const SimData &sim_data) -> int { return sum + sim_data.units.at(u.first).statistics.attack_number; }) / result_sz;
+                aver_result[u.first].health_change = std::accumulate(results.begin(), results.end(), 0.f, [&u](float sum, const SimData &sim_data) -> float { return sum + sim_data.units.at(u.first).statistics.health_change; }) / result_sz;
             }
+            size_t a;
         }
         return aver_result;
     }

@@ -152,8 +152,8 @@ namespace sc2
                         float my_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
                         pop[i].objectives[0] += m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
                         pop[i].objectives[1] += -m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
-                        pop[i].aver_result.total_health_loss_enemy += enemy_loss;
-                        pop[i].aver_result.total_health_loss_mine += my_loss;
+                        pop[i].aver_result.total_health_change_enemy += enemy_loss;
+                        pop[i].aver_result.total_health_change_mine += my_loss;
                         if (pop[i].results[j].game.result != GameResult::Win) // maximization
                         {
                             pop[i].objectives[2] -= m_sim_length;
@@ -174,8 +174,8 @@ namespace sc2
                 pop[i].objectives[0] /= m_evaluation_time_multiplier;
                 pop[i].objectives[1] /= m_evaluation_time_multiplier; // transform it to maximum optimization
                 pop[i].objectives[2] /= m_evaluation_time_multiplier;
-                pop[i].aver_result.total_health_loss_enemy /= m_evaluation_time_multiplier;
-                pop[i].aver_result.total_health_loss_mine /= m_evaluation_time_multiplier;
+                pop[i].aver_result.total_health_change_enemy /= m_evaluation_time_multiplier;
+                pop[i].aver_result.total_health_change_mine /= m_evaluation_time_multiplier;
                 pop[i].aver_result.end_loop /= m_evaluation_time_multiplier;
             }
         }
@@ -242,8 +242,8 @@ namespace sc2
                         float enemy_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Enemy);
                         float my_loss = m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
                         pop[i].objectives[0] += enemy_loss / total_health_enemy - my_loss / total_health_me;
-                        pop[i].aver_result.total_health_loss_enemy += enemy_loss;
-                        pop[i].aver_result.total_health_loss_mine += my_loss;
+                        pop[i].aver_result.total_health_change_enemy += enemy_loss;
+                        pop[i].aver_result.total_health_change_mine += my_loss;
                         // pop[i].objectives[1] += -m_simulation_pool.GetTeamHealthLoss(i, Unit::Alliance::Self);
                         if (pop[i].results[j].game.result != GameResult::Win) // maximization
                         {
@@ -264,8 +264,8 @@ namespace sc2
                 pop[i].objectives[0] /= m_evaluation_time_multiplier;
                 // pop[i].objectives[1] /= m_evaluation_time_multiplier; // transform it to maximum optimization
                 pop[i].objectives[1] /= m_evaluation_time_multiplier;
-                pop[i].aver_result.total_health_loss_enemy /= m_evaluation_time_multiplier;
-                pop[i].aver_result.total_health_loss_mine /= m_evaluation_time_multiplier;
+                pop[i].aver_result.total_health_change_enemy /= m_evaluation_time_multiplier;
+                pop[i].aver_result.total_health_change_mine /= m_evaluation_time_multiplier;
                 pop[i].aver_result.end_loop /= m_evaluation_time_multiplier;
             }
         }
@@ -285,6 +285,15 @@ namespace sc2
         {
             item.ClearSimData();
             item.results.resize(sub_pop_size); // to contain the sub_pop_size's results
+            item.objectives.resize(m_objective_size);
+            for (auto &ob : item.objectives)
+            {
+                ob = std::numeric_limits<float>::lowest(); // clear the objective value for the addition operation
+            }
+        }
+        for (auto &item : enemy_pop)
+        {
+            item.ClearSimData();
             item.objectives.resize(m_objective_size);
             for (auto &ob : item.objectives)
             {
@@ -343,17 +352,18 @@ namespace sc2
         for (int i = 0; i < my_pop.size(); ++i) // my pop: calculate average data and set the objectives
         {
             my_pop[i].CalculateAver();
+            my_pop[i].objectives.resize(m_objective_size);
             if (m_objective_size == 3)
             {
-                my_pop[i].objectives[0] = my_pop[i].aver_result.total_health_loss_enemy;
-                my_pop[i].objectives[1] = my_pop[i].aver_result.total_health_loss_mine;
+                my_pop[i].objectives[0] = -my_pop[i].aver_result.total_health_change_enemy;
+                my_pop[i].objectives[1] = my_pop[i].aver_result.total_health_change_mine;
                 my_pop[i].objectives[2] = my_pop[i].aver_result.end_loop;
             }
             else if (m_objective_size == 2)
             {
                 float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
                 float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
-                my_pop[i].objectives[0] = my_pop[i].aver_result.total_health_loss_enemy / total_health_enemy - my_pop[i].aver_result.total_health_loss_mine / total_health_me;
+                my_pop[i].objectives[0] = my_pop[i].aver_result.total_health_change_enemy / total_health_enemy - my_pop[i].aver_result.total_health_change_mine / total_health_me;
                 my_pop[i].objectives[1] = my_pop[i].aver_result.end_loop;
             }
             else
@@ -374,17 +384,18 @@ namespace sc2
             else
             {
                 enemy_pop[i].CalculateAver();
+                enemy_pop[i].objectives.resize(m_objective_size);
                 if (m_objective_size == 3)
                 {
-                    enemy_pop[i].objectives[0] = enemy_pop[i].aver_result.total_health_loss_enemy;
-                    enemy_pop[i].objectives[1] = -enemy_pop[i].aver_result.total_health_loss_mine;
-                    enemy_pop[i].objectives[2] = -enemy_pop[i].aver_result.end_loop;
+                    enemy_pop[i].objectives[0] = +enemy_pop[i].aver_result.total_health_change_enemy;
+                    enemy_pop[i].objectives[1] = enemy_pop[i].aver_result.total_health_change_mine;
+                    enemy_pop[i].objectives[2] = enemy_pop[i].aver_result.end_loop;
                 }
                 else if (m_objective_size == 2)
                 {
                     float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
                     float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
-                    enemy_pop[i].objectives[0] = enemy_pop[i].aver_result.total_health_loss_enemy / total_health_enemy - my_pop[i].aver_result.total_health_loss_mine / total_health_me;
+                    enemy_pop[i].objectives[0] = enemy_pop[i].aver_result.total_health_change_enemy / total_health_enemy - my_pop[i].aver_result.total_health_change_mine / total_health_me;
                     enemy_pop[i].objectives[1] = -enemy_pop[i].aver_result.end_loop;
                 }
             }
@@ -677,18 +688,18 @@ namespace sc2
     {
         //todo aver and max
         float damage_aver = std::accumulate(m_populations[pop_index].begin(), m_populations[pop_index].end(), 0.f, [](float init, const RollingSolution<Command> &r) -> float {
-                                return init + r.aver_result.total_health_loss_enemy;
+                                return init + r.aver_result.total_health_change_enemy;
                             }) /
                             m_populations[pop_index].size();
         auto damage_max_it = std::max_element(m_populations[pop_index].begin(), m_populations[pop_index].end(), [](const RollingSolution<Command> &l, const RollingSolution<Command> &r) -> bool {
-            return l.aver_result.total_health_loss_enemy < r.aver_result.total_health_loss_enemy;
+            return l.aver_result.total_health_change_enemy < r.aver_result.total_health_change_enemy;
         });
         float hurt_aver = std::accumulate(m_populations[pop_index].begin(), m_populations[pop_index].end(), 0.f, [](float init, const RollingSolution<Command> r) -> float {
-                              return init + r.aver_result.total_health_loss_mine;
+                              return init + r.aver_result.total_health_change_mine;
                           }) /
                           m_populations[pop_index].size();
         auto hurt_min_it = std::max_element(m_populations[pop_index].begin(), m_populations[pop_index].end(), [](const RollingSolution<Command> &l, const RollingSolution<Command> &r) -> bool {
-            return l.aver_result.total_health_loss_mine > r.aver_result.total_health_loss_mine;
+            return l.aver_result.total_health_change_mine > r.aver_result.total_health_change_mine;
         });
         uint32_t win_loop = std::accumulate(m_populations[pop_index].begin(), m_populations[pop_index].end(), 0.f, [](float init, const RollingSolution<Command> &r) -> float {
                                 return init + r.aver_result.end_loop;
@@ -697,7 +708,7 @@ namespace sc2
         auto win_loop_min_it = std::max_element(m_populations[pop_index].begin(), m_populations[pop_index].end(), [](const RollingSolution<Command> &l, const RollingSolution<Command> &r) -> bool {
             return l.aver_result.end_loop > r.aver_result.end_loop;
         });
-        os << damage_aver << '\t' << damage_max_it->aver_result.total_health_loss_enemy << '\t' << hurt_aver << '\t' << hurt_min_it->aver_result.total_health_loss_mine << '\t' << win_loop << '\t' << win_loop_min_it->aver_result.end_loop << std::endl;
+        os << damage_aver << '\t' << damage_max_it->aver_result.total_health_change_enemy << '\t' << hurt_aver << '\t' << hurt_min_it->aver_result.total_health_change_mine << '\t' << win_loop << '\t' << win_loop_min_it->aver_result.end_loop << std::endl;
     }
 
     void RollingEA::OutputPopulationSimResult(std::ostream &os, int pop_index) const
@@ -706,7 +717,7 @@ namespace sc2
         {
             float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
             float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
-            os << s.aver_result.total_health_loss_enemy << '\t' << s.aver_result.total_health_loss_mine << '\t' << s.aver_result.end_loop << '\t' << total_health_enemy << '\t' << total_health_me << '\t' << s.rank << std::endl;
+            os << s.aver_result.total_health_change_enemy << '\t' << s.aver_result.total_health_change_mine << '\t' << s.aver_result.end_loop << '\t' << total_health_enemy << '\t' << total_health_me << '\t' << s.rank << std::endl;
         }
         os << std::endl;
     }

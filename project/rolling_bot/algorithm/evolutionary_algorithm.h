@@ -78,13 +78,18 @@ namespace sc2
     public:
         EvolutionaryAlgorithm() = default;
         // a constructor with all parameters
-        EvolutionaryAlgorithm(int objective_size, int max_generation, int population_size, int random_seed = 0, std::vector<std::string> objective_names = std::vector<std::string>(), int num_pop = 2) : m_termination_conditions{
-                                                                                                                                                                                                              // if true, stop loop
-                                                                                                                                                                                                              {TERMINATION_CONDITION::MAX_GENERATION, std::make_shared<MGT>(*this, max_generation)},
-                                                                                                                                                                                                              {TERMINATION_CONDITION::CONVERGENCE, std::make_shared<CT>(*this)}, /* add it by yourself */
-                                                                                                                                                                                                              {TERMINATION_CONDITION::MAX_EVALUATION, std::make_shared<MET>(*this)},
-                                                                                                                                                                                                          },
-                                                                                                                                                                                                          m_population_size(population_size), m_objective_size(objective_size), m_random_engine{random_seed}, m_history_objs_ave(objective_size), m_history_objs_best(objective_size), m_history_objs_worst(objective_size), m_objective_names(objective_size), m_populations(num_pop, Population(m_population_size))
+        EvolutionaryAlgorithm(int objective_size,
+                              int max_generation,
+                              int population_size,
+                              int random_seed = 0,
+                              std::vector<std::string> objective_names = std::vector<std::string>(),
+                              int num_pop = 2) : m_termination_conditions{
+                                                     // if true, stop loop
+                                                     {TERMINATION_CONDITION::MAX_GENERATION, std::make_shared<MGT>(*this, max_generation)},
+                                                     {TERMINATION_CONDITION::CONVERGENCE, std::make_shared<CT>(*this)}, /* add it by yourself */
+                                                     {TERMINATION_CONDITION::MAX_EVALUATION, std::make_shared<MET>(*this)},
+                                                 },
+                                                 m_population_size(population_size), m_objective_size(objective_size), m_random_engine{random_seed}, m_history_objs_ave(objective_size), m_history_objs_best(objective_size), m_history_objs_worst(objective_size), m_objective_names(objective_size), m_populations(num_pop, Population(m_population_size)), m_offsprings(num_pop, Population())
         {
 #ifdef USE_GRAPHICS
             m_overall_evolution_status_renderer.SetTitle("Evolution Status");
@@ -248,7 +253,7 @@ namespace sc2
     {
         InitBeforeRun();
         Generate();                  //todo 各自generate各自
-        Evaluate();                  //todo 合在一起evaluate
+        Evaluate();                  //!evaluate 把他妈主进程杀了
         ActionAfterEachGeneration(); // you need to run it after the first generation
         for (m_current_generation = 1; !CheckIfTerminationMeet(); ++m_current_generation)
         {

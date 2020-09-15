@@ -1,8 +1,9 @@
-#include <thread>
-#include <iostream>
-
 #include <unistd.h>
 #include <sys/socket.h>
+#include <fcntl.h>
+
+#include <thread>
+#include <iostream>
 
 #include "sc2utils/port_checker.h"
 
@@ -33,6 +34,7 @@ bool PortChecker::Check(int port)
     }
     else
     {
+        std::cout << m_checker_fd << std::endl;
         if (close(m_checker_fd) < 0) // 关闭file descriptor
         {
             std::cout << "bind ok, release error: " << std::endl;
@@ -61,5 +63,6 @@ uint16_t PortChecker::GetContinuousPortsFromPort(uint16_t port_start, int contin
 
 PortChecker::~PortChecker()
 {
-    close(m_checker_fd);
+    // close(m_checker_fd); //! caution! if you close this one, the fd which is reused by others will also be closed! It dosn't need to close when you only use bind && after each time I close the fd, no need to close it again
+    // fcntl(m_checker_fd, )
 }

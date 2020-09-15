@@ -74,6 +74,10 @@ namespace sc2
     {
         // mutate each? solution in population, get the transition solution
         int sz = EA::m_populations[pop_index].size();
+        if (EA::m_offsprings.size() < pop_index)
+        {
+            EA::m_offsprings.push_back(Population());
+        }
         EA::m_offsprings[pop_index].resize(sz, TSolution<T>(0, EA::m_objective_size));
         std::uniform_int_distribution<int> random_dis(0, sz - 1);
         for (size_t j = 0; j < sz; ++j)
@@ -84,11 +88,16 @@ namespace sc2
             EA::m_offsprings[pop_index][j] = Mutate(EA::m_populations[pop_index][j], EA::m_populations[pop_index][index_a], EA::m_populations[pop_index][index_b]);
             Crossover(EA::m_populations[pop_index][j], EA::m_offsprings[pop_index][j]);
         }
+        return;
     }
 
     template <class T, template <typename> class TSolution>
     void DifferentialEvolution<T, TSolution>::Breed()
     {
+        // if (m_populations.size() != m_offsprings.size())
+        // {
+        //     throw(std::runtime_error("the size of springsS is not equal to the size of populationS@"+std::string(__FUNCTION__));
+        // }
         for (size_t i = 0; i < EA::m_populations.size(); ++i)
         {
             Breed_(i);

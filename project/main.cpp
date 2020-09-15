@@ -7,9 +7,11 @@
 #include <sc2api/test.h> // added by myself
 #include <sc2utils/sc2_manage_process.h>
 #include <civetweb.h>
-#include <sys/wait.h>
+#include <sc2api/sc2_connection.h>
 
 #include "./rolling_bot/rolling_bot/rolling_bot.h"
+
+#include <sys/wait.h>
 
 using namespace sc2;
 
@@ -97,7 +99,7 @@ int main(int argc, char *argv[])
     std::vector<Simulator> sims(100);
     std::vector<Coordinator> cors(100);
     Coordinator cor;
-    mg_init_library(MG_FEATURES_DEFAULT);
+    StartCivetweb();
     {
         PortChecker pc;
         pc.GetContinuousPortsFromPort(61000, 30);
@@ -271,14 +273,14 @@ int main(int argc, char *argv[])
 
         // std::string starcraft_path;;
         int port_start = 61000;
-        int main_process_port = 3900;
-        bool real_time = false; // but if the graphics is on, the main game will be showed in real-time mode
+        int main_process_port = 3900; //3989 is the default port of xrdp
+        bool real_time = false;       // but if the graphics is on, the main game will be showed in real-time mode
         bool multi_threaded = false;
         // use this to control the cauculation times per second
         uint frames = 60;
         bool use_enemy_pop = true;
         int population_size = 2;
-        int max_generations = 100;
+        int max_generations = 2; //100
         int max_no_improve_generation = 100;
         int ga_muatation_rate = 0.5;
         int command_length = 50;
@@ -334,6 +336,8 @@ int main(int argc, char *argv[])
         Bot bot(coordinator.GetExePath(), map_path);
         RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path, max_generations, population_size, use_enemy_pop);
 
+        PortChecker pc;
+        main_process_port = pc.GetContinuousPortsFromPort(main_process_port, 7);
         rolling_bot.Algorithm().ConvergenceTermination()->SetMaxNoImproveGeneration(max_no_improve_generation);
         rolling_bot.Algorithm().SetDebug(is_debug);
         rolling_bot.Algorithm().SetAttackPossibility(1.f);
@@ -364,7 +368,7 @@ int main(int argc, char *argv[])
         //! participants settings here
         coordinator.SetParticipants({CreateParticipant(Race::Terran, &rolling_bot),
                                      CreateComputer(Race::Terran)});
-        coordinator.SetPortStart(main_process_port);
+        coordinator.SetPortStart(main_process_port + 1);
         coordinator.SetRealtime(real_time);
         coordinator.SetMultithreaded(multi_threaded);
 
@@ -401,43 +405,44 @@ int main(int argc, char *argv[])
             }
             SleepFor(1000);
             coordinator.ClearOldProcessInfo();
-            uint16_t new_port_start = pc.GetContinuousPortsFromPort(coordinator.GetPortStart(), 7);
-            coordinator.SetPortStart(new_port_start + 1);
+            main_process_port = pc.GetContinuousPortsFromPort(coordinator.GetPortStart(), 7);
+            coordinator.SetPortStart(main_process_port + 1);
             coordinator.LaunchStarcraft();
             SleepFor(1000);
         }
-        while (!coordinator.StartGame())
-        {
-            PortChecker pc;
-            coordinator.LeaveGame();
-            std::vector<ProcessInfo> infos = coordinator.GetProcessInfo();
-            for (int i = 0; i < 3; ++i)
-            {
+        // while (!coordinator.StartGame())
+        // {
+        //     PortChecker pc;
+        //     coordinator.LeaveGame();
+        //     std::vector<ProcessInfo> infos = coordinator.GetProcessInfo();
+        //     for (int i = 0; i < 3; ++i)
+        //     {
 
-                if (IsProcessRunning(infos[0].process_id))
-                {
-                    TerminateProcess(infos[0].process_id);
-                }
-                if (infos.size() > 1 && IsProcessRunning(infos[1].process_id))
-                {
-                    TerminateProcess(infos[1].process_id);
-                }
-                SleepFor(500);
-            }
-            int status;
-            ::waitpid(infos[0].process_id, &status, WUNTRACED | WCONTINUED); // kill the zombie ps
-            if (infos.size() > 1)
-            {
-                ::waitpid(infos[1].process_id, &status, WUNTRACED | WCONTINUED);
-            }
-            SleepFor(1000);
-            coordinator.ClearOldProcessInfo();
-            uint16_t new_port_start = pc.GetContinuousPortsFromPort(coordinator.GetPortStart(), 7);
-            coordinator.SetPortStart(new_port_start + 1);
-            coordinator.LaunchStarcraft();
-            SleepFor(1000);
-        }
-
+        //         if (IsProcessRunning(infos[0].process_id))
+        //         {
+        //             TerminateProcess(infos[0].process_id);
+        //         }
+        //         if (infos.size() > 1 && IsProcessRunning(infos[1].process_id))
+        //         {
+        //             TerminateProcess(infos[1].process_id);
+        //         }
+        //         SleepFor(500);
+        //     }
+        //     int status;
+        //     ::waitpid(infos[0].process_id, &status, WUNTRACED | WCONTINUED); // kill the zombie ps
+        //     if (infos.size() > 1)
+        //     {
+        //         ::waitpid(infos[1].process_id, &status, WUNTRACED | WCONTINUED);
+        //     }
+        //     SleepFor(1000);
+        //     coordinator.ClearOldProcessInfo();
+        //     uint16_t new_port_start = pc.GetContinuousPortsFromPort(coordinator.GetPortStart(), 7);
+        //     coordinator.SetPortStart(new_port_start + 1);
+        //     coordinator.LaunchStarcraft();
+        //     SleepFor(1000);
+        // }
+        coordinator.StartGame();
+        SleepFor(10000);
         // A fixed time update mechanism
         auto start = std::chrono::steady_clock::now();
         auto end = std::chrono::steady_clock::now();
@@ -450,6 +455,7 @@ int main(int argc, char *argv[])
             renderer.DrawObservation(ob), // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
             renderer.Present(),
 #endif //USE_GRAPHICS
+            std::cout << ob->GetUnits().size() << std::endl,
             coordinator.Update())
         {
 #ifdef REAL_TIME_UPDATE
