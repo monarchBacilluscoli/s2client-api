@@ -470,7 +470,7 @@ int main(int argc, char *argv[])
     DebugRenderer renderer;
 #endif // USE_GRAPHICS
 
-    Bot bot;
+    Bot bot, bot2;
     EnemyBot enemy_bot;
     DebugTestBot debug_test_bot;
     CopyTestBot copy_test_bot;
@@ -479,8 +479,8 @@ int main(int argc, char *argv[])
     SaveTestBot save_bot;
     // coordinator.SetMultithreaded(true);
     coordinator.SetParticipants({
-        CreateParticipant(Race::Terran, &action_test_bot),
-        CreateParticipant(Race::Terran, &enemy_bot)
+        CreateParticipant(Race::Terran, &bot),
+        CreateParticipant(Race::Terran, &bot2)
         //  CreateComputer(Race::Terran)
     });
     coordinator2.SetParticipants({

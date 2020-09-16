@@ -58,9 +58,8 @@ namespace sc2
         int sz = m_sol_sim_map.size();
         if (batch_size > sz)
         {
-            batch_size = 0;
+            batch_size = 0; // 0 means all the processes are in the same batch
         }
-        batch_size = 1;
         for (int i = 0; i < sz; ++i)
         {
             m_sol_sim_map[i]->result_holder =

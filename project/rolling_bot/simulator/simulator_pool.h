@@ -38,7 +38,7 @@ namespace sc2
         SimulatorPool(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_filename, int controlled_player_num = 1);
         // if you use default constructor you must call this function to set the sims
         void SetSims(int size, const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_filename, int controlled_player_num = 1);
-        void StartSimsAsync(int batch_size = 30); // 20 is a experienced value
+        void StartSimsAsync(int batch_size = 20); // 20 is a experienced value
         // copy the state from main game and set the orders to simulations
         void CopyStateAndSendOrdersAsync(const ObservationInterface *ob, const std::vector<std::vector<Command>> &orders);
         // for easy use

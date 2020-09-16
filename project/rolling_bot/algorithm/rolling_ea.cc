@@ -331,7 +331,7 @@ namespace sc2
             for (int j = 0; j < sub_pop_size; j++)
             {
                 sim_index = i * sub_pop_size + j;
-                const std::map<Tag, const Unit *> &units_correspondence = m_simulation_pool[sim_index].GetRelativeUnits();
+                const std::map<Tag, const Unit *> &units_correspondence = m_simulation_pool[sim_index].GetRelativeUnits(); // 注意两边的relative_units可能是不一样的——不，实际一样
                 RollingSolution<Command> &enemy_sol = enemy_pop[index_map[i][j]];
                 enemy_sol.results.push_back(SimData());
                 for (const auto &unit : units_correspondence)

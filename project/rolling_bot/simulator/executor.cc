@@ -258,7 +258,7 @@ namespace sc2
     float Executor::CalculateHealthChange(Tag tag) const
     {
         float change = 0;
-        if (m_initial_units.at(tag)->is_alive)
+        if (m_initial_units.at(tag)->is_alive) //todo 这里会报错，似乎初始unit不全 //! 因为调用这个函数的函数需要调用relative_units，而两边的units的tag是不一样的
         {
             change = m_initial_units.at(tag)->health - m_initial_units_states.at(tag).health; // m_initial_units is just a pointer. which fetches the newest unit state
         }
