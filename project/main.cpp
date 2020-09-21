@@ -279,8 +279,8 @@ int main(int argc, char *argv[])
         // use this to control the cauculation times per second
         uint frames = 60;
         bool use_enemy_pop = true;
-        int population_size = 10;
-        int max_generations = 20; //100
+        int population_size = 20;
+        int max_generations = 50; //100
         int max_no_improve_generation = 100;
         int ga_muatation_rate = 0.5;
         int command_length = 50;

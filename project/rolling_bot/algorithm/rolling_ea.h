@@ -58,17 +58,25 @@ namespace sc2
 
     public:
         RollingEA() = delete;
-        RollingEA(const std::string &net_address, int port_start, const std::string &process_path, const std::string &map_path, int max_generation, int population_size, bool use_enemy_pop, int random_seed = 0, unsigned int evaluation_time_multiplier = 1) : EvolutionaryAlgorithm(3, max_generation, population_size, random_seed, {std::string("enemy loss"), std::string("my team loss")}),
+        RollingEA(const std::string &net_address,
+                  int port_start,
+                  const std::string &process_path,
+                  const std::string &map_path,
+                  int max_generation,
+                  int population_size,
+                  bool use_enemy_pop,
+                  int random_seed = 0,
+                  unsigned int evaluation_time_multiplier = 1) : EvolutionaryAlgorithm(3, max_generation, population_size, random_seed, {std::string("enemy loss"), std::string("my team loss")}),
 #ifdef USE_GRAPHICS
-                                                                                                                                                                                                                                             m_debug_renderers(EA::m_populations.size() > 1 ? population_size * EA::m_sub_pop_size : population_size),
+                                                                 m_debug_renderers(EA::m_populations.size() > 1 ? population_size * EA::m_sub_pop_size : population_size),
 #endif //USE_GRAPHICS
-                                                                                                                                                                                                                                             m_simulation_pool(EA::m_populations.size() > 1 ? population_size * EA::m_sub_pop_size : population_size,
-                                                                                                                                                                                                                                                               net_address,
-                                                                                                                                                                                                                                                               port_start,
-                                                                                                                                                                                                                                                               process_path,
-                                                                                                                                                                                                                                                               map_path,
-                                                                                                                                                                                                                                                               use_enemy_pop ? 2 : 1),
-                                                                                                                                                                                                                                             m_evaluation_time_multiplier(evaluation_time_multiplier)
+                                                                 m_simulation_pool(EA::m_populations.size() > 1 ? population_size * EA::m_sub_pop_size : population_size,
+                                                                                   net_address,
+                                                                                   port_start,
+                                                                                   process_path,
+                                                                                   map_path,
+                                                                                   use_enemy_pop ? 2 : 1),
+                                                                 m_evaluation_time_multiplier(evaluation_time_multiplier)
         {
             // m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE] = std::ref(m_convergence_termination_manager); //? if not ref here, the construct will copy the function object
             m_simulation_pool.StartSimsAsync();
