@@ -271,14 +271,13 @@ int main(int argc, char *argv[])
         bool is_debug = true;
         std::string net_address = "127.0.0.1";
 
-        // std::string starcraft_path;;
         int port_start = 61000;
         int main_process_port = 3900; //3989 is the default port of xrdp
         bool real_time = false;       // but if the graphics is on, the main game will be showed in real-time mode
         bool multi_threaded = false;
-        // use this to control the cauculation times per second
-        uint frames = 60;
+        uint frames = 60; // use this to control the Update times per second
         bool use_enemy_pop = true;
+        bool is_enemy_pop_evo = true;
         int population_size = 20;
         int max_generations = 50; //100
         int max_no_improve_generation = 100;
@@ -288,7 +287,7 @@ int main(int argc, char *argv[])
         int interval_size = 150;
         int evaluation_multiplier = 1;
         PLAY_STYLE play_style = PLAY_STYLE::NORMAL;
-        bool use_fix = false; // if the map is dynamic do not use the static fix
+        bool use_fix = false; // if the map is dynamic do not use the static fix -> will be aborted soon
         unsigned fix_by_data_interval = 6;
 
         bool use_fix_by_data = true;
