@@ -12,29 +12,54 @@ namespace sc2
         //todo Initialization only for this class
     }
 
-    void RollingDE::Breed()
+    void RollingDE::Breed_(int pop_index)
     {
+        if (pop_index != 0) // do not use those "advanced"(smile) breed function
+        {
+            DifferentialEvolution<Command, RollingSolution>::Breed_(pop_index);
+            return;
+        }
         if (m_use_fix_by_data && m_current_generation % 6 == 0) // if use fix, then fix all individuals based on the sim data
         {
             std::cout << "fix" << std::endl;
-            for (int l = 0; l < m_populations.size(); l++)
+
+            int sz = EA::m_populations[pop_index].size();
+            EA::m_offsprings[pop_index] = EA::m_populations[pop_index];
+            for (int i = 0; i < sz; ++i)
             {
-                int sz = EA::m_populations[l].size();
-                EA::m_offsprings[l] = EA::m_populations[l];
-                for (int i = 0; i < sz; ++i)
-                {
-                    m_offsprings[l][i] = FixBasedOnSimulation(m_populations[l][i]);
-                }
+                m_offsprings[pop_index][i] = FixBasedOnSimulation(m_populations[pop_index][i]);
             }
         }
         else
         {
-            DifferentialEvolution<Command, RollingSolution>::Breed();
+            DifferentialEvolution<Command, RollingSolution>::Breed_(pop_index);
         }
-        if (m_use_assemble) //? nothing wrong, use the population's evaluation to make a new solution, and replace a random solution in offspring. It's ok
+        if (m_use_assemble) //? nothing wrong, use the population's evaluation to make a new solution, and replace a random solution in offspring. It's ok, since the offpring hasn't been evaluated
         {
-            RollingEA::AssembleASolutionFromGoodUnits(GetRandomEntry(m_offsprings[0]), m_populations[0]); // randomly exchange 1 solution with a new assemble solution
+            RollingEA::AssembleASolutionFromGoodUnits(GetRandomEntry(m_offsprings[pop_index]), m_populations[pop_index]); // randomly exchange 1 solution with a new assemble solution
         }
+        return;
+    }
+
+    void RollingDE::Breed()
+    {
+        Breed_(0);
+        if (m_populations.size() > 1)
+        {
+            if (m_is_enemy_pop_evo)
+            {
+                Breed_(1);
+            }
+            else
+            {
+                for (int i = 0; i < m_population_size; ++i)
+                {
+                    GenerateOne(EA::m_offsprings[1][i], 1); // if Breed is not used, use Generate instead
+                }
+            }
+        }
+
+        return;
     }
 
     RollingSolution<Command> RollingDE::Mutate(const RollingSolution<Command> &base_sol, const RollingSolution<Command> &material_sol1, const RollingSolution<Command> &material_sol2)
@@ -112,23 +137,12 @@ namespace sc2
                     actions_child[j] = actions_parent[j];
                 }
             }
-#if 0  //! test code \
-    //todo output child actions
-        for (const auto &item : actions_child)
-        {
-            std::cout << "(" << item.target_point.x << "," << item.target_point.y << ")"
-                      << "\t";
         }
-        std::cout << std::endl;
-        //todo output parent actions
-        for (const auto &item : actions_parent)
-        {
-            std::cout << "(" << item.target_point.x << "," << item.target_point.y << ")"
-                      << "\t";
-        }
-        std::cout << std::endl;
-#endif //! test code>
-        }
+    }
+
+    void RollingDE::SetEnemyPopEvo(bool enemy_pop_evo)
+    {
+        m_is_enemy_pop_evo = enemy_pop_evo;
     }
 
 } // namespace sc2

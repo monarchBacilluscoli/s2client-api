@@ -43,11 +43,13 @@ namespace sc2
         using CT = ConvergenceTerminator<T, TSolution>;
         using MGT = MaxGenerationTerminator<T, TSolution>;
         using MET = MaxEvaluationTerminator<T, TSolution>;
-        //! some settings
+        //! /etc
         bool m_is_output_file = false;
         int m_objective_size = 1;
+        int m_is_enemy_pop_evo = false;
         int m_population_size = 50;
         int m_sub_pop_size = MAX_SIM_SIZE / m_population_size > 1 ? MAX_SIM_SIZE / m_population_size : 1;
+        //! /var
         int m_current_generation = 0;
         int m_current_evaluation = 0;
         int m_max_evaluation = 0;
@@ -84,12 +86,12 @@ namespace sc2
                               int random_seed = 0,
                               std::vector<std::string> objective_names = std::vector<std::string>(),
                               int num_pop = 2) : m_termination_conditions{
-                                                     // if true, stop loop
-                                                     {TERMINATION_CONDITION::MAX_GENERATION, std::make_shared<MGT>(*this, max_generation)},
-                                                     {TERMINATION_CONDITION::CONVERGENCE, std::make_shared<CT>(*this)}, /* add it by yourself */
-                                                     {TERMINATION_CONDITION::MAX_EVALUATION, std::make_shared<MET>(*this)},
-                                                 },
-                                                 m_population_size(population_size), m_objective_size(objective_size), m_random_engine{random_seed}, m_history_objs_ave(objective_size), m_history_objs_best(objective_size), m_history_objs_worst(objective_size), m_objective_names(objective_size), m_populations(num_pop, Population(m_population_size)), m_offsprings(num_pop, Population())
+                                                                  // if true, stop loop
+                                                                  {TERMINATION_CONDITION::MAX_GENERATION, std::make_shared<MGT>(*this, max_generation)},
+                                                                  {TERMINATION_CONDITION::CONVERGENCE, std::make_shared<CT>(*this)}, /* add it by yourself */
+                                                                  {TERMINATION_CONDITION::MAX_EVALUATION, std::make_shared<MET>(*this)},
+                                                              },
+                                                              m_population_size(population_size), m_objective_size(objective_size), m_random_engine{random_seed}, m_history_objs_ave(objective_size), m_history_objs_best(objective_size), m_history_objs_worst(objective_size), m_objective_names(objective_size), m_populations(num_pop, Population(m_population_size)), m_offsprings(num_pop, Population())
         {
 #ifdef USE_GRAPHICS
             m_overall_evolution_status_renderer.SetTitle("Evolution Status");
@@ -252,14 +254,14 @@ namespace sc2
     std::vector<TSolution<T>> EvolutionaryAlgorithm<T, TSolution>::Run()
     {
         InitBeforeRun();
-        Generate();                  //todo 各自generate各自
-        Evaluate();                  //!evaluate 把他妈主进程杀了
+        Generate();                  // 各自generate各自
+        Evaluate();
         ActionAfterEachGeneration(); // you need to run it after the first generation
         for (m_current_generation = 1; !CheckIfTerminationMeet(); ++m_current_generation)
         {
-            Breed();    //todo 分别breed
-            Evaluate(); //todo 混在一起一起评估
-            Select();   //todo 分别select
+            Breed();    // 分别breed
+            Evaluate(); // 混在一起一起评估
+            Select();   // 分别select
             ActionAfterEachGeneration();
         }
         ActionAfterRun();

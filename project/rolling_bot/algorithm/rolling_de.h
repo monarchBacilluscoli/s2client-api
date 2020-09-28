@@ -14,6 +14,7 @@ namespace sc2
     private:
     protected:
         using EA = EvolutionaryAlgorithm<Command, RollingSolution>;
+        bool m_is_enemy_pop_evo = false;
 
     public:
         RollingDE() = delete;
@@ -29,19 +30,25 @@ namespace sc2
                   bool use_enemy_pop = false,
                   float scale_factor = .5f,
                   float crossover_rate = .5f,
-                  int random_seed = rand()) : EvolutionaryAlgorithm(3, max_generation, population_size, random_seed, {"Enemy Loss", "My Team Loss"}, use_enemy_pop ? 2 : 1),
-                                              DifferentialEvolution(3, max_generation, population_size, scale_factor, crossover_rate),
-                                              RollingEA(net_address, port_start, process_path, map_path, max_generation, population_size, use_enemy_pop, random_seed)
+                  int random_seed = rand(),
+                  bool is_enemy_pop_evo = false) : EvolutionaryAlgorithm(3, max_generation, population_size, random_seed, {"Enemy Loss", "My Team Loss"}, use_enemy_pop ? 2 : 1),
+                                                   DifferentialEvolution(3, max_generation, population_size, scale_factor, crossover_rate),
+                                                   RollingEA(net_address, port_start, process_path, map_path, max_generation, population_size, use_enemy_pop, random_seed),
+                                                   m_is_enemy_pop_evo(is_enemy_pop_evo)
         {
             SetAttackPossibility(.9f);
         }
         virtual ~RollingDE() = default;
+        
+        void SetEnemyPopEvo(bool is_enemy_pop_evo = false);
 
     protected:
         void InitBeforeRun() override;
-        void Breed() override;
+        virtual void Breed() override;
         virtual RollingSolution<Command> Mutate(const RollingSolution<Command> &base_sol, const RollingSolution<Command> &material_sol1, const RollingSolution<Command> &material_sol2) override;
         virtual void Crossover(const RollingSolution<Command> &parent, RollingSolution<Command> &child) override;
+
+        virtual void Breed_(int pop_index = 0);
     };
 } // namespace sc2
 

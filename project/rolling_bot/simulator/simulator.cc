@@ -20,7 +20,13 @@ void Simulator::CopyAndSetState(const ObservationInterface *ob_source
     m_enemy_executor.SetIsSetting(true);
     m_save = SaveMultiPlayerGame(ob_source);
     m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);
+    for (const auto &item : m_relative_units)
+    {
+        m_relative_units_enemy[item.first] = m_enemy_executor.Observation()->GetUnit(item.second->tag);
+    }
+
     SetReversedUnitRelation(m_target_to_source_unit_tags, m_relative_units);
+    SetReversedUnitRelation(m_target_to_source_unit_tags_enemy, m_relative_units_enemy);
     m_executor.Initialize();
     m_enemy_executor.Initialize();
     { //! check the crush of unit relationship
@@ -168,13 +174,14 @@ void Simulator::SetDirectOrders(const std::vector<std::vector<Command>> &command
 
 void Simulator::SetUnitsRelations(State state, Units us_copied)
 {
-    // since state object is static once it is saved, so it just needs to get
-    // the relations between units in state and units in simulator
-    for (const UnitState &state_u : state.unit_states)
-    {
-        m_relative_units[state_u.unit_tag] =
-            FindNearestUnitFromPoint(state_u.pos, us_copied);
-    }
+    // // since state object is static once it is saved, so it just needs to get
+    // // the relations between units in state and units in simulator
+    // for (const UnitState &state_u : state.unit_states)
+    // {
+    //     m_relative_units[state_u.unit_tag] =
+    //         FindNearestUnitFromPoint(state_u.pos, us_copied);
+    // }
+    throw(std::runtime_error("No implementation for this function@" + std::string(__FUNCTION__)));
 }
 
 void Simulator::SetStartPoint(const std::vector<Command> &commands,
@@ -355,6 +362,7 @@ const std::list<Unit> &Simulator::GetTeamDeadUnits(Unit::Alliance alliance, int 
 
 void Simulator::Load()
 {
+    throw("This function may have been aborted@"+std::string(__FUNCTION__));
     if (IsMultiPlayerGame())
     {
         m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);

@@ -18,7 +18,9 @@
                 // "${HOME}/StarCraftII/maps/testBattle_distant_vs_melee_debug.SC2Map",
                 // "${HOME}/StarCraftII/maps/PCANP_EnemyZealotVSMarines.SC2Map",
                 // "${HOME}/StarCraftII/maps/PCANP_EnemyZealotModVSMarines.SC2Map",
-                "${HOME}/StarCraftII/maps/2P_EnemyZealotModVSMarines.SC2Map",
+                // "${HOME}/StarCraftII/maps/2P_EnemyZealotModVSMarines.SC2Map",
+                "${HOME}/StarCraftII/maps/2P_EnemyZealotsModMoreVSMarines.SC2Map",
+                // "${HOME}/StarCraftII/maps/2P_EnemyZealotsModMoreVSMarinesSim.SC2Map",
                 // "${HOME}/StarCraftII/maps/2P_EnemyZealotModVSMarinesSim.SC2Map",
                 // "${HOME}/StarCraftII/maps/PCANP_EnemyZealotsModVSMarines.SC2Map",
                 // "${HOME}/StarCraftII/maps/PCANP_EnemyZealotsModMoreVSMarines.SC2Map", //* this
@@ -77,6 +79,7 @@
                 }
             ],
             "preLaunchTask": "make entire project",
+            "postDebugTask": "clean previous SC2 processes",
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]

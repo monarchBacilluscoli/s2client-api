@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
         uint frames = 60; // use this to control the Update times per second
         bool use_enemy_pop = true;
         bool is_enemy_pop_evo = true;
-        int population_size = 20;
+        int population_size = 10;
         int max_generations = 50; //100
         int max_no_improve_generation = 100;
         int ga_muatation_rate = 0.5;
@@ -350,6 +350,7 @@ int main(int argc, char *argv[])
         rolling_bot.Algorithm().SetUsePriori(use_priori);
         rolling_bot.Algorithm().SetUseAssemble(use_assembled);
         rolling_bot.Algorithm().TerminationCondition(TERMINATION_CONDITION::CONVERGENCE);
+        static_cast<RollingDE &>(rolling_bot.Algorithm()).SetEnemyPopEvo(is_enemy_pop_evo); // ugly, but I the feeling of using static_cast
         rolling_bot.SetIntervalLength(interval_size);
         rolling_bot.SetStyle(play_style);
         rolling_bot.SetRemark(record_remark);

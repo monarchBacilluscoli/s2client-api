@@ -158,7 +158,6 @@ namespace sc2
                         {
                             pop[i].objectives[2] -= m_sim_length;
                             pop[i].aver_result.end_loop += m_sim_length;
-                            // std::cout << pop[i].aver_result.win_loop << '\t' << m_sim_length << std::endl;
                         }
                         else
                         {
@@ -331,15 +330,18 @@ namespace sc2
             for (int j = 0; j < sub_pop_size; j++)
             {
                 sim_index = i * sub_pop_size + j;
-                const std::map<Tag, const Unit *> &units_correspondence = m_simulation_pool[sim_index].GetRelativeUnits(); // 注意两边的relative_units可能是不一样的——不，实际一样
+                const std::map<Tag, const Unit *> &units_correspondence = m_simulation_pool[sim_index].GetRelativeUnits(1);       // 注意两边的relative_units可能是不一样的——不，实际一样——不，阵容不一样
+                const std::map<Tag, const Unit *> &units_correspondence_enemy = m_simulation_pool[sim_index].GetRelativeUnits(2); // 注意两边的relative_units可能是不一样的——不，实际一样——不，阵容不一样
                 RollingSolution<Command> &enemy_sol = enemy_pop[index_map[i][j]];
                 enemy_sol.results.push_back(SimData());
                 for (const auto &unit : units_correspondence)
                 {
                     my_pop[i].results[j].units[unit.first].final_state = *(unit.second);
                     my_pop[i].results[j].units[unit.first].statistics = m_simulation_pool[i].GetUnitStatistics(unit.first, 1);
-
-                    enemy_sol.results.back().units[unit.first].final_state = *(unit.second);
+                }
+                for (const auto &unit : units_correspondence_enemy)
+                {
+                    enemy_sol.results.back().units[unit.first].final_state = *(unit.second); //!这里需要用敌方的视角
                     enemy_sol.results.back().units[unit.first].statistics = m_simulation_pool[i].GetUnitStatistics(unit.first, 2);
                 }
 
@@ -387,7 +389,7 @@ namespace sc2
                 enemy_pop[i].objectives.resize(m_objective_size);
                 if (m_objective_size == 3)
                 {
-                    enemy_pop[i].objectives[0] = +enemy_pop[i].aver_result.total_health_change_enemy;
+                    enemy_pop[i].objectives[0] = -enemy_pop[i].aver_result.total_health_change_enemy;
                     enemy_pop[i].objectives[1] = enemy_pop[i].aver_result.total_health_change_mine;
                     enemy_pop[i].objectives[2] = enemy_pop[i].aver_result.end_loop;
                 }

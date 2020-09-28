@@ -50,13 +50,11 @@ namespace sc2
     protected:
         virtual void InitBeforeRun() override;
         void InitOnlySelfMembersBeforeRun();
-        virtual void Breed() override; // random select
+        virtual void Breed() override; // Get all populations bred
 
         virtual TSolution<T> Mutate(const TSolution<T> &base_sol, const TSolution<T> &material_sol1, const TSolution<T> &material_sol2) = 0;
         virtual void Crossover(const TSolution<T> &parent, TSolution<T> &child) = 0; // can not be implemented, since there are so many solution types
-
-    private:
-        virtual void Breed_(int pop_index = 0);
+        virtual void Breed_(int pop_index = 0);                                      // Get a indexed population bred
     };
 
     template <class T, template <typename> class TSolution>
@@ -94,10 +92,6 @@ namespace sc2
     template <class T, template <typename> class TSolution>
     void DifferentialEvolution<T, TSolution>::Breed()
     {
-        // if (m_populations.size() != m_offsprings.size())
-        // {
-        //     throw(std::runtime_error("the size of springsS is not equal to the size of populationS@"+std::string(__FUNCTION__));
-        // }
         for (size_t i = 0; i < EA::m_populations.size(); ++i)
         {
             Breed_(i);

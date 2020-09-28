@@ -87,7 +87,7 @@ namespace sc2
 
                 std::vector<Command> GetOrders(int player = 1) { return player == 1 ? m_commands : m_enemy_commands; }
                 std::vector<Command> GetOriginalOrders(int player = 1) { return player == 1 ? m_original_commands : m_original_enemy_commands; } // get the original orders (sent and stored, raw orders)
-                const std::map<Tag, const Unit *> &GetRelativeUnits() const { return m_relative_units; }
+                const std::map<Tag, const Unit *> &GetRelativeUnits(int player = 1) const { return player == 1 ? m_relative_units : m_relative_units_enemy; }
                 const State &GetSave() const { return m_save; }
 
                 float GetTeamHealthLoss(Unit::Alliance alliance) const;                                 // get health loss result
@@ -116,8 +116,10 @@ namespace sc2
                 std::vector<Command> m_commands;
                 std::vector<Command> m_enemy_commands;
 
-                std::map<Tag, const Unit *> m_relative_units;    // form source tag to target unit //todo check if opponent's is included
-                std::map<Tag, Tag> m_target_to_source_unit_tags; // from target to source unit tags
+                std::map<Tag, const Unit *> m_relative_units; // form source tag to target unit //todo check if opponent's is included
+                std::map<Tag, const Unit *> m_relative_units_enemy;
+                std::map<Tag, Tag> m_target_to_source_unit_tags;       // from target to source unit tags
+                std::map<Tag, Tag> m_target_to_source_unit_tags_enemy; // from target to source unit tags
 
                 // set units relations#
                 // so the caller of this simultor doesn't have to know the tags of units
@@ -126,7 +128,7 @@ namespace sc2
                 // set reversed unit tags for (?)
                 void SetReversedUnitRelation(std::map<Tag, Tag> &target_to_source_units, const std::map<Tag, const Unit *> &relative_units);
                 // translate the tags in those commands into local tags
-                void TranslateCommands(std::vector<Command> &commands);
+                void TranslateCommands(std::vector<Command> &commands); // safe in 2 players sim, since unit tags are same on both sides
 
         public:
                 // add "Sim" after the original map name
