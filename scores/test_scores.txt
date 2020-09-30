@@ -707,4 +707,16 @@ M562	0	239.844	0	0	0	Maze	2019-12-18 01:33:28	nothing, play_style: NORMAL, popul
 75	0	135	0	0	0	862	2P_EnemyZealotModVSMarinesSim	2020-09-16 02:01:22	priori data_fix assemble , play_style: NORMAL, population_size: 10, max_generations: 20, command_length: 50, sim_length: 200, interval_size: 150, evaluation_multiplier: 1, 
 
 // enemy evo
-95	0	270	0	0	0	150	PCANP_EnemyZealotsModMoreVSMarines	2020-09-28 08:38:28	priori data_fix assemble , play_style: NORMAL, population_size: 10, max_generations: 50, command_length: 50, sim_length: 200, interval_size: 150, evaluation_multiplier: 1, 
+150	0	270	0	0	0	427	PCANP_EnemyZealotsModMoreVSMarines	2020-09-29 07:16:41	priori data_fix assemble , play_style: NORMAL, population_size: 10, max_generations: 2, command_length: 50, sim_length: 200, interval_size: 150, evaluation_multiplier: 1, 
+150	0	270	0	0	0	512	PCANP_EnemyZealotsModMoreVSMarines	2020-09-29 07:47:58	priori data_fix assemble , play_style: NORMAL, population_size: 10, max_generations: 50, command_length: 50, sim_length: 200, interval_size: 150, evaluation_multiplier: 1, 
+170	0	270	0	0	0	620	PCANP_EnemyZealotsModMoreVSMarines	2020-09-29 08:01:57	priori data_fix assemble , play_style: NORMAL, population_size: 10, max_generations: 50, command_length: 50, sim_length: 200, interval_size: 150, evaluation_multiplier: 1, 
+160	0	270	0	0	0	638	PCANP_EnemyZealotsModMoreVSMarines	2020-09-29 11:56:54	priori data_fix assemble , play_style: NORMAL, population_size: 10, max_generations: 50, command_length: 50, sim_length: 200, interval_size: 150, evaluation_multiplier: 1, 
+225	0	270	0	0	0	574	PCANP_EnemyZealotsModMoreVSMarines	2020-09-29 12:08:31	priori data_fix assemble , play_style: NORMAL, population_size: 10, max_generations: 50, command_length: 50, sim_length: 200, interval_size: 150, evaluation_multiplier: 1, 
+120	0	270	0	0	0	414	PCANP_EnemyZealotsModMoreVSMarines	2020-09-30 01:48:44	priori data_fix assemble , play_style: NORMAL, population_size: 10, max_generations: 50, command_length: 50, sim_length: 200, interval_size: 150, evaluation_multiplier: 1, 
+95	0	270	0	0	0	150	PCANP_EnemyZealotsModMoreVSMarines	2020-09-30 02:21:57	priori data_fix assemble , play_style: NORMAL, population_size: 10, max_generations: 50, command_length: 50, sim_length: 200, interval_size: 150, evaluation_multiplier: 1, 
+165	0	270	0	0	0	425	PCANP_EnemyZealotsModMoreVSMarines	2020-09-30 02:30:31	priori data_fix assemble , play_style: NORMAL, population_size: 10, max_generations: 50, command_length: 50, sim_length: 200, interval_size: 150, evaluation_multiplier: 1, 
+125	0	270	0	0	0	513	PCANP_EnemyZealotsModMoreVSMarines	2020-09-30 02:41:54	priori data_fix assemble , play_style: NORMAL, population_size: 10, max_generations: 50, command_length: 50, sim_length: 200, interval_size: 150, evaluation_multiplier: 1, 
+
+// enemy no evo
+130	0	270	0	0	0	224	PCANP_EnemyZealotsModMoreVSMarines	2020-09-30 07:02:03	priori data_fix assemble , play_style: NORMAL, population_size: 10, max_generations: 50, command_length: 50, sim_length: 200, interval_size: 150, evaluation_multiplier: 1, 
+150	0	270	0	0	0	394	PCANP_EnemyZealotsModMoreVSMarines	2020-09-30 07:10:31	priori data_fix assemble , play_style: NORMAL, population_size: 10, max_generations: 50, command_length: 50, sim_length: 200, interval_size: 150, evaluation_multiplier: 1, 

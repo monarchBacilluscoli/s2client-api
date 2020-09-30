@@ -475,6 +475,7 @@ namespace sc2
         }
 
         team_size = team.size();
+        sol.variable.resize(team_size);
         for (int i = 0; i < team_size; ++i)
         {
             sol.variable[i].unit_tag = team[i]->tag;
@@ -530,12 +531,12 @@ namespace sc2
     void RollingEA::RecordObjectives()
     {
         // all the objs
-        int pop_sz = m_populations[0].size();
+        int pop_sz = m_populations[1].size();
         m_history_objs.emplace_back(std::vector<std::vector<float>>(pop_sz, std::vector<float>(m_objective_size)));
         std::vector<std::vector<float>> &current_generation_objs = m_history_objs.back();
         for (size_t i = 0; i < pop_sz; ++i)
         {
-            current_generation_objs[i] = m_populations[0][i].objectives;
+            current_generation_objs[i] = m_populations[1][i].objectives;
         }
         for (size_t i = 0; i < m_objective_size; ++i) // the ith objective
         {

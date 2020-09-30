@@ -19,28 +19,26 @@ void Simulator::CopyAndSetState(const ObservationInterface *ob_source
     m_executor.SetIsSetting(true);
     m_enemy_executor.SetIsSetting(true);
     m_save = SaveMultiPlayerGame(ob_source);
-    m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);
-    for (const auto &item : m_relative_units)
-    {
-        m_relative_units_enemy[item.first] = m_enemy_executor.Observation()->GetUnit(item.second->tag);
-    }
+
+    m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this); // make sure all the previous unit relations has been cleared (you konw, the map[] only inserts something)
+    SetRelativeUnitsEnemy();
 
     SetReversedUnitRelation(m_target_to_source_unit_tags, m_relative_units);
     SetReversedUnitRelation(m_target_to_source_unit_tags_enemy, m_relative_units_enemy);
     m_executor.Initialize();
     m_enemy_executor.Initialize();
-    { //! check the crush of unit relationship
-        std::set<const Unit *> check_set;
-        for (const auto &item : m_relative_units)
-        {
-            check_set.insert(item.second);
-        }
-        if (check_set.size() != m_relative_units.size() || m_relative_units.size() != Observation()->GetUnits().size())
-        {
-            std::cout << "mistake in copy: " << m_relative_units.size() - check_set.size() << std::endl;                                           // it means that some units were mistaken to be seen as the same one
-            std::cout << "difference between save and current units: " << m_relative_units.size() - Observation()->GetUnits().size() << std::endl; // it can mean that some units has been dead
-        }
-    }
+    // { //! check the crush of unit relationship
+    //     std::set<const Unit *> check_set;
+    //     for (const auto &item : m_relative_units)
+    //     {
+    //         check_set.insert(item.second);
+    //     }
+    //     if (check_set.size() != m_relative_units.size() || m_relative_units.size() != Observation()->GetUnits().size())
+    //     {
+    //         std::cout << "mistake in copy: " << m_relative_units.size() - check_set.size() << std::endl;                                           // it means that some units were mistaken to be seen as the same one
+    //         std::cout << "difference between save and current units: " << m_relative_units.size() - Observation()->GetUnits().size() << std::endl; // it can mean that some units has been dead
+    //     }
+    // }
     if (!IsMultiPlayerGame())
     {
         m_executor.Control()->Save();
@@ -362,7 +360,7 @@ const std::list<Unit> &Simulator::GetTeamDeadUnits(Unit::Alliance alliance, int 
 
 void Simulator::Load()
 {
-    throw("This function may have been aborted@"+std::string(__FUNCTION__));
+    throw("This function may have been aborted@" + std::string(__FUNCTION__));
     if (IsMultiPlayerGame())
     {
         m_relative_units = LoadMultiPlayerGame(m_save, m_executor, *this);
@@ -480,11 +478,11 @@ const UnitStatisticalData &Simulator::GetUnitStatistics(Tag tag, int player)
     //todo which unit, which player
     if (player == 1)
     {
-        return m_executor.GetUnitStatistics(m_relative_units[tag]->tag);
+        return m_executor.GetUnitStatistics(m_relative_units.at(tag)->tag);
     }
     else if (player == 2)
     {
-        return m_enemy_executor.GetUnitStatistics(m_relative_units[tag]->tag);
+        return m_enemy_executor.GetUnitStatistics(m_relative_units.at(tag)->tag);
     }
     else
     {
@@ -517,4 +515,13 @@ void Simulator::ResetExecutors()
 {
     m_executor.Reset();
     m_enemy_executor.Reset();
+}
+
+void Simulator::SetRelativeUnitsEnemy()
+{
+    m_relative_units_enemy.clear();
+    for (const auto &item : m_relative_units)
+    {
+        m_relative_units_enemy[item.first] = m_enemy_executor.Observation()->GetUnit(item.second->tag);
+    }
 }

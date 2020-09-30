@@ -158,98 +158,6 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    //         // sim.Debug(1)->DebugKillUnits(sim.Observation()->GetUnits());
-    //         for (int i = 0; i < 10; i++)
-    //         {
-    //             coordinator.Update();
-    //         }
-
-    //         sim.Actions()->SendChat("start copy");
-    //         sim.CopyAndSetState(anbot.Observation());
-    //         sim.Actions()->SendChat("end copy, start dry update");
-    //         for (int i = 0; i < 100; i++)
-    //         {
-    //             sim.Update();
-    //         }
-    //         sim.Actions()->SendChat("end dry update");
-    //         // 构建命令
-    //         Units my_units = anbot.Observation()->GetUnits(Unit::Alliance::Self);
-    //         Units enemies = anbot.Observation()->GetUnits(Unit::Alliance::Enemy);
-    //         std::vector<Command> commands(my_units.size());
-    //         std::vector<Command> enemy_commands(enemies.size());
-    //         // 构建我方
-    //         for (size_t i = 0; i < my_units.size(); i++)
-    //         {
-    //             Command c; // many actions
-    //             c.unit_tag = my_units[i]->tag;
-    //             ActionRaw a;
-    //             a.ability_id = ABILITY_ID::MOVE;
-    //             a.target_type = ActionRaw::TargetPosition;
-    //             a.target_point = Point2D(16, 13 + 3 * i);
-    //             for (size_t i = 0; i < 3; i++)
-    //             {
-    //                 c.actions.push_back(a);
-    //             }
-    //             commands[i] = c;
-    //         }
-    //         // 构建敌方
-    //         for (size_t i = 0; i < enemies.size(); i++)
-    //         {
-    //             Command c;
-    //             c.unit_tag = enemies[i]->tag;
-    //             ActionRaw a;
-    //             a.ability_id = ABILITY_ID::ATTACK;
-    //             a.target_type = ActionRaw::TargetPosition;
-    //             for (size_t j = 0; j < my_units.size(); j++) // 分别攻击几个我方单位
-    //             {
-    //                 a.target_point = Point2D(16, 13 + 3 * j);
-    //                 c.actions.push_back(a);
-    //             }
-    //             a.target_point = Point2D(27, 16); // 远离我方单位
-    //             c.actions.push_back(a);
-    //             enemy_commands[i] = c;
-    //         }
-
-    //         sim.Actions()->SendChat("start copy state and command");
-    //         sim.SetStartPoint(commands, enemy_commands, anbot.Observation());
-    //         sim.Actions()->SendChat("end copy, start wet update");
-    //         for (int i = 0; i < 300; i++)
-    //         {
-    //             sim.Update();
-    //         }
-    //         sim.Actions()->SendChat("player 1 loss: " + std::to_string(sim.GetTeamHealthLoss(1)));
-    //         sim.Actions()->SendChat("player 2 loss: " + std::to_string(sim.GetTeamHealthLoss(2)));
-    //         sim.Actions()->SendChat("end wet update, start dry update");
-    //         for (int i = 0; i < 100; i++)
-    //         {
-    //             sim.Update();
-    //         }
-    //         sim.Control()->SaveReplay("copy_and_set_state_test.SC2Replay");
-
-    //         return 0;
-    //     }
-    //     {
-    //         // 测试直观可行性
-    //         Simulator sim(2);
-    //         sim.LoadSettings(argc, argv);
-    //         std::string starcraft_path = sim.GetExePath();
-    //         sim.SetProcessPath(starcraft_path);
-    //         sim.SetPortStart(2000);
-    //         sim.SetMapPath("2P_EnemyZealotModVSMarinesSim.SC2Map");
-    //         sim.SetStepSize(1);
-    //         sim.LaunchStarcraft();
-    //         sim.StartGame();
-    //         for (size_t i = 0; i < 100; i++)
-    //         {
-    //             sim.Update();
-    //         }
-    //         sim.Control()->SaveReplay("2psimulator_test.SC2Replay");
-    //         //? 结论，多人游戏可以debug
-    //     }
-
-    //     return 0;
-    // }
-
     while (true)
     {
         // try
@@ -277,7 +185,7 @@ int main(int argc, char *argv[])
         bool multi_threaded = false;
         uint frames = 60; // use this to control the Update times per second
         bool use_enemy_pop = true;
-        bool is_enemy_pop_evo = true;
+        bool is_enemy_pop_evo = false;
         int population_size = 10;
         int max_generations = 50; //100
         int max_no_improve_generation = 100;

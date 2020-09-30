@@ -341,7 +341,6 @@ namespace sc2
                 Simulator &sim = m_simulations.back().sim;
                 sim.SetBaseSettings(m_port_end, m_process_path, m_map_path, 1);
 
-                //! 这一段绝对有问题
                 m_simulations.back().result_holder = std::async(std::launch::async, [&] {
                     sim.LaunchStarcraft();
                     sim.StartGame();

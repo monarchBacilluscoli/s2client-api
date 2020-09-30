@@ -46,15 +46,19 @@ namespace sc2
         Breed_(0);
         if (m_populations.size() > 1)
         {
-            if (m_is_enemy_pop_evo)
+            if (m_is_enemy_pop_evo) // if Breed is used, use the minimal breed operation.
             {
                 Breed_(1);
             }
             else
             {
-                for (int i = 0; i < m_population_size; ++i)
+                if (m_offsprings.size() < m_population_size)
                 {
-                    GenerateOne(EA::m_offsprings[1][i], 1); // if Breed is not used, use Generate instead
+                    m_offsprings[1].resize(m_population_size, RollingSolution<Command>());
+                }
+                for (int i = 0; i < m_population_size; ++i) // if Breed is not used, use normal Generate instead
+                {
+                    GenerateOne(EA::m_offsprings[1][i], 1);
                 }
             }
         }

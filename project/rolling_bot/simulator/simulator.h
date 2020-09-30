@@ -129,6 +129,7 @@ namespace sc2
                 void SetReversedUnitRelation(std::map<Tag, Tag> &target_to_source_units, const std::map<Tag, const Unit *> &relative_units);
                 // translate the tags in those commands into local tags
                 void TranslateCommands(std::vector<Command> &commands); // safe in 2 players sim, since unit tags are same on both sides
+                void SetRelativeUnitsEnemy();
 
         public:
                 // add "Sim" after the original map name
