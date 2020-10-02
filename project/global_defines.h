@@ -10,7 +10,7 @@
 #define USE_SYSTEM_COMMAND
 #else
 #define REAL_TIME_UPDATE
-define USE_GRAPHICS
+#define USE_GRAPHICS
 #define USE_SYSTEM_COMMAND
 #endif
 
