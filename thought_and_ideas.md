@@ -19,3 +19,8 @@ The implmentation after(Elite):
 1. Evlauate pop\_size, reserve elite\_size(20% pop\_size) (evaluate all, keep a part)
 
 all the other things are the same.
+
+after finish the re-implementation, I need to do something else:
+1. change the MAX\_SIM\_NUMBER to a larger value (80, for example)
+2. check if the run is the same as what I thought.
+3. compare the differences between the two runs.

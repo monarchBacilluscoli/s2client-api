@@ -245,13 +245,16 @@ int main(int argc, char *argv[])
 
         PortChecker pc;
         main_process_port = pc.GetContinuousPortsFromPort(main_process_port, 7);
+        std::random_device rd;
+        auto random_seed = rd();
+
         rolling_bot.Algorithm().ConvergenceTermination()->SetMaxNoImproveGeneration(max_no_improve_generation);
         rolling_bot.Algorithm().SetDebug(is_debug);
         rolling_bot.Algorithm().SetAttackPossibility(1.f);
         rolling_bot.Algorithm().SetSimLength(sim_length);
         rolling_bot.Algorithm().SetCommandLength(command_length);
         rolling_bot.Algorithm().SetEvaluationTimeMultiplier(evaluation_multiplier);
-        rolling_bot.Algorithm().SetRandomEngineSeed(1);
+        rolling_bot.Algorithm().SetRandomEngineSeed(random_seed);
         rolling_bot.Algorithm().SetUseFix(use_fix);
         rolling_bot.Algorithm().SetUseFixByData(use_fix_by_data);
         rolling_bot.Algorithm().SetFixByDataInterval(fix_by_data_interval);

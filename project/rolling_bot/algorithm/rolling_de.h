@@ -49,6 +49,7 @@ namespace sc2
         virtual void Crossover(const RollingSolution<Command> &parent, RollingSolution<Command> &child) override;
 
         virtual void Breed_(int pop_index = 0);
+        void Fix_(int pop_index);
     };
 } // namespace sc2
 

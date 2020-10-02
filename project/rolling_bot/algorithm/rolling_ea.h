@@ -179,6 +179,7 @@ namespace sc2
         void InitFromObservation();
         void GenerateOne(RollingSolution<Command> &sol, int pop_index = 0); // 0 for me, 1 for enemey
         virtual void RecordObjectives() override;
+        virtual void RecordObjectives_(int pop_index) override;
         virtual void ActionAfterRun() override;
         RollingSolution<Command> AssembleASolutionFromGoodUnits(const Population &evaluated_pop);                              // Assemble a priori solution based on the evaluated population.
         void AssembleASolutionFromGoodUnits(RollingSolution<Command> &modified_solution, const Population &evaluated_pop);     //! the param must be an evaluated population
@@ -186,7 +187,7 @@ namespace sc2
 
     public:
         void OutputPopulationSimResult(std::ostream &os, int pop_index = 0) const;
-        RollingSolution<Command> FixBasedOnSimulation(const RollingSolution<Command> &parent, int pop_index = 0); // based on the simulation data to fix the move target of my units into effective area around enemies
+        RollingSolution<Command> FixBasedOnSimulation(const RollingSolution<Command> &parent, int pop_index = 0); // based on the simulation data to fix the move target of my units into effective area around enemies, the individual to be fixed must be evaluated
 
     protected: // some utilities
         Point2D FixActionPosIntoEffectiveRangeToNearestEnemy(const Point2D &action_target_pos, float this_unit_weapon_range, const Units &enemy_team);

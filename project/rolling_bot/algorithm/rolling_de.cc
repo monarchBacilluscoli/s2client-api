@@ -14,21 +14,14 @@ namespace sc2
 
     void RollingDE::Breed_(int pop_index)
     {
-        if (pop_index != 0) // do not use those "advanced"(smile) breed function
+        if (pop_index != 0) // only use vanilla
         {
             DifferentialEvolution<Command, RollingSolution>::Breed_(pop_index);
             return;
         }
-        if (m_use_fix_by_data && m_current_generation % 6 == 0) // if use fix, then fix all individuals based on the sim data
+        if (m_use_fix_by_data && m_current_generation % 6 == 0) // if use fix, then fix all individuals based on the sim data, so the individual must have been evaluated before
         {
-            std::cout << "fix" << std::endl;
-
-            int sz = EA::m_populations[pop_index].size();
-            EA::m_offsprings[pop_index] = EA::m_populations[pop_index];
-            for (int i = 0; i < sz; ++i)
-            {
-                m_offsprings[pop_index][i] = FixBasedOnSimulation(m_populations[pop_index][i]);
-            }
+            Fix_(pop_index);
         }
         else
         {
@@ -46,23 +39,30 @@ namespace sc2
         Breed_(0);
         if (m_populations.size() > 1)
         {
-            if (m_is_enemy_pop_evo) // if Breed is used, use the minimal breed operation.
+            if (m_is_enemy_pop_evo) // if Breed is used, use the minimal breed operation //!need to mod for multiple enemy pop
             {
                 Breed_(1);
             }
             else
             {
-                if (m_offsprings.size() < m_population_size)
+                if (m_populations[1].size() < m_population_size)
                 {
-                    m_offsprings[1].resize(m_population_size, RollingSolution<Command>());
+                    m_populations[1].resize(m_population_size, RollingSolution<Command>());
                 }
-                for (int i = 0; i < m_population_size; ++i) // if Breed is not used, use normal Generate instead
+                for (int i = 0; i < m_population_size; ++i) // if Breed is not used, use normal Generate instead, //!并且这个一定要替代population
                 {
-                    GenerateOne(EA::m_offsprings[1][i], 1);
+                    GenerateOne(EA::m_populations[1][i], 1);
                 }
             }
         }
-
+        //todo concrete
+        for (int i = 0; i < m_populations.size(); ++i)
+        {
+            auto &current_pop = m_populations[i];
+            auto &current_off = m_offsprings[i];
+            current_pop.insert(current_pop.begin() + m_elite_size, current_off.begin(), current_off.end());
+            current_pop.resize(m_population_size);
+        }
         return;
     }
 
@@ -147,6 +147,26 @@ namespace sc2
     void RollingDE::SetEnemyPopEvo(bool enemy_pop_evo)
     {
         m_is_enemy_pop_evo = enemy_pop_evo;
+    }
+
+    void RollingDE::Fix_(int pop_index)
+    {
+        std::cout << "fix" << std::endl;
+        int pop_sz = EA::m_populations[pop_index].size();
+        int remaining_sz = m_population_size - m_elite_size;
+
+        EA::m_offsprings[pop_index] = EA::m_populations[pop_index]; // 当前pop无论多少个，应该都是评价完了的
+        for (int i = 0; i < pop_sz && i < remaining_sz; ++i)        // 先fix，fix所有的pop或者fix满剩余的个体
+        {
+            m_offsprings[pop_index][i] = FixBasedOnSimulation(m_populations[pop_index][i]);
+        }
+        if (m_population_size < remaining_sz) // 如果fix不满，那就generate插入
+        {
+            for (size_t i = pop_sz; i < remaining_sz; ++i)
+            {
+                GenerateOne(m_offsprings[pop_index][i]);
+            }
+        }
     }
 
 } // namespace sc2

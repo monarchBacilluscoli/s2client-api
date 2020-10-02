@@ -71,20 +71,23 @@ namespace sc2
     void DifferentialEvolution<T, TSolution>::Breed_(int pop_index)
     {
         // mutate each? solution in population, get the transition solution
-        int sz = EA::m_populations[pop_index].size();
+        typename EA::Population &current_pop = EA::m_populations[pop_index];
+        typename EA::Population &current_off = EA::m_offsprings[pop_index];
+        int sz = current_pop.size();
         if (EA::m_offsprings.size() < pop_index)
         {
-            EA::m_offsprings.push_back(Population());
+            EA::m_offsprings.resize(pop_index, Population());
         }
-        EA::m_offsprings[pop_index].resize(sz, TSolution<T>(0, EA::m_objective_size));
+        current_off.resize(EA::m_population_size - EA::m_elite_size, TSolution<T>(0, EA::m_objective_size)); //? 有疑问
         std::uniform_int_distribution<int> random_dis(0, sz - 1);
-        for (size_t j = 0; j < sz; ++j)
+        for (size_t j = 0; j < EA::m_population_size - EA::m_elite_size; ++j)
         {
             //? Here I can not ensure the 3 random numbers are not the same. Should I ensure it?
             int index_a = random_dis(EA::m_random_engine);
             int index_b = random_dis(EA::m_random_engine);
-            EA::m_offsprings[pop_index][j] = Mutate(EA::m_populations[pop_index][j], EA::m_populations[pop_index][index_a], EA::m_populations[pop_index][index_b]);
-            Crossover(EA::m_populations[pop_index][j], EA::m_offsprings[pop_index][j]);
+            int index_src = j % EA::m_elite_size;
+            current_off[j] = Mutate(current_pop[index_src], current_pop[index_a], current_pop[index_b]);
+            Crossover(current_pop[index_src], current_off[j]);
         }
         return;
     }
@@ -92,9 +95,17 @@ namespace sc2
     template <class T, template <typename> class TSolution>
     void DifferentialEvolution<T, TSolution>::Breed()
     {
+        //todo 这里breed是要breed满population size
         for (size_t i = 0; i < EA::m_populations.size(); ++i)
         {
             Breed_(i);
+        }
+        for (int i = 0; i < EA::m_populations.size(); ++i)
+        {
+            auto &current_pop = EA::m_populations[i];
+            auto &current_off = EA::m_offsprings[i];
+            current_pop.insert(current_pop.begin() + EA::m_elite_size, current_off.begin(), current_off.end());
+            current_pop.resize(EA::m_population_size);
         }
     }
 

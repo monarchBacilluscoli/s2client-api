@@ -5,6 +5,9 @@ option(BUILD_API_EXAMPLES "Build Examples" ON)
 option(BUILD_API_TESTS "Build Tests" ON)
 project(s2client-api)
 
+set( CMAKE_EXPORT_COMPILE_COMMANDS ON ) # used for YouCompleteMe by LiuYongfeng
+
+
 # Use bin as the directory for all executables.
 # This will make protoc easy to find.
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

@@ -44,7 +44,7 @@ namespace sc2
             }
         }
 
-        if (m_use_priori) // generate some solutions with priori knowledge //?only my team uses it?
+        if (m_use_priori) // generate some solutions with priori knowledge //?only my team uses it? of course
         {
             int enemy_sz = std::min(m_enemy_team.size(), (size_t)m_population_size / 5);
             for (size_t i = 0; i < enemy_sz; ++i)
@@ -68,29 +68,15 @@ namespace sc2
         }
     }
 
-    void RollingEA::Evaluate()
+    void RollingEA::Evaluate() // here evaluate the concreted population
     {
         if (m_populations.size() == 1)
         {
-            if (m_current_generation == 0)
-            {
-                Evaluate(m_populations[0]);
-            }
-            else
-            {
-                Evaluate(m_offsprings[0]);
-            }
+            Evaluate(m_populations[0]);
         }
         else if (m_populations.size() == 2)
         {
-            if (m_current_generation == 0)
-            {
-                Evaluate(m_populations[0], m_populations[1], m_sub_pop_size);
-            }
-            else
-            {
-                Evaluate(m_offsprings[0], m_offsprings[1], m_sub_pop_size);
-            }
+            Evaluate(m_populations[0], m_populations[1], m_sub_pop_size);
         }
     }
 
@@ -271,7 +257,7 @@ namespace sc2
         return;
     }
 
-    void RollingEA::Evaluate(Population &my_pop, Population &enemy_pop, int sub_pop_size) //! 问题出在这里，希望不要是很多的copy错误，那样程序真的就没法运行了
+    void RollingEA::Evaluate(Population &my_pop, Population &enemy_pop, int sub_pop_size)
     {
         std::vector<std::vector<int>> index_map = std::vector<std::vector<int>>(my_pop.size(), std::vector<int>(sub_pop_size));
 
@@ -280,9 +266,10 @@ namespace sc2
 
         float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
         float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
+
         for (auto &item : my_pop)
         {
-            item.ClearSimData();
+            item.ClearSimData();               // give it a refreshed record, even the solution which has been evaluated. Since I want to pay more attention to the current enemy's strategy.
             item.results.resize(sub_pop_size); // to contain the sub_pop_size's results
             item.objectives.resize(m_objective_size);
             for (auto &ob : item.objectives)
@@ -363,8 +350,8 @@ namespace sc2
             }
             else if (m_objective_size == 2)
             {
-                float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
-                float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
+                float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));     //! delete
+                float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy)); //! delete
                 my_pop[i].objectives[0] = my_pop[i].aver_result.total_health_change_enemy / total_health_enemy - my_pop[i].aver_result.total_health_change_mine / total_health_me;
                 my_pop[i].objectives[1] = my_pop[i].aver_result.end_loop;
             }
@@ -406,22 +393,22 @@ namespace sc2
     }
 
     void RollingEA::Select()
-    {
+    { //todo 要shrink到elite_size
         for (int i = 0; i < m_populations.size(); ++i)
         {
-            m_populations[i].insert(m_populations[i].end(), m_offsprings[i].begin(), m_offsprings[i].end());
-            RollingSolution<Command>::DominanceSort<RollingSolution>(m_populations[i], RollingSolution<Command>::RollingLess);
+            EA::Population &current_pop = m_populations[i];
+            RollingSolution<Command>::DominanceSort<RollingSolution>(current_pop, RollingSolution<Command>::RollingLess);
             // choose solutions to be added to the next generation
-            int rank_need_resort = m_populations[i][m_population_size - 1].rank;
-            if (m_populations[i].size() > m_population_size && m_populations[i][m_population_size].rank == rank_need_resort) // if next element is still of this rank, it means this rank can not be contained fully in current population, it needs selecting
+            int rank_need_resort = current_pop[m_elite_size - 1].rank;
+            if (current_pop.size() > m_elite_size && current_pop[m_elite_size].rank == rank_need_resort) // if next element is still of this rank, it means this rank can not be contained fully in current population, it needs selecting by crowdedness
             {
                 // resort solutions of current rank
-                Population::iterator bg = std::find_if(m_populations[i].begin(), m_populations[i].end(), [rank_need_resort](const RollingSolution<Command> &s) { return rank_need_resort == s.rank; });
-                Population::iterator ed = std::find_if(m_populations[i].rbegin(), m_populations[i].rend(), [rank_need_resort](const RollingSolution<Command> &s) { return rank_need_resort == s.rank; }).base();
-                RollingSolution<Command>::CalculateCrowdedness(m_populations[i], std::distance(m_populations[i].begin(), bg), std::distance(m_populations[i].begin(), ed));
+                Population::iterator bg = std::find_if(current_pop.begin(), current_pop.end(), [rank_need_resort](const RollingSolution<Command> &s) { return rank_need_resort == s.rank; });
+                Population::iterator ed = std::find_if(current_pop.rbegin(), current_pop.rend(), [rank_need_resort](const RollingSolution<Command> &s) { return rank_need_resort == s.rank; }).base();
+                RollingSolution<Command>::CalculateCrowdedness(current_pop, std::distance(current_pop.begin(), bg), std::distance(current_pop.begin(), ed));
                 std::stable_sort(bg, ed, [](const RollingSolution<Command> &l, const RollingSolution<Command> &r) { return l.crowdedness > r.crowdedness; });
             }
-            m_populations[i].resize(EA::m_population_size);
+            // current_pop.resize(EA::m_elite_size); //! select 之后不立即resize，因为还有fix要用后面的那些解...fix前一半解？还是fix全部elite然后用别的方法填充剩下的?后者好像更实际一些,
         }
         return;
     }
@@ -531,12 +518,43 @@ namespace sc2
     void RollingEA::RecordObjectives()
     {
         // all the objs
-        int pop_sz = m_populations[1].size();
+        int pop_sz = m_populations[0].size();
         m_history_objs.emplace_back(std::vector<std::vector<float>>(pop_sz, std::vector<float>(m_objective_size)));
         std::vector<std::vector<float>> &current_generation_objs = m_history_objs.back();
         for (size_t i = 0; i < pop_sz; ++i)
         {
-            current_generation_objs[i] = m_populations[1][i].objectives;
+            current_generation_objs[i] = m_populations[0][i].objectives;
+        }
+        for (size_t i = 0; i < m_objective_size; ++i) // the ith objective
+        {
+            // ave
+            EA::m_history_objs_ave[i].push_back(std::abs(std::accumulate(current_generation_objs.begin(), current_generation_objs.end(), 0.f, [i](float initial_value, const std::vector<float> &so) -> float {
+                return initial_value + so[i];
+            })));
+            EA::m_history_objs_ave[i].back() /= pop_sz;
+            // best
+            auto best_iter_i = std::max_element(current_generation_objs.begin(), current_generation_objs.end(), [i](const std::vector<float> &so1, const std::vector<float> so2) -> bool {
+                return so1[i] < so2[i];
+            });
+            EA::m_history_objs_best[i].push_back(std::abs((*best_iter_i)[i]));
+            // worst
+            auto worst_iter_i = std::min_element(current_generation_objs.begin(), current_generation_objs.end(), [i](const std::vector<float> &so1, const std::vector<float> &so2) -> bool {
+                return so1[i] < so2[i];
+            });
+            EA::m_history_objs_worst[i].push_back(std::abs((*worst_iter_i)[i]));
+        }
+        return;
+    }
+
+    void RollingEA::RecordObjectives_(int pop_index)
+    {
+        // all the objs
+        int pop_sz = m_populations[pop_index].size();
+        m_history_objs.emplace_back(std::vector<std::vector<float>>(pop_sz, std::vector<float>(m_objective_size)));
+        std::vector<std::vector<float>> &current_generation_objs = m_history_objs.back();
+        for (size_t i = 0; i < pop_sz; ++i)
+        {
+            current_generation_objs[i] = m_populations[pop_index][i].objectives;
         }
         for (size_t i = 0; i < m_objective_size; ++i) // the ith objective
         {
