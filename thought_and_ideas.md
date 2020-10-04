@@ -24,3 +24,12 @@ after finish the re-implementation, I need to do something else:
 1. change the MAX\_SIM\_NUMBER to a larger value (80, for example)
 2. check if the run is the same as what I thought.
 3. compare the differences between the two runs.
+
+## The weired problem
+If the population has been shuffled, the evaluation value of the whole pop will get worse and worse.
+! Even though the breed doesn't function.
+The most depressing thing is that there is still a possible reason leading to this condition, that is if you shuffled the population, the mapping relationship will change, then the evaluation value will unstably change, too.
+
+**Stupid program. Stupid research topic.**
+
+I know! I will try to use a enemy pop which only contains copies of one solution. Then I will see whether or not the population of mine evolves worse.

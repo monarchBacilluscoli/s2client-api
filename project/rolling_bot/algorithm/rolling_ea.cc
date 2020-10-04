@@ -317,25 +317,26 @@ namespace sc2
             for (int j = 0; j < sub_pop_size; j++)
             {
                 sim_index = i * sub_pop_size + j;
-                const std::map<Tag, const Unit *> &units_correspondence = m_simulation_pool[sim_index].GetRelativeUnits(1);       // 注意两边的relative_units可能是不一样的——不，实际一样——不，阵容不一样
-                const std::map<Tag, const Unit *> &units_correspondence_enemy = m_simulation_pool[sim_index].GetRelativeUnits(2); // 注意两边的relative_units可能是不一样的——不，实际一样——不，阵容不一样
+                auto &corresponding_sim = m_simulation_pool[sim_index];
+                const std::map<Tag, const Unit *> &units_correspondence = corresponding_sim.GetRelativeUnits(1);       // 注意两边的relative_units可能是不一样的——不，实际一样——不，阵容不一样
+                const std::map<Tag, const Unit *> &units_correspondence_enemy = corresponding_sim.GetRelativeUnits(2); // 注意两边的relative_units可能是不一样的——不，实际一样——不，阵容不一样
                 RollingSolution<Command> &enemy_sol = enemy_pop[index_map[i][j]];
                 enemy_sol.results.push_back(SimData());
                 for (const auto &unit : units_correspondence)
                 {
                     my_pop[i].results[j].units[unit.first].final_state = *(unit.second);
-                    my_pop[i].results[j].units[unit.first].statistics = m_simulation_pool[i].GetUnitStatistics(unit.first, 1);
+                    my_pop[i].results[j].units[unit.first].statistics = corresponding_sim.GetUnitStatistics(unit.first, 1);
                 }
                 for (const auto &unit : units_correspondence_enemy)
                 {
                     enemy_sol.results.back().units[unit.first].final_state = *(unit.second); //!这里需要用敌方的视角
-                    enemy_sol.results.back().units[unit.first].statistics = m_simulation_pool[i].GetUnitStatistics(unit.first, 2);
+                    enemy_sol.results.back().units[unit.first].statistics = corresponding_sim.GetUnitStatistics(unit.first, 2);
                 }
 
-                my_pop[i].results[j].game.end_loop = m_simulation_pool[i].GetEndLoop();
-                my_pop[i].results[j].game.result = m_simulation_pool[i].CheckGameResult();
-                enemy_sol.results.back().game.end_loop = m_simulation_pool[i].GetEndLoop();
-                enemy_sol.results.back().game.result = m_simulation_pool[i].CheckGameResult(2);
+                my_pop[i].results[j].game.end_loop = corresponding_sim.GetEndLoop();
+                my_pop[i].results[j].game.result = corresponding_sim.CheckGameResult();
+                enemy_sol.results.back().game.end_loop = corresponding_sim.GetEndLoop();
+                enemy_sol.results.back().game.result = corresponding_sim.CheckGameResult(2);
             }
         }
         for (int i = 0; i < my_pop.size(); ++i) // my pop: calculate average data and set the objectives
@@ -350,8 +351,6 @@ namespace sc2
             }
             else if (m_objective_size == 2)
             {
-                float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));     //! delete
-                float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy)); //! delete
                 my_pop[i].objectives[0] = my_pop[i].aver_result.total_health_change_enemy / total_health_enemy - my_pop[i].aver_result.total_health_change_mine / total_health_me;
                 my_pop[i].objectives[1] = my_pop[i].aver_result.end_loop;
             }
@@ -382,8 +381,6 @@ namespace sc2
                 }
                 else if (m_objective_size == 2)
                 {
-                    float total_health_me = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Self));
-                    float total_health_enemy = GetTotalHealth(m_observation->GetUnits(Unit::Alliance::Enemy));
                     enemy_pop[i].objectives[0] = enemy_pop[i].aver_result.total_health_change_enemy / total_health_enemy - my_pop[i].aver_result.total_health_change_mine / total_health_me;
                     enemy_pop[i].objectives[1] = -enemy_pop[i].aver_result.end_loop;
                 }
@@ -396,6 +393,10 @@ namespace sc2
     { //todo 要shrink到elite_size
         for (int i = 0; i < m_populations.size(); ++i)
         {
+            if ((!m_is_enemy_pop_evo) && i > 0) //enemy pop doesn't need evo
+            {
+                break;
+            }
             EA::Population &current_pop = m_populations[i];
             RollingSolution<Command>::DominanceSort<RollingSolution>(current_pop, RollingSolution<Command>::RollingLess);
             // choose solutions to be added to the next generation
@@ -408,7 +409,6 @@ namespace sc2
                 RollingSolution<Command>::CalculateCrowdedness(current_pop, std::distance(current_pop.begin(), bg), std::distance(current_pop.begin(), ed));
                 std::stable_sort(bg, ed, [](const RollingSolution<Command> &l, const RollingSolution<Command> &r) { return l.crowdedness > r.crowdedness; });
             }
-            // current_pop.resize(EA::m_elite_size); //! select 之后不立即resize，因为还有fix要用后面的那些解...fix前一半解？还是fix全部elite然后用别的方法填充剩下的?后者好像更实际一些,
         }
         return;
     }

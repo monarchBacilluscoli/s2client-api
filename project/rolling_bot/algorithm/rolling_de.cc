@@ -36,7 +36,7 @@ namespace sc2
 
     void RollingDE::Breed()
     {
-        Breed_(0);
+        Breed_(0); // the front pop must be bred, it is the pop you need after all
         if (m_populations.size() > 1)
         {
             if (m_is_enemy_pop_evo) // if Breed is used, use the minimal breed operation //!need to mod for multiple enemy pop
@@ -55,8 +55,7 @@ namespace sc2
                 }
             }
         }
-        //todo concrete
-        for (int i = 0; i < m_populations.size(); ++i)
+        for (int i = 0; i < (m_is_enemy_pop_evo ? m_populations.size() : 1); ++i) // nonevo pop doen't need resieze;
         {
             auto &current_pop = m_populations[i];
             auto &current_off = m_offsprings[i];

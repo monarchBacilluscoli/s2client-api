@@ -21,6 +21,7 @@ struct Solution
 {
     std::vector<float> objectives = std::vector<float>();
     std::vector<T> variable = std::vector<T>();
+    std::string debug_text = ""; // :)
 
     int rank = std::numeric_limits<int>::max(); // used in multi-objective problem
     int dominated_count = 0;

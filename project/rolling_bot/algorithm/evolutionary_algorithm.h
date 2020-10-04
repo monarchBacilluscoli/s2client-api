@@ -256,9 +256,8 @@ namespace sc2
     std::vector<TSolution<T>> EvolutionaryAlgorithm<T, TSolution>::Run()
     {
         InitBeforeRun();
-        Generate(); // 各自generate各自
-        Evaluate(); //todo 改掉
-        // Select(); // no select here, the whole population need remaining
+        Generate();                  // 各自generate各自
+        Evaluate();                  //todo 改掉
         ActionAfterEachGeneration(); // you need to run it after the first generation
         for (m_current_generation = 1; !CheckIfTerminationMeet(); ++m_current_generation)
         {
