@@ -19,7 +19,7 @@ namespace sc2
     struct SimGameData
     {
         GameResult result = GameResult::Undecided;
-        u_int32_t end_loop = std::numeric_limits<u_int32_t>::max();
+        u_int32_t end_loop = std::numeric_limits<uint>::max();
     };
     struct SimData
     {

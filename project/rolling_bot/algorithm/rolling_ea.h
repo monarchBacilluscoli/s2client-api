@@ -39,9 +39,11 @@ namespace sc2
         unsigned int m_evaluation_time_multiplier = 1; // the evaluation times for each solution (to avoid randomness)
         unsigned int m_fix_by_data_interval = 6;
 #ifdef USE_GRAPHICS
-        ScatterRenderer2D m_objective_distribution;
         DebugRenderers m_debug_renderers;
 #endif //USE_GRAPHICS
+#ifdef USE_GRAPH
+        ScatterRenderer2D m_objective_distribution;
+#endif //USE_GRAPH
         bool m_use_fix_by_data = true;
         bool m_use_fix = false;
         bool m_use_priori = false;
@@ -80,11 +82,11 @@ namespace sc2
         {
             // m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE] = std::ref(m_convergence_termination_manager); //? if not ref here, the construct will copy the function object
             m_simulation_pool.StartSimsAsync();
-#ifdef USE_GRAPHICS
+#ifdef USE_GRAPH
             m_objective_distribution.SetTitle("Objectives Distribution");
             m_objective_distribution.SetXLabel("total damage to enemy");
             m_objective_distribution.SetYLabel("total damage to me");
-#endif
+#endif //USE_GRAPH
             SetObjectiveNames({"Enemy Loss", "My Team Loss"});
             for (auto &sol : m_populations[0]) // I can not ensure the solutions in enemy pop can be evaluated 3 times.
             {
@@ -132,10 +134,10 @@ namespace sc2
         virtual void Generate() override;
         virtual void Evaluate() override;
         virtual void Select() override; // sort and keep only the good solutions
-#ifdef USE_GRAPHICS
+#ifdef USE_GRAPH
         virtual void ShowOverallStatusGraphEachGeneration() override;
         virtual void ShowSolutionDistribution(int showed_generations_count) override;
-#endif //USE_GRAPHICS \
+#endif //USE_GRAPH
     //! for test
         virtual void ActionAfterEachGeneration() override
         {

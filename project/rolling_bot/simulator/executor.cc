@@ -14,7 +14,7 @@ namespace sc2
             m_last_is_setting = true;
             return;
         }
-        if (m_end_loop == std::numeric_limits<u_int32_t>::max()) // everytime a game starts to run, the m_end_loop will be set to max
+        if (m_end_loop == std::numeric_limits<uint>::max()) // everytime a game starts to run, the m_end_loop will be set to max
         {
             switch (CheckGameResult()) // since Sim map has no ending judgment, we need to check it each loop
             {
@@ -303,7 +303,7 @@ namespace sc2
     {
         ClearCommands();
         ClearUnitsData();
-        m_end_loop = std::numeric_limits<u_int32_t>::max();
+        m_end_loop = std::numeric_limits<uint>::max();
     }
 
     void Executor::RecordLastUnits()

@@ -333,9 +333,9 @@ namespace sc2
                     enemy_sol.results.back().units[unit.first].statistics = corresponding_sim.GetUnitStatistics(unit.first, 2);
                 }
 
-                my_pop[i].results[j].game.end_loop = corresponding_sim.GetEndLoop();
+                my_pop[i].results[j].game.end_loop = (corresponding_sim.GetEndLoop() == std::numeric_limits<uint>::max()) ? RollingEA::m_sim_length : corresponding_sim.GetEndLoop();
                 my_pop[i].results[j].game.result = corresponding_sim.CheckGameResult();
-                enemy_sol.results.back().game.end_loop = corresponding_sim.GetEndLoop();
+                enemy_sol.results.back().game.end_loop = (corresponding_sim.GetEndLoop() == std::numeric_limits<uint>::max()) ? RollingEA::m_sim_length : corresponding_sim.GetEndLoop();
                 enemy_sol.results.back().game.result = corresponding_sim.CheckGameResult(2);
             }
         }
@@ -343,16 +343,17 @@ namespace sc2
         {
             my_pop[i].CalculateAver();
             my_pop[i].objectives.resize(m_objective_size);
+
             if (m_objective_size == 3)
             {
                 my_pop[i].objectives[0] = -my_pop[i].aver_result.total_health_change_enemy;
                 my_pop[i].objectives[1] = my_pop[i].aver_result.total_health_change_mine;
-                my_pop[i].objectives[2] = my_pop[i].aver_result.end_loop;
+                my_pop[i].objectives[2] = -static_cast<long>(my_pop[i].aver_result.end_loop);
             }
             else if (m_objective_size == 2)
             {
                 my_pop[i].objectives[0] = my_pop[i].aver_result.total_health_change_enemy / total_health_enemy - my_pop[i].aver_result.total_health_change_mine / total_health_me;
-                my_pop[i].objectives[1] = my_pop[i].aver_result.end_loop;
+                my_pop[i].objectives[1] = -static_cast<long>(my_pop[i].aver_result.end_loop);
             }
             else
             {
@@ -377,12 +378,12 @@ namespace sc2
                 {
                     enemy_pop[i].objectives[0] = -enemy_pop[i].aver_result.total_health_change_enemy;
                     enemy_pop[i].objectives[1] = enemy_pop[i].aver_result.total_health_change_mine;
-                    enemy_pop[i].objectives[2] = enemy_pop[i].aver_result.end_loop;
+                    enemy_pop[i].objectives[2] = -static_cast<long>(enemy_pop[i].aver_result.end_loop);
                 }
                 else if (m_objective_size == 2)
                 {
                     enemy_pop[i].objectives[0] = enemy_pop[i].aver_result.total_health_change_enemy / total_health_enemy - my_pop[i].aver_result.total_health_change_mine / total_health_me;
-                    enemy_pop[i].objectives[1] = -enemy_pop[i].aver_result.end_loop;
+                    enemy_pop[i].objectives[1] = -static_cast<long>(enemy_pop[i].aver_result.end_loop);
                 }
             }
         }
@@ -421,11 +422,10 @@ namespace sc2
         m_playable_dis = Vector2D(m_game_info.playable_max.x - m_game_info.playable_min.x, m_game_info.playable_max.y - m_game_info.playable_min.y);
         m_unit_types = m_observation->GetUnitTypeData();
     }
-#ifdef USE_GRAPHICS
+#ifdef USE_GRAPH
     void RollingEA::ShowOverallStatusGraphEachGeneration()
     {
         EA::ShowOverallStatusGraphEachGeneration();
-        std::cout << "diff of aves: " << m_history_objs_ave[0].back() - m_history_objs_ave[1].back() << std::endl;
     }
 
     void RollingEA::ShowSolutionDistribution(int showed_generations_count)
@@ -440,7 +440,7 @@ namespace sc2
         }
         m_objective_distribution.Show(begin, end, group_names);
     }
-#endif //USE_GRAPHICS
+#endif //USE_GRAPH
 
     void RollingEA::GenerateOne(RollingSolution<Command> &sol, int pop_index)
     { //todo need to be modified

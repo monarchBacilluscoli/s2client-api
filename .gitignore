@@ -76,3 +76,4 @@ project/v_and_o_data.txt
 .ycm_extra_conf.py*
 compile_commands.json
 launch_options
+sc2replays

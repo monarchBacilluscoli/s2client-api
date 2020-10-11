@@ -3,7 +3,8 @@
 #define REMOTE_DESKTOP
 #define USE_SYSTEM_COMMAND
 
-#define MAX_SIM_SIZE 40 // This is the max simulations count (AKA the max StarCraft II processes running symutaniously)
+#define MAX_SIM_SIZE 40// This is the max simulations count (AKA the max StarCraft II processes running symutaniously)
+#define USE_GRAPH // algorithm graph
 
 #ifdef REMOTE_DESKTOP
 #else

@@ -14,9 +14,9 @@
 #include <string>
 
 #include "solution.h"
-#ifdef USE_GRAPHICS
+#ifdef USE_GRAPH
 #include "../methods/graph_renderer.h"
-#endif // USE_GRAPHICS
+#endif // USE_GRAPH
 #ifdef DEBUG
 #include "../simulator/command.h"
 #endif // DEBUG
@@ -73,9 +73,9 @@ namespace sc2
         std::vector<std::vector<float>> m_history_objs_ave{};        // outter vec: objs, inner vec: generation
         std::vector<std::vector<float>> m_history_objs_best{};       // outter vec: objs, inner vec: generation
         std::vector<std::vector<float>> m_history_objs_worst{};      // outter vec: objs, inner vec: generation
-#ifdef USE_GRAPHICS
+#ifdef USE_GRAPH
         LineChartRenderer2D m_overall_evolution_status_renderer;
-#endif //USE_GRAPHICS
+#endif //USE_GRAPH
         std::mt19937 m_random_engine{0};
 
     public:
@@ -94,9 +94,9 @@ namespace sc2
                                                  },
                                                  m_population_size(population_size), m_objective_size(objective_size), m_random_engine{random_seed}, m_history_objs_ave(objective_size), m_history_objs_best(objective_size), m_history_objs_worst(objective_size), m_objective_names(objective_size), m_populations(num_pop, Population(m_population_size)), m_offsprings(num_pop, Population()), m_elite_size(m_population_size * 0.5f)
         {
-#ifdef USE_GRAPHICS
+#ifdef USE_GRAPH
             m_overall_evolution_status_renderer.SetTitle("Evolution Status");
-#endif //USE_GRAPHICS
+#endif //USE_GRAPH
         };
         virtual ~EvolutionaryAlgorithm() = default;
 
@@ -141,11 +141,11 @@ namespace sc2
         virtual void OutputToConsoleEachGeneration(std::ostream &out);
         virtual void OutputCurrentObjectives(std::ostream &out);
         virtual void OutputAllHistoryObjectives(std::ostream &out);
-#ifdef USE_GRAPHICS
+#ifdef USE_GRAPH
         virtual void ShowGraphEachGeneration();
         virtual void ShowOverallStatusGraphEachGeneration();
         virtual void ShowSolutionDistribution(int showed_generations_count) = 0;
-#endif //USE_GRAPHICS
+#endif //USE_GRAPH
 
         bool CheckIfTerminationMeet();
         virtual void ActionAfterRun() = 0;
@@ -247,9 +247,9 @@ namespace sc2
         }
 
         std::dynamic_pointer_cast<CT>(m_termination_conditions[TERMINATION_CONDITION::CONVERGENCE])->clear();
-#ifdef USE_GRAPHICS
-        m_overall_evolution_status_renderer.SetXRange(0, std::dynamic_pointer_cast<MGT>(m_termination_conditions[TERMINATION_CONDITION::MAX_GENERATION]).MaxGeneration());
-#endif // USE_GRAPHICS
+#ifdef USE_GRAPH
+        m_overall_evolution_status_renderer.SetXRange(0, std::dynamic_pointer_cast<MGT>(m_termination_conditions[TERMINATION_CONDITION::MAX_GENERATION])->MaxGeneration());
+#endif // USE_GRAPH
     }
 
     template <class T, template <typename> class TSolution>
@@ -284,9 +284,9 @@ namespace sc2
     {
         RecordRunningData();
         OutputToConsoleEachGeneration(std::cout);
-#ifdef USE_GRAPHICS
+#ifdef USE_GRAPH
         ShowGraphEachGeneration();
-#endif // USE_GRAPHICS
+#endif // USE_GRAPH
         return;
     }
 
@@ -399,7 +399,7 @@ namespace sc2
         out << std::endl; // split diffrent run
     }
 
-#ifdef USE_GRAPHICS
+#ifdef USE_GRAPH
     template <class T, template <typename> class TSolution>
     void EvolutionaryAlgorithm<T, TSolution>::ShowGraphEachGeneration()
     {
@@ -432,7 +432,7 @@ namespace sc2
         // std::cout << std::endl;
         m_overall_evolution_status_renderer.Show(data, generation_indices, line_names);
     }
-#endif // USE_GRAPHICS
+#endif // USE_GRAPH
 
     template <class T, template <typename> class TSolution>
     bool EvolutionaryAlgorithm<T, TSolution>::CheckIfTerminationMeet()

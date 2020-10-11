@@ -36,7 +36,7 @@ private:
     bool m_is_setting = true; // if in setting state, do not call any of the client event about executing actions here
     bool m_last_is_setting = true;
     u_int32_t m_start_loop = 0;
-    u_int32_t m_end_loop = std::numeric_limits<u_int32_t>::max();
+    u_int32_t m_end_loop = std::numeric_limits<uint>::max();
 
     std::map<Tag, bool> m_is_an_attack_to_be_recorded;
 

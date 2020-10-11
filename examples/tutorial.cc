@@ -466,9 +466,9 @@ int main(int argc, char *argv[])
     coordinator2.SetPortStart(12470);
 
     int frames = 60;
-#ifdef USE_GRAPHICS
-    DebugRenderer renderer;
-#endif // USE_GRAPHICS
+// #ifdef USE_GRAPHICS
+//     DebugRenderer renderer;
+// #endif // USE_GRAPHICS
 
     Bot bot, bot2;
     EnemyBot enemy_bot;
@@ -506,11 +506,11 @@ int main(int argc, char *argv[])
 #ifdef REAL_TIME_UPDATE
         start = std::chrono::steady_clock::now(),
 #endif //REAL_TIME_UPDATE
-#ifdef USE_GRAPHICS
-        renderer.ClearRenderer(),
-        renderer.DrawObservation(ob), // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
-        renderer.Present(),
-#endif // USE_GRAPHICS
+// #ifdef USE_GRAPHICS
+//         renderer.ClearRenderer(),
+//         renderer.DrawObservation(ob), // display the game, since StartGame() runs for 1 starting frame, it can not display it by renderer here.
+//         renderer.Present(),
+// #endif // USE_GRAPHICS
         coordinator.Update())
     {
 #ifdef REAL_TIME_UPDATE

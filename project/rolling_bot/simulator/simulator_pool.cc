@@ -181,8 +181,6 @@ namespace sc2
                                }
                                return std::this_thread::get_id();
                            });
-            std::cout << batch_size << std::endl;
-            std::cout << (i + 1) % batch_size << std::endl;
             if (batch_size != 0 && ((i + 1) % batch_size == 0 || i >= sz - 1))
             {
                 int j = (i >= sz - 1 ? batch_size * (sz % batch_size == 0 ? sz / batch_size - 1 : sz / batch_size) : i - batch_size + 1);
