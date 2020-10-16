@@ -19,7 +19,9 @@
                 // "${HOME}/StarCraftII/maps/PCANP_EnemyZealotVSMarines.SC2Map",
                 // "${HOME}/StarCraftII/maps/PCANP_EnemyZealotModVSMarines.SC2Map",
                 // "${HOME}/StarCraftII/maps/2P_EnemyZealotModVSMarines.SC2Map",
-                "${HOME}/StarCraftII/maps/2P_EnemyZealotsModMoreVSMarines.SC2Map",
+                // "${HOME}/StarCraftII/maps/2P_EnemyZealotsModMoreVSMarines.SC2Map", // test map
+                // "${HOME}/StarCraftII/maps/2P_EnemyMarinesVSZealotsModMore.SC2Map", // reversed test map
+                "${HOME}/StarCraftII/maps/2P_EnemyMarinesZsVSMarinesZs.SC2Map", // equal test map
                 // "${HOME}/StarCraftII/maps/2P_EnemyZealotsModMoreVSMarinesSim.SC2Map",
                 // "${HOME}/StarCraftII/maps/2P_EnemyZealotModVSMarinesSim.SC2Map",
                 // "${HOME}/StarCraftII/maps/PCANP_EnemyZealotsModVSMarines.SC2Map",

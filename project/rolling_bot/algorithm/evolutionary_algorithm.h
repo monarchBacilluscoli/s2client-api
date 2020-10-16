@@ -46,7 +46,7 @@ namespace sc2
         //! /etc
         bool m_is_output_file = false;
         int m_objective_size = 1;
-        int m_is_enemy_pop_evo = false;
+        int m_is_enemy_pop_evo = true;
         int m_population_size = 50;
         int m_elite_size = m_population_size * 0.5f;
         int m_sub_pop_size = MAX_SIM_SIZE / m_population_size > 1 ? MAX_SIM_SIZE / m_population_size : 1;

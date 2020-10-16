@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
             uint frames = 60; // use this to control the Update times per second
             bool use_enemy_pop = true;
             bool is_enemy_pop_evo = true;
-            int population_size = 10;
+            int population_size = 20;
             int max_generations = 40;
             int max_no_improve_generation = 100;
             int ga_muatation_rate = 0.5;

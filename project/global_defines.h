@@ -3,14 +3,13 @@
 #define REMOTE_DESKTOP
 #define USE_SYSTEM_COMMAND
 
-#define MAX_SIM_SIZE 40// This is the max simulations count (AKA the max StarCraft II processes running symutaniously)
-#define USE_GRAPH // algorithm graph
+#define MAX_SIM_SIZE 80 // This is the max simulations count (AKA the max StarCraft II processes running symutaniously)
+#define USE_GRAPH       // algorithm graph
 
 #ifdef REMOTE_DESKTOP
 #else
-#define REAL_TIME_UPDATE
 #define USE_GRAPHICS
+#define REAL_TIME_UPDATE
 #endif
-
 
 #define var2str(name) std::string((#name)) // convert a expr (variable, class...anything you write in these parentheses) to string
