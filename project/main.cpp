@@ -183,9 +183,10 @@ int main(int argc, char *argv[])
             int main_process_port = 3900; //3989 is the default port of xrdp
             bool real_time = false;       // but if the graphics is on, the main game will be showed in real-time mode
             bool multi_threaded = false;
-            uint frames = 60; // use this to control the Update times per second
+            uint frames = 60;       // use this to control the Update times per second
+            int objective_size = 3; // 3 is the traditional setting
             bool use_enemy_pop = true;
-            bool is_enemy_pop_evo = true;
+            bool is_enemy_pop_evo = false;
             int population_size = 20;
             int max_generations = 40;
             int max_no_improve_generation = 100;
@@ -228,7 +229,8 @@ int main(int argc, char *argv[])
                 std::to_string(interval_size) + ", ",
                 var2str(evaluation_multiplier) + ": ",
                 std::to_string(evaluation_multiplier) + ", ",
-            };
+                var2str(objective_size) + ": ",
+                std::to_string(objective_size) + ", "};
             std::string record_remark = std::accumulate(record_remark_vec.begin(), record_remark_vec.end(), std::string());
 
 #ifdef USE_GRAPHICS
@@ -243,7 +245,7 @@ int main(int argc, char *argv[])
 
             //! Bots here
             Bot bot(coordinator.GetExePath(), map_path);
-            RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path, max_generations, population_size, use_enemy_pop);
+            RollingBot rolling_bot(net_address, port_start, starcraft_path, map_path, max_generations, population_size, use_enemy_pop, objective_size);
 
             PortChecker pc;
             main_process_port = pc.GetContinuousPortsFromPort(main_process_port, 7);

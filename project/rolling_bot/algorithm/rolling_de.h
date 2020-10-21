@@ -31,15 +31,16 @@ namespace sc2
                   float scale_factor = .5f,
                   float crossover_rate = .5f,
                   int random_seed = rand(),
-                  bool is_enemy_pop_evo = false) : EvolutionaryAlgorithm(3, max_generation, population_size, random_seed, {"Enemy Loss", "My Team Loss"}, use_enemy_pop ? 2 : 1),
-                                                   DifferentialEvolution(3, max_generation, population_size, scale_factor, crossover_rate),
-                                                   RollingEA(net_address, port_start, process_path, map_path, max_generation, population_size, use_enemy_pop, random_seed),
-                                                   m_is_enemy_pop_evo(is_enemy_pop_evo)
+                  bool is_enemy_pop_evo = false,
+                  int objective_size = 3) : EvolutionaryAlgorithm(objective_size, max_generation, population_size, random_seed, {"Enemy Loss", "My Team Loss"}, use_enemy_pop ? 2 : 1),
+                                            DifferentialEvolution(objective_size, max_generation, population_size, scale_factor, crossover_rate),
+                                            RollingEA(net_address, port_start, process_path, map_path, max_generation, population_size, use_enemy_pop, random_seed),
+                                            m_is_enemy_pop_evo(is_enemy_pop_evo)
         {
             SetAttackPossibility(.9f);
         }
         virtual ~RollingDE() = default;
-        
+
         void SetEnemyPopEvo(bool is_enemy_pop_evo = false);
 
     protected:
